@@ -27,7 +27,7 @@ import eu.cdevreeze.yaidom.core.EName
  * to their own substitution groups, if any. Well-known substitution groups such as xbrli:item, xbrli:tuple,
  * xbrldt:hypercubeItem and xbrldt:dimensionItem must not occur as keys in the mapping, but typically do occur
  * as mapped values.
- * 
+ *
  * Cycles are not allowed when following mappings, but this is not checked.
  *
  * @author Chris de Vreeze
@@ -47,8 +47,8 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
 
   /**
    * Returns true if the given global element declaration has the given substitution group, either
-   * directly or indirectly. The mappings are used as the necessary context, and this method is well aware of
-   * the standard concept substitution groups.
+   * directly or indirectly. The mappings are used as the necessary context, but are not needed if the element
+   * declaration directly has the substitution group itself.
    */
   def hasSubstitutionGroup(elemDecl: GlobalElementDeclaration, substGroup: EName): Boolean = {
     (elemDecl.substitutionGroupOption == Some(substGroup)) || {
