@@ -52,7 +52,7 @@ sealed abstract class ConceptDeclaration(val globalElementDeclaration: GlobalEle
 /**
  * Item declaration. It must be in the xbrli:item substitution group, directly or indirectly.
  */
-sealed class ItemDeclaration(globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration)
+sealed abstract class ItemDeclaration(globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration)
 
 /**
  * Tuple declaration. It must be in the xbrli:tuple substitution group, directly or indirectly.
@@ -119,17 +119,19 @@ final class TypedDimension(globalElementDeclaration: GlobalElementDeclaration) e
 object ConceptDeclaration {
 
   /**
-   * Builder of ConceptDeclaration objects, given a mapping of substitution groups to their "parent" substitution group.
-   * The xbrli:item and xbrli:tuple substitution groups must occur as mapped values in the map, or else no concept declaration
-   * will be created.
+   * Builder of ConceptDeclaration objects, given a SubstitutionGroupMap object.
    */
-  final class Builder(val knownSubstitutionGroups: Map[EName, EName]) {
+  final class Builder(val substitutionGroupMap: SubstitutionGroupMap) {
 
+    /**
+     * Optionally turns the global element declaration into a ConceptDeclaration, if it is indeed a concept.
+     * This creation cannot fail (assuming that the SubstitutionGroupMap cannot be corrupted).
+     */
     def optConceptDeclaration(elemDecl: GlobalElementDeclaration): Option[ConceptDeclaration] = {
-      val isHypercube = hasSubstitutionGroup(elemDecl, XbrldtHypercubeItemEName)
-      val isDimension = hasSubstitutionGroup(elemDecl, XbrldtDimensionItemEName)
-      val isItem = hasSubstitutionGroup(elemDecl, XbrliItemEName)
-      val isTuple = hasSubstitutionGroup(elemDecl, XbrliTupleEName)
+      val isHypercube = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrldtHypercubeItemEName)
+      val isDimension = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrldtDimensionItemEName)
+      val isItem = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrliItemEName)
+      val isTuple = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrliTupleEName)
 
       require(!isItem || !isTuple, s"A concept (${elemDecl.targetEName}) cannot be both an item and tuple")
       require(!isHypercube || !isDimension, s"A concept (${elemDecl.targetEName}) cannot be both a hypercube and dimension")
@@ -148,16 +150,6 @@ object ConceptDeclaration {
         }
       } else {
         None
-      }
-    }
-
-    def hasSubstitutionGroup(elemDecl: GlobalElementDeclaration, substGroup: EName): Boolean = {
-      (elemDecl.substitutionGroupOption == Some(substGroup)) || {
-        val derivedSubstGroups = knownSubstitutionGroups.filter(_._2 == substGroup).keySet
-
-        // Recursive calls
-
-        derivedSubstGroups.exists(substGrp => hasSubstitutionGroup(elemDecl, substGrp))
       }
     }
   }

@@ -102,7 +102,7 @@ class TaxonomyElemTest extends FunSuite {
       elemDecls.flatMap(_.typeOption).toSet
     }
 
-    val conceptDeclBuilder = new ConceptDeclaration.Builder(Map())
+    val conceptDeclBuilder = new ConceptDeclaration.Builder(SubstitutionGroupMap.Empty)
     val conceptDecls = elemDecls.flatMap(e => conceptDeclBuilder.optConceptDeclaration(e))
 
     assertResult(elemDecls) {
