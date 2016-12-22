@@ -61,8 +61,4 @@ object Namespaces {
   val AcfNamespace = "http://xbrl.org/2010/filter/aspect-cover"
   val CrfNamespace = "http://xbrl.org/2010/filter/concept-relation"
   val GplNamespace = "http://xbrl.org/2013/preferred-label"
-
-  // "Own" namespaces
-
-  val LnkNamespace = "http://www.ebpi.nl/2017/linkbase"
 }

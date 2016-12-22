@@ -38,6 +38,13 @@ object ENames {
   val XbrldtTypedDomainRefEName = EName(XbrldtNamespace, "typedDomainRef")
   val XbrldtContextElement = EName(XbrldtNamespace, "contextElement")
 
+  val XLinkHrefEName = EName(XLinkNamespace, "href")
+  val XLinkLabelEName = EName(XLinkNamespace, "label")
+  val XLinkRoleEName = EName(XLinkNamespace, "role")
+  val XLinkArcroleEName = EName(XLinkNamespace, "arcrole")
+  val XLinkFromEName = EName(XLinkNamespace, "from")
+  val XLinkToEName = EName(XLinkNamespace, "to")
+
   val XsSchemaEName = EName(XsNamespace, "schema")
   val XsElementEName = EName(XsNamespace, "element")
   val XsAttributeEName = EName(XsNamespace, "attribute")
@@ -323,12 +330,4 @@ object ENames {
   val BoundaryEName = EName("boundary")
   val LocationEName = EName("location")
   val MinimumEName = EName("minimum")
-
-  // "Own" ENames
-
-  val LnkLinkbase = EName(LnkNamespace, "linkbase")
-  val LnkConcept = EName(LnkNamespace, "concept")
-  val LnkQname = EName(LnkNamespace, "qname")
-  val LnkPresentationLink = EName(LnkNamespace, "presentationLink")
-  val LnkPresentationArc = EName(LnkNamespace, "presentationArc")
 }
