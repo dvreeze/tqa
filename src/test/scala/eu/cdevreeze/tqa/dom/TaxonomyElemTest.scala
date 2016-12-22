@@ -101,5 +101,16 @@ class TaxonomyElemTest extends FunSuite {
     assertResult(Set(EName(XbrliNamespace, "stringItemType"), EName(XbrliNamespace, "monetaryItemType"))) {
       elemDecls.flatMap(_.typeOption).toSet
     }
+
+    val conceptDeclBuilder = new ConceptDeclaration.Builder(Map())
+    val conceptDecls = elemDecls.flatMap(e => conceptDeclBuilder.optConceptDeclaration(e))
+
+    assertResult(elemDecls) {
+      conceptDecls.map(_.globalElementDeclaration)
+    }
+
+    assertResult(conceptDecls) {
+      conceptDecls collect { case primaryItemDecl: PrimaryItemDeclaration => primaryItemDecl }
+    }
   }
 }

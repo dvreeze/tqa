@@ -123,23 +123,23 @@ sealed trait XLinkElem extends TaxonomyElem {
   }
 }
 
-sealed trait XLinkLinkElem extends XLinkElem
+sealed trait XLinkLink extends XLinkElem
 
-sealed trait XLinkInExtendedLink extends XLinkElem {
+sealed trait ChildXLink extends XLinkElem {
 
   final def elr: String = {
     backingElem.parent.attribute(XLinkRoleEName)
   }
 }
 
-sealed trait LabeledXLinkElem extends XLinkInExtendedLink {
+sealed trait LabeledXLink extends ChildXLink {
 
   final def xlinkLabel: String = {
     attribute(XLinkLabelEName)
   }
 }
 
-sealed trait ExtendedLink extends XLinkLinkElem {
+sealed trait ExtendedLink extends XLinkLink {
 
   final def xlinkType: String = {
     "extended"
@@ -149,12 +149,12 @@ sealed trait ExtendedLink extends XLinkLinkElem {
     attributeOption(XLinkRoleEName)
   }
 
-  final def xlinkChildren: immutable.IndexedSeq[XLinkInExtendedLink] = {
-    findAllChildElemsOfType(classTag[XLinkInExtendedLink])
+  final def xlinkChildren: immutable.IndexedSeq[ChildXLink] = {
+    findAllChildElemsOfType(classTag[ChildXLink])
   }
 }
 
-sealed trait XLinkArc extends XLinkInExtendedLink {
+sealed trait XLinkArc extends ChildXLink {
 
   final def xlinkType: String = {
     "arc"
@@ -173,14 +173,14 @@ sealed trait XLinkArc extends XLinkInExtendedLink {
   }
 }
 
-sealed trait XLinkResource extends LabeledXLinkElem {
+sealed trait XLinkResource extends LabeledXLink {
 
   final def xlinkType: String = {
     "resource"
   }
 }
 
-sealed trait XLinkLocator extends LabeledXLinkElem {
+sealed trait XLinkLocator extends LabeledXLink {
 
   final def xlinkType: String = {
     "locator"
@@ -191,7 +191,7 @@ sealed trait XLinkLocator extends LabeledXLinkElem {
   }
 }
 
-sealed trait SimpleLink extends XLinkLinkElem {
+sealed trait SimpleLink extends XLinkLink {
 
   final def xlinkType: String = {
     "simple"
