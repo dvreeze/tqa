@@ -49,7 +49,7 @@ final class DefaultRelationshipsFactory(val lenient: Boolean) extends Relationsh
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
     taxonomy.rootElems flatMap { rootElem =>
-      extractRelationshipsFromDocument(rootElem.backingElem.docUri, taxonomy, arcFilter)
+      extractRelationshipsFromDocument(rootElem.docUri, taxonomy, arcFilter)
     }
   }
 
@@ -100,11 +100,11 @@ final class DefaultRelationshipsFactory(val lenient: Boolean) extends Relationsh
 
     val fromXLinks = labeledXlinkMap.getOrElse(
       fromXLinkLabel,
-      if (lenient) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $fromXLinkLabel. Document: ${arc.backingElem.docUri}"))
+      if (lenient) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $fromXLinkLabel. Document: ${arc.docUri}"))
 
     val toXLinks = labeledXlinkMap.getOrElse(
       toXLinkLabel,
-      if (lenient) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $toXLinkLabel. Document: ${arc.backingElem.docUri}"))
+      if (lenient) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $toXLinkLabel. Document: ${arc.docUri}"))
 
     val relationships =
       for {
@@ -126,14 +126,14 @@ final class DefaultRelationshipsFactory(val lenient: Boolean) extends Relationsh
     xlink match {
       case res: XLinkResource => Some(new ResolvedResource(res))
       case loc: XLinkLocator =>
-        val elemUri = loc.backingElem.baseUri.resolve(loc.rawHref)
+        val elemUri = loc.baseUri.resolve(loc.rawHref)
         val optTaxoElem = taxonomy.findElemByUri(elemUri)
         val optResolvedLoc = optTaxoElem.map(e => new ResolvedLocator(loc, e))
 
         if (lenient) {
           optResolvedLoc
         } else {
-          optResolvedLoc.orElse(sys.error(s"Could not resolve locator with XLink label ${xlink.xlinkLabel}. Document: ${xlink.backingElem.docUri}"))
+          optResolvedLoc.orElse(sys.error(s"Could not resolve locator with XLink label ${xlink.xlinkLabel}. Document: ${xlink.docUri}"))
         }
     }
   }

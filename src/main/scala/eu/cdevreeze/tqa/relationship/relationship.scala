@@ -75,9 +75,9 @@ sealed abstract class Relationship(
 
   final def targetElem: TaxonomyElem = resolvedTo.resolvedElem
 
-  final def docUri: URI = arc.backingElem.docUri
+  final def docUri: URI = arc.docUri
 
-  final def baseUri: URI = arc.backingElem.baseUri
+  final def baseUri: URI = arc.baseUri
 
   final def elr: String = arc.elr
 

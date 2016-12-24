@@ -34,14 +34,14 @@ import eu.cdevreeze.tqa.ENames.IdEName
  */
 final class UriAwareTaxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem]) {
   require(
-    rootElems.forall(e => e.backingElem.docUri.getFragment == null),
+    rootElems.forall(e => e.docUri.getFragment == null),
     s"Expected document URIs but got at least one URI with fragment")
 
   /**
    * Somewhat expensive map from URIs without fragments to corresponding root elements. If there are duplicate IDs, data is lost.
    */
   val rootElemUriMap: Map[URI, TaxonomyElem] = {
-    rootElems.groupBy(e => e.backingElem.docUri).mapValues(_.head)
+    rootElems.groupBy(e => e.docUri).mapValues(_.head)
   }
 
   /**
@@ -83,13 +83,13 @@ final class UriAwareTaxonomy private (val rootElems: immutable.IndexedSeq[Taxono
   }
 
   private def getElemUriMap(rootElem: TaxonomyElem): Map[URI, TaxonomyElem] = {
-    val docUri = rootElem.backingElem.docUri
+    val docUri = rootElem.docUri
     assert(docUri.isAbsolute)
 
     // The schema type of the ID attributes is not checked! That would be very expensive without any real advantage.
 
     val elemsWithId = rootElem.filterElemsOrSelf(_.attributeOption(IdEName).isDefined)
-    elemsWithId.map(e => (makeUriWithIdFragment(e.backingElem.baseUri, e.attribute(IdEName)) -> e)).toMap
+    elemsWithId.map(e => (makeUriWithIdFragment(e.baseUri, e.attribute(IdEName)) -> e)).toMap
   }
 
   private def makeUriWithIdFragment(baseUri: URI, idFragment: String): URI = {

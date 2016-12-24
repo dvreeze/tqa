@@ -144,6 +144,12 @@ sealed abstract class TaxonomyElem private[dom] (
 
   final def key: XmlFragmentKey = backingElem.key
 
+  final def docUri: URI = backingElem.docUri
+
+  final def baseUriOption: Option[URI] = backingElem.baseUriOption
+
+  final def baseUri: URI = backingElem.baseUri
+
   // Internal functions
 
   protected final def msg(s: String): String = s"${s} (${key})"

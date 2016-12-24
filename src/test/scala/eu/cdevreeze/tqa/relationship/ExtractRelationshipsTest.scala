@@ -20,6 +20,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.dom.UriAwareTaxonomy
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
@@ -53,6 +54,8 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
 
+    // Parent-child relationships
+
     val parentChildRelationshipParents: Set[EName] =
       (relationships collect { case rel: ParentChildRelationship => rel.sourceConceptEName }).toSet
 
@@ -77,6 +80,45 @@ class ExtractRelationshipsTest extends FunSuite {
 
     assertResult(parentChildRelationshipChildren) {
       (relationships collect { case rel: ParentChildRelationship => rel.targetGlobalElementDeclaration.targetEName }).toSet
+    }
+
+    // Calculation relationships
+
+    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+
+    val total = EName(tns, "TotalPropertyPlantEquipment")
+
+    assertResult(
+      Set(
+        (total, EName(tns, "Building")),
+        (total, EName(tns, "ComputerEquipment")),
+        (total, EName(tns, "FurnitureFixtures")),
+        (total, EName(tns, "Land")),
+        (total, EName(tns, "Other")))) {
+
+        calcRelationships.map(rel => (rel.sourceConceptEName -> rel.targetConceptEName)).toSet
+      }
+
+    assertResult(calcRelationships.map(_.arc).toSet) {
+      relationshipsFactory.extractRelationships(taxo, (_.resolvedName == LinkCalculationArcEName)).map(_.arc).toSet
+    }
+
+    // Concept-label relationships
+
+    val computerEquipmentLabelRelationships =
+      relationships collect { case rel: ConceptLabelRelationship if rel.sourceConceptEName == EName(tns, "ComputerEquipment") => rel }
+
+    assertResult(2) {
+      computerEquipmentLabelRelationships.size
+    }
+    assertResult(Set("http://www.xbrl.org/2003/role/label", "http://www.xbrl.org/2003/role/documentation")) {
+      computerEquipmentLabelRelationships.map(_.resourceRole).toSet
+    }
+    assertResult(Set("en")) {
+      computerEquipmentLabelRelationships.map(_.language).toSet
+    }
+    assertResult(Set("Computer Equipment", "Documentation for Computer Equipment")) {
+      computerEquipmentLabelRelationships.map(_.labelText).toSet
     }
   }
 }

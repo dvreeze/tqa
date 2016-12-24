@@ -5,8 +5,8 @@ TQA
 Improved leaner XBRL Taxonomy Query API (TQA). There are just 3 layers: taxonomy DOM, relationships, and taxonomies
 that combine the 2 (as a taxonomy query API).
 
-It knows about taxonomy data as type-safe XML in an XBRL context, supporting several extensions of DOM abstractions,
-and it knows about relationships connecting these type-safe DOM elements.
+It knows about taxonomy data as type-safe XML in an XBRL context, supporting several different DOM abstractions
+(core/dimensional, formula, table etc.), and it knows about relationships connecting these type-safe DOM elements.
 
 It can be used for validating XBRL instances, including (pluggable) schema validation of XBRL instances.
 

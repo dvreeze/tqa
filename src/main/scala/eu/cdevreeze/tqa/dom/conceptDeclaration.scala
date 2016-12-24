@@ -113,7 +113,7 @@ final class TypedDimension(globalElementDeclaration: GlobalElementDeclaration) e
    */
   def typedDomainRef: URI = {
     val rawUri = URI.create(globalElementDeclaration.attribute(XbrldtTypedDomainRefEName))
-    globalElementDeclaration.backingElem.baseUri.resolve(rawUri)
+    globalElementDeclaration.baseUri.resolve(rawUri)
   }
 }
 
