@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.dom
+package eu.cdevreeze.tqa
 
 import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
 import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
@@ -43,21 +43,6 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
    */
   val substitutionGroupDerivations: Map[EName, Set[EName]] = {
     mappings.toSeq.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
-  }
-
-  /**
-   * Returns true if the given global element declaration has the given substitution group, either
-   * directly or indirectly. The mappings are used as the necessary context, but are not needed if the element
-   * declaration directly has the substitution group itself.
-   */
-  def hasSubstitutionGroup(elemDecl: GlobalElementDeclaration, substGroup: EName): Boolean = {
-    (elemDecl.substitutionGroupOption == Some(substGroup)) || {
-      val derivedSubstGroups = substitutionGroupDerivations.getOrElse(substGroup, Set.empty)
-
-      // Recursive calls
-
-      derivedSubstGroups.exists(substGrp => hasSubstitutionGroup(elemDecl, substGrp))
-    }
   }
 }
 

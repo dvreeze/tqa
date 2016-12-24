@@ -17,7 +17,18 @@
 package eu.cdevreeze
 
 /**
- * Taxonomy Query API.
+ * Root package of the Taxonomy Query API. This package itself contains commonly used data classes and many constants
+ * for namespaces and expanded names.
+ *
+ * There are 3 levels of abstraction in TQA. The lowest layer is the type-safe taxonomy DOM model. It uses yaidom for its
+ * "XML dialect support", where the XML dialect is XBRL taxonomy data. It knows only about individual DOM trees.
+ *
+ * On top of the type-safe DOM layer is the relationship layer. It resolves the arcs of the DOM layer as relationships.
+ * Of course, to resolve arcs we need other documents as context.
+ *
+ * On top of the relationship layer is the taxonomy query API layer. It uses the underlying layers to offer a query
+ * API in which taxonomy elements (such as concept declarations) and relationships can easily be queried. This layer
+ * is the purpose of TQA.
  *
  * @author Chris de Vreeze
  */

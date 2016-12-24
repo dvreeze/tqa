@@ -17,13 +17,61 @@
 package eu.cdevreeze.tqa.dom
 
 import java.net.URI
-import javax.xml.bind.DatatypeConverter
 
-import scala.annotation.elidable
-import scala.annotation.elidable.ASSERTION
 import scala.collection.immutable
 import scala.reflect.classTag
 
+import eu.cdevreeze.tqa.ENames.AbstractEName
+import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
+import eu.cdevreeze.tqa.ENames.LinkCalculationLinkEName
+import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
+import eu.cdevreeze.tqa.ENames.LinkDefinitionLinkEName
+import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
+import eu.cdevreeze.tqa.ENames.LinkLabelEName
+import eu.cdevreeze.tqa.ENames.LinkLabelLinkEName
+import eu.cdevreeze.tqa.ENames.LinkLinkbaseEName
+import eu.cdevreeze.tqa.ENames.LinkLocEName
+import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
+import eu.cdevreeze.tqa.ENames.LinkPresentationLinkEName
+import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
+import eu.cdevreeze.tqa.ENames.LinkReferenceEName
+import eu.cdevreeze.tqa.ENames.LinkReferenceLinkEName
+import eu.cdevreeze.tqa.ENames.NameEName
+import eu.cdevreeze.tqa.ENames.PriorityEName
+import eu.cdevreeze.tqa.ENames.RefEName
+import eu.cdevreeze.tqa.ENames.SubstitutionGroupEName
+import eu.cdevreeze.tqa.ENames.TargetNamespaceEName
+import eu.cdevreeze.tqa.ENames.TypeEName
+import eu.cdevreeze.tqa.ENames.UseEName
+import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
+import eu.cdevreeze.tqa.ENames.XLinkFromEName
+import eu.cdevreeze.tqa.ENames.XLinkHrefEName
+import eu.cdevreeze.tqa.ENames.XLinkLabelEName
+import eu.cdevreeze.tqa.ENames.XLinkRoleEName
+import eu.cdevreeze.tqa.ENames.XLinkToEName
+import eu.cdevreeze.tqa.ENames.XLinkTypeEName
+import eu.cdevreeze.tqa.ENames.XsAllEName
+import eu.cdevreeze.tqa.ENames.XsAnnotationEName
+import eu.cdevreeze.tqa.ENames.XsAppinfoEName
+import eu.cdevreeze.tqa.ENames.XsAttributeEName
+import eu.cdevreeze.tqa.ENames.XsAttributeGroupEName
+import eu.cdevreeze.tqa.ENames.XsChoiceEName
+import eu.cdevreeze.tqa.ENames.XsComplexContentEName
+import eu.cdevreeze.tqa.ENames.XsComplexTypeEName
+import eu.cdevreeze.tqa.ENames.XsElementEName
+import eu.cdevreeze.tqa.ENames.XsExtensionEName
+import eu.cdevreeze.tqa.ENames.XsGroupEName
+import eu.cdevreeze.tqa.ENames.XsImportEName
+import eu.cdevreeze.tqa.ENames.XsIncludeEName
+import eu.cdevreeze.tqa.ENames.XsRestrictionEName
+import eu.cdevreeze.tqa.ENames.XsSchemaEName
+import eu.cdevreeze.tqa.ENames.XsSequenceEName
+import eu.cdevreeze.tqa.ENames.XsSimpleContentEName
+import eu.cdevreeze.tqa.ENames.XsSimpleTypeEName
+import eu.cdevreeze.tqa.Namespaces.LinkNamespace
+import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
+import eu.cdevreeze.tqa.Namespaces.XsNamespace
+import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.yaidom.core.EName
@@ -33,8 +81,7 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
-import eu.cdevreeze.tqa.Namespaces._
-import eu.cdevreeze.tqa.ENames._
+import javax.xml.bind.DatatypeConverter
 
 /**
  * Any taxonomy XML element. These classes are reasonably lenient when instantiating them (although schema validity helps), but query
@@ -56,8 +103,8 @@ import eu.cdevreeze.tqa.ENames._
  * @author Chris de Vreeze
  */
 sealed abstract class TaxonomyElem private[dom] (
-  val backingElem: BackingElemApi,
-  val childElems: immutable.IndexedSeq[TaxonomyElem]) extends AnyTaxonomyElem with Nodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
+    val backingElem: BackingElemApi,
+    val childElems: immutable.IndexedSeq[TaxonomyElem]) extends AnyTaxonomyElem with Nodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
   type ThisElem = TaxonomyElem
 
@@ -112,7 +159,7 @@ sealed trait TaxonomyRootElem extends TaxonomyElem
 // XLink elements in taxonomies.
 
 /**
- * An XLink element in a taxonomy. For example, an XLink arc or extended link.
+ * An XLink element in a taxonomy, obeying the constraints on XLink imposed by XBRL. For example, an XLink arc or extended link.
  */
 sealed trait XLinkElem extends TaxonomyElem {
 
@@ -128,7 +175,11 @@ sealed trait XLinkLink extends XLinkElem
 sealed trait ChildXLink extends XLinkElem {
 
   final def elr: String = {
-    backingElem.parent.attribute(XLinkRoleEName)
+    underlyingParentElem.attribute(XLinkRoleEName)
+  }
+
+  final def underlyingParentElem: BackingElemApi = {
+    backingElem.parent
   }
 }
 
@@ -152,6 +203,18 @@ sealed trait ExtendedLink extends XLinkLink {
   final def xlinkChildren: immutable.IndexedSeq[ChildXLink] = {
     findAllChildElemsOfType(classTag[ChildXLink])
   }
+
+  final def labeledXlinkChildren: immutable.IndexedSeq[LabeledXLink] = {
+    findAllChildElemsOfType(classTag[LabeledXLink])
+  }
+
+  final def arcs: immutable.IndexedSeq[XLinkArc] = {
+    findAllChildElemsOfType(classTag[XLinkArc])
+  }
+
+  final def labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]] = {
+    labeledXlinkChildren.groupBy(_.xlinkLabel)
+  }
 }
 
 sealed trait XLinkArc extends ChildXLink {
@@ -170,6 +233,19 @@ sealed trait XLinkArc extends ChildXLink {
 
   final def to: String = {
     attribute(XLinkToEName)
+  }
+
+  final def baseSetKey: BaseSetKey = {
+    val underlyingParent = underlyingParentElem
+    BaseSetKey(resolvedName, arcrole, underlyingParent.resolvedName, underlyingParent.attribute(XLinkRoleEName))
+  }
+
+  final def use: Use = {
+    Use.fromString(backingElem.attributeOption(UseEName).getOrElse("optional"))
+  }
+
+  final def priority: Int = {
+    backingElem.attributeOption(PriorityEName).getOrElse("0").toInt
   }
 }
 
@@ -255,8 +331,8 @@ sealed trait Reference extends XsdElem {
  * The xs:schema root element of a taxonomy schema.
  */
 final class XsdSchema private[dom] (
-  backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XsdElem with TaxonomyRootElem {
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XsdElem with TaxonomyRootElem {
 
   /**
    * Returns the optional target namespace of this schema root element itself, ignoring the possibility that this is an included chameleon schema.
@@ -323,8 +399,8 @@ sealed trait ElementDeclaration extends ElementDeclarationOrReference with Named
  * Global element declaration. This element in isolation does not know if the element declaration is a concept declaration.
  */
 final class GlobalElementDeclaration private[dom] (
-  backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElementDeclaration with CanBeAbstract {
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElementDeclaration with CanBeAbstract {
 
   def targetEName: EName = {
     val tnsOption = schemaTargetNamespaceOption
@@ -337,6 +413,21 @@ final class GlobalElementDeclaration private[dom] (
 
   def typeOption: Option[EName] = {
     attributeAsResolvedQNameOption(TypeEName)
+  }
+
+  /**
+   * Returns true if this global element declaration has the given substitution group, either
+   * directly or indirectly. The given mappings are used as the necessary context, but are not needed if the element
+   * declaration directly has the substitution group itself.
+   */
+  def hasSubstitutionGroup(substGroup: EName, substitutionGroupMap: SubstitutionGroupMap): Boolean = {
+    (substitutionGroupOption == Some(substGroup)) || {
+      val derivedSubstGroups = substitutionGroupMap.substitutionGroupDerivations.getOrElse(substGroup, Set.empty)
+
+      // Recursive calls
+
+      derivedSubstGroups.exists(substGrp => hasSubstitutionGroup(substGrp, substitutionGroupMap))
+    }
   }
 }
 
@@ -538,7 +629,21 @@ final class ConceptReferenceResource private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardResource(backingElem, childElems)
 
-// TODO Known simple links etc. Generic links and arcs.
+// Generic linkbase content.
+
+final class NonStandardLink private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ExtendedLink
+
+final class NonStandardArc private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkArc
+
+final class NonStandardResource private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkResource
+
+// TODO Known simple links etc.
 
 final class OtherLinkbaseElem private[dom] (
   backingElem: BackingElemApi,
@@ -563,7 +668,13 @@ object TaxonomyElem {
     backingElem.resolvedName.namespaceUriOption match {
       case Some(XsNamespace)   => XsdElem(backingElem, childElems)
       case Some(LinkNamespace) => LinkElem(backingElem, childElems)
-      case _                   => new OtherElem(backingElem, childElems)
+      case _ =>
+        backingElem.attributeOption(XLinkTypeEName) match {
+          case Some("extended") => new NonStandardLink(backingElem, childElems)
+          case Some("arc")      => new NonStandardArc(backingElem, childElems)
+          case Some("resource") => new NonStandardResource(backingElem, childElems)
+          case _                => new OtherElem(backingElem, childElems)
+        }
     }
   }
 }

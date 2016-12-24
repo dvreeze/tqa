@@ -20,6 +20,11 @@ import java.net.URI
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
+import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
+import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
+import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
+import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
 import eu.cdevreeze.tqa.dom.CalculationArc
 import eu.cdevreeze.tqa.dom.ConceptLabelResource
@@ -27,6 +32,7 @@ import eu.cdevreeze.tqa.dom.ConceptReferenceResource
 import eu.cdevreeze.tqa.dom.DefinitionArc
 import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
 import eu.cdevreeze.tqa.dom.LabelArc
+import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.PresentationArc
 import eu.cdevreeze.tqa.dom.ReferenceArc
 import eu.cdevreeze.tqa.dom.StandardArc
@@ -97,7 +103,7 @@ sealed abstract class StandardRelationship(
 }
 
 sealed abstract class NonStandardRelationship(
-  arc: XLinkArc,
+  arc: NonStandardArc,
   resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
   resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo)
 
@@ -248,21 +254,173 @@ final class DimensionDefaultRelationship(
 // Generic relationships
 
 sealed abstract class ElementResourceRelationship(
-  arc: XLinkArc,
+  arc: NonStandardArc,
   resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
   resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
 
 final class ElementLabelRelationship(
-  arc: XLinkArc,
+  arc: NonStandardArc,
   resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
   resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends ElementResourceRelationship(arc, resolvedFrom, resolvedTo)
 
 final class ElementReferenceRelationship(
-  arc: XLinkArc,
+  arc: NonStandardArc,
   resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
   resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends ElementResourceRelationship(arc, resolvedFrom, resolvedTo)
 
 final class ElementMessageRelationship(
-  arc: XLinkArc,
+  arc: NonStandardArc,
   resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
   resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
+
+final class OtherNonStandardRelationship(
+  arc: NonStandardArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+  resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
+
+// Companion objects
+
+object Relationship {
+
+  def apply(
+    arc: XLinkArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Relationship = {
+
+    (arc, resolvedFrom.resolvedElem) match {
+      case (arc: StandardArc, elemDecl: GlobalElementDeclaration) =>
+        val from = resolvedFrom.asInstanceOf[ResolvedLocator[GlobalElementDeclaration]]
+        StandardRelationship.opt(arc, from, resolvedTo).getOrElse(new UnknownRelationship(arc, resolvedFrom, resolvedTo))
+      case (arc: NonStandardArc, _) =>
+        NonStandardRelationship.opt(arc, resolvedFrom, resolvedTo).getOrElse(new UnknownRelationship(arc, resolvedFrom, resolvedTo))
+      case (_, _) =>
+        new UnknownRelationship(arc, resolvedFrom, resolvedTo)
+    }
+  }
+}
+
+object StandardRelationship {
+
+  def opt(
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[StandardRelationship] = {
+
+    resolvedTo.resolvedElem match {
+      case elemDecl: GlobalElementDeclaration =>
+        InterConceptRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocator[GlobalElementDeclaration]])
+      case res: XLinkResource =>
+        ConceptResourceRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]])
+      case _ => None
+    }
+  }
+}
+
+object NonStandardRelationship {
+
+  def opt(
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[NonStandardRelationship] = {
+
+    // TODO
+    Some(new OtherNonStandardRelationship(arc, resolvedFrom, resolvedTo))
+  }
+}
+
+object InterConceptRelationship {
+
+  def opt(
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]): Option[InterConceptRelationship] = {
+
+    (arc.resolvedName, arc) match {
+      case (LinkDefinitionArcEName, arc: DefinitionArc) => Some(DefinitionRelationship(arc, resolvedFrom, resolvedTo))
+      case (LinkPresentationArcEName, arc: PresentationArc) => Some(PresentationRelationship(arc, resolvedFrom, resolvedTo))
+      case (LinkCalculationArcEName, arc: CalculationArc) => Some(CalculationRelationship(arc, resolvedFrom, resolvedTo))
+      case _ => None
+    }
+  }
+}
+
+object ConceptResourceRelationship {
+
+  def opt(
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]): Option[ConceptResourceRelationship] = {
+
+    (arc.resolvedName, arc, resolvedTo.resolvedElem) match {
+      case (LinkLabelArcEName, arc: LabelArc, lbl: ConceptLabelResource) =>
+        Some(new ConceptLabelRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[ConceptLabelResource]]))
+      case (LinkReferenceArcEName, arc: ReferenceArc, ref: ConceptReferenceResource) =>
+        Some(new ConceptReferenceRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[ConceptReferenceResource]]))
+      case _ => None
+    }
+  }
+}
+
+object DefinitionRelationship {
+
+  def apply(
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]): DefinitionRelationship = {
+
+    arc.arcrole match {
+      case "http://www.xbrl.org/2003/arcrole/general-special" => new GeneralSpecialRelationship(arc, resolvedFrom, resolvedTo)
+      case "http://www.xbrl.org/2003/arcrole/essence-alias" => new EssenceAliasRelationship(arc, resolvedFrom, resolvedTo)
+      case "http://www.xbrl.org/2003/arcrole/similar-tuples" => new SimilarTuplesRelationship(arc, resolvedFrom, resolvedTo)
+      case "http://www.xbrl.org/2003/arcrole/requires-element" => new RequiresElementRelationship(arc, resolvedFrom, resolvedTo)
+      case _ => DimensionalRelationship.opt(arc, resolvedFrom, resolvedTo).getOrElse(new DefinitionRelationship(arc, resolvedFrom, resolvedTo))
+    }
+  }
+}
+
+object DimensionalRelationship {
+
+  def opt(
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]): Option[DimensionalRelationship] = {
+
+    arc.arcrole match {
+      case "http://xbrl.org/int/dim/arcrole/hypercube-dimension" => Some(new HypercubeDimensionRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/dimension-domain" => Some(new DimensionDomainRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/domain-member" => Some(new DomainMemberRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/dimension-default" => Some(new DimensionDefaultRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/all" => Some(new AllRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/notAll" => Some(new NotAllRelationship(arc, resolvedFrom, resolvedTo))
+      case _ => None
+    }
+  }
+}
+
+object PresentationRelationship {
+
+  def apply(
+    arc: PresentationArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]): PresentationRelationship = {
+
+    arc.arcrole match {
+      case "http://www.xbrl.org/2003/arcrole/parent-child" => new ParentChildRelationship(arc, resolvedFrom, resolvedTo)
+      case _ => new PresentationRelationship(arc, resolvedFrom, resolvedTo)
+    }
+  }
+}
+
+object CalculationRelationship {
+
+  def apply(
+    arc: CalculationArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]): CalculationRelationship = {
+
+    arc.arcrole match {
+      case "http://www.xbrl.org/2003/arcrole/summation-item" => new SummationItemRelationship(arc, resolvedFrom, resolvedTo)
+      case _ => new CalculationRelationship(arc, resolvedFrom, resolvedTo)
+    }
+  }
+}

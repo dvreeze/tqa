@@ -23,6 +23,7 @@ import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
 import eu.cdevreeze.tqa.ENames.XbrldtTypedDomainRefEName
 import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.ENames.XbrliTupleEName
+import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -128,10 +129,10 @@ object ConceptDeclaration {
      * This creation cannot fail (assuming that the SubstitutionGroupMap cannot be corrupted).
      */
     def optConceptDeclaration(elemDecl: GlobalElementDeclaration): Option[ConceptDeclaration] = {
-      val isHypercube = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrldtHypercubeItemEName)
-      val isDimension = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrldtDimensionItemEName)
-      val isItem = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrliItemEName)
-      val isTuple = substitutionGroupMap.hasSubstitutionGroup(elemDecl, XbrliTupleEName)
+      val isHypercube = elemDecl.hasSubstitutionGroup(XbrldtHypercubeItemEName, substitutionGroupMap)
+      val isDimension = elemDecl.hasSubstitutionGroup(XbrldtDimensionItemEName, substitutionGroupMap)
+      val isItem = elemDecl.hasSubstitutionGroup(XbrliItemEName, substitutionGroupMap)
+      val isTuple = elemDecl.hasSubstitutionGroup(XbrliTupleEName, substitutionGroupMap)
 
       require(!isItem || !isTuple, s"A concept (${elemDecl.targetEName}) cannot be both an item and tuple")
       require(!isHypercube || !isDimension, s"A concept (${elemDecl.targetEName}) cannot be both a hypercube and dimension")

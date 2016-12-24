@@ -38,6 +38,7 @@ object ENames {
   val XbrldtTypedDomainRefEName = EName(XbrldtNamespace, "typedDomainRef")
   val XbrldtContextElement = EName(XbrldtNamespace, "contextElement")
 
+  val XLinkTypeEName = EName(XLinkNamespace, "type")
   val XLinkHrefEName = EName(XLinkNamespace, "href")
   val XLinkLabelEName = EName(XLinkNamespace, "label")
   val XLinkRoleEName = EName(XLinkNamespace, "role")
