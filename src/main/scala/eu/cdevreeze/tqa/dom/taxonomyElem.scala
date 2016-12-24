@@ -178,6 +178,10 @@ sealed trait XLinkResource extends LabeledXLink {
   final def xlinkType: String = {
     "resource"
   }
+
+  final def roleOption: Option[String] = {
+    attributeOption(XLinkRoleEName)
+  }
 }
 
 sealed trait XLinkLocator extends LabeledXLink {
