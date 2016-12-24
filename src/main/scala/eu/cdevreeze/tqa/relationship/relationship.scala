@@ -52,9 +52,9 @@ import eu.cdevreeze.yaidom.core.Path
  * @author Chris de Vreeze
  */
 sealed abstract class Relationship(
-  val arc: XLinkArc,
-  val resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  val resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) {
+    val arc: XLinkArc,
+    val resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    val resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) {
 
   require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
   require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
@@ -87,9 +87,9 @@ sealed abstract class Relationship(
 }
 
 sealed abstract class StandardRelationship(
-  arc: StandardArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo) {
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo) {
 
   final def sourceGlobalElementDeclaration: GlobalElementDeclaration = resolvedFrom.resolvedElem
 
@@ -107,9 +107,9 @@ final class UnknownRelationship(
   resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo)
 
 sealed abstract class InterConceptRelationship(
-  arc: StandardArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
 
   final def targetGlobalElementDeclaration: GlobalElementDeclaration = resolvedTo.resolvedElem
 
@@ -119,17 +119,17 @@ sealed abstract class InterConceptRelationship(
 }
 
 sealed abstract class ConceptResourceRelationship(
-  arc: StandardArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
 
   def resource: XLinkResource
 }
 
 final class ConceptLabelRelationship(
-  arc: LabelArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: ConceptLabelResource]) extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: LabelArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: ConceptLabelResource]) extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
 
   def resource: ConceptLabelResource = resolvedTo.resolvedElem
 
@@ -143,9 +143,9 @@ final class ConceptLabelRelationship(
 }
 
 final class ConceptReferenceRelationship(
-  arc: ReferenceArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: ConceptReferenceResource]) extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: ReferenceArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: ConceptReferenceResource]) extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
 
   def resource: ConceptReferenceResource = resolvedTo.resolvedElem
 
