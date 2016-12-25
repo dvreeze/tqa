@@ -21,6 +21,8 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
+import eu.cdevreeze.tqa.dom.LabelArc
+import eu.cdevreeze.tqa.dom.Linkbase
 import eu.cdevreeze.tqa.dom.UriAwareTaxonomy
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
@@ -34,6 +36,84 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  */
 @RunWith(classOf[JUnitRunner])
 class ExtractRelationshipsTest extends FunSuite {
+
+  test("testExtractRelationships") {
+    // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
+
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-01-HrefResolution.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-01-HrefResolution-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.LenientInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+
+    assertResult(2) {
+      relationships.size
+    }
+    assertResult(relationships.map(_.arc)) {
+      conceptLabelRelationships.map(_.arc)
+    }
+
+    assertResult(Set(
+      (EName(tns, "fixedAssets"), "Fixed Assets"),
+      (EName(tns, "changeInRetainedEarnings"), "Change in Retained Earnings"))) {
+
+      conceptLabelRelationships.map(rel => (rel.sourceConceptEName, rel.labelText)).toSet
+    }
+  }
+
+  test("testExtractRelationshipsUsingXmlBase") {
+    // Using a simple linkbase and schema from the XBRL Core Conformance Suite, both with XML base attributes.
+
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-03-HrefResolutionXMLBase.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("base/202-03-HrefResolutionXMLBase-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.LenientInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+
+    assertResult(2) {
+      relationships.size
+    }
+    assertResult(relationships.map(_.arc)) {
+      conceptLabelRelationships.map(_.arc)
+    }
+
+    assertResult(Set(
+      (EName(tns, "changeInRetainedEarnings"), "Fixed Assets"),
+      (EName(tns, "fixedAssets"), "Change in Retained Earnings"))) {
+
+      conceptLabelRelationships.map(rel => (rel.sourceConceptEName, rel.labelText)).toSet
+    }
+  }
 
   test("testExtractRelationshipsInEmbeddedLinkbase") {
     // Using an embedded linkbase from the XBRL Core Conformance Suite.
@@ -119,6 +199,12 @@ class ExtractRelationshipsTest extends FunSuite {
     }
     assertResult(Set("Computer Equipment", "Documentation for Computer Equipment")) {
       computerEquipmentLabelRelationships.map(_.labelText).toSet
+    }
+
+    assertResult(computerEquipmentLabelRelationships.map(_.arc).toSet) {
+      relationshipsFactory.extractRelationships(
+        taxo,
+        (arc => arc.isInstanceOf[LabelArc] && arc.from == "ci_ComputerEquipment")).map(_.arc).toSet
     }
   }
 }
