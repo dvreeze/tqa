@@ -54,4 +54,30 @@ trait RelationshipsFactory {
 object RelationshipsFactory {
 
   val AnyArc: XLinkArc => Boolean = (_ => true)
+
+  final case class Config(
+    val allowUnresolvedXLinkLabel: Boolean,
+    val allowWrongXPointer: Boolean,
+    val allowUnresolvedLocator: Boolean)
+
+  object Config {
+
+    /**
+     * Accepts unresolved locators but also XPointer syntax errors and broken XLink labels (in XLink arcs).
+     * Such erroneous locators and arcs are silently skipped.
+     */
+    val VeryLenient = Config(true, true, true)
+
+    /**
+     * Accepts unresolved locators but does not accept any (found) XPointer syntax errors or broken XLink labels.
+     * Such unresolved locators are silently skipped.
+     */
+    val Lenient = Config(false, false, true)
+
+    /**
+     * Does not accept any unresolved locators or syntax errors (in XPointer) or broken XLink labels.
+     * Exceptions will be thrown instead.
+     */
+    val Strict = Config(false, false, false)
+  }
 }

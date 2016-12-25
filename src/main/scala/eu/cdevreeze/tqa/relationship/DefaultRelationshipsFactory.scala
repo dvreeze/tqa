@@ -20,6 +20,9 @@ import java.net.URI
 
 import scala.collection.immutable
 import scala.reflect.classTag
+import scala.util.Success
+import scala.util.Failure
+import scala.util.Try
 
 import eu.cdevreeze.tqa.dom.ExtendedLink
 import eu.cdevreeze.tqa.dom.LabeledXLink
@@ -42,7 +45,7 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  *
  * @author Chris de Vreeze
  */
-final class DefaultRelationshipsFactory(val lenient: Boolean) extends RelationshipsFactory {
+final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config) extends RelationshipsFactory {
 
   def extractRelationships(
     taxonomy: UriAwareTaxonomy,
@@ -98,6 +101,8 @@ final class DefaultRelationshipsFactory(val lenient: Boolean) extends Relationsh
     val fromXLinkLabel = arc.from
     val toXLinkLabel = arc.to
 
+    val lenient = config.allowUnresolvedXLinkLabel
+
     val fromXLinks = labeledXlinkMap.getOrElse(
       fromXLinkLabel,
       if (lenient) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $fromXLinkLabel. Document: ${arc.docUri}"))
@@ -127,10 +132,17 @@ final class DefaultRelationshipsFactory(val lenient: Boolean) extends Relationsh
       case res: XLinkResource => Some(new ResolvedResource(res))
       case loc: XLinkLocator =>
         val elemUri = loc.baseUri.resolve(loc.rawHref)
-        val optTaxoElem = taxonomy.findElemByUri(elemUri)
+
+        val optTaxoElem =
+          Try(taxonomy.findElemByUri(elemUri)) match {
+            case Success(result) => result
+            case Failure(result) =>
+              if (config.allowWrongXPointer) None else sys.error(s"Error in URI '${elemUri}'")
+          }
+
         val optResolvedLoc = optTaxoElem.map(e => new ResolvedLocator(loc, e))
 
-        if (lenient) {
+        if (config.allowUnresolvedLocator) {
           optResolvedLoc
         } else {
           optResolvedLoc.orElse(sys.error(s"Could not resolve locator with XLink label ${xlink.xlinkLabel}. Document: ${xlink.docUri}"))
@@ -141,7 +153,9 @@ final class DefaultRelationshipsFactory(val lenient: Boolean) extends Relationsh
 
 object DefaultRelationshipsFactory {
 
-  val LenientInstance = new DefaultRelationshipsFactory(true)
+  val VeryLenientInstance = new DefaultRelationshipsFactory(RelationshipsFactory.Config.VeryLenient)
 
-  val StrictInstance = new DefaultRelationshipsFactory(false)
+  val LenientInstance = new DefaultRelationshipsFactory(RelationshipsFactory.Config.Lenient)
+
+  val StrictInstance = new DefaultRelationshipsFactory(RelationshipsFactory.Config.Strict)
 }

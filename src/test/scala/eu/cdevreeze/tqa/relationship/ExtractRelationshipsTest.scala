@@ -55,7 +55,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.LenientInstance
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
     val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
 
@@ -73,6 +73,134 @@ class ExtractRelationshipsTest extends FunSuite {
       (EName(tns, "changeInRetainedEarnings"), "Change in Retained Earnings"))) {
 
       conceptLabelRelationships.map(rel => (rel.sourceConceptEName, rel.labelText)).toSet
+    }
+  }
+
+  test("testExtractRelationshipsUsingElementSchemeIdPointer") {
+    // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
+
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-05-ElementLocatorExample.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-05-ElementLocatorExample-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+
+    assertResult(2) {
+      relationships.size
+    }
+    assertResult(relationships.map(_.arc)) {
+      conceptLabelRelationships.map(_.arc)
+    }
+
+    // One concept-label shared by 2 relationships, pointed 2 by 2 arcs
+
+    assertResult(1) {
+      conceptLabelRelationships.map(_.resource).distinct.size
+    }
+    assertResult(2) {
+      conceptLabelRelationships.map(_.arc).distinct.size
+    }
+
+    // Both locators point to the same concept declaration
+
+    assertResult(List(
+      EName(tns, "aaa"),
+      EName(tns, "aaa"))) {
+
+      conceptLabelRelationships.map(rel => rel.sourceConceptEName)
+    }
+  }
+
+  test("testExtractRelationshipsUsingElementSchemePointer") {
+    // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
+
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-09-ElementSchemeXPointerLocatorExample.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-09-ElementSchemeXPointerLocatorExample-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+
+    assertResult(1) {
+      relationships.size
+    }
+    assertResult(relationships.map(_.arc)) {
+      conceptLabelRelationships.map(_.arc)
+    }
+
+    assertResult(List(EName(tns, "aaa"))) {
+      conceptLabelRelationships.map(rel => rel.sourceConceptEName)
+    }
+    assertResult(List("Text of the label")) {
+      conceptLabelRelationships.map(rel => rel.labelText)
+    }
+  }
+
+  test("testExtractRelationshipsUsingElementSchemePointerSeq") {
+    // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
+
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-10-ElementSchemeXPointerLocatorExample.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-10-ElementSchemeXPointerLocatorExample-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+
+    assertResult(1) {
+      relationships.size
+    }
+    assertResult(relationships.map(_.arc)) {
+      conceptLabelRelationships.map(_.arc)
+    }
+
+    assertResult(List(EName(tns, "aaa"))) {
+      conceptLabelRelationships.map(rel => rel.sourceConceptEName)
+    }
+    assertResult(List("Text of the label")) {
+      conceptLabelRelationships.map(rel => rel.labelText)
     }
   }
 
@@ -94,7 +222,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.LenientInstance
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
     val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
 
@@ -130,7 +258,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = UriAwareTaxonomy.build(Vector(xsdSchema))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.LenientInstance
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
     val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
 
@@ -188,9 +316,14 @@ class ExtractRelationshipsTest extends FunSuite {
     val computerEquipmentLabelRelationships =
       relationships collect { case rel: ConceptLabelRelationship if rel.sourceConceptEName == EName(tns, "ComputerEquipment") => rel }
 
+    // One arc, 2 relationships
     assertResult(2) {
       computerEquipmentLabelRelationships.size
     }
+    assertResult(1) {
+      computerEquipmentLabelRelationships.map(_.arc).distinct.size
+    }
+
     assertResult(Set("http://www.xbrl.org/2003/role/label", "http://www.xbrl.org/2003/role/documentation")) {
       computerEquipmentLabelRelationships.map(_.resourceRole).toSet
     }

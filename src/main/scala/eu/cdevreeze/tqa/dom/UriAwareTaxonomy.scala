@@ -52,12 +52,13 @@ final class UriAwareTaxonomy private (val rootElems: immutable.IndexedSeq[Taxono
   }
 
   /**
-   * Finds the (first) optional element with the given URI. The fragment, if any, must be an ID. If there is no fragment,
-   * the first root element with the given document URI is searched for. This is a quick operation.
+   * Finds the (first) optional element with the given URI. The fragment, if any, must be an XPointer or sequence thereof.
+   * Only shorthand pointers or non-empty sequences of element scheme XPointers are accepted. If there is no fragment,
+   * the first root element with the given document URI is searched for.
+   *
+   * This is a quick operation for shorthand pointers, which are the most commonly used XPointers in URI fragments anyway.
    *
    * The schema type of the ID attributes is not taken into account, although strictly speaking that is incorrect.
-   *
-   * TODO Element scheme XPointer
    */
   def findElemByUri(elemUri: URI): Option[TaxonomyElem] = {
     require(elemUri.isAbsolute, s"URI '${elemUri}' is not absolute")
@@ -65,7 +66,16 @@ final class UriAwareTaxonomy private (val rootElems: immutable.IndexedSeq[Taxono
     if (elemUri.getFragment == null) {
       rootElemUriMap.get(elemUri)
     } else {
-      elemUriMap.get(elemUri)
+      val xpointers = XPointer.parseXPointers(elemUri.getFragment)
+
+      xpointers match {
+        case ShorthandPointer(_) :: Nil =>
+          // Do a fast map lookup on the entire URI with fragment
+          elemUriMap.get(elemUri)
+        case _ =>
+          val rootElemOption = rootElemUriMap.get(removeFragment(elemUri))
+          rootElemOption.flatMap(e => XPointer.findElem(e, xpointers))
+      }
     }
   }
 
@@ -95,6 +105,10 @@ final class UriAwareTaxonomy private (val rootElems: immutable.IndexedSeq[Taxono
   private def makeUriWithIdFragment(baseUri: URI, idFragment: String): URI = {
     require(baseUri.isAbsolute, s"Expected absolute base URI but got '${baseUri}'")
     new URI(baseUri.getScheme, baseUri.getSchemeSpecificPart, idFragment)
+  }
+
+  private def removeFragment(uri: URI): URI = {
+    new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
   }
 }
 
