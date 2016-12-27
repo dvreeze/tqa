@@ -140,9 +140,9 @@ sealed abstract class TaxonomyElem private[dom] (
 
   final override def hashCode: Int = backingElem.hashCode
 
-  // Other public methods
+  final override def key: XmlFragmentKey = backingElem.key
 
-  final def key: XmlFragmentKey = backingElem.key
+  // Other public methods
 
   final def docUri: URI = backingElem.docUri
 
@@ -452,8 +452,14 @@ sealed trait AttributeDeclarationOrReference extends XsdElem
 sealed trait AttributeDeclaration extends AttributeDeclarationOrReference with NamedDeclOrDef
 
 final class GlobalAttributeDeclaration private[dom] (
-  backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeDeclaration
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeDeclaration {
+
+  def targetEName: EName = {
+    val tnsOption = schemaTargetNamespaceOption
+    EName(tnsOption, nameAttributeValue)
+  }
+}
 
 final class LocalAttributeDeclaration private[dom] (
   backingElem: BackingElemApi,
@@ -467,7 +473,13 @@ final class AttributeReference private[dom] (
 
 sealed trait TypeDefinition extends XsdElem
 
-sealed trait NamedTypeDefinition extends TypeDefinition with NamedDeclOrDef
+sealed trait NamedTypeDefinition extends TypeDefinition with NamedDeclOrDef {
+
+  def targetEName: EName = {
+    val tnsOption = schemaTargetNamespaceOption
+    EName(tnsOption, nameAttributeValue)
+  }
+}
 
 sealed trait AnonymousTypeDefinition extends TypeDefinition
 

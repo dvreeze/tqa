@@ -23,7 +23,7 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.dom.LabelArc
 import eu.cdevreeze.tqa.dom.Linkbase
-import eu.cdevreeze.tqa.dom.UriAwareTaxonomy
+import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
@@ -53,7 +53,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -92,7 +92,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -142,7 +142,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -181,7 +181,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -220,7 +220,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema, linkbase))
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -256,7 +256,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://www.UBmatrix.com/Patterns/BasicCalculation"
 
-    val taxo = UriAwareTaxonomy.build(Vector(xsdSchema))
+    val taxo = Taxonomy.build(Vector(xsdSchema))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 

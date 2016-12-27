@@ -20,14 +20,14 @@ import java.net.URI
 
 import scala.collection.immutable
 import scala.reflect.classTag
-import scala.util.Success
 import scala.util.Failure
+import scala.util.Success
 import scala.util.Try
 
 import eu.cdevreeze.tqa.dom.ExtendedLink
 import eu.cdevreeze.tqa.dom.LabeledXLink
+import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.TaxonomyElem
-import eu.cdevreeze.tqa.dom.UriAwareTaxonomy
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XLinkLocator
 import eu.cdevreeze.tqa.dom.XLinkResource
@@ -48,7 +48,7 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config) extends RelationshipsFactory {
 
   def extractRelationships(
-    taxonomy: UriAwareTaxonomy,
+    taxonomy: Taxonomy,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
     taxonomy.rootElems flatMap { rootElem =>
@@ -58,7 +58,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
 
   def extractRelationshipsFromDocument(
     docUri: URI,
-    taxonomy: UriAwareTaxonomy,
+    taxonomy: Taxonomy,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
     val taxoRootElemOption = taxonomy.rootElemUriMap.get(docUri)
@@ -76,7 +76,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
 
   def extractRelationshipsFromExtendedLink(
     extendedLink: ExtendedLink,
-    taxonomy: UriAwareTaxonomy,
+    taxonomy: Taxonomy,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
     extendedLink.arcs.filter(arcFilter) flatMap { arc =>
@@ -87,7 +87,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
   def extractRelationshipsFromArc(
     arc: XLinkArc,
     parentExtendedLink: ExtendedLink,
-    taxonomy: UriAwareTaxonomy): immutable.IndexedSeq[Relationship] = {
+    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship] = {
 
     extractRelationshipsFromArc(arc, parentExtendedLink, parentExtendedLink.labeledXlinkMap, taxonomy)
   }
@@ -96,7 +96,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
     arc: XLinkArc,
     parentExtendedLink: ExtendedLink,
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
-    taxonomy: UriAwareTaxonomy): immutable.IndexedSeq[Relationship] = {
+    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship] = {
 
     val fromXLinkLabel = arc.from
     val toXLinkLabel = arc.to
@@ -126,7 +126,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
 
   private def optionallyResolve(
     xlink: LabeledXLink,
-    taxonomy: UriAwareTaxonomy): Option[ResolvedLocatorOrResource[_ <: TaxonomyElem]] = {
+    taxonomy: Taxonomy): Option[ResolvedLocatorOrResource[_ <: TaxonomyElem]] = {
 
     xlink match {
       case res: XLinkResource => Some(new ResolvedResource(res))

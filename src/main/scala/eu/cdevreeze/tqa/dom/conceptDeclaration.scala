@@ -24,6 +24,7 @@ import eu.cdevreeze.tqa.ENames.XbrldtTypedDomainRefEName
 import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.ENames.XbrliTupleEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -35,6 +36,10 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 sealed abstract class ConceptDeclaration(val globalElementDeclaration: GlobalElementDeclaration) extends AnyTaxonomyElem {
+
+  final def key: XmlFragmentKey = {
+    globalElementDeclaration.key
+  }
 
   final def targetEName: EName = {
     globalElementDeclaration.targetEName

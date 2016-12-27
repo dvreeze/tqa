@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.dom
+package eu.cdevreeze.tqa.relationship
 
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.dom.BaseSetKey
 
 /**
- * Any taxonomy XML element, at any abstraction level. So the abstraction level can be core taxonomy data, or dimensional taxonomy
- * data, or formula or table taxonomy data.
+ * Relationship key. It has been designed for value equality.
+ *
+ * Relationships are equivalent if they have the same relationship key.
+ * Prohibition/overriding resolution is performed on equivalent relationships.
+ * After prohibition/overriding resolution, the remaining relationships form networks of relationships,
+ * one network per base set key.
  *
  * @author Chris de Vreeze
  */
-trait AnyTaxonomyElem {
-
-  def key: XmlFragmentKey
-}
+final case class RelationshipKey(
+  val baseSetKey: BaseSetKey,
+  val sourceKey: XmlFragmentKey,
+  val targetKey: XmlFragmentKey,
+  val nonExemptAttributes: NonExemptAttributeMap)

@@ -20,7 +20,7 @@ package eu.cdevreeze.tqa
  * Type-safe XBRL taxonomy DOM API. This contains DOM-like elements in taxonomy documents. It offers the yaidom query API
  * and more, and wraps an underlying element that itself offers the yaidom query API, whatever the underlying element
  * implementation. This package does not offer any taxonomy abstractions that cross any document boundaries, except
- * for the light-weight UriAwareTaxonomy abstraction.
+ * for the light-weight Taxonomy abstraction at the type-safe DOM level.
  *
  * To get the model right, there are many sources to look at for inspiration. First of all, for schema content
  * there are APIs like the Xerces schema API (https://xerces.apache.org/xerces2-j/javadocs/xs/org/apache/xerces/xs/XSModel.html).

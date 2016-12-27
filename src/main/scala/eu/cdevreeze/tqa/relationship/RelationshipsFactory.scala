@@ -21,7 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.dom.ExtendedLink
-import eu.cdevreeze.tqa.dom.UriAwareTaxonomy
+import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.XLinkArc
 
 /**
@@ -32,23 +32,23 @@ import eu.cdevreeze.tqa.dom.XLinkArc
 trait RelationshipsFactory {
 
   def extractRelationships(
-    taxonomy: UriAwareTaxonomy,
+    taxonomy: Taxonomy,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   def extractRelationshipsFromDocument(
     docUri: URI,
-    taxonomy: UriAwareTaxonomy,
+    taxonomy: Taxonomy,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   def extractRelationshipsFromExtendedLink(
     extendedLink: ExtendedLink,
-    taxonomy: UriAwareTaxonomy,
+    taxonomy: Taxonomy,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   def extractRelationshipsFromArc(
     arc: XLinkArc,
     parentExtendedLink: ExtendedLink,
-    taxonomy: UriAwareTaxonomy): immutable.IndexedSeq[Relationship]
+    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship]
 }
 
 object RelationshipsFactory {

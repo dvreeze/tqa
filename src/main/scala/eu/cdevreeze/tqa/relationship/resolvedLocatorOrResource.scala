@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.tqa.relationship
 
+import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.dom.AnyTaxonomyElem
 import eu.cdevreeze.tqa.dom.LabeledXLink
 import eu.cdevreeze.tqa.dom.XLinkLocator
@@ -34,6 +35,8 @@ sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
 
   def resolvedElem: E
 
+  def xmlFragmentKey: XmlFragmentKey
+
   final def elr: String = xlinkLocatorOrResource.elr
 }
 
@@ -44,6 +47,10 @@ sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
 final class ResolvedLocator[E <: AnyTaxonomyElem](val locator: XLinkLocator, val resolvedElem: E) extends ResolvedLocatorOrResource[E] {
 
   def xlinkLocatorOrResource: XLinkLocator = locator
+
+  def xmlFragmentKey: XmlFragmentKey = {
+    resolvedElem.key
+  }
 }
 
 /**
@@ -54,4 +61,8 @@ final class ResolvedResource(val resource: XLinkResource) extends ResolvedLocato
   def xlinkLocatorOrResource: XLinkResource = resource
 
   def resolvedElem: XLinkResource = resource
+
+  def xmlFragmentKey: XmlFragmentKey = {
+    resource.key
+  }
 }
