@@ -20,6 +20,7 @@ import java.net.URI
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
 import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.XLinkArc
@@ -49,6 +50,15 @@ trait RelationshipsFactory {
     arc: XLinkArc,
     parentExtendedLink: ExtendedLink,
     taxonomy: Taxonomy): immutable.IndexedSeq[Relationship]
+
+  def computeNetworks(
+    relationships: immutable.IndexedSeq[Relationship],
+    taxonomy: Taxonomy): Map[BaseSetKey, immutable.IndexedSeq[Relationship]]
+
+  /**
+   * Gets the key of the relationship that is the same (only) for equivalent relationships.
+   */
+  def getRelationshipKey(relationship: Relationship, taxonomy: Taxonomy): RelationshipKey
 }
 
 object RelationshipsFactory {

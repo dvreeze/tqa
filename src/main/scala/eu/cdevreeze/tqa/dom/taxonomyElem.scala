@@ -22,6 +22,7 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames.AbstractEName
+import eu.cdevreeze.tqa.ENames.BaseEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationLinkEName
 import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
@@ -52,6 +53,7 @@ import eu.cdevreeze.tqa.ENames.XLinkToEName
 import eu.cdevreeze.tqa.ENames.XLinkTypeEName
 import eu.cdevreeze.tqa.ENames.XsAllEName
 import eu.cdevreeze.tqa.ENames.XsAnnotationEName
+import eu.cdevreeze.tqa.ENames.XsAnyTypeEName
 import eu.cdevreeze.tqa.ENames.XsAppinfoEName
 import eu.cdevreeze.tqa.ENames.XsAttributeEName
 import eu.cdevreeze.tqa.ENames.XsAttributeGroupEName
@@ -63,11 +65,13 @@ import eu.cdevreeze.tqa.ENames.XsExtensionEName
 import eu.cdevreeze.tqa.ENames.XsGroupEName
 import eu.cdevreeze.tqa.ENames.XsImportEName
 import eu.cdevreeze.tqa.ENames.XsIncludeEName
+import eu.cdevreeze.tqa.ENames.XsListEName
 import eu.cdevreeze.tqa.ENames.XsRestrictionEName
 import eu.cdevreeze.tqa.ENames.XsSchemaEName
 import eu.cdevreeze.tqa.ENames.XsSequenceEName
 import eu.cdevreeze.tqa.ENames.XsSimpleContentEName
 import eu.cdevreeze.tqa.ENames.XsSimpleTypeEName
+import eu.cdevreeze.tqa.ENames.XsUnionEName
 import eu.cdevreeze.tqa.Namespaces.LinkNamespace
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
@@ -78,6 +82,7 @@ import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
@@ -471,7 +476,18 @@ final class AttributeReference private[dom] (
 
 // Type definitions.
 
-sealed trait TypeDefinition extends XsdElem
+sealed trait TypeDefinition extends XsdElem {
+
+  /**
+   * Returns the base type of this type, as EName, if any, wrapped in an Option.
+   * If defined, this type is then a restriction or extension of that base type.
+   *
+   * For type xs:anyType, None is returned. For union and list types, None is returned as well.
+   *
+   * For simple types, derivation (from the base type) is always by restriction.
+   */
+  def baseTypeOption: Option[EName]
+}
 
 sealed trait NamedTypeDefinition extends TypeDefinition with NamedDeclOrDef {
 
@@ -483,9 +499,40 @@ sealed trait NamedTypeDefinition extends TypeDefinition with NamedDeclOrDef {
 
 sealed trait AnonymousTypeDefinition extends TypeDefinition
 
-sealed trait SimpleTypeDefinition extends TypeDefinition
+sealed trait SimpleTypeDefinition extends TypeDefinition {
 
-sealed trait ComplexTypeDefinition extends TypeDefinition
+  final def variety: Variety = {
+    if (findChildElem(_.resolvedName == XsListEName).isDefined) {
+      Variety.List
+    } else if (findChildElem(_.resolvedName == XsUnionEName).isDefined) {
+      Variety.Union
+    } else if (findChildElem(_.resolvedName == XsRestrictionEName).isDefined) {
+      Variety.Atomic
+    } else {
+      sys.error(msg(s"Could not determine variety"))
+    }
+  }
+
+  final def baseTypeOption: Option[EName] = variety match {
+    case Variety.Atomic =>
+      findChildElemOfType(classTag[Restriction])(anyElem).headOption.flatMap(_.baseTypeOption)
+    case _ => None
+  }
+}
+
+sealed trait ComplexTypeDefinition extends TypeDefinition {
+
+  final def contentElemOption: Option[Content] = {
+    val complexContentOption = findChildElemOfType(classTag[ComplexContent])(anyElem)
+    val simpleContentOption = findChildElemOfType(classTag[SimpleContent])(anyElem)
+
+    complexContentOption.orElse(simpleContentOption)
+  }
+
+  final def baseTypeOption: Option[EName] = {
+    contentElemOption.flatMap(_.baseTypeOption).orElse(Some(XsAnyTypeEName))
+  }
+}
 
 final class NamedSimpleTypeDefinition private[dom] (
   backingElem: BackingElemApi,
@@ -543,21 +590,42 @@ final class AllModelGroup private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ModelGroup
 
+sealed trait RestrictionOrExtension extends XsdElem {
+
+  def baseTypeOption: Option[EName] = {
+    attributeAsResolvedQNameOption(BaseEName)
+  }
+}
+
 final class Restriction private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XsdElem
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with RestrictionOrExtension
 
 final class Extension private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XsdElem
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with RestrictionOrExtension
+
+sealed trait Content extends XsdElem {
+
+  final def derivation: RestrictionOrExtension = {
+    findChildElemOfType(classTag[Restriction])(anyElem).
+      orElse(findChildElemOfType(classTag[Extension])(anyElem)).
+      getOrElse(sys.error(msg(s"Expected xs:restriction or xs:extension child element")))
+  }
+
+  /**
+   * Convenience method to get the base type of the child restriction or extension element.
+   */
+  final def baseTypeOption: Option[EName] = derivation.baseTypeOption
+}
 
 final class SimpleContent private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XsdElem
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with Content
 
 final class ComplexContent private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XsdElem
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with Content
 
 final class Annotation private[dom] (
   backingElem: BackingElemApi,

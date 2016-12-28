@@ -122,6 +122,24 @@ final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem])
   }
 
   /**
+   * If the given type obeys the type predicate, returns it, wrapped in an Option.
+   * Otherwise, returns the optional base type if that type obeys the type predicate, and so on,
+   * until either the predicate holds or no further base type can be found in the taxonomy.
+   */
+  def findBaseTypeOrSelfUntil(typeEName: EName, p: EName => Boolean): Option[EName] = {
+    if (p(typeEName)) {
+      Some(typeEName)
+    } else {
+      val typeDefinitionOption = findNamedTypeDefinitionByEName(typeEName)
+
+      val baseTypeOption = typeDefinitionOption.flatMap(_.baseTypeOption)
+
+      // Recursive call
+      baseTypeOption.flatMap(baseType => findBaseTypeOrSelfUntil(baseType, p))
+    }
+  }
+
+  /**
    * Returns true if the DOM tree with the given root element has any duplicate ID attributes.
    * If so, the taxonomy is incorrect, and the map from URIs to elements loses data.
    *
@@ -135,22 +153,24 @@ final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem])
   }
 
   /**
-   * Returns true if the DOM tree with the given root element has any duplicate global element declaration "target ENames".
+   * Returns true if the DOM trees combined have any duplicate global element declaration "target ENames".
    * If so, the taxonomy is incorrect, and the map from ENames to global element declarations loses data.
    */
-  def hasDuplicateGlobalElementDeclarationENames(rootElem: TaxonomyElem): Boolean = {
-    val globalElementDeclarations = rootElem.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration])
+  def hasDuplicateGlobalElementDeclarationENames: Boolean = {
+    val globalElementDeclarations =
+      rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration]))
     val globalElementDeclarationENames = globalElementDeclarations.map(_.targetEName)
 
     globalElementDeclarationENames.distinct.size < globalElementDeclarations.size
   }
 
   /**
-   * Returns true if the DOM tree with the given root element has any duplicate named type definition "target ENames".
+   * Returns true if the DOM trees combined have any duplicate named type definition "target ENames".
    * If so, the taxonomy is incorrect, and the map from ENames to named type definitions loses data.
    */
-  def hasDuplicateNamedTypeDefinitionENames(rootElem: TaxonomyElem): Boolean = {
-    val namedTypeDefinitions = rootElem.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition])
+  def hasDuplicateNamedTypeDefinitionENames: Boolean = {
+    val namedTypeDefinitions =
+      rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition]))
     val namedTypeDefinitionENames = namedTypeDefinitions.map(_.targetEName)
 
     namedTypeDefinitionENames.distinct.size < namedTypeDefinitions.size

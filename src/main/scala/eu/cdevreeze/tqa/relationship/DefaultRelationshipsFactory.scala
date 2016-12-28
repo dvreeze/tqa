@@ -24,13 +24,19 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+import eu.cdevreeze.tqa.ENames.PriorityEName
+import eu.cdevreeze.tqa.ENames.UseEName
+import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
+import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
 import eu.cdevreeze.tqa.dom.LabeledXLink
 import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.TaxonomyElem
+import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XLinkLocator
 import eu.cdevreeze.tqa.dom.XLinkResource
+import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
@@ -92,6 +98,28 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
     extractRelationshipsFromArc(arc, parentExtendedLink, parentExtendedLink.labeledXlinkMap, taxonomy)
   }
 
+  def computeNetworks(
+    relationships: immutable.IndexedSeq[Relationship],
+    taxonomy: Taxonomy): Map[BaseSetKey, immutable.IndexedSeq[Relationship]] = {
+
+    val baseSets = relationships.groupBy(_.arc.baseSetKey)
+
+    baseSets.toSeq.map({
+      case (baseSetKey, rels) =>
+        (baseSetKey -> computeNetwork(baseSetKey, relationships, taxonomy))
+    }).toMap
+  }
+
+  def getRelationshipKey(relationship: Relationship, taxonomy: Taxonomy): RelationshipKey = {
+    val nonExemptAttributes = extractNonExemptAttributeMap(relationship, taxonomy)
+
+    RelationshipKey(
+      relationship.arc.baseSetKey,
+      relationship.resolvedFrom.xmlFragmentKey,
+      relationship.resolvedTo.xmlFragmentKey,
+      nonExemptAttributes)
+  }
+
   private def extractRelationshipsFromArc(
     arc: XLinkArc,
     parentExtendedLink: ExtendedLink,
@@ -148,6 +176,70 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
           optResolvedLoc.orElse(sys.error(s"Could not resolve locator with XLink label ${xlink.xlinkLabel}. Document: ${xlink.docUri}"))
         }
     }
+  }
+
+  private def computeNetwork(
+    baseSetKey: BaseSetKey,
+    relationships: immutable.IndexedSeq[Relationship],
+    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship] = {
+
+    val filteredRelationships = relationships.filter(_.arc.baseSetKey == baseSetKey)
+
+    val equivalentRelationshipsByKey =
+      filteredRelationships.groupBy(rel => getRelationshipKey(rel, taxonomy))
+    val optResolvedRelationshipsByKey =
+      equivalentRelationshipsByKey.mapValues(rels => resolveProhibitionAndOverridingForEquivalentRelationships(rels))
+    val resolvedRelationshipsByKey =
+      optResolvedRelationshipsByKey.filter(_._2.nonEmpty).mapValues(_.head)
+
+    filteredRelationships.filter(resolvedRelationshipsByKey.values.toSet)
+  }
+
+  /**
+   * Resolves prohibition and overriding, given some equivalent relationships as parameter.
+   * The returned optional relationship is one of the input relationships.
+   */
+  private def resolveProhibitionAndOverridingForEquivalentRelationships(
+    equivalentRelationships: immutable.IndexedSeq[Relationship]): Option[Relationship] = {
+
+    if (equivalentRelationships.isEmpty) None
+    else {
+      val highestPriority = equivalentRelationships.map(_.arc.priority).max
+
+      val relationshipsWithHighestPriority =
+        equivalentRelationships.filter(_.arc.priority == highestPriority)
+
+      if (relationshipsWithHighestPriority.exists(rel => rel.arc.use == Use.Prohibited)) None
+      else {
+        // Pick one of these equivalent relationships with the same priority, if any
+        relationshipsWithHighestPriority.headOption
+      }
+    }
+  }
+
+  private def extractNonExemptAttributeMap(relationship: Relationship, taxonomy: Taxonomy): NonExemptAttributeMap = {
+    // TODO This does not include default and fixed attributes!
+
+    val nonExemptAttrs: Map[EName, String] =
+      relationship.arc.resolvedAttributes.toMap filterKeys { attrName =>
+        attrName.namespaceUriOption != Some(XLinkNamespace) &&
+          attrName != UseEName &&
+          attrName != PriorityEName
+      }
+
+    val typedNonExemptAttrs: Map[EName, TypedAttributeValue] =
+      nonExemptAttrs map {
+        case (attrName, v) =>
+          // For well-known attributes such as order, we know the type. Otherwise, first do 1 and 2.
+          // 1. Find the attribute declaration and its type
+          // 2. Find the built-in type using method taxonomy.findBaseTypeOrSelfUntil
+          // 3. Depending on base type boolean, double etc., turn the attribute value into a typed one
+          // 4. Return the pair of attribute name and typed value
+          ???
+      }
+
+    // If the order attribute is missing, it will now be added
+    NonExemptAttributeMap.from(typedNonExemptAttrs)
   }
 }
 

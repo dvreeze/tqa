@@ -35,7 +35,9 @@ sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
 
   def resolvedElem: E
 
-  def xmlFragmentKey: XmlFragmentKey
+  final def xmlFragmentKey: XmlFragmentKey = {
+    resolvedElem.key
+  }
 
   final def elr: String = xlinkLocatorOrResource.elr
 }
@@ -47,10 +49,6 @@ sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
 final class ResolvedLocator[E <: AnyTaxonomyElem](val locator: XLinkLocator, val resolvedElem: E) extends ResolvedLocatorOrResource[E] {
 
   def xlinkLocatorOrResource: XLinkLocator = locator
-
-  def xmlFragmentKey: XmlFragmentKey = {
-    resolvedElem.key
-  }
 }
 
 /**
@@ -61,8 +59,4 @@ final class ResolvedResource(val resource: XLinkResource) extends ResolvedLocato
   def xlinkLocatorOrResource: XLinkResource = resource
 
   def resolvedElem: XLinkResource = resource
-
-  def xmlFragmentKey: XmlFragmentKey = {
-    resource.key
-  }
 }

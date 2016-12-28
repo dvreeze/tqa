@@ -17,20 +17,15 @@
 package eu.cdevreeze.tqa.dom
 
 /**
- * Use attribute value, so either optional or prohibited.
+ * Variety, so either List, Union or Atomic.
  *
  * @author Chris de Vreeze
  */
-sealed trait Use
+sealed trait Variety
 
-object Use {
+object Variety {
 
-  case object Optional extends Use
-  case object Prohibited extends Use
-
-  def fromString(s: String): Use = s match {
-    case "optional"   => Optional
-    case "prohibited" => Prohibited
-    case _            => sys.error(s"Not a valid 'use': $s")
-  }
+  case object List extends Variety
+  case object Union extends Variety
+  case object Atomic extends Variety
 }
