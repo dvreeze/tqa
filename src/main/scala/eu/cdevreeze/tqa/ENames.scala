@@ -29,8 +29,8 @@ object ENames {
 
   val XbrliItemEName = EName(XbrliNamespace, "item")
   val XbrliTupleEName = EName(XbrliNamespace, "tuple")
-  val XbrliPeriodTypeEName = EName("periodType")
-  val XbrliBalanceEName = EName("balance")
+  val XbrliPeriodTypeEName = EName(XbrliNamespace, "periodType")
+  val XbrliBalanceEName = EName(XbrliNamespace, "balance")
 
   val XbrldtTargetRoleEName = EName(XbrldtNamespace, "targetRole")
   val XbrldtUsableEName = EName(XbrldtNamespace, "usable")
