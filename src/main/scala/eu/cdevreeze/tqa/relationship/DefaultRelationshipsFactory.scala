@@ -24,8 +24,22 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+import eu.cdevreeze.tqa.ENames.ArcroleURIEName
+import eu.cdevreeze.tqa.ENames.XbrliBalanceEName
+import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
+import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
+import eu.cdevreeze.tqa.ENames.CyclesAllowedEName
+import eu.cdevreeze.tqa.ENames.IdEName
+import eu.cdevreeze.tqa.ENames.OrderEName
+import eu.cdevreeze.tqa.ENames.XbrliPeriodTypeEName
+import eu.cdevreeze.tqa.ENames.PreferredLabelEName
 import eu.cdevreeze.tqa.ENames.PriorityEName
+import eu.cdevreeze.tqa.ENames.RoleURIEName
+import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
+import eu.cdevreeze.tqa.ENames.XbrldtTypedDomainRefEName
+import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.UseEName
+import eu.cdevreeze.tqa.ENames.WeightEName
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
@@ -106,7 +120,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
 
     baseSets.toSeq.map({
       case (baseSetKey, rels) =>
-        (baseSetKey -> computeNetwork(baseSetKey, relationships, taxonomy))
+        (baseSetKey -> computeNetwork(baseSetKey, rels, taxonomy))
     }).toMap
   }
 
@@ -230,12 +244,22 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
     val typedNonExemptAttrs: Map[EName, TypedAttributeValue] =
       nonExemptAttrs map {
         case (attrName, v) =>
-          // For well-known attributes such as order, we know the type. Otherwise, first do 1 and 2.
-          // 1. Find the attribute declaration and its type
-          // 2. Find the built-in type using method taxonomy.findBaseTypeOrSelfUntil
-          // 3. Depending on base type boolean, double etc., turn the attribute value into a typed one
-          // 4. Return the pair of attribute name and typed value
-          ???
+          attrName match {
+            case OrderEName | PriorityEName | WeightEName =>
+              (attrName -> DecimalAttributeValue.parse(v))
+            case IdEName | UseEName | CyclesAllowedEName | RoleURIEName | ArcroleURIEName | PreferredLabelEName =>
+              (attrName -> StringAttributeValue.parse(v))
+            case XbrliPeriodTypeEName | XbrliBalanceEName =>
+              (attrName -> StringAttributeValue.parse(v))
+            case XbrldtContextElementEName | XbrldtTargetRoleEName | XbrldtTypedDomainRefEName =>
+              (attrName -> StringAttributeValue.parse(v))
+            case XbrldtClosedEName | XbrldtUsableEName =>
+              (attrName -> BooleanAttributeValue.parse(v))
+            case _ =>
+              // TODO Not correct. Instead look up the attribute declaration, its type, call
+              // function taxonomy.findBaseTypeOrSelfUntil, and turn the attribute value into a typed one
+              (attrName -> StringAttributeValue.parse(v))
+          }
       }
 
     // If the order attribute is missing, it will now be added

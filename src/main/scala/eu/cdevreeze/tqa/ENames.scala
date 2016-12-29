@@ -29,6 +29,8 @@ object ENames {
 
   val XbrliItemEName = EName(XbrliNamespace, "item")
   val XbrliTupleEName = EName(XbrliNamespace, "tuple")
+  val XbrliPeriodTypeEName = EName("periodType")
+  val XbrliBalanceEName = EName("balance")
 
   val XbrldtTargetRoleEName = EName(XbrldtNamespace, "targetRole")
   val XbrldtUsableEName = EName(XbrldtNamespace, "usable")
@@ -36,7 +38,7 @@ object ENames {
   val XbrldtDimensionItemEName = EName(XbrldtNamespace, "dimensionItem")
   val XbrldtHypercubeItemEName = EName(XbrldtNamespace, "hypercubeItem")
   val XbrldtTypedDomainRefEName = EName(XbrldtNamespace, "typedDomainRef")
-  val XbrldtContextElement = EName(XbrldtNamespace, "contextElement")
+  val XbrldtContextElementEName = EName(XbrldtNamespace, "contextElement")
 
   val XLinkTypeEName = EName(XLinkNamespace, "type")
   val XLinkHrefEName = EName(XLinkNamespace, "href")
@@ -321,8 +323,6 @@ object ENames {
   val OccEName = EName("occ")
   val AugmentEName = EName("augment")
   val OutputEName = EName("output")
-  val PeriodTypeEName = EName("periodType")
-  val BalanceEName = EName("balance")
   val PatternEName = EName("pattern")
   val VariableEName = EName("variable")
   val MatchAnyEName = EName("matchAny")
@@ -331,4 +331,6 @@ object ENames {
   val BoundaryEName = EName("boundary")
   val LocationEName = EName("location")
   val MinimumEName = EName("minimum")
+  val WeightEName = EName("weight")
+  val CyclesAllowedEName = EName("cyclesAllowed")
 }

@@ -17,6 +17,9 @@
 package eu.cdevreeze.tqa.relationship
 
 import javax.xml.bind.DatatypeConverter
+import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
 
 /**
  * Typed attribute value, as used in the non-exempt attributes in a relationship key. The sub-classes are designed
@@ -53,6 +56,11 @@ final case class DecimalAttributeValue(val value: BigDecimal) extends TypedAttri
   type AttrValueType = BigDecimal
 }
 
+final case class ENameAttributeValue(val value: EName) extends TypedAttributeValue {
+
+  type AttrValueType = EName
+}
+
 final case class StringAttributeValue(val value: String) extends TypedAttributeValue {
 
   type AttrValueType = String
@@ -87,6 +95,15 @@ object DecimalAttributeValue {
   def parse(s: String): DecimalAttributeValue = {
     val value = DatatypeConverter.parseDecimal(s)
     DecimalAttributeValue(value)
+  }
+}
+
+object ENameAttributeValue {
+
+  def parse(s: String, scope: Scope): ENameAttributeValue = {
+    val qname = QName(s)
+    val ename = scope.withoutDefaultNamespace.resolveQNameOption(qname).get
+    ENameAttributeValue(ename)
   }
 }
 

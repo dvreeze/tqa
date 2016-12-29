@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.dom
 
+import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
+import eu.cdevreeze.tqa.ENames.LinkCalculationLinkEName
 import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkLabelLinkEName
 import eu.cdevreeze.tqa.Namespaces.LinkNamespace
@@ -43,6 +45,9 @@ final case class BaseSetKey(
 }
 
 object BaseSetKey {
+
+  def forSummationItemArc: BaseSetKey =
+    BaseSetKey(LinkCalculationArcEName, "http://www.xbrl.org/2003/arcrole/summation-item", LinkCalculationLinkEName, "http://www.xbrl.org/2003/role/link")
 
   def forStandardConceptLabel: BaseSetKey =
     BaseSetKey(LinkLabelArcEName, "http://www.xbrl.org/2003/arcrole/concept-label", LinkLabelLinkEName, "http://www.xbrl.org/2003/role/link")
