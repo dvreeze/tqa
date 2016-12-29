@@ -842,20 +842,14 @@ object ElementDeclarationOrReference {
     val hasName = backingElem.attributeOption(NameEName).isDefined
     val hasRef = backingElem.attributeOption(RefEName).isDefined
 
-    if (parentIsSchema) {
-      if (hasName && !hasRef) {
-        Some(new GlobalElementDeclaration(backingElem, childElems))
-      } else if (hasRef && !hasName) {
-        Some(new ElementReference(backingElem, childElems))
-      } else {
-        None
-      }
+    if (parentIsSchema && hasName && !hasRef) {
+      Some(new GlobalElementDeclaration(backingElem, childElems))
+    } else if (!parentIsSchema && hasName && !hasRef) {
+      Some(new LocalElementDeclaration(backingElem, childElems))
+    } else if (!parentIsSchema && !hasName && hasRef) {
+      Some(new ElementReference(backingElem, childElems))
     } else {
-      if (hasName && !hasRef) {
-        Some(new LocalElementDeclaration(backingElem, childElems))
-      } else {
-        None
-      }
+      None
     }
   }
 }
@@ -869,20 +863,14 @@ object AttributeDeclarationOrReference {
     val hasName = backingElem.attributeOption(NameEName).isDefined
     val hasRef = backingElem.attributeOption(RefEName).isDefined
 
-    if (parentIsSchema) {
-      if (hasName && !hasRef) {
-        Some(new GlobalAttributeDeclaration(backingElem, childElems))
-      } else if (hasRef && !hasName) {
-        Some(new AttributeReference(backingElem, childElems))
-      } else {
-        None
-      }
+    if (parentIsSchema && hasName && !hasRef) {
+      Some(new GlobalAttributeDeclaration(backingElem, childElems))
+    } else if (!parentIsSchema && hasName && !hasRef) {
+      Some(new LocalAttributeDeclaration(backingElem, childElems))
+    } else if (!parentIsSchema && !hasName && hasRef) {
+      Some(new AttributeReference(backingElem, childElems))
     } else {
-      if (hasName && !hasRef) {
-        Some(new LocalAttributeDeclaration(backingElem, childElems))
-      } else {
-        None
-      }
+      None
     }
   }
 }
@@ -932,14 +920,10 @@ object ModelGroupDefinitionOrReference {
     val hasName = backingElem.attributeOption(NameEName).isDefined
     val hasRef = backingElem.attributeOption(RefEName).isDefined
 
-    if (parentIsSchema) {
-      if (hasName && !hasRef) {
-        Some(new ModelGroupDefinition(backingElem, childElems))
-      } else if (hasRef && !hasName) {
-        Some(new ModelGroupReference(backingElem, childElems))
-      } else {
-        None
-      }
+    if (parentIsSchema && hasName && !hasRef) {
+      Some(new ModelGroupDefinition(backingElem, childElems))
+    } else if (!parentIsSchema && !hasName && hasRef) {
+      Some(new ModelGroupReference(backingElem, childElems))
     } else {
       None
     }
@@ -955,14 +939,10 @@ object AttributeGroupDefinitionOrReference {
     val hasName = backingElem.attributeOption(NameEName).isDefined
     val hasRef = backingElem.attributeOption(RefEName).isDefined
 
-    if (parentIsSchema) {
-      if (hasName && !hasRef) {
-        Some(new AttributeGroupDefinition(backingElem, childElems))
-      } else if (hasRef && !hasName) {
-        Some(new AttributeGroupReference(backingElem, childElems))
-      } else {
-        None
-      }
+    if (parentIsSchema && hasName && !hasRef) {
+      Some(new AttributeGroupDefinition(backingElem, childElems))
+    } else if (!parentIsSchema && !hasName && hasRef) {
+      Some(new AttributeGroupReference(backingElem, childElems))
     } else {
       None
     }
