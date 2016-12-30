@@ -26,6 +26,7 @@ import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
+import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.CalculationArc
 import eu.cdevreeze.tqa.dom.ConceptLabelResource
 import eu.cdevreeze.tqa.dom.ConceptReferenceResource
@@ -89,7 +90,9 @@ sealed abstract class Relationship(
 
   final def toPath: Path = resolvedTo.xlinkLocatorOrResource.backingElem.path
 
-  // TODO Key of the relationship (in the network), order, equals and hashCode.
+  final def baseSetKey: BaseSetKey = arc.baseSetKey
+
+  // TODO Order, equals and hashCode.
 }
 
 sealed abstract class StandardRelationship(

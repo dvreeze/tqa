@@ -21,11 +21,14 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
+import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
+import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.OrderEName
 import eu.cdevreeze.tqa.ENames.WeightEName
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.LabelArc
 import eu.cdevreeze.tqa.dom.Linkbase
+import eu.cdevreeze.tqa.dom.XLinkLocator
 import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.tqa.dom.Use
@@ -75,7 +78,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
 
-    assertResult(Set(BaseSetKey.forSummationItemArc)) {
+    assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
     }
     assertResult(Set(taxo.findGlobalElementDeclarationByEName(EName(tns, "fixedAssets")).get.key)) {
@@ -98,7 +101,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
 
-    assertResult(Map(BaseSetKey.forSummationItemArc -> Vector())) {
+    assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
     }
   }
@@ -137,7 +140,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
 
-    assertResult(Set(BaseSetKey.forSummationItemArc)) {
+    assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
     }
     assertResult(Set(taxo.findGlobalElementDeclarationByEName(EName(tns, "fixedAssets")).get.key)) {
@@ -164,7 +167,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       nonProhibitedRelationships.size
     }
 
-    assertResult(Map(BaseSetKey.forSummationItemArc -> nonProhibitedRelationships)) {
+    assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> nonProhibitedRelationships)) {
       networkMap
     }
   }
@@ -203,7 +206,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
 
-    assertResult(Set(BaseSetKey.forSummationItemArc)) {
+    assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
     }
     assertResult(Set(taxo.findGlobalElementDeclarationByEName(EName(tns, "fixedAssets")).get.key)) {
@@ -227,7 +230,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
 
-    assertResult(Map(BaseSetKey.forSummationItemArc -> Vector())) {
+    assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
     }
   }
@@ -266,7 +269,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
 
-    assertResult(Set(BaseSetKey.forSummationItemArc)) {
+    assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
     }
     assertResult(Set(taxo.findGlobalElementDeclarationByEName(EName(tns, "fixedAssets")).get.key)) {
@@ -299,7 +302,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       floatingAssetsRels.size
     }
 
-    assertResult(Map(BaseSetKey.forSummationItemArc -> floatingAssetsRels)) {
+    assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> floatingAssetsRels)) {
       networkMap
     }
   }
@@ -338,7 +341,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
 
-    assertResult(Set(BaseSetKey.forSummationItemArc)) {
+    assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
     }
     assertResult(Set(taxo.findGlobalElementDeclarationByEName(EName(tns, "fixedAssets")).get.key)) {
@@ -371,8 +374,327 @@ class RelationshipEquivalenceTest extends FunSuite {
       floatingAssetsRels.size
     }
 
-    assertResult(Map(BaseSetKey.forSummationItemArc -> floatingAssetsRels)) {
+    assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> floatingAssetsRels)) {
       networkMap
+    }
+  }
+
+  test("testCombineConceptLabelRelationships") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-01-ArcOverrideDisjointLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-01-ArcOverrideDisjointLinkbases-2-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
+    val linkbaseDoc2 = indexed.Document(docParser.parse(linkbaseDocUri2).withUriOption(Some(linkbaseDocUri2)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase1 = Linkbase.build(linkbaseDoc1.documentElement)
+    val linkbase2 = Linkbase.build(linkbaseDoc2.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    assertResult(2) {
+      relationships.size
+    }
+
+    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+
+    assertResult(2) {
+      relationshipKeys.distinct.size
+    }
+
+    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+
+    assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships)) {
+      networkMap
+    }
+  }
+
+  test("testOverrideConceptLabelRelationships") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-02-ArcOverrideLabelLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-02-ArcOverrideLabelLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-02-ArcOverrideLabelLinkbases-2-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
+    val linkbaseDoc2 = indexed.Document(docParser.parse(linkbaseDocUri2).withUriOption(Some(linkbaseDocUri2)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase1 = Linkbase.build(linkbaseDoc1.documentElement)
+    val linkbase2 = Linkbase.build(linkbaseDoc2.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    assertResult(3) {
+      relationships.size
+    }
+
+    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+
+    assertResult(2) {
+      relationshipKeys.distinct.size
+    }
+
+    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+
+    val filteredRelationships = relationships.filter(_.arc.priority == 2)
+
+    assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> filteredRelationships)) {
+      networkMap
+    }
+  }
+
+  test("testWrongOverrideConceptLabelRelationships") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases-2-label.xml").toURI
+    val linkbaseDocUri3 = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases-3-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
+    val linkbaseDoc2 = indexed.Document(docParser.parse(linkbaseDocUri2).withUriOption(Some(linkbaseDocUri2)))
+    val linkbaseDoc3 = indexed.Document(docParser.parse(linkbaseDocUri3).withUriOption(Some(linkbaseDocUri3)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase1 = Linkbase.build(linkbaseDoc1.documentElement)
+    val linkbase2 = Linkbase.build(linkbaseDoc2.documentElement)
+    val linkbase3 = Linkbase.build(linkbaseDoc3.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    assertResult(3) {
+      relationships.size
+    }
+
+    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+
+    assertResult(1) {
+      relationshipKeys.distinct.size
+    }
+
+    // Assuming only concept-label relationships here
+
+    val wrongRelationships =
+      relationships.filter(rel => rel.resolvedTo.xlinkLocatorOrResource.isInstanceOf[XLinkLocator] && rel.arc.use == Use.Optional)
+
+    assertResult(1) {
+      wrongRelationships.size
+    }
+
+    // Useless network computation, because one arc is not allowed
+
+    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+
+    assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships.filter(_.arc.priority == 2))) {
+      networkMap
+    }
+  }
+
+  test("testCombineDefinitionRelationships") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-04-ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-04-ArcOverrideLinkbases-1-def.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-04-ArcOverrideLinkbases-2-def.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
+    val linkbaseDoc2 = indexed.Document(docParser.parse(linkbaseDocUri2).withUriOption(Some(linkbaseDocUri2)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase1 = Linkbase.build(linkbaseDoc1.documentElement)
+    val linkbase2 = Linkbase.build(linkbaseDoc2.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    assertResult(2) {
+      relationships.size
+    }
+
+    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+
+    assertResult(2) {
+      relationshipKeys.distinct.size
+    }
+
+    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+
+    assertResult(Map(BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> relationships)) {
+      networkMap
+    }
+  }
+
+  test("testOverrideDefinitionRelationships") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-05-ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-05-ArcOverrideLinkbases-1-def.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-05-ArcOverrideLinkbases-2-def.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
+    val linkbaseDoc2 = indexed.Document(docParser.parse(linkbaseDocUri2).withUriOption(Some(linkbaseDocUri2)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase1 = Linkbase.build(linkbaseDoc1.documentElement)
+    val linkbase2 = Linkbase.build(linkbaseDoc2.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    assertResult(3) {
+      relationships.size
+    }
+
+    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+
+    assertResult(2) {
+      relationshipKeys.distinct.size
+    }
+
+    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+
+    val filteredRelationships =
+      relationships.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName) == Some("fixedAssets"))
+
+    assertResult(Map(BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> filteredRelationships)) {
+      networkMap
+    }
+  }
+
+  test("testProhibitAndInsertDefinitionRelationships") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideLinkbases-1-def.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideLinkbases-2-def.xml").toURI
+    val linkbaseDocUri3 = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideLinkbases-3-def.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
+    val linkbaseDoc2 = indexed.Document(docParser.parse(linkbaseDocUri2).withUriOption(Some(linkbaseDocUri2)))
+    val linkbaseDoc3 = indexed.Document(docParser.parse(linkbaseDocUri3).withUriOption(Some(linkbaseDocUri3)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase1 = Linkbase.build(linkbaseDoc1.documentElement)
+    val linkbase2 = Linkbase.build(linkbaseDoc2.documentElement)
+    val linkbase3 = Linkbase.build(linkbaseDoc3.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    assertResult(4) {
+      relationships.size
+    }
+
+    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+
+    // Mind the different arcroles
+    assertResult(3) {
+      relationshipKeys.distinct.size
+    }
+
+    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+
+    val filteredRequiresElementRelationships =
+      relationships collect {
+        case rel: RequiresElementRelationship => rel
+      } filter (_.resolvedTo.resolvedElem.attributeOption(NameEName) == Some("fixedAssets"))
+
+    val filteredGeneralSpecialRelationships =
+      relationships collect { case rel: GeneralSpecialRelationship => rel }
+
+    assertResult(
+      Map(
+        BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> filteredRequiresElementRelationships,
+        BaseSetKey.forGeneralSpecialArc(BaseSetKey.StandardElr) -> filteredGeneralSpecialRelationships)) {
+
+        networkMap
+      }
+  }
+
+  test("testWrongConceptLabelRelationship") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-08-ArcOverrideLabelLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-08-ArcOverrideLabelLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-08-ArcOverrideLabelLinkbases-2-label.xml").toURI
+
+    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
+    val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
+    val linkbaseDoc2 = indexed.Document(docParser.parse(linkbaseDocUri2).withUriOption(Some(linkbaseDocUri2)))
+
+    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
+    val linkbase1 = Linkbase.build(linkbaseDoc1.documentElement)
+    val linkbase2 = Linkbase.build(linkbaseDoc2.documentElement)
+
+    val tns = "http://mycompany.com/xbrl/taxonomy"
+
+    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+
+    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+
+    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+
+    assertResult(3) {
+      relationships.size
+    }
+    assertResult(true) {
+      relationships.forall(_.arc.resolvedName == LinkLabelArcEName)
+    }
+    assertResult(2) {
+      (relationships collect { case rel: ConceptLabelRelationship => rel }).size
+    }
+    // The corrupt concept-label relationship pointing to a target concept instead of label
+    assertResult(1) {
+      (relationships collect { case rel: UnknownRelationship => rel }).size
+    }
+
+    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+
+    assertResult(3) {
+      relationshipKeys.distinct.size
     }
   }
 }

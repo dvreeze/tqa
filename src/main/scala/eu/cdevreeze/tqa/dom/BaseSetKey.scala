@@ -18,8 +18,14 @@ package eu.cdevreeze.tqa.dom
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationLinkEName
+import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
+import eu.cdevreeze.tqa.ENames.LinkDefinitionLinkEName
 import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkLabelLinkEName
+import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
+import eu.cdevreeze.tqa.ENames.LinkPresentationLinkEName
+import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
+import eu.cdevreeze.tqa.ENames.LinkReferenceLinkEName
 import eu.cdevreeze.tqa.Namespaces.LinkNamespace
 import eu.cdevreeze.yaidom.core.EName
 
@@ -46,9 +52,51 @@ final case class BaseSetKey(
 
 object BaseSetKey {
 
-  def forSummationItemArc: BaseSetKey =
-    BaseSetKey(LinkCalculationArcEName, "http://www.xbrl.org/2003/arcrole/summation-item", LinkCalculationLinkEName, "http://www.xbrl.org/2003/role/link")
+  val StandardElr = "http://www.xbrl.org/2003/role/link"
 
-  def forStandardConceptLabel: BaseSetKey =
-    BaseSetKey(LinkLabelArcEName, "http://www.xbrl.org/2003/arcrole/concept-label", LinkLabelLinkEName, "http://www.xbrl.org/2003/role/link")
+  def forSummationItemArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkCalculationArcEName, "http://www.xbrl.org/2003/arcrole/summation-item", LinkCalculationLinkEName, elr)
+
+  def forParentChildArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkPresentationArcEName, "http://www.xbrl.org/2003/arcrole/parent-child", LinkPresentationLinkEName, elr)
+
+  def forGeneralSpecialArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/general-special", LinkDefinitionLinkEName, elr)
+
+  def forEssenceAliasArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/essence-alias", LinkDefinitionLinkEName, elr)
+
+  def forSimilarTuplesArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/similar-tuples", LinkDefinitionLinkEName, elr)
+
+  def forRequiresElementArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/requires-element", LinkDefinitionLinkEName, elr)
+
+  def forHypercubeDimensionArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/hypercube-dimension", LinkDefinitionLinkEName, elr)
+
+  def forDimensionDomainArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/dimension-domain", LinkDefinitionLinkEName, elr)
+
+  def forDomainMemberArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/domain-member", LinkDefinitionLinkEName, elr)
+
+  def forDimensionDefaultArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/dimension-default", LinkDefinitionLinkEName, elr)
+
+  def forAllArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/all", LinkDefinitionLinkEName, elr)
+
+  def forNotAllArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/notAll", LinkDefinitionLinkEName, elr)
+
+  def forConceptLabelArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkLabelArcEName, "http://www.xbrl.org/2003/arcrole/concept-label", LinkLabelLinkEName, elr)
+
+  def forConceptReferenceArc(elr: String): BaseSetKey =
+    BaseSetKey(LinkReferenceArcEName, "http://www.xbrl.org/2003/arcrole/concept-reference", LinkReferenceLinkEName, elr)
+
+  def forConceptLabelArcWithStandardElr: BaseSetKey = forConceptLabelArc(StandardElr)
+
+  def forConceptReferenceArcWithStandardElr: BaseSetKey = forConceptReferenceArc(StandardElr)
 }
