@@ -101,16 +101,16 @@ sealed abstract class DimensionDeclaration(globalElementDeclaration: GlobalEleme
 }
 
 /**
- * Explicit dimension. It must be a dimension declaration without attribute xbrldt:typedDomainRef, among other requirements.
+ * Explicit dimension declaration. It must be a dimension declaration without attribute xbrldt:typedDomainRef, among other requirements.
  */
-final class ExplicitDimension(globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
+final class ExplicitDimensionDeclaration(globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
   require(!isTyped, s"${globalElementDeclaration.targetEName} is typed and therefore not an explicit dimension")
 }
 
 /**
- * Typed dimension. It must be a dimension declaration with an attribute xbrldt:typedDomainRef, among other requirements.
+ * Typed dimension declaration. It must be a dimension declaration with an attribute xbrldt:typedDomainRef, among other requirements.
  */
-final class TypedDimension(globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
+final class TypedDimensionDeclaration(globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
   require(isTyped, s"${globalElementDeclaration.targetEName} is not typed and therefore not a typed dimension")
 
   /**
@@ -150,7 +150,11 @@ object ConceptDeclaration {
         if (isHypercube) {
           Some(new HypercubeDeclaration(elemDecl))
         } else if (isDimension) {
-          if (elemDecl.attributeOption(XbrldtTypedDomainRefEName).isDefined) Some(new TypedDimension(elemDecl)) else Some(new ExplicitDimension(elemDecl))
+          if (elemDecl.attributeOption(XbrldtTypedDomainRefEName).isDefined) {
+            Some(new TypedDimensionDeclaration(elemDecl))
+          } else {
+            Some(new ExplicitDimensionDeclaration(elemDecl))
+          }
         } else {
           Some(new PrimaryItemDeclaration(elemDecl))
         }
