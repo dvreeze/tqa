@@ -24,7 +24,7 @@ package eu.cdevreeze.tqa
  * Various scenarios are supported. Taxonomies that are not closed (and not validated in any way) must be supported
  * in order for TQA to be useful for taxonomy validation. Closed taxonomies are supported for reliable taxonomy
  * querying. Taxonomies that model networks of relationships are also supported. Specific taxonomies knowing about
- * formulas and/or tables are also supported.
+ * formulas and/or tables are also supported. Extension taxonomies are also supported.
  *
  * Some important operations on taxonomies are prohibition/overriding resolution (to find networks of relationships),
  * combining taxonomies (for building extension taxonomies, for example), filtering relationships (to ignore relationships
