@@ -43,6 +43,11 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
   def findAllConceptDeclarations: immutable.IndexedSeq[ConceptDeclaration]
 
+  /**
+   * Finds the optional concept declaration with the given target expanded name (name plus target
+   * namespace). Make sure the implementation of this method is very fast, thus ensuring that the
+   * other lookup methods on target expanded name are very fast as well.
+   */
   def findConceptDeclaration(ename: EName): Option[ConceptDeclaration]
 
   def findAllItemDeclarations: immutable.IndexedSeq[ItemDeclaration]
