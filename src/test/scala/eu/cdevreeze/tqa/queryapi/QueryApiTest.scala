@@ -18,23 +18,29 @@ package eu.cdevreeze.tqa.queryapi
 
 import java.net.URI
 
-import scala.reflect.classTag
-import scala.reflect.ClassTag
 import scala.collection.immutable
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.ENames.XbrliItemEName
-import eu.cdevreeze.tqa.Namespaces.XbrliNamespace
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.dom._
-import eu.cdevreeze.tqa.relationship._
+import eu.cdevreeze.tqa.dom.ConceptDeclaration
+import eu.cdevreeze.tqa.dom.GlobalAttributeDeclaration
+import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
+import eu.cdevreeze.tqa.dom.NamedTypeDefinition
+import eu.cdevreeze.tqa.dom.Taxonomy
+import eu.cdevreeze.tqa.dom.TaxonomyElem
+import eu.cdevreeze.tqa.dom.XsdSchema
+import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
+import eu.cdevreeze.tqa.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.relationship.PresentationRelationship
+import eu.cdevreeze.tqa.relationship.Relationship
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
-import org.scalatest.junit.JUnitRunner
 
 /**
  * Query API test case. It uses test data from https://acra.gov.sg/How_To_Guides/Filing_Financial_Statements/Downloads/.
@@ -108,6 +114,21 @@ object QueryApiTest {
 
     private val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
 
+    val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
+      (underlyingTaxo.globalElementDeclarationMap.toSeq collect {
+        case (ename, decl) if conceptDeclarationBuilder.optConceptDeclaration(decl).isDefined =>
+          (ename -> conceptDeclarationBuilder.optConceptDeclaration(decl).get)
+      }).toMap
+    }
+
+    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
+      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.sourceConceptEName)
+    }
+
+    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
+      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.targetConceptEName)
+    }
+
     def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
       underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[XsdSchema]))
     }
@@ -140,55 +161,8 @@ object QueryApiTest {
       underlyingTaxo.findNamedTypeDefinitionByEName(ename)
     }
 
-    val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-      (underlyingTaxo.globalElementDeclarationMap.toSeq collect {
-        case (ename, decl) if conceptDeclarationBuilder.optConceptDeclaration(decl).isDefined =>
-          (ename -> conceptDeclarationBuilder.optConceptDeclaration(decl).get)
-      }).toMap
-    }
-
-    def findAllConceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = {
-      findAllGlobalElementDeclarations.flatMap(decl => conceptDeclarationBuilder.optConceptDeclaration(decl))
-    }
-
     def findConceptDeclaration(ename: EName): Option[ConceptDeclaration] = {
       conceptDeclarationsByEName.get(ename)
-    }
-
-    def findAllItemDeclarations: immutable.IndexedSeq[ItemDeclaration] = {
-      findAllConceptDeclarations collect { case decl: ItemDeclaration => decl }
-    }
-
-    def findAllTupleDeclarations: immutable.IndexedSeq[TupleDeclaration] = {
-      findAllConceptDeclarations collect { case decl: TupleDeclaration => decl }
-    }
-
-    def findAllPrimaryItemDeclarations: immutable.IndexedSeq[PrimaryItemDeclaration] = {
-      findAllConceptDeclarations collect { case decl: PrimaryItemDeclaration => decl }
-    }
-
-    def findAllHypercubeDeclarations: immutable.IndexedSeq[HypercubeDeclaration] = {
-      findAllConceptDeclarations collect { case decl: HypercubeDeclaration => decl }
-    }
-
-    def findAllDimensionDeclarations: immutable.IndexedSeq[DimensionDeclaration] = {
-      findAllConceptDeclarations collect { case decl: DimensionDeclaration => decl }
-    }
-
-    def findAllExplicitDimensionDeclarations: immutable.IndexedSeq[ExplicitDimensionDeclaration] = {
-      findAllConceptDeclarations collect { case decl: ExplicitDimensionDeclaration => decl }
-    }
-
-    def findAllTypedDimensionDeclarations: immutable.IndexedSeq[TypedDimensionDeclaration] = {
-      findAllConceptDeclarations collect { case decl: TypedDimensionDeclaration => decl }
-    }
-
-    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.sourceConceptEName)
-    }
-
-    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.targetConceptEName)
     }
 
     def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
@@ -196,13 +170,6 @@ object QueryApiTest {
 
       implicit val clsTag = relationshipType
       relationships collect { case rel: A => rel }
-    }
-
-    def filterInterConceptRelationshipsOfType[A <: InterConceptRelationship](
-      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
-
-      implicit val clsTag = relationshipType
-      relationships collect { case rel: A if p(rel) => rel }
     }
   }
 

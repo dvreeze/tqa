@@ -44,7 +44,7 @@ sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
 
 /**
  * An XLink locator with the taxonomy element referred to by that locator. The taxonomy element referred to may occur
- * in another document than the locator, and it typically does.
+ * in another document than the locator, which is typically the case.
  */
 final class ResolvedLocator[E <: AnyTaxonomyElem](val locator: XLinkLocator, val resolvedElem: E) extends ResolvedLocatorOrResource[E] {
 

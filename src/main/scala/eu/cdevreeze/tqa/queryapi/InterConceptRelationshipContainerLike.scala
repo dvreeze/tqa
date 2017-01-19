@@ -29,6 +29,8 @@ import eu.cdevreeze.yaidom.core.EName
  */
 trait InterConceptRelationshipContainerLike extends InterConceptRelationshipContainerApi {
 
+  // Abstract methods
+
   /**
    * Returns a map from source concepts to inter-concept relationships. Must be fast in order for this trait to be fast.
    */
@@ -42,8 +44,13 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
-  def filterInterConceptRelationshipsOfType[A <: InterConceptRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+  // Concrete methods
+
+  final def filterInterConceptRelationshipsOfType[A <: InterConceptRelationship](
+    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+
+    findAllInterConceptRelationshipsOfType(relationshipType).filter(p)
+  }
 
   final def findAllOutgoingInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     sourceConcept: EName,
@@ -116,20 +123,15 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
 
     val nextRelationships = filterOutgoingInterConceptRelationshipsOfType(path.targetConcept, relationshipType)(relationship => p(path.append(relationship)))
+    val nextPaths = nextRelationships.map(rel => path.append(rel))
 
-    if (nextRelationships.isEmpty) {
+    if (nextPaths.isEmpty) {
       immutable.IndexedSeq(path)
     } else {
-      val paths = nextRelationships flatMap { relationship =>
-        assert(path.canAppend(relationship))
-        val nextPath = path.append(relationship)
-
+      nextPaths flatMap { nextPath =>
         // Recursive calls
-        val nextPaths = filterLongestOutgoingInterConceptRelationshipPaths(nextPath, relationshipType)(p)
-        nextPaths
+        filterLongestOutgoingInterConceptRelationshipPaths(nextPath, relationshipType)(p)
       }
-
-      paths
     }
   }
 
@@ -138,20 +140,15 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
 
     val prevRelationships = filterIncomingInterConceptRelationshipsOfType(path.sourceConcept, relationshipType)(relationship => p(path.prepend(relationship)))
+    val prevPaths = prevRelationships.map(rel => path.prepend(rel))
 
-    if (prevRelationships.isEmpty) {
+    if (prevPaths.isEmpty) {
       immutable.IndexedSeq(path)
     } else {
-      val paths = prevRelationships flatMap { relationship =>
-        assert(path.canPrepend(relationship))
-        val prevPath = path.prepend(relationship)
-
+      prevPaths flatMap { prevPath =>
         // Recursive calls
-        val prevPaths = filterLongestIncomingInterConceptRelationshipPaths(prevPath, relationshipType)(p)
-        prevPaths
+        filterLongestIncomingInterConceptRelationshipPaths(prevPath, relationshipType)(p)
       }
-
-      paths
     }
   }
 }

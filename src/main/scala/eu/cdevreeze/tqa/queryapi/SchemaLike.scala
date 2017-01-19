@@ -54,6 +54,8 @@ trait SchemaLike extends SchemaApi {
 
   def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition]
 
+  // Concrete methods
+
   // Schema root elements
 
   final def filterXsdSchemas(p: XsdSchema => Boolean): immutable.IndexedSeq[XsdSchema] = {

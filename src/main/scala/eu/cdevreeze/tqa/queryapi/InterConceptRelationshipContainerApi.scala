@@ -78,7 +78,7 @@ trait InterConceptRelationshipContainerApi {
    * relationship query API traits.
    *
    * It is also a dangerous method in that termination is not guaranteed, but may depend on the passed
-   * relationship chain predicate. For safety, make sure that the predicate detects cycles and returns
+   * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
   def filterLongestOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
@@ -94,7 +94,7 @@ trait InterConceptRelationshipContainerApi {
    * relationship query API traits.
    *
    * It is also a dangerous method in that termination is not guaranteed, but may depend on the passed
-   * relationship chain predicate. For safety, make sure that the predicate detects cycles and returns
+   * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
   def filterLongestIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](

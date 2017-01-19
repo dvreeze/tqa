@@ -41,8 +41,6 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
   // Abstract methods
 
-  def findAllConceptDeclarations: immutable.IndexedSeq[ConceptDeclaration]
-
   /**
    * Finds the optional concept declaration with the given target expanded name (name plus target
    * namespace). Make sure the implementation of this method is very fast, thus ensuring that the
@@ -50,21 +48,13 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
    */
   def findConceptDeclaration(ename: EName): Option[ConceptDeclaration]
 
-  def findAllItemDeclarations: immutable.IndexedSeq[ItemDeclaration]
-
-  def findAllTupleDeclarations: immutable.IndexedSeq[TupleDeclaration]
-
-  def findAllPrimaryItemDeclarations: immutable.IndexedSeq[PrimaryItemDeclaration]
-
-  def findAllHypercubeDeclarations: immutable.IndexedSeq[HypercubeDeclaration]
-
-  def findAllDimensionDeclarations: immutable.IndexedSeq[DimensionDeclaration]
-
-  def findAllExplicitDimensionDeclarations: immutable.IndexedSeq[ExplicitDimensionDeclaration]
-
-  def findAllTypedDimensionDeclarations: immutable.IndexedSeq[TypedDimensionDeclaration]
-
   // Concept declarations, across documents
+
+  final def findAllConceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = {
+    val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
+
+    findAllGlobalElementDeclarations.flatMap(decl => conceptDeclarationBuilder.optConceptDeclaration(decl))
+  }
 
   final def filterConceptDeclarations(p: ConceptDeclaration => Boolean): immutable.IndexedSeq[ConceptDeclaration] = {
     findAllConceptDeclarations.filter(p)
@@ -79,6 +69,10 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   // Item declarations, across documents
+
+  final def findAllItemDeclarations: immutable.IndexedSeq[ItemDeclaration] = {
+    findAllConceptDeclarations collect { case decl: ItemDeclaration => decl }
+  }
 
   final def filterItemDeclarations(p: ItemDeclaration => Boolean): immutable.IndexedSeq[ItemDeclaration] = {
     findAllItemDeclarations.filter(p)
@@ -98,6 +92,10 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
   // Tuple declarations, across documents
 
+  final def findAllTupleDeclarations: immutable.IndexedSeq[TupleDeclaration] = {
+    findAllConceptDeclarations collect { case decl: TupleDeclaration => decl }
+  }
+
   final def filterTupleDeclarations(p: TupleDeclaration => Boolean): immutable.IndexedSeq[TupleDeclaration] = {
     findAllTupleDeclarations.filter(p)
   }
@@ -115,6 +113,10 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   // Primary item declarations, across documents
+
+  final def findAllPrimaryItemDeclarations: immutable.IndexedSeq[PrimaryItemDeclaration] = {
+    findAllConceptDeclarations collect { case decl: PrimaryItemDeclaration => decl }
+  }
 
   final def filterPrimaryItemDeclarations(p: PrimaryItemDeclaration => Boolean): immutable.IndexedSeq[PrimaryItemDeclaration] = {
     findAllPrimaryItemDeclarations.filter(p)
@@ -134,6 +136,10 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
   // Hypercube declarations, across documents
 
+  final def findAllHypercubeDeclarations: immutable.IndexedSeq[HypercubeDeclaration] = {
+    findAllConceptDeclarations collect { case decl: HypercubeDeclaration => decl }
+  }
+
   final def filterHypercubeDeclarations(p: HypercubeDeclaration => Boolean): immutable.IndexedSeq[HypercubeDeclaration] = {
     findAllHypercubeDeclarations.filter(p)
   }
@@ -151,6 +157,10 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   // Dimension declarations, across documents
+
+  final def findAllDimensionDeclarations: immutable.IndexedSeq[DimensionDeclaration] = {
+    findAllConceptDeclarations collect { case decl: DimensionDeclaration => decl }
+  }
 
   final def filterDimensionDeclarations(p: DimensionDeclaration => Boolean): immutable.IndexedSeq[DimensionDeclaration] = {
     findAllDimensionDeclarations.filter(p)
@@ -170,6 +180,10 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
   // Explicit dimension declarations, across documents
 
+  final def findAllExplicitDimensionDeclarations: immutable.IndexedSeq[ExplicitDimensionDeclaration] = {
+    findAllConceptDeclarations collect { case decl: ExplicitDimensionDeclaration => decl }
+  }
+
   final def filterExplicitDimensionDeclarations(p: ExplicitDimensionDeclaration => Boolean): immutable.IndexedSeq[ExplicitDimensionDeclaration] = {
     findAllExplicitDimensionDeclarations.filter(p)
   }
@@ -187,6 +201,10 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   // Typed dimension declarations, across documents
+
+  final def findAllTypedDimensionDeclarations: immutable.IndexedSeq[TypedDimensionDeclaration] = {
+    findAllConceptDeclarations collect { case decl: TypedDimensionDeclaration => decl }
+  }
 
   final def filterTypedDimensionDeclarations(p: TypedDimensionDeclaration => Boolean): immutable.IndexedSeq[TypedDimensionDeclaration] = {
     findAllTypedDimensionDeclarations.filter(p)

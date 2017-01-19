@@ -30,7 +30,7 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 final case class InterConceptRelationshipPath[A <: InterConceptRelationship] private (val relationships: immutable.IndexedSeq[A]) {
-  require(relationships.size >= 1, s"A relationship chain must have at least one relationship")
+  require(relationships.size >= 1, s"A relationship path must have at least one relationship")
 
   def sourceConcept: EName = firstRelationship.sourceConceptEName
 
@@ -85,7 +85,7 @@ object InterConceptRelationshipPath {
   def from[A <: InterConceptRelationship](relationships: immutable.IndexedSeq[A]): InterConceptRelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => haveMatchingConcepts(pair(0), pair(1))),
-      s"All subsequent relationships in a chain must have matching target/source concepts")
+      s"All subsequent relationships in a path must have matching target/source concepts")
 
     new InterConceptRelationshipPath(relationships.toVector)
   }
