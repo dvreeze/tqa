@@ -76,6 +76,14 @@ final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem])
   }
 
   /**
+   * Expensive map from ENames (names with target namespace) of global attribute declarations to the global attribute declarations themselves.
+   * If there are any global element declarations with duplicate "target ENames", data is lost.
+   */
+  val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration] = {
+    rootElems.flatMap(e => getGlobalAttributeDeclarationMap(e).toSeq).toMap
+  }
+
+  /**
    * Finds the (first) optional element with the given URI. The fragment, if any, must be an XPointer or sequence thereof.
    * Only shorthand pointers or non-empty sequences of element scheme XPointers are accepted. If there is no fragment,
    * the first root element with the given document URI is searched for.
@@ -119,6 +127,15 @@ final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem])
    */
   def findNamedTypeDefinitionByEName(targetEName: EName): Option[NamedTypeDefinition] = {
     namedTypeDefinitionMap.get(targetEName)
+  }
+
+  /**
+   * Finds the (first) optional global attribute declaration with the given target EName (named with target namespace).
+   *
+   * This is a quick operation.
+   */
+  def findGlobalAttributeDeclarationByEName(targetEName: EName): Option[GlobalAttributeDeclaration] = {
+    globalAttributeDeclarationMap.get(targetEName)
   }
 
   /**
@@ -198,6 +215,13 @@ final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem])
     val namedTypeDefinitions = rootElem.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition])
 
     namedTypeDefinitions.groupBy(_.targetEName).mapValues(_.head)
+  }
+
+  private def getGlobalAttributeDeclarationMap(rootElem: TaxonomyElem): Map[EName, GlobalAttributeDeclaration] = {
+    // TODO Speed up by finding the target namespace (per xs:schema) only once.
+    val globalAttributeDeclarations = rootElem.findAllElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])
+
+    globalAttributeDeclarations.groupBy(_.targetEName).mapValues(_.head)
   }
 
   private def makeUriWithIdFragment(baseUri: URI, idFragment: String): URI = {
