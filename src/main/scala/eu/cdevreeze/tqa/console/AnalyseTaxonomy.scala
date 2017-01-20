@@ -72,6 +72,23 @@ object AnalyseTaxonomy {
       relationships.groupBy(_.getClass.getSimpleName)
 
     logger.info(s"Relationship group sizes (topmost 10): ${relationshipGroups.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(10).mkString(", ")}")
+
+    val sortedRelationshipGroups = relationshipGroups.toIndexedSeq.sortBy(_._2.size).reverse
+
+    sortedRelationshipGroups foreach {
+      case (relationshipName, relationships) =>
+        val relationshipsByUri: Map[URI, immutable.IndexedSeq[Relationship]] = relationships.groupBy(_.docUri)
+
+        val uris = relationshipsByUri.keySet.toSeq.sortBy(_.toString)
+
+        uris foreach { uri =>
+          val currentRelationships = relationshipsByUri.getOrElse(uri, Vector())
+          val elrs = currentRelationships.filter(_.docUri == uri).map(_.elr).distinct.sorted
+          val arcroles = currentRelationships.filter(_.docUri == uri).map(_.arcrole).distinct.sorted
+
+          logger.info(s"Found ${currentRelationships.size} ${relationshipName}s found in doc '${uri}'. ELRs: ${elrs.mkString(", ")}. Arcroles: ${arcroles.mkString(", ")}.")
+        }
+    }
   }
 
   private def findNormalFiles(rootDir: File, p: File => Boolean): immutable.IndexedSeq[File] = {
