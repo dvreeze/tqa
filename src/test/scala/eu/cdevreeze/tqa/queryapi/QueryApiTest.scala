@@ -144,10 +144,10 @@ class QueryApiTest extends FunSuite {
     }
 
     assertResult(Nil) {
-      richTaxo.findAllInterConceptRelationshipsOfType(classTag[AllRelationship])
+      richTaxo.filterHasHypercubeRelationships(_.isAllRelationship)
     }
 
-    val hdRels = richTaxo.findAllInterConceptRelationshipsOfType(classTag[HypercubeDimensionRelationship])
+    val hdRels = richTaxo.findAllHypercubeDimensionRelationships
 
     assertResult(Set(
       "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-fsh-bfc/role/AxisRetrospectiveApplicationAndRetrospectiveRestatement",
@@ -177,7 +177,7 @@ class QueryApiTest extends FunSuite {
       hdRels.map(_.targetConceptEName).forall(c => richTaxo.findPrimaryItemDeclaration(c).isEmpty)
     }
 
-    val ddRels = richTaxo.findAllInterConceptRelationshipsOfType(classTag[DimensionDomainRelationship])
+    val ddRels = richTaxo.findAllDimensionDomainRelationships
 
     assertResult(true) {
       ddRels.nonEmpty
@@ -210,7 +210,7 @@ class QueryApiTest extends FunSuite {
     val paths =
       hypercubes.flatMap(hc => richTaxo.filterLongestOutgoingInterConceptRelationshipPaths(hc, classTag[DimensionalRelationship])(_.isElrValid))
 
-    assertResult(richTaxo.findAllInterConceptRelationshipsOfType(classTag[HypercubeDimensionRelationship]).toSet) {
+    assertResult(richTaxo.findAllHypercubeDimensionRelationships.toSet) {
       paths.map(_.firstRelationship).toSet
     }
   }
@@ -221,7 +221,7 @@ object QueryApiTest {
   final class RichTaxonomy(
       val underlyingTaxo: Taxonomy,
       val substitutionGroupMap: SubstitutionGroupMap,
-      val relationships: immutable.IndexedSeq[Relationship]) extends TaxonomySchemaLike with InterConceptRelationshipContainerLike {
+      val relationships: immutable.IndexedSeq[Relationship]) extends TaxonomySchemaLike with DimensionalRelationshipContainerLike {
 
     private val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
 

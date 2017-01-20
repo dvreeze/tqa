@@ -253,20 +253,28 @@ sealed abstract class HasHypercubeRelationship(
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
+  def isAllRelationship: Boolean
+
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
     rel.isInstanceOf[HypercubeDimensionRelationship]
   }
 }
 
 final class AllRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo) {
+
+  def isAllRelationship: Boolean = true
+}
 
 final class NotAllRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo) {
+
+  def isAllRelationship: Boolean = false
+}
 
 final class HypercubeDimensionRelationship(
     arc: DefinitionArc,
@@ -278,10 +286,15 @@ final class HypercubeDimensionRelationship(
   }
 }
 
+sealed abstract class DomainAwareRelationship(
+  arc: DefinitionArc,
+  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo)
+
 final class DimensionDomainRelationship(
     arc: DefinitionArc,
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
 
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
     rel.isInstanceOf[DomainMemberRelationship]
@@ -291,7 +304,7 @@ final class DimensionDomainRelationship(
 final class DomainMemberRelationship(
     arc: DefinitionArc,
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
 
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
     rel.isInstanceOf[DomainMemberRelationship]
