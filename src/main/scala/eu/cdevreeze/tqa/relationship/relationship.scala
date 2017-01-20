@@ -25,6 +25,7 @@ import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
 import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
+import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.CalculationArc
@@ -124,7 +125,30 @@ sealed abstract class InterConceptRelationship(
 
   final def targetConceptEName: EName = targetGlobalElementDeclaration.targetEName
 
-  // TODO Effective target role and isFollowedBy, to be overridden by dimensional relationships.
+  /**
+   * For non-dimensional relationships, returns true if the target concept of this relationship matches the source
+   * concept of the parameter relationship and the "types of relationships" are the same and the ELRs are the same.
+   *
+   * For dimensional relationships, returns true if this and the parameter relationships form a pair of consecutive
+   * relationships.
+   */
+  final def isFollowedBy(rel: InterConceptRelationship): Boolean = {
+    (this.targetConceptEName == rel.sourceConceptEName) && isFollowedByTypeOf(rel) && (effectiveTargetRole == rel.elr)
+  }
+
+  /**
+   * Overridable method returning the effective target role, which is the ELR for non-dimensional relationships,
+   * but respects the target role attribute for dimensional relationships.
+   */
+  def effectiveTargetRole: String = elr
+
+  /**
+   * Overridable method returning true if this and the other relationship are of "the same type".
+   * It is used by method followedBy.
+   */
+  protected def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
+    this.baseSetKey.arcEName == rel.baseSetKey.arcEName
+  }
 }
 
 sealed abstract class ConceptResourceRelationship(
@@ -215,14 +239,24 @@ final class RequiresElementRelationship(
   resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
 
 sealed abstract class DimensionalRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo) {
+
+  override def effectiveTargetRole: String = {
+    arc.attributeOption(XbrldtTargetRoleEName).getOrElse(elr)
+  }
+}
 
 sealed abstract class HasHypercubeRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+
+  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
+    rel.isInstanceOf[HypercubeDimensionRelationship]
+  }
+}
 
 final class AllRelationship(
   arc: DefinitionArc,
@@ -235,24 +269,42 @@ final class NotAllRelationship(
   resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo)
 
 final class HypercubeDimensionRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+
+  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
+    rel.isInstanceOf[DimensionDomainRelationship]
+  }
+}
 
 final class DimensionDomainRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+
+  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
+    rel.isInstanceOf[DomainMemberRelationship]
+  }
+}
 
 final class DomainMemberRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+
+  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
+    rel.isInstanceOf[DomainMemberRelationship]
+  }
+}
 
 final class DimensionDefaultRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+
+  override def effectiveTargetRole: String = elr
+}
 
 // Generic relationships
 

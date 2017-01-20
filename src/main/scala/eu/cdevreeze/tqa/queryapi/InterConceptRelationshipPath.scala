@@ -74,6 +74,14 @@ final case class InterConceptRelationshipPath[A <: InterConceptRelationship] pri
   def tails: immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
     relationships.tails.filter(_.nonEmpty).toVector.map(rels => new InterConceptRelationshipPath[A](rels))
   }
+
+  /**
+   * Returns true if all subsequent relationships in the path "follow each other".
+   * For dimensional relationships this means that they are consecutive relationships.
+   */
+  def isElrValid: Boolean = {
+    relationships.sliding(2).filter(_.size == 2).forall(pair => pair(0).isFollowedBy(pair(1)))
+  }
 }
 
 object InterConceptRelationshipPath {

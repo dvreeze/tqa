@@ -37,12 +37,21 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
     mappings.keySet.filter(SubstitutionGroupMap.StandardConceptSubstitutionGroups).isEmpty,
     s"No standard substitution groups allowed as mapping keys")
 
+  import SubstitutionGroupMap._
+
   /**
    * A map from substitution groups to other substitution groups directly derived from them.
-   * Hence, the reverse of `mappings`.
+   * In other words, the reverse of `effectiveMappings`.
    */
   val substitutionGroupDerivations: Map[EName, Set[EName]] = {
-    mappings.toSeq.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
+    effectiveMappings.toSeq.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
+  }
+
+  /**
+   * The mappings, plus the implicit mappings for hypercube and dimension items.
+   */
+  def effectiveMappings: Map[EName, EName] = {
+    mappings ++ Map(XbrldtHypercubeItemEName -> XbrliItemEName, XbrldtDimensionItemEName -> XbrliItemEName)
   }
 }
 

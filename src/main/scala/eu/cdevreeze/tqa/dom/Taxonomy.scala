@@ -29,8 +29,8 @@ import eu.cdevreeze.yaidom.core.EName
  * (with fragments) to taxonomy elements, for quick element lookups based on URIs with fragments. It also contains
  * a map from ENames (names with target namespace) of global element declarations and named type definitions.
  *
- * This object is rather expensive to create, building the maps that support fast querying based on URI (with fragment)
- * or "target EName".
+ * This object is rather expensive to create (through the build method), building the maps that support fast querying based on URI
+ * (with fragment) or "target EName".
  *
  * Taxonomy creation should never fail, if correct URIs are passed. Even the instance methods are very lenient and
  * should never fail. Typically, a taxonomy instantiated as an object of this class has not yet been validated.
@@ -38,50 +38,26 @@ import eu.cdevreeze.yaidom.core.EName
  * support for quick relationship key computation when determining networks of relationships. Of course, this class
  * can also be used for taxonomy validations tasks, when the taxonomy has not yet been validated at all.
  *
+ * For the rootElemUriMap and elemUriMap, we have that data is silently lost in those maps if there are any duplicate IDs (per document).
+ * In a valid taxonomy (as XML document set) this duplication is not allowed.
+ *
+ * For the globalElementDeclarationMap, namedTypeDefinitionMap, etc., we also have that data is silently lost if there
+ * is more than 1 global element declaration (or named type definition) with the same "target EName".
+ * In a valid taxonomy (as XML schema) this duplication is not allowed.
+ *
  * @author Chris de Vreeze
  */
-final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem]) {
+final class Taxonomy private (
+    val rootElems: immutable.IndexedSeq[TaxonomyElem],
+    val rootElemUriMap: Map[URI, TaxonomyElem],
+    val elemUriMap: Map[URI, TaxonomyElem],
+    val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration],
+    val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition],
+    val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration]) {
+
   require(
     rootElems.forall(e => e.docUri.getFragment == null),
     s"Expected document URIs but got at least one URI with fragment")
-
-  /**
-   * Somewhat expensive map from URIs without fragments to corresponding root elements. If there are duplicate IDs, data is lost.
-   */
-  val rootElemUriMap: Map[URI, TaxonomyElem] = {
-    rootElems.groupBy(e => e.docUri).mapValues(_.head)
-  }
-
-  /**
-   * Expensive map from URIs with ID fragments to corresponding elements. If there are duplicate IDs, data is lost.
-   */
-  val elemUriMap: Map[URI, TaxonomyElem] = {
-    rootElems.flatMap(e => getElemUriMap(e).toSeq).toMap
-  }
-
-  /**
-   * Expensive map from ENames (names with target namespace) of global element declarations to the global element declarations themselves.
-   * If there are any global element declarations with duplicate "target ENames", data is lost.
-   */
-  val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
-    rootElems.flatMap(e => getGlobalElementDeclarationMap(e).toSeq).toMap
-  }
-
-  /**
-   * Expensive map from ENames (names with target namespace) of named type definitions to the named type definitions themselves.
-   * If there are any named type definitions with duplicate "target ENames", data is lost.
-   */
-  val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition] = {
-    rootElems.flatMap(e => getNamedTypeDefinitionMap(e).toSeq).toMap
-  }
-
-  /**
-   * Expensive map from ENames (names with target namespace) of global attribute declarations to the global attribute declarations themselves.
-   * If there are any global element declarations with duplicate "target ENames", data is lost.
-   */
-  val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration] = {
-    rootElems.flatMap(e => getGlobalAttributeDeclarationMap(e).toSeq).toMap
-  }
 
   /**
    * Finds the (first) optional element with the given URI. The fragment, if any, must be an XPointer or sequence thereof.
@@ -193,14 +169,38 @@ final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem])
     namedTypeDefinitionENames.distinct.size < namedTypeDefinitions.size
   }
 
-  private def getElemUriMap(rootElem: TaxonomyElem): Map[URI, TaxonomyElem] = {
-    val docUri = rootElem.docUri
-    assert(docUri.isAbsolute)
+  private def removeFragment(uri: URI): URI = {
+    new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
+  }
+}
 
-    // The schema type of the ID attributes is not checked! That would be very expensive without any real advantage.
+object Taxonomy {
 
-    val elemsWithId = rootElem.filterElemsOrSelf(_.attributeOption(IdEName).isDefined)
-    elemsWithId.map(e => (makeUriWithIdFragment(e.baseUri, e.attribute(IdEName)) -> e)).toMap
+  /**
+   * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
+   */
+  def build(rootElems: immutable.IndexedSeq[TaxonomyElem]): Taxonomy = {
+    val rootElemUriMap: Map[URI, TaxonomyElem] = {
+      rootElems.groupBy(e => e.docUri).mapValues(_.head)
+    }
+
+    val elemUriMap: Map[URI, TaxonomyElem] = {
+      rootElems.flatMap(e => getElemUriMap(e).toSeq).toMap
+    }
+
+    val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
+      rootElems.flatMap(e => getGlobalElementDeclarationMap(e).toSeq).toMap
+    }
+
+    val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition] = {
+      rootElems.flatMap(e => getNamedTypeDefinitionMap(e).toSeq).toMap
+    }
+
+    val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration] = {
+      rootElems.flatMap(e => getGlobalAttributeDeclarationMap(e).toSeq).toMap
+    }
+
+    new Taxonomy(rootElems, rootElemUriMap, elemUriMap, globalElementDeclarationMap, namedTypeDefinitionMap, globalAttributeDeclarationMap)
   }
 
   private def getGlobalElementDeclarationMap(rootElem: TaxonomyElem): Map[EName, GlobalElementDeclaration] = {
@@ -224,19 +224,18 @@ final class Taxonomy private (val rootElems: immutable.IndexedSeq[TaxonomyElem])
     globalAttributeDeclarations.groupBy(_.targetEName).mapValues(_.head)
   }
 
+  private def getElemUriMap(rootElem: TaxonomyElem): Map[URI, TaxonomyElem] = {
+    val docUri = rootElem.docUri
+    assert(docUri.isAbsolute)
+
+    // The schema type of the ID attributes is not checked! That would be very expensive without any real advantage.
+
+    val elemsWithId = rootElem.filterElemsOrSelf(_.attributeOption(IdEName).isDefined)
+    elemsWithId.map(e => (makeUriWithIdFragment(e.baseUri, e.attribute(IdEName)) -> e)).toMap
+  }
+
   private def makeUriWithIdFragment(baseUri: URI, idFragment: String): URI = {
     require(baseUri.isAbsolute, s"Expected absolute base URI but got '${baseUri}'")
     new URI(baseUri.getScheme, baseUri.getSchemeSpecificPart, idFragment)
-  }
-
-  private def removeFragment(uri: URI): URI = {
-    new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
-  }
-}
-
-object Taxonomy {
-
-  def build(rootElems: immutable.IndexedSeq[TaxonomyElem]): Taxonomy = {
-    new Taxonomy(rootElems)
   }
 }
