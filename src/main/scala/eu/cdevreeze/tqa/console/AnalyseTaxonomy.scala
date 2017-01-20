@@ -86,7 +86,7 @@ object AnalyseTaxonomy {
           val elrs = currentRelationships.filter(_.docUri == uri).map(_.elr).distinct.sorted
           val arcroles = currentRelationships.filter(_.docUri == uri).map(_.arcrole).distinct.sorted
 
-          logger.info(s"Found ${currentRelationships.size} ${relationshipName}s found in doc '${uri}'. ELRs: ${elrs.mkString(", ")}. Arcroles: ${arcroles.mkString(", ")}.")
+          logger.info(s"Found ${currentRelationships.size} ${relationshipName}s in doc '${uri}'. ELRs: ${elrs.mkString(", ")}. Arcroles: ${arcroles.mkString(", ")}.")
         }
     }
   }
