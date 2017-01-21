@@ -22,6 +22,7 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
+import eu.cdevreeze.tqa.dom.LabeledXLink
 import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.XLinkArc
 
@@ -48,7 +49,7 @@ trait RelationshipsFactory {
 
   def extractRelationshipsFromArc(
     arc: XLinkArc,
-    parentExtendedLink: ExtendedLink,
+    labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
     taxonomy: Taxonomy): immutable.IndexedSeq[Relationship]
 
   def computeNetworks(

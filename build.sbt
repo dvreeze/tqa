@@ -26,6 +26,8 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
 
 libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.6.0"
 
+libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-10"
+
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"

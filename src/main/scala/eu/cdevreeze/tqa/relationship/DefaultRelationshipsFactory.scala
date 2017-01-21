@@ -25,21 +25,21 @@ import scala.util.Success
 import scala.util.Try
 
 import eu.cdevreeze.tqa.ENames.ArcroleURIEName
-import eu.cdevreeze.tqa.ENames.XbrliBalanceEName
-import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
-import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.CyclesAllowedEName
 import eu.cdevreeze.tqa.ENames.IdEName
 import eu.cdevreeze.tqa.ENames.OrderEName
-import eu.cdevreeze.tqa.ENames.XbrliPeriodTypeEName
 import eu.cdevreeze.tqa.ENames.PreferredLabelEName
 import eu.cdevreeze.tqa.ENames.PriorityEName
 import eu.cdevreeze.tqa.ENames.RoleURIEName
+import eu.cdevreeze.tqa.ENames.UseEName
+import eu.cdevreeze.tqa.ENames.WeightEName
+import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
+import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XbrldtTypedDomainRefEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
-import eu.cdevreeze.tqa.ENames.UseEName
-import eu.cdevreeze.tqa.ENames.WeightEName
+import eu.cdevreeze.tqa.ENames.XbrliBalanceEName
+import eu.cdevreeze.tqa.ENames.XbrliPeriodTypeEName
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
@@ -99,44 +99,15 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
     taxonomy: Taxonomy,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
+    val labeledXlinkMap = extendedLink.labeledXlinkMap
+
     extendedLink.arcs.filter(arcFilter) flatMap { arc =>
-      extractRelationshipsFromArc(arc, extendedLink, extendedLink.labeledXlinkMap, taxonomy)
+      extractRelationshipsFromArc(arc, labeledXlinkMap, taxonomy)
     }
   }
 
   def extractRelationshipsFromArc(
     arc: XLinkArc,
-    parentExtendedLink: ExtendedLink,
-    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship] = {
-
-    extractRelationshipsFromArc(arc, parentExtendedLink, parentExtendedLink.labeledXlinkMap, taxonomy)
-  }
-
-  def computeNetworks(
-    relationships: immutable.IndexedSeq[Relationship],
-    taxonomy: Taxonomy): Map[BaseSetKey, immutable.IndexedSeq[Relationship]] = {
-
-    val baseSets = relationships.groupBy(_.arc.baseSetKey)
-
-    baseSets.toSeq.map({
-      case (baseSetKey, rels) =>
-        (baseSetKey -> computeNetwork(baseSetKey, rels, taxonomy))
-    }).toMap
-  }
-
-  def getRelationshipKey(relationship: Relationship, taxonomy: Taxonomy): RelationshipKey = {
-    val nonExemptAttributes = extractNonExemptAttributeMap(relationship, taxonomy)
-
-    RelationshipKey(
-      relationship.arc.baseSetKey,
-      relationship.resolvedFrom.xmlFragmentKey,
-      relationship.resolvedTo.xmlFragmentKey,
-      nonExemptAttributes)
-  }
-
-  private def extractRelationshipsFromArc(
-    arc: XLinkArc,
-    parentExtendedLink: ExtendedLink,
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
     taxonomy: Taxonomy): immutable.IndexedSeq[Relationship] = {
 
@@ -164,6 +135,28 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
       }
 
     relationships
+  }
+
+  def computeNetworks(
+    relationships: immutable.IndexedSeq[Relationship],
+    taxonomy: Taxonomy): Map[BaseSetKey, immutable.IndexedSeq[Relationship]] = {
+
+    val baseSets = relationships.groupBy(_.arc.baseSetKey)
+
+    baseSets.toSeq.map({
+      case (baseSetKey, rels) =>
+        (baseSetKey -> computeNetwork(baseSetKey, rels, taxonomy))
+    }).toMap
+  }
+
+  def getRelationshipKey(relationship: Relationship, taxonomy: Taxonomy): RelationshipKey = {
+    val nonExemptAttributes = extractNonExemptAttributeMap(relationship, taxonomy)
+
+    RelationshipKey(
+      relationship.arc.baseSetKey,
+      relationship.resolvedFrom.xmlFragmentKey,
+      relationship.resolvedTo.xmlFragmentKey,
+      nonExemptAttributes)
   }
 
   private def optionallyResolve(

@@ -105,6 +105,9 @@ import javax.xml.bind.DatatypeConverter
  *
  * It is perfectly fine to embed linkbase content in schema content, and such an element tree will be instantiated correctly.
  *
+ * The underlying backing elements can be any backing element implementation, including BackingElemApi
+ * wrappers around Saxon tiny trees!
+ *
  * @author Chris de Vreeze
  */
 sealed abstract class TaxonomyElem private[dom] (

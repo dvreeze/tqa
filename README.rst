@@ -39,3 +39,4 @@ Some design choices in this TQA are:
 * It is up to the user of the API if taxonomy objects are created in a very lenient way or a very strict way
 * DTS discovery can be tweaked, and so can post-processing of parsed taxonomy documents
 * Finding relationships and schema content on concept (target) expanded names is fast
+* The backing element implementations can be native yaidom but can also be Saxon tiny trees!
