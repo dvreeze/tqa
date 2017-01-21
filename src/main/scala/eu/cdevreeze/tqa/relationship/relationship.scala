@@ -253,6 +253,10 @@ sealed abstract class HasHypercubeRelationship(
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
+  final def primary: EName = sourceConceptEName
+
+  final def hypercube: EName = targetConceptEName
+
   def isAllRelationship: Boolean
 
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
@@ -281,6 +285,10 @@ final class HypercubeDimensionRelationship(
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
+  def hypercube: EName = sourceConceptEName
+
+  def dimension: EName = targetConceptEName
+
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
     rel.isInstanceOf[DimensionDomainRelationship]
   }
@@ -296,6 +304,10 @@ final class DimensionDomainRelationship(
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
 
+  def dimension: EName = sourceConceptEName
+
+  def domain: EName = targetConceptEName
+
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
     rel.isInstanceOf[DomainMemberRelationship]
   }
@@ -306,6 +318,10 @@ final class DomainMemberRelationship(
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
 
+  def domain: EName = sourceConceptEName
+
+  def member: EName = targetConceptEName
+
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
     rel.isInstanceOf[DomainMemberRelationship]
   }
@@ -315,6 +331,10 @@ final class DimensionDefaultRelationship(
     arc: DefinitionArc,
     resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+
+  def dimension: EName = sourceConceptEName
+
+  def defaultOfDimension: EName = targetConceptEName
 
   override def effectiveTargetRole: String = elr
 }

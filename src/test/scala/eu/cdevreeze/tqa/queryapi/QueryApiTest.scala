@@ -214,6 +214,73 @@ class QueryApiTest extends FunSuite {
       paths.map(_.firstRelationship).toSet
     }
   }
+
+  test("testQueryDimensionalDLinkWithHasHypercubes") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUris = Vector(
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/fr/sg-se/sg-se_2013-09-13_def.xml").toURI,
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13.xsd").toURI)
+
+    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
+
+    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+
+    val taxo = Taxonomy.build(taxoRootElems)
+    val richTaxo = QueryApiTest.RichTaxonomy.build(taxo, SubstitutionGroupMap.Empty)
+
+    assertResult(true) {
+      richTaxo.findAllGlobalElementDeclarations.size > 1600
+    }
+    assertResult(richTaxo.findAllGlobalElementDeclarations) {
+      richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
+    }
+
+    assertResult(true) {
+      richTaxo.filterHasHypercubeRelationships(_.isAllRelationship).nonEmpty
+    }
+    assertResult(true) {
+      richTaxo.filterHasHypercubeRelationships(!_.isAllRelationship).isEmpty
+    }
+
+    val hhRels = richTaxo.findAllHasHypercubeRelationships
+
+    val elr = "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NoteFinanceLeaseLiabilities"
+
+    val hhRelsForElr = richTaxo.filterHasHypercubeRelationships(_.elr == elr)
+
+    assertResult(List(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}DisclosureOfAmountsPayableUnderFinanceLeasesByLesseeAbstract"))) {
+      hhRelsForElr.map(_.primary)
+    }
+
+    val hhRel = hhRelsForElr.head
+
+    val hdRelsForElr = richTaxo.filterOutgoingHypercubeDimensionRelationships(hhRel.targetConceptEName) { rel =>
+      hhRel.isFollowedBy(rel)
+    }
+
+    assertResult(List(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}DisclosureOfAmountsPayableUnderFinanceLeasesByLesseeTable"))) {
+      hdRelsForElr.map(_.hypercube)
+    }
+    assertResult(List(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}MaturityAxis"))) {
+      hdRelsForElr.map(_.dimension)
+    }
+
+    val hdRel = hdRelsForElr.head
+
+    val ddPathsForElr = richTaxo.filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(hdRel.targetConceptEName) { path =>
+      hdRel.isFollowedBy(path.firstRelationship)
+    }
+
+    val ddPathLeaves = ddPathsForElr.map(_.targetConcept).toSet
+
+    val incomingPaths = ddPathLeaves.toIndexedSeq.flatMap(c =>
+      richTaxo.filterLongestIncomingInterConceptRelationshipPaths(c, classTag[DimensionalRelationship])(_ => true))
+
+    assertResult(true) {
+      incomingPaths.exists(_.firstRelationship == hhRel)
+    }
+  }
 }
 
 object QueryApiTest {

@@ -41,7 +41,7 @@ trait DimensionalRelationshipContainerApi extends InterConceptRelationshipContai
 
   type DomainAwareRelationshipPath = InterConceptRelationshipPath[DomainAwareRelationship]
 
-  // Finding and filtering relationships without looking at source of target concept
+  // Finding and filtering relationships without looking at source or target concept
 
   def findAllDimensionalRelationshipsOfType[A <: DimensionalRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
@@ -174,4 +174,12 @@ trait DimensionalRelationshipContainerApi extends InterConceptRelationshipContai
    */
   def filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(
     targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
+
+  // Other query methods
+
+  /**
+   * Finds all inherited has-hypercubes as a Map from ELRs to all primaries that are source concepts
+   * of the has-hypercube relationships with that ELR. See section 2.6.1 of the XBRL Dimensions specification.
+   */
+  def findAllInheritedHasHypercubesAsElrToPrimariesMap(targetConcept: EName): Map[String, Set[EName]]
 }

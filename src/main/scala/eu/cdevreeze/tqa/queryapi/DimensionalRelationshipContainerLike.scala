@@ -38,7 +38,7 @@ import eu.cdevreeze.yaidom.core.EName
  */
 trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContainerApi with InterConceptRelationshipContainerLike {
 
-  // Finding and filtering relationships without looking at source of target concept
+  // Finding and filtering relationships without looking at source or target concept
 
   final def findAllDimensionalRelationshipsOfType[A <: DimensionalRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
@@ -195,5 +195,25 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship]) { path =>
       path.isElrValid && p(path)
     }
+  }
+
+  // Other query methods
+
+  final def findAllInheritedHasHypercubesAsElrToPrimariesMap(targetConcept: EName): Map[String, Set[EName]] = {
+    val incomingRelationshipPaths =
+      filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)
+
+    val domainMemberRelationships = incomingRelationshipPaths.flatMap(_.relationships)
+
+    val elrSourceConceptPairs =
+      domainMemberRelationships.map(rel => (rel.elr -> rel.sourceConceptEName)).distinct
+
+    val elrSourceConceptPairsForHasHypercubes =
+      elrSourceConceptPairs filter {
+        case (elr, sourceConcept) =>
+          filterOutgoingHypercubeDimensionRelationships(sourceConcept)(_.elr == elr).nonEmpty
+      }
+
+    elrSourceConceptPairsForHasHypercubes.groupBy(_._1).mapValues(_.map(_._2).toSet)
   }
 }
