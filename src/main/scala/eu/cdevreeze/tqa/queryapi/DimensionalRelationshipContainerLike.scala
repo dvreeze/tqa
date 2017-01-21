@@ -36,7 +36,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContainerApi with InterConceptRelationshipContainerLike {
+trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContainerApi { self: InterConceptRelationshipContainerLike =>
 
   // Finding and filtering relationships without looking at source or target concept
 
@@ -199,7 +199,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   // Other query methods
 
-  final def findAllInheritedHasHypercubesAsElrToPrimariesMap(targetConcept: EName): Map[String, Set[EName]] = {
+  final def findAllInheritedHasHypercubes(targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
     val incomingRelationshipPaths =
       filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)
 
@@ -208,12 +208,18 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     val elrSourceConceptPairs =
       domainMemberRelationships.map(rel => (rel.elr -> rel.sourceConceptEName)).distinct
 
-    val elrSourceConceptPairsForHasHypercubes =
-      elrSourceConceptPairs filter {
+    val hasHypercubes =
+      elrSourceConceptPairs flatMap {
         case (elr, sourceConcept) =>
-          filterOutgoingHypercubeDimensionRelationships(sourceConcept)(_.elr == elr).nonEmpty
+          filterOutgoingHasHypercubeRelationships(sourceConcept)(_.elr == elr)
       }
 
-    elrSourceConceptPairsForHasHypercubes.groupBy(_._1).mapValues(_.map(_._2).toSet)
+    hasHypercubes
+  }
+
+  final def findAllInheritedHasHypercubesAsElrToPrimariesMap(targetConcept: EName): Map[String, Set[EName]] = {
+    val hasHypercubes = findAllInheritedHasHypercubes(targetConcept)
+
+    hasHypercubes.groupBy(_.elr).mapValues(_.map(_.sourceConceptEName).toSet)
   }
 }

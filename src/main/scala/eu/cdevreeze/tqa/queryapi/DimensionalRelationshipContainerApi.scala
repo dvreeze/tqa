@@ -35,7 +35,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-trait DimensionalRelationshipContainerApi extends InterConceptRelationshipContainerApi {
+trait DimensionalRelationshipContainerApi {
 
   type DomainMemberRelationshipPath = InterConceptRelationshipPath[DomainMemberRelationship]
 
@@ -176,6 +176,11 @@ trait DimensionalRelationshipContainerApi extends InterConceptRelationshipContai
     targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   // Other query methods
+
+  /**
+   * Finds all inherited has-hypercubes. See section 2.6.1 of the XBRL Dimensions specification.
+   */
+  def findAllInheritedHasHypercubes(targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
 
   /**
    * Finds all inherited has-hypercubes as a Map from ELRs to all primaries that are source concepts

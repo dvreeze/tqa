@@ -42,6 +42,7 @@ import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.relationship.PresentationRelationship
 import eu.cdevreeze.tqa.relationship.Relationship
+import eu.cdevreeze.tqa.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
@@ -288,7 +289,7 @@ object QueryApiTest {
   final class RichTaxonomy(
       val underlyingTaxo: Taxonomy,
       val substitutionGroupMap: SubstitutionGroupMap,
-      val relationships: immutable.IndexedSeq[Relationship]) extends TaxonomySchemaLike with DimensionalRelationshipContainerLike {
+      val relationships: immutable.IndexedSeq[Relationship]) extends TaxonomyLike {
 
     private val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
 
@@ -297,6 +298,10 @@ object QueryApiTest {
         case (ename, decl) if conceptDeclarationBuilder.optConceptDeclaration(decl).isDefined =>
           (ename -> conceptDeclarationBuilder.optConceptDeclaration(decl).get)
       }).toMap
+    }
+
+    val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
+      relationships collect { case rel: StandardRelationship => rel } groupBy (_.sourceConceptEName)
     }
 
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
@@ -341,6 +346,13 @@ object QueryApiTest {
 
     def findConceptDeclaration(ename: EName): Option[ConceptDeclaration] = {
       conceptDeclarationsByEName.get(ename)
+    }
+
+    def findAllStandardRelationshipsOfType[A <: StandardRelationship](
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+
+      implicit val clsTag = relationshipType
+      relationships collect { case rel: A => rel }
     }
 
     def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](

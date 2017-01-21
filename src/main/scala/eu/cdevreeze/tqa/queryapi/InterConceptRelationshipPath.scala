@@ -27,6 +27,9 @@ import eu.cdevreeze.yaidom.core.EName
  * targetRole attributes are followed, although in practice this will be the case. A relationship path
  * must have at least one relationship.
  *
+ * In practice, inter-concept relationship paths are "ELR-valid", that is, their relationships are in the same ELR,
+ * or, in the case of dimensional relationship paths, their relationships are consecutive relationships.
+ *
  * @author Chris de Vreeze
  */
 final case class InterConceptRelationshipPath[A <: InterConceptRelationship] private (val relationships: immutable.IndexedSeq[A]) {
