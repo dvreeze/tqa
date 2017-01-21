@@ -75,7 +75,7 @@ object AnalyseTaxonomy {
     val relationshipGroups: Map[String, immutable.IndexedSeq[Relationship]] =
       relationships.groupBy(_.getClass.getSimpleName)
 
-    logger.info(s"Relationship group sizes (topmost 10): ${relationshipGroups.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(10).mkString(", ")}")
+    logger.info(s"Relationship group sizes (topmost 15): ${relationshipGroups.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(15).mkString(", ")}")
 
     val sortedRelationshipGroups = relationshipGroups.toIndexedSeq.sortBy(_._2.size).reverse
 

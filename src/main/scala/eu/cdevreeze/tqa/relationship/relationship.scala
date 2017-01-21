@@ -25,6 +25,7 @@ import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
 import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
+import eu.cdevreeze.tqa.ENames.MsgMessageEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
 import eu.cdevreeze.tqa.dom.BaseSetKey
@@ -411,8 +412,16 @@ object NonStandardRelationship {
     resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
     resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[NonStandardRelationship] = {
 
-    // TODO
-    Some(new OtherNonStandardRelationship(arc, resolvedFrom, resolvedTo))
+    (arc.arcrole, arc, resolvedTo.resolvedElem) match {
+      case ("http://xbrl.org/arcrole/2008/element-label", arc: NonStandardArc, res: XLinkResource) =>
+        Some(new ElementLabelRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]]))
+      case ("http://xbrl.org/arcrole/2008/element-reference", arc: NonStandardArc, res: XLinkResource) =>
+        Some(new ElementReferenceRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]]))
+      case (_, arc: NonStandardArc, res: XLinkResource) if resolvedTo.resolvedElem.resolvedName == MsgMessageEName =>
+        Some(new ElementMessageRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]]))
+      case _ =>
+        Some(new OtherNonStandardRelationship(arc, resolvedFrom, resolvedTo))
+    }
   }
 }
 
