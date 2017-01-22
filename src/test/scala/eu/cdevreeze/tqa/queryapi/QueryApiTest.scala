@@ -143,6 +143,12 @@ class QueryApiTest extends FunSuite {
     assertResult(richTaxo.findAllGlobalElementDeclarations) {
       richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
     }
+    assertResult(false) {
+      richTaxo.underlyingTaxo.hasDuplicateGlobalElementDeclarationENames
+    }
+    assertResult(false) {
+      taxoRootElems.exists(e => richTaxo.underlyingTaxo.hasDuplicateIds(e))
+    }
 
     assertResult(Nil) {
       richTaxo.filterHasHypercubeRelationships(_.isAllRelationship)

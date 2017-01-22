@@ -43,7 +43,7 @@ class TaxonomyElemTest extends FunSuite {
 
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val docUri = classOf[TaxonomyElemTest].getResource("292-00-Embeddedlinkbaseinthexsd.xsd").toURI
+    val docUri = classOf[TaxonomyElemTest].getResource("/conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd").toURI
 
     val doc = indexed.Document(docParser.parse(docUri).withUriOption(Some(docUri)))
 

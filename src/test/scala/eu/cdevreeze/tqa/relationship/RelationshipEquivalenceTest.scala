@@ -47,9 +47,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testProhibition") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("210-01-RelationshipEquivalence.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("210-01-RelationshipEquivalence-calculation-1.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("210-01-RelationshipEquivalence-calculation-2.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-01-RelationshipEquivalence.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-01-RelationshipEquivalence-calculation-1.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-01-RelationshipEquivalence-calculation-2.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -109,9 +109,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testFailingProhibition") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("210-02-DifferentOrder.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("210-02-DifferentOrder-calculation-1.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("210-02-DifferentOrder-calculation-2.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-02-DifferentOrder.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-02-DifferentOrder-calculation-1.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-02-DifferentOrder-calculation-2.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -175,9 +175,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testProhibitionWithImplicitOrder") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("210-03-MissingOrder.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("210-03-MissingOrder-calculation-1.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("210-03-MissingOrder-calculation-2.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-03-MissingOrder.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-03-MissingOrder-calculation-1.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-03-MissingOrder-calculation-2.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -238,9 +238,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testProhibitionOfOneRelationship") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("210-04-RelationshipEquivalence.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("210-04-RelationshipEquivalence-calculation-1.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("210-04-RelationshipEquivalence-calculation-2.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-04-RelationshipEquivalence.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-04-RelationshipEquivalence-calculation-1.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-04-RelationshipEquivalence-calculation-2.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -310,9 +310,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testProhibitionOfOneRelationshipAgain") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("210-05-RelationshipEquivalence.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("210-05-RelationshipEquivalence-calculation-1.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("210-05-RelationshipEquivalence-calculation-2.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-05-RelationshipEquivalence.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-05-RelationshipEquivalence-calculation-1.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/210-05-RelationshipEquivalence-calculation-2.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -382,9 +382,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testCombineConceptLabelRelationships") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("ArcOverrideDisjointLinkbases.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-01-ArcOverrideDisjointLinkbases-1-label.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-01-ArcOverrideDisjointLinkbases-2-label.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-01-ArcOverrideDisjointLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-01-ArcOverrideDisjointLinkbases-2-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -422,9 +422,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testOverrideConceptLabelRelationships") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-02-ArcOverrideLabelLinkbases.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-02-ArcOverrideLabelLinkbases-1-label.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-02-ArcOverrideLabelLinkbases-2-label.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-02-ArcOverrideLabelLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-02-ArcOverrideLabelLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-02-ArcOverrideLabelLinkbases-2-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -464,10 +464,10 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testWrongOverrideConceptLabelRelationships") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases-1-label.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases-2-label.xml").toURI
-    val linkbaseDocUri3 = classOf[RelationshipEquivalenceTest].getResource("291-03-ArcOverrideLabelLinkbases-3-label.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-03-ArcOverrideLabelLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-03-ArcOverrideLabelLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-03-ArcOverrideLabelLinkbases-2-label.xml").toURI
+    val linkbaseDocUri3 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-03-ArcOverrideLabelLinkbases-3-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -518,9 +518,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testCombineDefinitionRelationships") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-04-ArcOverrideDisjointLinkbases.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-04-ArcOverrideLinkbases-1-def.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-04-ArcOverrideLinkbases-2-def.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-04-ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-04-ArcOverrideLinkbases-1-def.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-04-ArcOverrideLinkbases-2-def.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -558,9 +558,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testOverrideDefinitionRelationships") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-05-ArcOverrideDisjointLinkbases.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-05-ArcOverrideLinkbases-1-def.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-05-ArcOverrideLinkbases-2-def.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-05-ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-05-ArcOverrideLinkbases-1-def.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-05-ArcOverrideLinkbases-2-def.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -601,10 +601,10 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testProhibitAndInsertDefinitionRelationships") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideDisjointLinkbases.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideLinkbases-1-def.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideLinkbases-2-def.xml").toURI
-    val linkbaseDocUri3 = classOf[RelationshipEquivalenceTest].getResource("291-06-ArcOverrideLinkbases-3-def.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-06-ArcOverrideDisjointLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-06-ArcOverrideLinkbases-1-def.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-06-ArcOverrideLinkbases-2-def.xml").toURI
+    val linkbaseDocUri3 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-06-ArcOverrideLinkbases-3-def.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))
@@ -657,9 +657,9 @@ class RelationshipEquivalenceTest extends FunSuite {
   test("testWrongConceptLabelRelationship") {
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("291-08-ArcOverrideLabelLinkbases.xsd").toURI
-    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("291-08-ArcOverrideLabelLinkbases-1-label.xml").toURI
-    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("291-08-ArcOverrideLabelLinkbases-2-label.xml").toURI
+    val xsdDocUri = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-08-ArcOverrideLabelLinkbases.xsd").toURI
+    val linkbaseDocUri1 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-08-ArcOverrideLabelLinkbases-1-label.xml").toURI
+    val linkbaseDocUri2 = classOf[RelationshipEquivalenceTest].getResource("/conf-suite/Common/200-linkbase/291-08-ArcOverrideLabelLinkbases-2-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc1 = indexed.Document(docParser.parse(linkbaseDocUri1).withUriOption(Some(linkbaseDocUri1)))

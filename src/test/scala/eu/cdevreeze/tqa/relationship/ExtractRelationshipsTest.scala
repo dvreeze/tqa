@@ -42,8 +42,8 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-01-HrefResolution.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-01-HrefResolution-label.xml").toURI
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
@@ -81,8 +81,8 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-05-ElementLocatorExample.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-05-ElementLocatorExample-label.xml").toURI
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-05-ElementLocatorExample.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-05-ElementLocatorExample-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
@@ -131,8 +131,8 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-09-ElementSchemeXPointerLocatorExample.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-09-ElementSchemeXPointerLocatorExample-label.xml").toURI
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
@@ -170,8 +170,8 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-10-ElementSchemeXPointerLocatorExample.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("202-10-ElementSchemeXPointerLocatorExample-label.xml").toURI
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
@@ -209,8 +209,8 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("202-03-HrefResolutionXMLBase.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("base/202-03-HrefResolutionXMLBase-label.xml").toURI
+    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-03-HrefResolutionXMLBase.xsd").toURI
+    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/base/202-03-HrefResolutionXMLBase-label.xml").toURI
 
     val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
     val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
@@ -248,7 +248,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docParser = DocumentParserUsingStax.newInstance()
 
-    val docUri = classOf[ExtractRelationshipsTest].getResource("292-00-Embeddedlinkbaseinthexsd.xsd").toURI
+    val docUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd").toURI
 
     val doc = indexed.Document(docParser.parse(docUri).withUriOption(Some(docUri)))
 
