@@ -153,6 +153,12 @@ trait DimensionalRelationshipContainerApi {
   // Filtering outgoing and incoming relationship paths
 
   /**
+   * Returns `filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(sourceConcept)(_ => true)`.
+   */
+  def findAllLongestOutgoingConsecutiveDomainAwareRelationshipPaths(
+    sourceConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
+
+  /**
    * Filters the longest consecutive (!) dimension-domain-or-domain-member relationship paths that are outgoing from the given concept.
    * Only relationship paths for which all (non-empty) "inits" pass the predicate are accepted by the filter!
    *
@@ -163,6 +169,30 @@ trait DimensionalRelationshipContainerApi {
   def filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(
     sourceConcept: EName)(
       p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
+
+  /**
+   * Returns `filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(sourceConcept)(_ => true)`.
+   */
+  def findAllLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+    sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
+
+  /**
+   * Filters the longest consecutive (!) domain-member relationship paths that are outgoing from the given concept.
+   * Only relationship paths for which all (non-empty) "inits" pass the predicate are accepted by the filter!
+   *
+   * It is a dangerous method in that termination is not guaranteed, but may depend on the passed
+   * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
+   * false on detecting them.
+   */
+  def filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+    sourceConcept: EName)(
+      p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
+
+  /**
+   * Returns `filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)`.
+   */
+  def findAllLongestIncomingConsecutiveDomainMemberRelationshipPaths(
+    targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   /**
    * Filters the longest consecutive (!) domain-member relationship paths that are incoming to the given concept.

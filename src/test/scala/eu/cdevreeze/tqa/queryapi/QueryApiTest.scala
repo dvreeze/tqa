@@ -26,6 +26,9 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import eu.cdevreeze.tqa.ENames.XbrliItemEName
+import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
+import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.dom.ConceptDeclaration
 import eu.cdevreeze.tqa.dom.GlobalAttributeDeclaration
@@ -85,6 +88,10 @@ class QueryApiTest extends FunSuite {
 
     assertResult(Set("http://www.xbrl.org/2003/arcrole/parent-child")) {
       prels.map(_.arcrole).toSet
+    }
+
+    assertResult(prels) {
+      richTaxo.filterStandardRelationshipsOfType(classTag[PresentationRelationship])(_.elr == elr)
     }
 
     val topENames = prels.map(_.sourceConceptEName).toSet.diff(prels.map(_.targetConceptEName).toSet)
@@ -266,6 +273,12 @@ class QueryApiTest extends FunSuite {
       hhRel.isFollowedBy(rel)
     }
 
+    assertResult(hdRelsForElr) {
+      richTaxo.findAllOutgoingStandardRelationshipsOfType(hhRel.targetConceptEName, classTag[HypercubeDimensionRelationship]) collect {
+        case hd if hhRel.isFollowedBy(hd) => hd
+      }
+    }
+
     assertResult(List(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}DisclosureOfAmountsPayableUnderFinanceLeasesByLesseeTable"))) {
       hdRelsForElr.map(_.hypercube)
     }
@@ -286,6 +299,128 @@ class QueryApiTest extends FunSuite {
 
     assertResult(true) {
       incomingPaths.exists(_.firstRelationship == hhRel)
+    }
+
+    // Testing has-hypercube inheritance
+
+    val anInheritingPrimary = EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}AmountDueToCustomersForConstructionContracts")
+
+    val elrToPrimaryMap = richTaxo.findAllInheritedHasHypercubesAsElrToPrimariesMap(anInheritingPrimary)
+
+    assertResult(Set("http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NoteTradeAndOtherPayables")) {
+      elrToPrimaryMap.keySet
+    }
+
+    assertResult(true) {
+      val (elr, primaries) = elrToPrimaryMap.iterator.next
+      val rootPrimary = primaries.iterator.next
+
+      val dmRelPaths = richTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(rootPrimary) {
+        _.firstRelationship.elr == elr
+      }
+
+      dmRelPaths.flatMap(_.relationships).map(_.targetConceptEName).contains(anInheritingPrimary)
+    }
+
+    // Testing has-hypercube inheritance in bulk
+
+    val inheritingPrimaries =
+      hhRels.flatMap(hh => richTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary)(_.firstRelationship.elr == hh.elr)).flatMap(_.concepts).toSet
+
+    assertResult(true) {
+      inheritingPrimaries.flatMap(e => richTaxo.findAllInheritedHasHypercubes(e)).nonEmpty
+    }
+
+    assertResult(hhRels.toSet) {
+      inheritingPrimaries.flatMap(e => richTaxo.findAllInheritedHasHypercubes(e)).toSet
+    }
+  }
+
+  test("testQueryConceptsInDimensionalDLinkWithHasHypercubes") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUris = Vector(
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/fr/sg-se/sg-se_2013-09-13_def.xml").toURI,
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13.xsd").toURI)
+
+    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
+
+    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+
+    val taxo = Taxonomy.build(taxoRootElems)
+    val richTaxo = QueryApiTest.RichTaxonomy.build(taxo, SubstitutionGroupMap.Empty)
+
+    assertResult(true) {
+      richTaxo.findAllGlobalElementDeclarations.size > 1600
+    }
+    assertResult(richTaxo.findAllGlobalElementDeclarations) {
+      richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
+    }
+
+    assertResult(richTaxo.filterGlobalElementDeclarationsInSubstitutionGroup(XbrliItemEName).map(_.targetEName).toSet) {
+      richTaxo.findAllItemDeclarations.map(_.targetEName).toSet
+    }
+
+    val primaries = richTaxo.findAllPrimaryItemDeclarations.map(_.targetEName).toSet
+
+    assertResult(true) {
+      val dds = richTaxo.findAllDimensionDomainRelationships.map(e => e.targetConceptEName).toSet
+      val dms = richTaxo.findAllDomainMemberRelationships.map(e => e.targetConceptEName).toSet
+      val hhs = richTaxo.findAllHasHypercubeRelationships.map(e => e.primary).toSet
+
+      dds.union(dms).union(hhs).subsetOf(primaries)
+    }
+
+    assertResult(richTaxo.filterGlobalElementDeclarations(e => primaries.contains(e.targetEName)).map(_.targetEName).toSet) {
+      primaries
+    }
+    assertResult(richTaxo.filterItemDeclarations(e => primaries.contains(e.targetEName)).map(_.targetEName).toSet) {
+      primaries
+    }
+    assertResult(richTaxo.filterGlobalElementDeclarationsOnOwnSubstitutionGroup(Set(XbrliItemEName)).map(_.targetEName).toSet) {
+      primaries
+    }
+
+    val hypercubes = richTaxo.findAllHypercubeDeclarations.map(_.targetEName).toSet
+
+    assertResult(true) {
+      richTaxo.findAllHasHypercubeRelationships.map(_.hypercube).toSet.subsetOf(hypercubes)
+    }
+    assertResult(true) {
+      richTaxo.findAllHypercubeDimensionRelationships.map(_.hypercube).toSet.subsetOf(hypercubes)
+    }
+
+    assertResult(richTaxo.filterGlobalElementDeclarations(e => hypercubes.contains(e.targetEName)).map(_.targetEName).toSet) {
+      hypercubes
+    }
+    assertResult(richTaxo.filterItemDeclarations(e => hypercubes.contains(e.targetEName)).map(_.targetEName).toSet) {
+      hypercubes
+    }
+    assertResult(richTaxo.filterGlobalElementDeclarationsOnOwnSubstitutionGroup(Set(XbrldtHypercubeItemEName)).map(_.targetEName).toSet) {
+      hypercubes
+    }
+
+    val dimensions = richTaxo.findAllDimensionDeclarations.map(_.targetEName).toSet
+
+    assertResult(true) {
+      richTaxo.findAllHypercubeDimensionRelationships.map(_.dimension).toSet.subsetOf(dimensions)
+    }
+    assertResult(true) {
+      richTaxo.findAllDimensionDomainRelationships.map(_.dimension).toSet.subsetOf(dimensions)
+    }
+
+    assertResult(richTaxo.filterGlobalElementDeclarations(e => dimensions.contains(e.targetEName)).map(_.targetEName).toSet) {
+      dimensions
+    }
+    assertResult(richTaxo.filterItemDeclarations(e => dimensions.contains(e.targetEName)).map(_.targetEName).toSet) {
+      dimensions
+    }
+    assertResult(richTaxo.filterGlobalElementDeclarationsOnOwnSubstitutionGroup(Set(XbrldtDimensionItemEName)).map(_.targetEName).toSet) {
+      dimensions
+    }
+
+    assertResult(true) {
+      dimensions.forall(dim => richTaxo.findGlobalElementDeclaration(dim).map(_.targetEName) == Some(dim))
     }
   }
 }

@@ -1,0 +1,51 @@
+/*
+ * Copyright 2011-2017 Chris de Vreeze
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package eu.cdevreeze.tqa.backingelem.nodeinfo
+
+import java.io.File
+
+import scala.collection.immutable
+
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+
+import eu.cdevreeze.tqa.backingelem.AbstractBackingElemTest
+import eu.cdevreeze.yaidom.queryapi.Nodes
+import javax.xml.transform.stream.StreamSource
+import net.sf.saxon.s9api.Processor
+
+/**
+ * Backing element test for Saxon Elems.
+ *
+ * @author Chris de Vreeze
+ */
+@RunWith(classOf[JUnitRunner])
+class BackingElemTest extends AbstractBackingElemTest {
+
+  private val processor = new Processor(true)
+
+  val docElem: E = {
+    val docUri = classOf[AbstractBackingElemTest].getResource("some-data.xsd").toURI
+    val inputSource = new StreamSource(new File(docUri))
+    val doc = processor.getUnderlyingConfiguration.buildDocumentTree(inputSource)
+    DomNode.wrapDocument(doc).documentElement
+  }
+
+  def getChildren(elem: E): immutable.IndexedSeq[Nodes.Node] = {
+    elem.asInstanceOf[DomElem].children
+  }
+}
