@@ -66,7 +66,10 @@ object AnalyseTaxonomy {
 
     logger.info(s"Built taxonomy with ${taxo.rootElems.size} taxonomy root elements")
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val lenient = System.getProperty("lenient", "false").toBoolean
+
+    val relationshipsFactory =
+      if (lenient) DefaultRelationshipsFactory.LenientInstance else DefaultRelationshipsFactory.StrictInstance
 
     val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
 
@@ -87,8 +90,8 @@ object AnalyseTaxonomy {
 
         uris foreach { uri =>
           val currentRelationships = relationshipsByUri.getOrElse(uri, Vector())
-          val elrs = currentRelationships.filter(_.docUri == uri).map(_.elr).distinct.sorted
-          val arcroles = currentRelationships.filter(_.docUri == uri).map(_.arcrole).distinct.sorted
+          val elrs = currentRelationships.map(_.elr).distinct.sorted
+          val arcroles = currentRelationships.map(_.arcrole).distinct.sorted
 
           logger.info(s"Found ${currentRelationships.size} ${relationshipName}s in doc '${uri}'. ELRs: ${elrs.mkString(", ")}. Arcroles: ${arcroles.mkString(", ")}.")
         }
