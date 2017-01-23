@@ -22,12 +22,14 @@ import java.util.logging.Logger
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.backingelem.nodeinfo.DomNode
 import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
 import eu.cdevreeze.tqa.relationship.Relationship
 import eu.cdevreeze.tqa.relationship.RelationshipsFactory
+import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
@@ -62,21 +64,23 @@ object AnalyseTaxonomy {
 
     logger.info(s"Found ${taxoRootElems.size} taxonomy root elements")
 
-    val taxo = Taxonomy.build(taxoRootElems)
+    val underlyingTaxo = Taxonomy.build(taxoRootElems)
 
-    logger.info(s"Built taxonomy with ${taxo.rootElems.size} taxonomy root elements")
+    logger.info(s"Built taxonomy with ${underlyingTaxo.rootElems.size} taxonomy root elements")
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
     val relationshipsFactory =
       if (lenient) DefaultRelationshipsFactory.LenientInstance else DefaultRelationshipsFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipsFactory.extractRelationships(underlyingTaxo, RelationshipsFactory.AnyArc)
 
-    logger.info(s"The taxonomy has ${relationships.size} relationships")
+    val basicTaxo = new BasicTaxonomy(underlyingTaxo, SubstitutionGroupMap.Empty, relationships)
+
+    logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")
 
     val relationshipGroups: Map[String, immutable.IndexedSeq[Relationship]] =
-      relationships.groupBy(_.getClass.getSimpleName)
+      basicTaxo.relationships.groupBy(_.getClass.getSimpleName)
 
     logger.info(s"Relationship group sizes (topmost 15): ${relationshipGroups.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(15).mkString(", ")}")
 
