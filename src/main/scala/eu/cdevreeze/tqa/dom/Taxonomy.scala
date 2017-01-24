@@ -133,6 +133,20 @@ final class Taxonomy private (
   }
 
   /**
+   * Creates a "sub-taxonomy" in which only the given document URIs occur.
+   * It can be used for a specific entrypoint DTS, or to make query methods (not taking an EName) cheaper.
+   */
+  def filterDocumentUris(docUris: Set[URI]): Taxonomy = {
+    new Taxonomy(
+      rootElems.filter(e => docUris.contains(e.docUri)),
+      rootElemUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
+      elemUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
+      globalElementDeclarationMap.filter(kv => docUris.contains(kv._2.docUri)),
+      namedTypeDefinitionMap.filter(kv => docUris.contains(kv._2.docUri)),
+      globalAttributeDeclarationMap.filter(kv => docUris.contains(kv._2.docUri)))
+  }
+
+  /**
    * Returns true if the DOM tree with the given root element has any duplicate ID attributes.
    * If so, the taxonomy is incorrect, and the map from URIs to elements loses data.
    *

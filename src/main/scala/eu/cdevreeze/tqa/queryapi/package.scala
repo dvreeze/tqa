@@ -23,6 +23,10 @@ package eu.cdevreeze.tqa
  * Examples of such traits are traits for querying schema content, for querying inter-concept relationships,
  * for querying dimensional relationships in particular, etc.
  *
+ * Most query API methods are quite forgiving when the taxonomy is incomplete or incorrect. They just
+ * return the queried data to the extent that it is found. Only the getXXX methods that expect precisely
+ * one result will throw an exception if no (single) result is found.
+ *
  * Ideally, the taxonomy query API is very easy to use for XBRL taxonomy scripting tasks in a Scala REPL. It must
  * also be easy to mix taxonomy query API traits, and to compose taxonomy implementations that know about specific
  * relationship types (such as in formulas or tables), or that store specific data that is queried quite often.

@@ -73,9 +73,7 @@ object AnalyseTaxonomy {
     val relationshipsFactory =
       if (lenient) DefaultRelationshipsFactory.LenientInstance else DefaultRelationshipsFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(underlyingTaxo, RelationshipsFactory.AnyArc)
-
-    val basicTaxo = new BasicTaxonomy(underlyingTaxo, SubstitutionGroupMap.Empty, relationships)
+    val basicTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, relationshipsFactory)
 
     logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")
 
