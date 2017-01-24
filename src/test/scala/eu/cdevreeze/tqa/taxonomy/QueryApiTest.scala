@@ -14,38 +14,26 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.queryapi
+package eu.cdevreeze.tqa.taxonomy
 
-import java.net.URI
-
-import scala.collection.immutable
-import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
 import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
+import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.dom.ConceptDeclaration
-import eu.cdevreeze.tqa.dom.GlobalAttributeDeclaration
-import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
-import eu.cdevreeze.tqa.dom.NamedTypeDefinition
 import eu.cdevreeze.tqa.dom.Taxonomy
 import eu.cdevreeze.tqa.dom.TaxonomyElem
-import eu.cdevreeze.tqa.dom.XsdSchema
-import eu.cdevreeze.tqa.relationship.AllRelationship
+import eu.cdevreeze.tqa.queryapi.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
-import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.relationship.PresentationRelationship
-import eu.cdevreeze.tqa.relationship.Relationship
-import eu.cdevreeze.tqa.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
@@ -69,8 +57,8 @@ class QueryApiTest extends FunSuite {
 
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
-    val taxo = Taxonomy.build(taxoRootElems)
-    val richTaxo = QueryApiTest.RichTaxonomy.build(taxo, SubstitutionGroupMap.Empty)
+    val underlyingTaxo = Taxonomy.build(taxoRootElems)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 20
@@ -141,8 +129,8 @@ class QueryApiTest extends FunSuite {
 
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
-    val taxo = Taxonomy.build(taxoRootElems)
-    val richTaxo = QueryApiTest.RichTaxonomy.build(taxo, SubstitutionGroupMap.Empty)
+    val underlyingTaxo = Taxonomy.build(taxoRootElems)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 1600
@@ -240,8 +228,8 @@ class QueryApiTest extends FunSuite {
 
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
-    val taxo = Taxonomy.build(taxoRootElems)
-    val richTaxo = QueryApiTest.RichTaxonomy.build(taxo, SubstitutionGroupMap.Empty)
+    val underlyingTaxo = Taxonomy.build(taxoRootElems)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 1600
@@ -347,8 +335,8 @@ class QueryApiTest extends FunSuite {
 
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
-    val taxo = Taxonomy.build(taxoRootElems)
-    val richTaxo = QueryApiTest.RichTaxonomy.build(taxo, SubstitutionGroupMap.Empty)
+    val underlyingTaxo = Taxonomy.build(taxoRootElems)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 1600
@@ -421,95 +409,6 @@ class QueryApiTest extends FunSuite {
 
     assertResult(true) {
       dimensions.forall(dim => richTaxo.findGlobalElementDeclaration(dim).map(_.targetEName) == Some(dim))
-    }
-  }
-}
-
-object QueryApiTest {
-
-  final class RichTaxonomy(
-      val underlyingTaxo: Taxonomy,
-      val substitutionGroupMap: SubstitutionGroupMap,
-      val relationships: immutable.IndexedSeq[Relationship]) extends TaxonomyLike {
-
-    private val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
-
-    val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-      (underlyingTaxo.globalElementDeclarationMap.toSeq collect {
-        case (ename, decl) if conceptDeclarationBuilder.optConceptDeclaration(decl).isDefined =>
-          (ename -> conceptDeclarationBuilder.optConceptDeclaration(decl).get)
-      }).toMap
-    }
-
-    val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
-      relationships collect { case rel: StandardRelationship => rel } groupBy (_.sourceConceptEName)
-    }
-
-    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.sourceConceptEName)
-    }
-
-    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.targetConceptEName)
-    }
-
-    def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
-      underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[XsdSchema]))
-    }
-
-    def findAllGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
-      underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration]))
-    }
-
-    def findGlobalElementDeclaration(ename: EName): Option[GlobalElementDeclaration] = {
-      underlyingTaxo.findGlobalElementDeclarationByEName(ename)
-    }
-
-    def findGlobalElementDeclarationByUri(uri: URI): Option[GlobalElementDeclaration] = {
-      underlyingTaxo.findElemByUri(uri) collectFirst { case decl: GlobalElementDeclaration => decl }
-    }
-
-    def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
-      underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalAttributeDeclaration]))
-    }
-
-    def findGlobalAttributeDeclaration(ename: EName): Option[GlobalAttributeDeclaration] = {
-      underlyingTaxo.findGlobalAttributeDeclarationByEName(ename)
-    }
-
-    def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition] = {
-      underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition]))
-    }
-
-    def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition] = {
-      underlyingTaxo.findNamedTypeDefinitionByEName(ename)
-    }
-
-    def findConceptDeclaration(ename: EName): Option[ConceptDeclaration] = {
-      conceptDeclarationsByEName.get(ename)
-    }
-
-    def findAllStandardRelationshipsOfType[A <: StandardRelationship](
-      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
-
-      implicit val clsTag = relationshipType
-      relationships collect { case rel: A => rel }
-    }
-
-    def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
-      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
-
-      implicit val clsTag = relationshipType
-      relationships collect { case rel: A => rel }
-    }
-  }
-
-  object RichTaxonomy {
-
-    def build(underlyingTaxo: Taxonomy, substitutionGroupMap: SubstitutionGroupMap): RichTaxonomy = {
-      val relationships = DefaultRelationshipsFactory.LenientInstance.extractRelationships(underlyingTaxo, _ => true)
-
-      new RichTaxonomy(underlyingTaxo, substitutionGroupMap, relationships)
     }
   }
 }
