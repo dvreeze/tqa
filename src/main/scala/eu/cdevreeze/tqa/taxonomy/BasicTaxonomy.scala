@@ -61,50 +61,50 @@ final class BasicTaxonomy private (
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
     val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
 
-  final def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
+  def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
     underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[XsdSchema]))
   }
 
-  final def findAllGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
+  def findAllGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
     underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration]))
   }
 
-  final def findGlobalElementDeclaration(ename: EName): Option[GlobalElementDeclaration] = {
+  def findGlobalElementDeclaration(ename: EName): Option[GlobalElementDeclaration] = {
     underlyingTaxo.findGlobalElementDeclarationByEName(ename)
   }
 
-  final def findGlobalElementDeclarationByUri(uri: URI): Option[GlobalElementDeclaration] = {
+  def findGlobalElementDeclarationByUri(uri: URI): Option[GlobalElementDeclaration] = {
     underlyingTaxo.findElemByUri(uri) collectFirst { case decl: GlobalElementDeclaration => decl }
   }
 
-  final def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
+  def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
     underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalAttributeDeclaration]))
   }
 
-  final def findGlobalAttributeDeclaration(ename: EName): Option[GlobalAttributeDeclaration] = {
+  def findGlobalAttributeDeclaration(ename: EName): Option[GlobalAttributeDeclaration] = {
     underlyingTaxo.findGlobalAttributeDeclarationByEName(ename)
   }
 
-  final def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition] = {
+  def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition] = {
     underlyingTaxo.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition]))
   }
 
-  final def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition] = {
+  def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition] = {
     underlyingTaxo.findNamedTypeDefinitionByEName(ename)
   }
 
-  final def findConceptDeclaration(ename: EName): Option[ConceptDeclaration] = {
+  def findConceptDeclaration(ename: EName): Option[ConceptDeclaration] = {
     conceptDeclarationsByEName.get(ename)
   }
 
-  final def findAllStandardRelationshipsOfType[A <: StandardRelationship](
+  def findAllStandardRelationshipsOfType[A <: StandardRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
     relationships collect { case rel: A => rel }
   }
 
-  final def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
+  def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
