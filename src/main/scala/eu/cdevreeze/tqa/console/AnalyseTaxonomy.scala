@@ -22,19 +22,16 @@ import java.util.logging.Logger
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.backingelem.nodeinfo.DomNode
-import eu.cdevreeze.tqa.dom.Taxonomy
-import eu.cdevreeze.tqa.dom.TaxonomyElem
+import eu.cdevreeze.tqa.backingelem.BackingElemBuilder
+import eu.cdevreeze.tqa.backingelem.indexed.IndexedBackingElemBuilder
+import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonBackingElemBuilder
+import eu.cdevreeze.tqa.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.factory.TaxonomyFactory
+import eu.cdevreeze.tqa.factory.TaxonomyRootElemCollector
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
 import eu.cdevreeze.tqa.relationship.Relationship
-import eu.cdevreeze.tqa.relationship.RelationshipsFactory
-import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
-import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import net.sf.saxon.s9api.Processor
-import eu.cdevreeze.yaidom.java8.domelem.DomDocument
 
 /**
  * Taxonomy parser and analyser, showing some statistics about the taxonomy.
@@ -50,30 +47,23 @@ object AnalyseTaxonomy {
     val rootDir = new File(args(0))
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
 
-    val taxoFiles = findNormalFiles(rootDir, isTaxoFile)
-
-    logger.info(s"Found ${taxoFiles.size} taxonomy files")
-
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
-    val backingRootElems = toBackingElems(taxoFiles, rootDir, useSaxon)
-
-    logger.info(s"Found ${backingRootElems.size} taxonomy backing root elements")
-
-    val taxoRootElems = backingRootElems.map(e => TaxonomyElem.build(e))
-
-    logger.info(s"Found ${taxoRootElems.size} taxonomy root elements")
-
-    val underlyingTaxo = Taxonomy.build(taxoRootElems)
-
-    logger.info(s"Built taxonomy with ${underlyingTaxo.rootElems.size} taxonomy root elements")
+    val backingElemBuilder = getBackingElemBuilder(useSaxon, rootDir)
+    val rootElemCollector = getRootElemCollector(rootDir)
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
     val relationshipsFactory =
       if (lenient) DefaultRelationshipsFactory.LenientInstance else DefaultRelationshipsFactory.StrictInstance
 
-    val basicTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, relationshipsFactory)
+    val taxoBuilder =
+      TaxonomyFactory.
+        withBackingElemBuilder(backingElemBuilder).
+        withRootElemCollector(rootElemCollector).
+        withRelationshipsFactory(relationshipsFactory)
+
+    val basicTaxo = taxoBuilder.build()
 
     logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")
 
@@ -126,30 +116,47 @@ object AnalyseTaxonomy {
     URI.create(s"http://${relevantPath}")
   }
 
-  private def toBackingElems(files: immutable.IndexedSeq[File], rootDir: File, useSaxon: Boolean): immutable.IndexedSeq[BackingElemApi] = {
+  private def uriToLocalUri(uri: URI, rootDir: File): URI = {
+    // Not robust
+    val relativePath = uri.getScheme match {
+      case "http"  => uri.toString.drop("http://".size)
+      case "https" => uri.toString.drop("https://".size)
+      case _       => sys.error(s"Unexpected URI $uri")
+    }
+
+    val f = new File(rootDir, relativePath)
+    f.toURI
+  }
+
+  private def getRootElemCollector(rootDir: File): TaxonomyRootElemCollector = {
+    new TaxonomyRootElemCollector {
+
+      def collectRootElems(backingElemBuilder: BackingElemBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+        val taxoFiles = findNormalFiles(rootDir, isTaxoFile)
+
+        logger.info(s"Found ${taxoFiles.size} taxonomy files")
+
+        val taxoUris = taxoFiles.map(f => fileToUri(f, rootDir))
+
+        val backingElems = taxoUris.map(uri => backingElemBuilder.build(uri))
+
+        logger.info(s"Found ${backingElems.size} taxonomy backing root elements")
+
+        val taxoRootElems = backingElems.flatMap(e => TaxonomyRootElem.buildOptionally(e))
+
+        logger.info(s"Found ${taxoRootElems.size} taxonomy root elements")
+        taxoRootElems
+      }
+    }
+  }
+
+  private def getBackingElemBuilder(useSaxon: Boolean, rootDir: File): BackingElemBuilder = {
     if (useSaxon) {
-      toBackingElemsUsingSaxon(files, rootDir)
+      val processor = new Processor(false)
+
+      new SaxonBackingElemBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
     } else {
-      toBackingElemsUsingNativeYaidom(files, rootDir)
+      new IndexedBackingElemBuilder(DocumentParserUsingStax.newInstance(), uriToLocalUri(_, rootDir))
     }
-  }
-
-  private def toBackingElemsUsingSaxon(files: immutable.IndexedSeq[File], rootDir: File): immutable.IndexedSeq[BackingElemApi] = {
-    val processor = new Processor(false)
-
-    val docBuilder = processor.newDocumentBuilder()
-
-    files map { f =>
-      val node = docBuilder.build(f).getUnderlyingNode
-      node.setSystemId(fileToUri(f, rootDir).toString)
-      DomNode.wrapDocument(node.getTreeInfo).documentElement
-    }
-  }
-
-  private def toBackingElemsUsingNativeYaidom(files: immutable.IndexedSeq[File], rootDir: File): immutable.IndexedSeq[BackingElemApi] = {
-    val docParser = DocumentParserUsingStax.newInstance()
-
-    val taxoDocs = files.map(f => docParser.parse(f).withUriOption(Some(fileToUri(f, rootDir))))
-    taxoDocs.map(d => indexed.Document(d).documentElement)
   }
 }

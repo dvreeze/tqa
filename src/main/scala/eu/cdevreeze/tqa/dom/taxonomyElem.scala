@@ -768,6 +768,17 @@ object TaxonomyElem {
   }
 }
 
+object TaxonomyRootElem {
+
+  def buildOptionally(backingElem: BackingElemApi): Option[TaxonomyRootElem] = {
+    Some(TaxonomyElem.build(backingElem)) collect { case taxoRoot: TaxonomyRootElem => taxoRoot }
+  }
+
+  def build(backingElem: BackingElemApi): TaxonomyRootElem = {
+    TaxonomyElem.build(backingElem).asInstanceOf[TaxonomyRootElem]
+  }
+}
+
 object XsdSchema {
 
   def build(backingElem: BackingElemApi): XsdSchema = {
