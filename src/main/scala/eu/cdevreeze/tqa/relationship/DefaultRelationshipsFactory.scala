@@ -44,7 +44,7 @@ import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
 import eu.cdevreeze.tqa.dom.LabeledXLink
-import eu.cdevreeze.tqa.dom.Taxonomy
+import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.dom.XLinkArc
@@ -54,13 +54,13 @@ import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
- * Default extractor of relationships from a "taxonomy".
+ * Default extractor of relationships from a "taxonomy base".
  *
  * When choosing for lenient processing, XLink arcs may be broken in that the XLink labels are corrupt, and XLink
  * locators may be broken in that the locator href URIs cannot be resolved. When choosing for strict processing,
  * XLink arcs and locators may not be broken.
  *
- * Lenient processing makes sense when the taxonomy has not yet been validated. Strict processing makes sense when
+ * Lenient processing makes sense when the taxonomy base has not yet been validated. Strict processing makes sense when
  * the taxonomy is XBRL valid, and we want to use that fact, for example when validating XBRL instances against it.
  *
  * @author Chris de Vreeze
@@ -68,20 +68,20 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config) extends RelationshipsFactory {
 
   def extractRelationships(
-    taxonomy: Taxonomy,
+    taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
-    taxonomy.rootElems flatMap { rootElem =>
-      extractRelationshipsFromDocument(rootElem.docUri, taxonomy, arcFilter)
+    taxonomyBase.rootElems flatMap { rootElem =>
+      extractRelationshipsFromDocument(rootElem.docUri, taxonomyBase, arcFilter)
     }
   }
 
   def extractRelationshipsFromDocument(
     docUri: URI,
-    taxonomy: Taxonomy,
+    taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
-    val taxoRootElemOption = taxonomy.rootElemUriMap.get(docUri)
+    val taxoRootElemOption = taxonomyBase.rootElemUriMap.get(docUri)
 
     if (taxoRootElemOption.isEmpty) {
       immutable.IndexedSeq()
@@ -90,26 +90,26 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
 
       val extendedLinks = taxoRootElem.findTopmostElemsOrSelfOfType(classTag[ExtendedLink])(anyElem)
 
-      extendedLinks.flatMap(extLink => extractRelationshipsFromExtendedLink(extLink, taxonomy, arcFilter))
+      extendedLinks.flatMap(extLink => extractRelationshipsFromExtendedLink(extLink, taxonomyBase, arcFilter))
     }
   }
 
   def extractRelationshipsFromExtendedLink(
     extendedLink: ExtendedLink,
-    taxonomy: Taxonomy,
+    taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
     val labeledXlinkMap = extendedLink.labeledXlinkMap
 
     extendedLink.arcs.filter(arcFilter) flatMap { arc =>
-      extractRelationshipsFromArc(arc, labeledXlinkMap, taxonomy)
+      extractRelationshipsFromArc(arc, labeledXlinkMap, taxonomyBase)
     }
   }
 
   def extractRelationshipsFromArc(
     arc: XLinkArc,
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
-    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship] = {
+    taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship] = {
 
     val fromXLinkLabel = arc.from
     val toXLinkLabel = arc.to
@@ -127,9 +127,9 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
     val relationships =
       for {
         fromXLink <- fromXLinks.toIndexedSeq
-        resolvedFrom <- optionallyResolve(fromXLink, taxonomy).toIndexedSeq
+        resolvedFrom <- optionallyResolve(fromXLink, taxonomyBase).toIndexedSeq
         toXLink <- toXLinks.toIndexedSeq
-        resolvedTo <- optionallyResolve(toXLink, taxonomy).toIndexedSeq
+        resolvedTo <- optionallyResolve(toXLink, taxonomyBase).toIndexedSeq
       } yield {
         Relationship(arc, resolvedFrom, resolvedTo)
       }
@@ -139,18 +139,18 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
 
   def computeNetworks(
     relationships: immutable.IndexedSeq[Relationship],
-    taxonomy: Taxonomy): Map[BaseSetKey, immutable.IndexedSeq[Relationship]] = {
+    taxonomyBase: TaxonomyBase): Map[BaseSetKey, immutable.IndexedSeq[Relationship]] = {
 
     val baseSets = relationships.groupBy(_.arc.baseSetKey)
 
     baseSets.toSeq.map({
       case (baseSetKey, rels) =>
-        (baseSetKey -> computeNetwork(baseSetKey, rels, taxonomy))
+        (baseSetKey -> computeNetwork(baseSetKey, rels, taxonomyBase))
     }).toMap
   }
 
-  def getRelationshipKey(relationship: Relationship, taxonomy: Taxonomy): RelationshipKey = {
-    val nonExemptAttributes = extractNonExemptAttributeMap(relationship, taxonomy)
+  def getRelationshipKey(relationship: Relationship, taxonomyBase: TaxonomyBase): RelationshipKey = {
+    val nonExemptAttributes = extractNonExemptAttributeMap(relationship, taxonomyBase)
 
     RelationshipKey(
       relationship.arc.baseSetKey,
@@ -161,7 +161,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
 
   private def optionallyResolve(
     xlink: LabeledXLink,
-    taxonomy: Taxonomy): Option[ResolvedLocatorOrResource[_ <: TaxonomyElem]] = {
+    taxonomyBase: TaxonomyBase): Option[ResolvedLocatorOrResource[_ <: TaxonomyElem]] = {
 
     xlink match {
       case res: XLinkResource => Some(new ResolvedResource(res))
@@ -169,7 +169,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
         val elemUri = loc.baseUri.resolve(loc.rawHref)
 
         val optTaxoElem =
-          Try(taxonomy.findElemByUri(elemUri)) match {
+          Try(taxonomyBase.findElemByUri(elemUri)) match {
             case Success(result) => result
             case Failure(result) =>
               if (config.allowWrongXPointer) None else sys.error(s"Error in URI '${elemUri}'")
@@ -188,12 +188,12 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
   private def computeNetwork(
     baseSetKey: BaseSetKey,
     relationships: immutable.IndexedSeq[Relationship],
-    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship] = {
+    taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship] = {
 
     val filteredRelationships = relationships.filter(_.arc.baseSetKey == baseSetKey)
 
     val equivalentRelationshipsByKey =
-      filteredRelationships.groupBy(rel => getRelationshipKey(rel, taxonomy))
+      filteredRelationships.groupBy(rel => getRelationshipKey(rel, taxonomyBase))
     val optResolvedRelationshipsByKey =
       equivalentRelationshipsByKey.mapValues(rels => resolveProhibitionAndOverridingForEquivalentRelationships(rels))
     val resolvedRelationshipsByKey =
@@ -224,7 +224,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
     }
   }
 
-  private def extractNonExemptAttributeMap(relationship: Relationship, taxonomy: Taxonomy): NonExemptAttributeMap = {
+  private def extractNonExemptAttributeMap(relationship: Relationship, taxonomyBase: TaxonomyBase): NonExemptAttributeMap = {
     // TODO This does not include default and fixed attributes!
 
     val nonExemptAttrs: Map[EName, String] =
@@ -250,7 +250,7 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
               (attrName -> BooleanAttributeValue.parse(v))
             case _ =>
               // TODO Not correct. Instead look up the attribute declaration, its type, call
-              // function taxonomy.findBaseTypeOrSelfUntil, and turn the attribute value into a typed one
+              // function taxonomyBase.findBaseTypeOrSelfUntil, and turn the attribute value into a typed one
               (attrName -> StringAttributeValue.parse(v))
           }
       }

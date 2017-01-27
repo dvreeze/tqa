@@ -16,11 +16,9 @@
 
 package eu.cdevreeze.tqa.factory
 
-import java.net.URI
-
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.backingelem.BackingElemBuilder
-import eu.cdevreeze.tqa.dom.Taxonomy
+import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
 import eu.cdevreeze.tqa.relationship.RelationshipsFactory
@@ -81,9 +79,9 @@ object TaxonomyFactory {
     def build(): BasicTaxonomy = {
       val taxoRootElems = rootElemCollector.collectRootElems(backingElemBuilder)
 
-      val underlyingTaxo = Taxonomy.build(taxoRootElems)
+      val taxonomyBase = TaxonomyBase.build(taxoRootElems)
 
-      BasicTaxonomy.build(underlyingTaxo, substitutionGroupMap, relationshipsFactory, arcFilter)
+      BasicTaxonomy.build(taxonomyBase, substitutionGroupMap, relationshipsFactory, arcFilter)
     }
   }
 }

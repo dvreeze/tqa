@@ -29,14 +29,15 @@ import eu.cdevreeze.yaidom.core.EName
  * (with fragments) to taxonomy elements, for quick element lookups based on URIs with fragments. It also contains
  * a map from ENames (names with target namespace) of global element declarations and named type definitions.
  *
+ * It does not understand (resolved) relationships, and it has no taxonomy query API, but it supports creation of such
+ * a taxonomy that knows about relationships and has a taxonomy query API. In that sense, the reason for this class to
+ * exist is mainly its role in creating rich taxonomy objects.
+ *
  * This object is rather expensive to create (through the build method), building the maps that support fast querying based on URI
  * (with fragment) or "target EName".
  *
- * Taxonomy creation should never fail, if correct URIs are passed. Even the instance methods are very lenient and
+ * TaxonomyBase creation should never fail, if correct URIs are passed. Even the instance methods are very lenient and
  * should never fail. Typically, a taxonomy instantiated as an object of this class has not yet been validated.
- * This taxonomy class has 2 main purposes: support for quick locator resolution when building relationships, and
- * support for quick relationship key computation when determining networks of relationships. Of course, this class
- * can also be used for taxonomy validations tasks, when the taxonomy has not yet been validated at all.
  *
  * For the rootElemUriMap and elemUriMap, we have that data is silently lost in those maps if there are any duplicate IDs (per document).
  * In a valid taxonomy (as XML document set) this duplication is not allowed.
@@ -47,7 +48,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final class Taxonomy private (
+final class TaxonomyBase private (
     val rootElems: immutable.IndexedSeq[TaxonomyElem],
     val rootElemUriMap: Map[URI, TaxonomyElem],
     val elemUriMap: Map[URI, TaxonomyElem],
@@ -136,8 +137,8 @@ final class Taxonomy private (
    * Creates a "sub-taxonomy" in which only the given document URIs occur.
    * It can be used for a specific entrypoint DTS, or to make query methods (not taking an EName) cheaper.
    */
-  def filterDocumentUris(docUris: Set[URI]): Taxonomy = {
-    new Taxonomy(
+  def filterDocumentUris(docUris: Set[URI]): TaxonomyBase = {
+    new TaxonomyBase(
       rootElems.filter(e => docUris.contains(e.docUri)),
       rootElemUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
       elemUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
@@ -188,12 +189,12 @@ final class Taxonomy private (
   }
 }
 
-object Taxonomy {
+object TaxonomyBase {
 
   /**
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    */
-  def build(rootElems: immutable.IndexedSeq[TaxonomyElem]): Taxonomy = {
+  def build(rootElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyBase = {
     val rootElemUriMap: Map[URI, TaxonomyElem] = {
       rootElems.groupBy(e => e.docUri).mapValues(_.head)
     }
@@ -214,7 +215,7 @@ object Taxonomy {
       rootElems.flatMap(e => getGlobalAttributeDeclarationMap(e).toSeq).toMap
     }
 
-    new Taxonomy(rootElems, rootElemUriMap, elemUriMap, globalElementDeclarationMap, namedTypeDefinitionMap, globalAttributeDeclarationMap)
+    new TaxonomyBase(rootElems, rootElemUriMap, elemUriMap, globalElementDeclarationMap, namedTypeDefinitionMap, globalAttributeDeclarationMap)
   }
 
   private def getGlobalElementDeclarationMap(rootElem: TaxonomyElem): Map[EName, GlobalElementDeclaration] = {

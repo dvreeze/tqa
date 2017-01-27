@@ -19,8 +19,8 @@ package eu.cdevreeze.tqa.dom
 import eu.cdevreeze.tqa.XmlFragmentKey
 
 /**
- * Any taxonomy XML element, at any abstraction level. So the abstraction level can be core taxonomy data, or dimensional taxonomy
- * data, or formula or table taxonomy data.
+ * Any taxonomy XML element, at any abstraction level. So the abstraction level can be core or dimensional taxonomy data,
+ * or formula taxonomy data, or table taxonomy data.
  *
  * @author Chris de Vreeze
  */

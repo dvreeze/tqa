@@ -23,43 +23,43 @@ import scala.collection.immutable
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
 import eu.cdevreeze.tqa.dom.LabeledXLink
-import eu.cdevreeze.tqa.dom.Taxonomy
+import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.XLinkArc
 
 /**
- * Extractor of relationships from a "taxonomy".
+ * Extractor of relationships from a "taxonomy base".
  *
  * @author Chris de Vreeze
  */
 trait RelationshipsFactory {
 
   def extractRelationships(
-    taxonomy: Taxonomy,
+    taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   def extractRelationshipsFromDocument(
     docUri: URI,
-    taxonomy: Taxonomy,
+    taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   def extractRelationshipsFromExtendedLink(
     extendedLink: ExtendedLink,
-    taxonomy: Taxonomy,
+    taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   def extractRelationshipsFromArc(
     arc: XLinkArc,
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
-    taxonomy: Taxonomy): immutable.IndexedSeq[Relationship]
+    taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship]
 
   def computeNetworks(
     relationships: immutable.IndexedSeq[Relationship],
-    taxonomy: Taxonomy): Map[BaseSetKey, immutable.IndexedSeq[Relationship]]
+    taxonomyBase: TaxonomyBase): Map[BaseSetKey, immutable.IndexedSeq[Relationship]]
 
   /**
    * Gets the key of the relationship that is the same (only) for equivalent relationships.
    */
-  def getRelationshipKey(relationship: Relationship, taxonomy: Taxonomy): RelationshipKey
+  def getRelationshipKey(relationship: Relationship, taxonomyBase: TaxonomyBase): RelationshipKey
 }
 
 object RelationshipsFactory {

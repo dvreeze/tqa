@@ -29,7 +29,7 @@ import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.LabelArc
 import eu.cdevreeze.tqa.dom.Linkbase
 import eu.cdevreeze.tqa.dom.XLinkLocator
-import eu.cdevreeze.tqa.dom.Taxonomy
+import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.yaidom.core.EName
@@ -61,7 +61,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -123,7 +123,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -189,7 +189,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -252,7 +252,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -324,7 +324,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -396,7 +396,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -436,7 +436,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -481,7 +481,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -532,7 +532,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -572,7 +572,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -618,7 +618,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
@@ -671,7 +671,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = Taxonomy.build(Vector(xsdSchema, linkbase1, linkbase2))
+    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
     val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
 
