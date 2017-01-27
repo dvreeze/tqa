@@ -30,7 +30,7 @@ import eu.cdevreeze.yaidom.core.EName
  * a map from ENames (names with target namespace) of global element declarations and named type definitions.
  *
  * It does not understand (resolved) relationships, and it has no taxonomy query API, but it supports creation of such
- * a taxonomy that knows about relationships and has a taxonomy query API. In that sense, the reason for this class to
+ * a taxonomy that does know about relationships and does have a taxonomy query API. In that sense, the reason for this class to
  * exist is mainly its role in creating rich taxonomy objects.
  *
  * This object is rather expensive to create (through the build method), building the maps that support fast querying based on URI
