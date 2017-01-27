@@ -55,9 +55,9 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
 
@@ -94,9 +94,9 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
 
@@ -144,9 +144,9 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
 
@@ -183,9 +183,9 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
 
@@ -222,9 +222,9 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
 
@@ -258,9 +258,9 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     // Parent-child relationships
 
@@ -308,7 +308,7 @@ class ExtractRelationshipsTest extends FunSuite {
       }
 
     assertResult(calcRelationships.map(_.arc).toSet) {
-      relationshipsFactory.extractRelationships(taxo, (_.resolvedName == LinkCalculationArcEName)).map(_.arc).toSet
+      relationshipFactory.extractRelationships(taxo, (_.resolvedName == LinkCalculationArcEName)).map(_.arc).toSet
     }
 
     // Concept-label relationships
@@ -335,7 +335,7 @@ class ExtractRelationshipsTest extends FunSuite {
     }
 
     assertResult(computerEquipmentLabelRelationships.map(_.arc).toSet) {
-      relationshipsFactory.extractRelationships(
+      relationshipFactory.extractRelationships(
         taxo,
         (arc => arc.isInstanceOf[LabelArc] && arc.from == "ci_ComputerEquipment")).map(_.arc).toSet
     }

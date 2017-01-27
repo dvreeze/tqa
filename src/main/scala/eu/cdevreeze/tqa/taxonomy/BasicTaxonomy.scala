@@ -33,7 +33,7 @@ import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.tqa.queryapi.TaxonomyLike
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.relationship.Relationship
-import eu.cdevreeze.tqa.relationship.RelationshipsFactory
+import eu.cdevreeze.tqa.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
 
@@ -152,9 +152,9 @@ object BasicTaxonomy {
   def build(
     taxonomyBase: TaxonomyBase,
     substitutionGroupMap: SubstitutionGroupMap,
-    relationshipsFactory: RelationshipsFactory): BasicTaxonomy = {
+    relationshipFactory: RelationshipFactory): BasicTaxonomy = {
 
-    build(taxonomyBase, substitutionGroupMap, relationshipsFactory, _ => true)
+    build(taxonomyBase, substitutionGroupMap, relationshipFactory, _ => true)
   }
 
   /**
@@ -168,10 +168,10 @@ object BasicTaxonomy {
   def build(
     taxonomyBase: TaxonomyBase,
     substitutionGroupMap: SubstitutionGroupMap,
-    relationshipsFactory: RelationshipsFactory,
+    relationshipFactory: RelationshipFactory,
     arcFilter: XLinkArc => Boolean): BasicTaxonomy = {
 
-    val relationships = relationshipsFactory.extractRelationships(taxonomyBase, arcFilter)
+    val relationships = relationshipFactory.extractRelationships(taxonomyBase, arcFilter)
     build(taxonomyBase, substitutionGroupMap, relationships)
   }
 

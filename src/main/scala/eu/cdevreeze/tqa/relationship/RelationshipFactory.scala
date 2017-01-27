@@ -31,7 +31,7 @@ import eu.cdevreeze.tqa.dom.XLinkArc
  *
  * @author Chris de Vreeze
  */
-trait RelationshipsFactory {
+trait RelationshipFactory {
 
   def extractRelationships(
     taxonomyBase: TaxonomyBase,
@@ -62,7 +62,7 @@ trait RelationshipsFactory {
   def getRelationshipKey(relationship: Relationship, taxonomyBase: TaxonomyBase): RelationshipKey
 }
 
-object RelationshipsFactory {
+object RelationshipFactory {
 
   val AnyArc: XLinkArc => Boolean = (_ => true)
 

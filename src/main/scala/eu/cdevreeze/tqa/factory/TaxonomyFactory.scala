@@ -20,8 +20,8 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.backingelem.BackingElemBuilder
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.XLinkArc
-import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
-import eu.cdevreeze.tqa.relationship.RelationshipsFactory
+import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
 
 /**
@@ -48,16 +48,16 @@ object TaxonomyFactory {
 
     // TODO We miss caching of root elements now. DTS discovery may repeatedly parse the same documents.
 
-    def withRelationshipsFactory(relationshipsFactory: RelationshipsFactory): Builder = {
-      new Builder(backingElemBuilder, rootElemCollector, SubstitutionGroupMap.Empty, relationshipsFactory, (_ => true))
+    def withRelationshipsFactory(relationshipFactory: RelationshipFactory): Builder = {
+      new Builder(backingElemBuilder, rootElemCollector, SubstitutionGroupMap.Empty, relationshipFactory, (_ => true))
     }
 
     def withStrictRelationshipsFactory: Builder = {
-      withRelationshipsFactory(DefaultRelationshipsFactory.StrictInstance)
+      withRelationshipsFactory(DefaultRelationshipFactory.StrictInstance)
     }
 
     def withLenientRelationshipsFactory: Builder = {
-      withRelationshipsFactory(DefaultRelationshipsFactory.LenientInstance)
+      withRelationshipsFactory(DefaultRelationshipFactory.LenientInstance)
     }
   }
 
@@ -65,15 +65,15 @@ object TaxonomyFactory {
       val backingElemBuilder: BackingElemBuilder,
       val rootElemCollector: TaxonomyRootElemCollector,
       val substitutionGroupMap: SubstitutionGroupMap,
-      val relationshipsFactory: RelationshipsFactory,
+      val relationshipFactory: RelationshipFactory,
       val arcFilter: XLinkArc => Boolean) {
 
     def withSubstitutionGroupMap(newSubstitutionGroupMap: SubstitutionGroupMap): Builder = {
-      new Builder(backingElemBuilder, rootElemCollector, newSubstitutionGroupMap, relationshipsFactory, arcFilter)
+      new Builder(backingElemBuilder, rootElemCollector, newSubstitutionGroupMap, relationshipFactory, arcFilter)
     }
 
     def withArcFilter(newArcFilter: XLinkArc => Boolean): Builder = {
-      new Builder(backingElemBuilder, rootElemCollector, substitutionGroupMap, relationshipsFactory, newArcFilter)
+      new Builder(backingElemBuilder, rootElemCollector, substitutionGroupMap, relationshipFactory, newArcFilter)
     }
 
     def build(): BasicTaxonomy = {
@@ -81,7 +81,7 @@ object TaxonomyFactory {
 
       val taxonomyBase = TaxonomyBase.build(taxoRootElems)
 
-      BasicTaxonomy.build(taxonomyBase, substitutionGroupMap, relationshipsFactory, arcFilter)
+      BasicTaxonomy.build(taxonomyBase, substitutionGroupMap, relationshipFactory, arcFilter)
     }
   }
 }

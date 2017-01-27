@@ -29,7 +29,7 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.queryapi.InterConceptRelationshipPath
-import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
+import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
@@ -58,7 +58,7 @@ class QueryApiTest extends FunSuite {
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
     val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
-    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 20
@@ -130,7 +130,7 @@ class QueryApiTest extends FunSuite {
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
     val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
-    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 1600
@@ -229,7 +229,7 @@ class QueryApiTest extends FunSuite {
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
     val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
-    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 1600
@@ -336,7 +336,7 @@ class QueryApiTest extends FunSuite {
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
     val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
-    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipsFactory.LenientInstance)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
       richTaxo.findAllGlobalElementDeclarations.size > 1600

@@ -63,9 +63,9 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
 
@@ -76,7 +76,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       calcRelationships.map(_.arc)
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
@@ -99,7 +99,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
@@ -125,9 +125,9 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
 
@@ -138,7 +138,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       calcRelationships.map(_.arc)
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
@@ -159,7 +159,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     val nonProhibitedRelationships = relationships.filter(_.arc.use == Use.Optional)
 
@@ -191,9 +191,9 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
 
@@ -204,7 +204,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       calcRelationships.map(_.arc)
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
@@ -228,7 +228,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
@@ -254,9 +254,9 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
 
@@ -267,7 +267,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       calcRelationships.map(_.arc)
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
@@ -293,7 +293,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     val floatingAssetsRels =
       calcRelationships.filter(_.targetConceptEName.localPart == "floatingAssets")
@@ -326,9 +326,9 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
 
@@ -339,7 +339,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       calcRelationships.map(_.arc)
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(Set(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr))) {
       relationshipKeys.map(_.baseSetKey).toSet
@@ -365,7 +365,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     val floatingAssetsRels =
       calcRelationships.filter(_.targetConceptEName.localPart == "floatingAssets")
@@ -398,21 +398,21 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     assertResult(2) {
       relationships.size
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(2) {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships)) {
       networkMap
@@ -438,21 +438,21 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     assertResult(3) {
       relationships.size
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(2) {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     val filteredRelationships = relationships.filter(_.arc.priority == 2)
 
@@ -483,15 +483,15 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     assertResult(3) {
       relationships.size
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(1) {
       relationshipKeys.distinct.size
@@ -508,7 +508,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     // Useless network computation, because one arc is not allowed
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships.filter(_.arc.priority == 2))) {
       networkMap
@@ -534,21 +534,21 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     assertResult(2) {
       relationships.size
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(2) {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     assertResult(Map(BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> relationships)) {
       networkMap
@@ -574,21 +574,21 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     assertResult(3) {
       relationships.size
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(2) {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     val filteredRelationships =
       relationships.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName) == Some("fixedAssets"))
@@ -620,22 +620,22 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2, linkbase3))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     assertResult(4) {
       relationships.size
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     // Mind the different arcroles
     assertResult(3) {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipsFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     val filteredRequiresElementRelationships =
       relationships collect {
@@ -673,9 +673,9 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase1, linkbase2))
 
-    val relationshipsFactory = DefaultRelationshipsFactory.StrictInstance
+    val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val relationships = relationshipsFactory.extractRelationships(taxo, RelationshipsFactory.AnyArc)
+    val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
     assertResult(3) {
       relationships.size
@@ -691,7 +691,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       (relationships collect { case rel: UnknownRelationship => rel }).size
     }
 
-    val relationshipKeys = relationships.map(rel => relationshipsFactory.getRelationshipKey(rel, taxo))
+    val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))
 
     assertResult(3) {
       relationshipKeys.distinct.size

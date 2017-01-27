@@ -65,7 +65,7 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  *
  * @author Chris de Vreeze
  */
-final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config) extends RelationshipsFactory {
+final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) extends RelationshipFactory {
 
   def extractRelationships(
     taxonomyBase: TaxonomyBase,
@@ -260,11 +260,11 @@ final class DefaultRelationshipsFactory(val config: RelationshipsFactory.Config)
   }
 }
 
-object DefaultRelationshipsFactory {
+object DefaultRelationshipFactory {
 
-  val VeryLenientInstance = new DefaultRelationshipsFactory(RelationshipsFactory.Config.VeryLenient)
+  val VeryLenientInstance = new DefaultRelationshipFactory(RelationshipFactory.Config.VeryLenient)
 
-  val LenientInstance = new DefaultRelationshipsFactory(RelationshipsFactory.Config.Lenient)
+  val LenientInstance = new DefaultRelationshipFactory(RelationshipFactory.Config.Lenient)
 
-  val StrictInstance = new DefaultRelationshipsFactory(RelationshipsFactory.Config.Strict)
+  val StrictInstance = new DefaultRelationshipFactory(RelationshipFactory.Config.Strict)
 }

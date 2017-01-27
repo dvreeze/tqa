@@ -28,7 +28,7 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonBackingElemBuilder
 import eu.cdevreeze.tqa.dom.TaxonomyRootElem
 import eu.cdevreeze.tqa.factory.TaxonomyFactory
 import eu.cdevreeze.tqa.factory.TaxonomyRootElemCollector
-import eu.cdevreeze.tqa.relationship.DefaultRelationshipsFactory
+import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.Relationship
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
@@ -55,7 +55,7 @@ object AnalyseTaxonomy {
     val lenient = System.getProperty("lenient", "false").toBoolean
 
     val relationshipsFactory =
-      if (lenient) DefaultRelationshipsFactory.LenientInstance else DefaultRelationshipsFactory.StrictInstance
+      if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
 
     val taxoBuilder =
       TaxonomyFactory.
