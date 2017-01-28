@@ -21,9 +21,9 @@ package eu.cdevreeze.tqa
  *
  * First of all, bootstrapping needs an URI converter, that converts original (http or https) URIs to
  * local file system URIs. Next, we need that URI converter and a Saxon or yaidom document parser to
- * configure a BackingElemBuilder. Next we need a discovery strategy for obtaining the root elements of
+ * configure a DocumentBuilder. Next we need a discovery strategy for obtaining the root elements of
  * the taxonomy. This is typically DTS discovery (the details of which can be somewhat tweaked).
- * Finally we need a RelationshipsFactory (and maybe an arc filter) to create a BasicTaxonomy.
+ * Finally we need a RelationshipFactory (and maybe an arc filter) to create a BasicTaxonomy.
  *
  * Once a BasicTaxonomy is created, it can be used as basis for wrapper taxonomy objects that know
  * about networks of relationships, tables/formulas, etc.
@@ -39,4 +39,4 @@ package eu.cdevreeze.tqa
  *
  * @author Chris de Vreeze
  */
-package object factory
+package object taxonomybuilder

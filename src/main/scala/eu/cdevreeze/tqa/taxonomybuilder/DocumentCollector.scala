@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.factory
+package eu.cdevreeze.tqa.taxonomybuilder
 
 import scala.collection.immutable
 
