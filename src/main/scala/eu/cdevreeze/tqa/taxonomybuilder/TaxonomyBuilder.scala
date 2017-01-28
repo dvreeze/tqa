@@ -33,7 +33,7 @@ import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
 final class TaxonomyBuilder(
     val documentBuilder: DocumentBuilder,
     val documentCollector: DocumentCollector,
-    val substitutionGroupMap: SubstitutionGroupMap,
+    val extraSubstitutionGroupMap: SubstitutionGroupMap,
     val relationshipFactory: RelationshipFactory,
     val arcFilter: XLinkArc => Boolean) {
 
@@ -42,7 +42,7 @@ final class TaxonomyBuilder(
   }
 
   def withArcFilter(newArcFilter: XLinkArc => Boolean): TaxonomyBuilder = {
-    new TaxonomyBuilder(documentBuilder, documentCollector, substitutionGroupMap, relationshipFactory, newArcFilter)
+    new TaxonomyBuilder(documentBuilder, documentCollector, extraSubstitutionGroupMap, relationshipFactory, newArcFilter)
   }
 
   def build(): BasicTaxonomy = {
@@ -50,7 +50,7 @@ final class TaxonomyBuilder(
 
     val taxonomyBase = TaxonomyBase.build(taxoRootElems)
 
-    BasicTaxonomy.build(taxonomyBase, substitutionGroupMap, relationshipFactory, arcFilter)
+    BasicTaxonomy.build(taxonomyBase, extraSubstitutionGroupMap, relationshipFactory, arcFilter)
   }
 }
 

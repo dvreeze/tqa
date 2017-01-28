@@ -22,6 +22,7 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames.IdEName
+import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -32,6 +33,10 @@ import eu.cdevreeze.yaidom.core.EName
  * It does not understand (resolved) relationships, and it has no taxonomy query API, but it supports creation of such
  * a taxonomy that does know about relationships and does have a taxonomy query API. In that sense, the reason for this class to
  * exist is mainly its role in creating rich taxonomy objects.
+ *
+ * Not only does this class not understand (resolved) relationships, it also does not know about substitution
+ * groups and therefore it does not know about concept declarations (unless all substitution groups are
+ * in the taxonomy base and we are prepared to follow them all).
  *
  * This object is rather expensive to create (through the build method), building the maps that support fast querying based on URI
  * (with fragment) or "target EName".
@@ -59,6 +64,23 @@ final class TaxonomyBase private (
   require(
     rootElems.forall(e => e.docUri.getFragment == null),
     s"Expected document URIs but got at least one URI with fragment")
+
+  /**
+   * Returns the SubstitutionGroupMap that can be derived from this taxonomy base alone.
+   * This is an expensive operation that should be performed only once, if possible.
+   */
+  def computeDerivedSubstitutionGroupMap: SubstitutionGroupMap = {
+    val rawMappings: Map[EName, EName] =
+      (globalElementDeclarationMap.toSeq collect {
+        case (en, decl) if decl.substitutionGroupOption.isDefined => (en -> decl.substitutionGroupOption.get)
+      }).toMap
+
+    val substGroups: Set[EName] = rawMappings.values.toSet
+
+    val mappings: Map[EName, EName] = rawMappings.filterKeys(substGroups)
+
+    SubstitutionGroupMap.from(mappings)
+  }
 
   /**
    * Finds the (first) optional element with the given URI. The fragment, if any, must be an XPointer or sequence thereof.

@@ -54,12 +54,15 @@ import eu.cdevreeze.yaidom.core.EName
  */
 final class BasicTaxonomy private (
     val taxonomyBase: TaxonomyBase,
-    val substitutionGroupMap: SubstitutionGroupMap,
+    val extraSubstitutionGroupMap: SubstitutionGroupMap,
+    val netSubstitutionGroupMap: SubstitutionGroupMap,
     val relationships: immutable.IndexedSeq[Relationship],
     val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
     val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
     val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
+
+  def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
 
   def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
     taxonomyBase.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[XsdSchema]))
@@ -114,11 +117,16 @@ final class BasicTaxonomy private (
   /**
    * Creates a "sub-taxonomy" in which only the given document URIs occur.
    * It can be used for a specific entrypoint DTS, or to make query methods (not taking an EName) cheaper.
+   * In order to keep the same net substitution groups, they are passed as the extra substitution groups
+   * to the subset BasicTaxonomy.
    */
   def filterDocumentUris(docUris: Set[URI]): BasicTaxonomy = {
+    val filteredTaxoBase = taxonomyBase.filterDocumentUris(docUris)
+
     new BasicTaxonomy(
       taxonomyBase.filterDocumentUris(docUris),
-      substitutionGroupMap,
+      netSubstitutionGroupMap,
+      netSubstitutionGroupMap,
       relationships.filter(rel => docUris.contains(rel.docUri)),
       conceptDeclarationsByEName.filter(kv => docUris.contains(kv._2.globalElementDeclaration.docUri)),
       standardRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
@@ -134,7 +142,8 @@ final class BasicTaxonomy private (
   def filterRelationships(p: Relationship => Boolean): BasicTaxonomy = {
     new BasicTaxonomy(
       taxonomyBase,
-      substitutionGroupMap,
+      extraSubstitutionGroupMap,
+      netSubstitutionGroupMap,
       relationships.filter(p),
       conceptDeclarationsByEName,
       standardRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
@@ -151,28 +160,29 @@ object BasicTaxonomy {
    */
   def build(
     taxonomyBase: TaxonomyBase,
-    substitutionGroupMap: SubstitutionGroupMap,
+    extraSubstitutionGroupMap: SubstitutionGroupMap,
     relationshipFactory: RelationshipFactory): BasicTaxonomy = {
 
-    build(taxonomyBase, substitutionGroupMap, relationshipFactory, _ => true)
+    build(taxonomyBase, extraSubstitutionGroupMap, relationshipFactory, _ => true)
   }
 
   /**
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    * This method first extracts relationships from the underlying taxonomy, and then calls the overloaded
-   * build method that takes as parameters the underlying taxonomy base, substitution group map, and extracted
+   * build method that takes as parameters the underlying taxonomy base, extra substitution group map, and extracted
    * relationships.
    *
    * The arc filter is only used during relationship extraction. It is not used to filter any taxonomy DOM content.
    */
   def build(
     taxonomyBase: TaxonomyBase,
-    substitutionGroupMap: SubstitutionGroupMap,
+    extraSubstitutionGroupMap: SubstitutionGroupMap,
     relationshipFactory: RelationshipFactory,
     arcFilter: XLinkArc => Boolean): BasicTaxonomy = {
 
     val relationships = relationshipFactory.extractRelationships(taxonomyBase, arcFilter)
-    build(taxonomyBase, substitutionGroupMap, relationships)
+
+    build(taxonomyBase, extraSubstitutionGroupMap, relationships)
   }
 
   /**
@@ -181,10 +191,13 @@ object BasicTaxonomy {
    */
   def build(
     taxonomyBase: TaxonomyBase,
-    substitutionGroupMap: SubstitutionGroupMap,
+    extraSubstitutionGroupMap: SubstitutionGroupMap,
     relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
-    val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
+    val netSubstitutionGroupMap =
+      taxonomyBase.computeDerivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)
+
+    val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
 
     val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
       (taxonomyBase.globalElementDeclarationMap.toSeq collect {
@@ -193,21 +206,26 @@ object BasicTaxonomy {
       }).toMap
     }
 
+    val standardRelationships = relationships collect { case rel: StandardRelationship => rel }
+
     val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
-      relationships collect { case rel: StandardRelationship => rel } groupBy (_.sourceConceptEName)
+      standardRelationships groupBy (_.sourceConceptEName)
     }
 
+    val interConceptRelationships = standardRelationships collect { case rel: InterConceptRelationship => rel }
+
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.sourceConceptEName)
+      interConceptRelationships groupBy (_.sourceConceptEName)
     }
 
     val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      relationships collect { case rel: InterConceptRelationship => rel } groupBy (_.targetConceptEName)
+      interConceptRelationships groupBy (_.targetConceptEName)
     }
 
     new BasicTaxonomy(
       taxonomyBase,
-      substitutionGroupMap,
+      extraSubstitutionGroupMap,
+      netSubstitutionGroupMap,
       relationships,
       conceptDeclarationsByEName,
       standardRelationshipsBySource,

@@ -53,6 +53,13 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
   def effectiveMappings: Map[EName, EName] = {
     mappings ++ Map(XbrldtHypercubeItemEName -> XbrliItemEName, XbrldtDimensionItemEName -> XbrliItemEName)
   }
+
+  /**
+   * Returns `SubstitutionGroupMap(this.mappings ++ sgm.mappings)`.
+   */
+  def append(sgm: SubstitutionGroupMap): SubstitutionGroupMap = {
+    SubstitutionGroupMap(this.mappings ++ sgm.mappings)
+  }
 }
 
 object SubstitutionGroupMap {
@@ -61,4 +68,11 @@ object SubstitutionGroupMap {
     Set(XbrliItemEName, XbrliTupleEName, XbrldtHypercubeItemEName, XbrldtDimensionItemEName)
 
   val Empty = SubstitutionGroupMap(Map.empty)
+
+  /**
+   * Safe construction method, filtering away standard substitution groups from the mapping keys provided.
+   */
+  def from(mappings: Map[EName, EName]): SubstitutionGroupMap = {
+    SubstitutionGroupMap(mappings.filterKeys(k => !SubstitutionGroupMap.StandardConceptSubstitutionGroups.contains(k)))
+  }
 }
