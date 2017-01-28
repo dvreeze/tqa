@@ -31,14 +31,14 @@ final class SaxonDocumentBuilder(
     val docBuilder: s9api.DocumentBuilder,
     val uriConverter: URI => URI) extends DocumentBuilder {
 
-  type BackingElem = DomElem
+  type BackingElem = SaxonElem
 
-  def build(uri: URI): DomElem = {
+  def build(uri: URI): SaxonElem = {
     val localUri = uriConverter(uri)
     require(localUri.getScheme == "file", s"Expected local file URI but found $localUri")
 
     val node = docBuilder.build(new File(localUri)).getUnderlyingNode
     node.setSystemId(uri.toString)
-    DomNode.wrapDocument(node.getTreeInfo).documentElement
+    SaxonNode.wrapDocument(node.getTreeInfo).documentElement
   }
 }

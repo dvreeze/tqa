@@ -44,31 +44,31 @@ import net.sf.saxon.pattern.NodeKindTest
  *
  * @author Chris de Vreeze
  */
-sealed abstract class DomNode(val wrappedNode: NodeInfo) extends ResolvedNodes.Node {
+sealed abstract class SaxonNode(val wrappedNode: NodeInfo) extends ResolvedNodes.Node {
 
   final override def toString: String = wrappedNode.toString
 
   protected def nodeInfo2EName(nodeInfo: NodeInfo): EName = {
-    DomNode.nodeInfo2EName(nodeInfo)
+    SaxonNode.nodeInfo2EName(nodeInfo)
   }
 
   protected def nodeInfo2QName(nodeInfo: NodeInfo): QName = {
-    DomNode.nodeInfo2QName(nodeInfo)
+    SaxonNode.nodeInfo2QName(nodeInfo)
   }
 
   final override def equals(obj: Any): Boolean = obj match {
-    case other: DomNode => this.wrappedNode == other.wrappedNode
-    case _              => false
+    case other: SaxonNode => this.wrappedNode == other.wrappedNode
+    case _                => false
   }
 
   final override def hashCode: Int = this.wrappedNode.hashCode
 
-  final def children: immutable.IndexedSeq[DomNode] = {
+  final def children: immutable.IndexedSeq[SaxonNode] = {
     val it = wrappedNode.iterateAxis(AxisInfo.CHILD)
 
     val nodes = Stream.continually(it.next()).takeWhile(_ ne null).toIndexedSeq
 
-    nodes.flatMap(nodeInfo => DomNode.wrapNodeOption(nodeInfo))
+    nodes.flatMap(nodeInfo => SaxonNode.wrapNodeOption(nodeInfo))
   }
 
   /**
@@ -85,44 +85,44 @@ sealed abstract class DomNode(val wrappedNode: NodeInfo) extends ResolvedNodes.N
     words.mkString(" ") // Returns empty string if words.isEmpty
   }
 
-  final protected def filterElemsByAxisAndPredicate(axisNumber: Byte, p: DomElem => Boolean): immutable.IndexedSeq[DomElem] = {
+  final protected def filterElemsByAxisAndPredicate(axisNumber: Byte, p: SaxonElem => Boolean): immutable.IndexedSeq[SaxonElem] = {
     val it = wrappedNode.iterateAxis(axisNumber, NodeKindTest.ELEMENT)
 
     val nodes = Stream.continually(it.next()).takeWhile(_ ne null).toIndexedSeq
 
-    nodes.map(nodeInfo => DomNode.wrapElement(nodeInfo)).filter(p)
+    nodes.map(nodeInfo => SaxonNode.wrapElement(nodeInfo)).filter(p)
   }
 
-  final protected def findElemByAxisAndPredicate(axisNumber: Byte, p: DomElem => Boolean): Option[DomElem] = {
+  final protected def findElemByAxisAndPredicate(axisNumber: Byte, p: SaxonElem => Boolean): Option[SaxonElem] = {
     val it = wrappedNode.iterateAxis(axisNumber, NodeKindTest.ELEMENT)
 
     val nodeStream = Stream.continually(it.next()).takeWhile(_ ne null)
 
-    nodeStream.map(nodeInfo => DomNode.wrapElement(nodeInfo)).find(p)
+    nodeStream.map(nodeInfo => SaxonNode.wrapElement(nodeInfo)).find(p)
   }
 }
 
-final class DomDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
+final class SaxonDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.DOCUMENT, s"Expected document but got node kind ${wrappedNode.getNodeKind}")
 
-  type ThisDoc = DomDocument
+  type ThisDoc = SaxonDocument
 
-  type DocElemType = DomElem
+  type DocElemType = SaxonElem
 
   def wrappedNode: NodeInfo = wrappedTreeInfo.getRootNode
 
   def uriOption: Option[URI] = Option(wrappedNode.getSystemId).map(s => URI.create(s))
 
-  def documentElement: DomElem =
-    (children collectFirst { case e: DomElem => e }).getOrElse(sys.error(s"Missing document element"))
+  def documentElement: SaxonElem =
+    (children collectFirst { case e: SaxonElem => e }).getOrElse(sys.error(s"Missing document element"))
 
-  final def children: immutable.IndexedSeq[DomNode] = {
+  final def children: immutable.IndexedSeq[SaxonNode] = {
     val it = wrappedNode.iterateAxis(AxisInfo.CHILD)
 
     val nodes = Stream.continually(it.next()).takeWhile(_ ne null).toVector
 
-    nodes.flatMap(nodeInfo => DomNode.wrapNodeOption(nodeInfo))
+    nodes.flatMap(nodeInfo => SaxonNode.wrapNodeOption(nodeInfo))
   }
 }
 
@@ -131,13 +131,13 @@ final class DomDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
 /**
  * Saxon NodeInfo element wrapper. It is efficient, because of an entirely custom query API implementation tailored to Saxon.
  */
-final class DomElem(
-    override val wrappedNode: NodeInfo) extends DomNode(wrappedNode) with ResolvedNodes.Elem with BackingElemApi {
+final class SaxonElem(
+    override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with ResolvedNodes.Elem with BackingElemApi {
 
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.ELEMENT, s"Expected element but got node kind ${wrappedNode.getNodeKind}")
 
-  type ThisElem = DomElem
+  type ThisElem = SaxonElem
 
   def thisElem: ThisElem = this
 
@@ -492,13 +492,13 @@ final class DomElem(
   // Extra methods
 
   /** Returns the text children */
-  def textChildren: immutable.IndexedSeq[DomText] = children collect { case t: DomText => t }
+  def textChildren: immutable.IndexedSeq[SaxonText] = children collect { case t: SaxonText => t }
 
   /** Returns the comment children */
-  def commentChildren: immutable.IndexedSeq[DomComment] = children collect { case c: DomComment => c }
+  def commentChildren: immutable.IndexedSeq[SaxonComment] = children collect { case c: SaxonComment => c }
 }
 
-final class DomText(override val wrappedNode: NodeInfo) extends DomNode(wrappedNode) with ResolvedNodes.Text {
+final class SaxonText(override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with ResolvedNodes.Text {
   require(wrappedNode ne null)
   require(
     wrappedNode.getNodeKind == Type.TEXT || wrappedNode.getNodeKind == Type.WHITESPACE_TEXT,
@@ -511,7 +511,7 @@ final class DomText(override val wrappedNode: NodeInfo) extends DomNode(wrappedN
   def normalizedText: String = normalizeString(text)
 }
 
-final class DomProcessingInstruction(override val wrappedNode: NodeInfo) extends DomNode(wrappedNode) with Nodes.ProcessingInstruction {
+final class SaxonProcessingInstruction(override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with Nodes.ProcessingInstruction {
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.PROCESSING_INSTRUCTION, s"Expected processing instruction but got node kind ${wrappedNode.getNodeKind}")
 
@@ -520,32 +520,32 @@ final class DomProcessingInstruction(override val wrappedNode: NodeInfo) extends
   def data: String = wrappedNode.getStringValue // ???
 }
 
-final class DomComment(override val wrappedNode: NodeInfo) extends DomNode(wrappedNode) with Nodes.Comment {
+final class SaxonComment(override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with Nodes.Comment {
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.COMMENT, s"Expected comment but got node kind ${wrappedNode.getNodeKind}")
 
   def text: String = wrappedNode.getStringValue
 }
 
-object DomNode {
+object SaxonNode {
 
   import ENameProvider.globalENameProvider._
   import QNameProvider.globalQNameProvider._
 
-  def wrapNodeOption(node: NodeInfo): Option[DomNode] = {
+  def wrapNodeOption(node: NodeInfo): Option[SaxonNode] = {
     node.getNodeKind match {
-      case Type.ELEMENT                => Some(new DomElem(node))
-      case Type.TEXT                   => Some(new DomText(node))
-      case Type.WHITESPACE_TEXT        => Some(new DomText(node))
-      case Type.PROCESSING_INSTRUCTION => Some(new DomProcessingInstruction(node))
-      case Type.COMMENT                => Some(new DomComment(node))
+      case Type.ELEMENT                => Some(new SaxonElem(node))
+      case Type.TEXT                   => Some(new SaxonText(node))
+      case Type.WHITESPACE_TEXT        => Some(new SaxonText(node))
+      case Type.PROCESSING_INSTRUCTION => Some(new SaxonProcessingInstruction(node))
+      case Type.COMMENT                => Some(new SaxonComment(node))
       case _                           => None
     }
   }
 
-  def wrapDocument(doc: TreeInfo): DomDocument = new DomDocument(doc)
+  def wrapDocument(doc: TreeInfo): SaxonDocument = new SaxonDocument(doc)
 
-  def wrapElement(elm: NodeInfo): DomElem = new DomElem(elm)
+  def wrapElement(elm: NodeInfo): SaxonElem = new SaxonElem(elm)
 
   def nodeInfo2EName(nodeInfo: NodeInfo): EName = {
     val ns: String = nodeInfo.getURI
