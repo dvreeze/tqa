@@ -21,16 +21,16 @@ import java.net.URI
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 
 /**
- * Any builder of a backing element. Typical backing element builders convert the document URI
+ * Any builder of a document root backing element. Typical document builders convert the document URI
  * to a local URI, parse the document using that local URI, and after parsing store the original
  * URI as document URI in the returned backing element.
  *
- * Backing element builders can be stacked, for example to perform some "post-processing".
+ * Document builders can be stacked, for example to perform some "post-processing".
  * For example, some taxonomy document may have a broken link in the schema location attribute, and
  * such a post-processing step can fix that before the backing element is used to build a type-safe
  * taxonomy DOM tree from it.
- * 
- * Note that backing element builders backed by typical XML parsers are not thread-safe!
+ *
+ * Note that document builders backed by typical XML parsers are not thread-safe!
  *
  * Note that these builders return root elements and not documents, so top-level comments and processing
  * instructions are lost. It should be possible to parse the document later again, given the document URI,
@@ -40,8 +40,8 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
  *
  * @author Chris de Vreeze
  */
-trait BackingElemBuilder {
-  
+trait DocumentBuilder {
+
   type BackingElem <: BackingElemApi
 
   def build(uri: URI): BackingElem

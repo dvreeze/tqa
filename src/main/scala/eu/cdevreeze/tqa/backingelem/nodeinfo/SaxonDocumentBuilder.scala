@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.indexed
+package eu.cdevreeze.tqa.backingelem.nodeinfo
 
+import java.io.File
 import java.net.URI
 
-import eu.cdevreeze.tqa.backingelem.BackingElemBuilder
-import eu.cdevreeze.yaidom.indexed.Document
-import eu.cdevreeze.yaidom.indexed.Elem
-import eu.cdevreeze.yaidom.parse.DocumentParser
+import eu.cdevreeze.tqa.backingelem.DocumentBuilder
+import net.sf.saxon.s9api
 
 /**
- * Indexed backing element builder using a yaidom DocumentParser and URI converter.
+ * Saxon document builder using a Saxon DocumentBuilder and URI converter.
  *
  * @author Chris de Vreeze
  */
-final class IndexedBackingElemBuilder(
-    val docParser: DocumentParser,
-    val uriConverter: URI => URI) extends BackingElemBuilder {
+final class SaxonDocumentBuilder(
+    val docBuilder: s9api.DocumentBuilder,
+    val uriConverter: URI => URI) extends DocumentBuilder {
 
-  type BackingElem = Elem
+  type BackingElem = DomElem
 
-  def build(uri: URI): Elem = {
+  def build(uri: URI): DomElem = {
     val localUri = uriConverter(uri)
+    require(localUri.getScheme == "file", s"Expected local file URI but found $localUri")
 
-    val doc = docParser.parse(localUri).withUriOption(Some(uri))
-    Document(doc).documentElement
+    val node = docBuilder.build(new File(localUri)).getUnderlyingNode
+    node.setSystemId(uri.toString)
+    DomNode.wrapDocument(node.getTreeInfo).documentElement
   }
 }

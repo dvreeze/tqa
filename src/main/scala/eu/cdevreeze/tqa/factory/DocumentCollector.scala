@@ -18,7 +18,7 @@ package eu.cdevreeze.tqa.factory
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.backingelem.BackingElemBuilder
+import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.dom.TaxonomyRootElem
 
 /**
@@ -27,7 +27,7 @@ import eu.cdevreeze.tqa.dom.TaxonomyRootElem
  *
  * @author Chris de Vreeze
  */
-trait TaxonomyRootElemCollector {
+trait DocumentCollector {
 
-  def collectRootElems(backingElemBuilder: BackingElemBuilder): immutable.IndexedSeq[TaxonomyRootElem]
+  def collectTaxonomyRootElems(documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem]
 }

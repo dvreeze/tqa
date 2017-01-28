@@ -22,12 +22,12 @@ import java.util.logging.Logger
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.backingelem.BackingElemBuilder
-import eu.cdevreeze.tqa.backingelem.indexed.IndexedBackingElemBuilder
-import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonBackingElemBuilder
+import eu.cdevreeze.tqa.backingelem.DocumentBuilder
+import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.factory.DocumentCollector
 import eu.cdevreeze.tqa.factory.TaxonomyFactory
-import eu.cdevreeze.tqa.factory.TaxonomyRootElemCollector
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.Relationship
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
@@ -49,8 +49,8 @@ object AnalyseTaxonomy {
 
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
-    val backingElemBuilder = getBackingElemBuilder(useSaxon, rootDir)
-    val rootElemCollector = getRootElemCollector(rootDir)
+    val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
+    val documentCollector = getDocumentCollector(rootDir)
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
@@ -59,8 +59,8 @@ object AnalyseTaxonomy {
 
     val taxoBuilder =
       TaxonomyFactory.
-        withBackingElemBuilder(backingElemBuilder).
-        withRootElemCollector(rootElemCollector).
+        withDocumentBuilder(documentBuilder).
+        withDocumentCollector(documentCollector).
         withRelationshipsFactory(relationshipsFactory)
 
     val basicTaxo = taxoBuilder.build()
@@ -128,17 +128,17 @@ object AnalyseTaxonomy {
     f.toURI
   }
 
-  private def getRootElemCollector(rootDir: File): TaxonomyRootElemCollector = {
-    new TaxonomyRootElemCollector {
+  private def getDocumentCollector(rootDir: File): DocumentCollector = {
+    new DocumentCollector {
 
-      def collectRootElems(backingElemBuilder: BackingElemBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+      def collectTaxonomyRootElems(documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
         val taxoFiles = findNormalFiles(rootDir, isTaxoFile)
 
         logger.info(s"Found ${taxoFiles.size} taxonomy files")
 
         val taxoUris = taxoFiles.map(f => fileToUri(f, rootDir))
 
-        val backingElems = taxoUris.map(uri => backingElemBuilder.build(uri))
+        val backingElems = taxoUris.map(uri => documentBuilder.build(uri))
 
         logger.info(s"Found ${backingElems.size} taxonomy backing root elements")
 
@@ -150,13 +150,13 @@ object AnalyseTaxonomy {
     }
   }
 
-  private def getBackingElemBuilder(useSaxon: Boolean, rootDir: File): BackingElemBuilder = {
+  private def getDocumentBuilder(useSaxon: Boolean, rootDir: File): DocumentBuilder = {
     if (useSaxon) {
       val processor = new Processor(false)
 
-      new SaxonBackingElemBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
+      new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
     } else {
-      new IndexedBackingElemBuilder(DocumentParserUsingStax.newInstance(), uriToLocalUri(_, rootDir))
+      new IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriToLocalUri(_, rootDir))
     }
   }
 }
