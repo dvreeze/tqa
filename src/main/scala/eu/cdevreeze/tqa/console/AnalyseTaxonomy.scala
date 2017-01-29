@@ -25,10 +25,9 @@ import scala.collection.immutable
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
-import eu.cdevreeze.tqa.dom.TaxonomyRootElem
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.Relationship
-import eu.cdevreeze.tqa.taxonomybuilder.DocumentCollector
+import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
@@ -43,14 +42,16 @@ object AnalyseTaxonomy {
   private val logger = Logger.getGlobal
 
   def main(args: Array[String]): Unit = {
-    require(args.size == 1, s"Usage: AnalyseTaxonomy <taxo root dir>")
+    require(args.size >= 2, s"Usage: AnalyseTaxonomy <taxo root dir> <entrypoint URI 1> ...")
     val rootDir = new File(args(0))
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
+
+    val entrypointUris = args.drop(1).map(u => URI.create(u)).toSet
 
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
     val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
-    val documentCollector = getDocumentCollector(rootDir)
+    val documentCollector = DefaultDtsCollector(entrypointUris)
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
@@ -62,6 +63,8 @@ object AnalyseTaxonomy {
         withDocumentBuilder(documentBuilder).
         withDocumentCollector(documentCollector).
         withRelationshipFactory(relationshipFactory)
+
+    logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUris.mkString(", ")}")
 
     val basicTaxo = taxoBuilder.build()
 
@@ -90,32 +93,6 @@ object AnalyseTaxonomy {
     }
   }
 
-  private def findNormalFiles(rootDir: File, p: File => Boolean): immutable.IndexedSeq[File] = {
-    require(rootDir.isDirectory, s"Not a directory: $rootDir")
-
-    rootDir.listFiles.toIndexedSeq flatMap {
-      case f: File if f.isFile =>
-        immutable.IndexedSeq(f).filter(p)
-      case d: File if d.isDirectory =>
-        // Recursive call
-        findNormalFiles(d, p)
-      case f: File =>
-        immutable.IndexedSeq()
-    }
-  }
-
-  private def isTaxoFile(f: File): Boolean = {
-    f.isFile && (f.getName.endsWith(".xml") || f.getName.endsWith(".xsd"))
-  }
-
-  private def fileToUri(f: File, rootDir: File): URI = {
-    // Not robust
-    val idx = f.getPath.indexOf(rootDir.getName)
-    require(idx >= 0)
-    val relevantPath = f.getPath.substring(idx + rootDir.getName.size).dropWhile(_ == '/')
-    URI.create(s"http://${relevantPath}")
-  }
-
   private def uriToLocalUri(uri: URI, rootDir: File): URI = {
     // Not robust
     val relativePath = uri.getScheme match {
@@ -124,32 +101,8 @@ object AnalyseTaxonomy {
       case _       => sys.error(s"Unexpected URI $uri")
     }
 
-    val f = new File(rootDir, relativePath)
+    val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
     f.toURI
-  }
-
-  private def getDocumentCollector(rootDir: File): DocumentCollector = {
-    new DocumentCollector {
-
-      def collectTaxonomyRootElems(documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
-        val taxoFiles = findNormalFiles(rootDir, isTaxoFile)
-
-        logger.info(s"Found ${taxoFiles.size} taxonomy files")
-
-        val taxoUris = taxoFiles.map(f => fileToUri(f, rootDir))
-
-        val backingElems = taxoUris.map(uri => documentBuilder.build(uri))
-
-        logger.info(s"Found ${backingElems.size} taxonomy backing root elements")
-
-        val taxoRootElems = backingElems.flatMap(e => TaxonomyRootElem.buildOptionally(e))
-
-        logger.info(s"Found ${taxoRootElems.size} taxonomy root elements")
-        logger.info(s"Not taxonomy root elements: ${taxoUris.toSet.diff(taxoRootElems.map(_.docUri).toSet).toSeq.sortBy(_.toString).mkString(", ")}")
-
-        taxoRootElems
-      }
-    }
   }
 
   private def getDocumentBuilder(useSaxon: Boolean, rootDir: File): DocumentBuilder = {

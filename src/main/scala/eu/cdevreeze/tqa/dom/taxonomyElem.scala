@@ -23,6 +23,7 @@ import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames.AbstractEName
 import eu.cdevreeze.tqa.ENames.BaseEName
+import eu.cdevreeze.tqa.ENames.LinkArcroleRefEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationLinkEName
 import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
@@ -31,12 +32,15 @@ import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkLabelEName
 import eu.cdevreeze.tqa.ENames.LinkLabelLinkEName
 import eu.cdevreeze.tqa.ENames.LinkLinkbaseEName
+import eu.cdevreeze.tqa.ENames.LinkLinkbaseRefEName
 import eu.cdevreeze.tqa.ENames.LinkLocEName
 import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
 import eu.cdevreeze.tqa.ENames.LinkPresentationLinkEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceLinkEName
+import eu.cdevreeze.tqa.ENames.LinkRoleRefEName
+import eu.cdevreeze.tqa.ENames.LinkSchemaRefEName
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.PriorityEName
 import eu.cdevreeze.tqa.ENames.RefEName
@@ -732,7 +736,25 @@ final class NonStandardResource private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkResource
 
-// TODO Known simple links etc.
+// Known simple links etc.
+
+final class LinkbaseRef private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink
+
+final class SchemaRef private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink
+
+final class RoleRef private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink
+
+final class ArcroleRef private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink
+
+// Remaining elements.
 
 final class OtherLinkbaseElem private[dom] (
   backingElem: BackingElemApi,
@@ -842,6 +864,10 @@ object LinkElem {
       case LinkCalculationArcEName   => new CalculationArc(backingElem, childElems)
       case LinkLabelArcEName         => new LabelArc(backingElem, childElems)
       case LinkReferenceArcEName     => new ReferenceArc(backingElem, childElems)
+      case LinkLinkbaseRefEName      => new LinkbaseRef(backingElem, childElems)
+      case LinkSchemaRefEName        => new SchemaRef(backingElem, childElems)
+      case LinkRoleRefEName          => new RoleRef(backingElem, childElems)
+      case LinkArcroleRefEName       => new ArcroleRef(backingElem, childElems)
       case _                         => new OtherLinkbaseElem(backingElem, childElems)
     }
   }
