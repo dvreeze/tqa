@@ -22,7 +22,7 @@ import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.dom.TaxonomyRootElem
 
 /**
- * Strategy for collecting taxonomy root elements. Typically implemented as DTS discovery, although
+ * Strategy for collecting taxonomy document root elements. Typically implemented as DTS discovery, although
  * file search under a given root directory is also possible.
  *
  * @author Chris de Vreeze

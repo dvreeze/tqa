@@ -145,6 +145,8 @@ object AnalyseTaxonomy {
         val taxoRootElems = backingElems.flatMap(e => TaxonomyRootElem.buildOptionally(e))
 
         logger.info(s"Found ${taxoRootElems.size} taxonomy root elements")
+        logger.info(s"Not taxonomy root elements: ${taxoUris.toSet.diff(taxoRootElems.map(_.docUri).toSet).toSeq.sortBy(_.toString).mkString(", ")}")
+
         taxoRootElems
       }
     }

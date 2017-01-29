@@ -37,12 +37,20 @@ final class TaxonomyBuilder(
     val relationshipFactory: RelationshipFactory,
     val arcFilter: XLinkArc => Boolean) {
 
-  def withSubstitutionGroupMap(newSubstitutionGroupMap: SubstitutionGroupMap): TaxonomyBuilder = {
-    new TaxonomyBuilder(documentBuilder, documentCollector, newSubstitutionGroupMap, relationshipFactory, arcFilter)
+  def withExtraSubstitutionGroupMap(newExtraSubstitutionGroupMap: SubstitutionGroupMap): TaxonomyBuilder = {
+    new TaxonomyBuilder(documentBuilder, documentCollector, newExtraSubstitutionGroupMap, relationshipFactory, arcFilter)
   }
 
   def withArcFilter(newArcFilter: XLinkArc => Boolean): TaxonomyBuilder = {
     new TaxonomyBuilder(documentBuilder, documentCollector, extraSubstitutionGroupMap, relationshipFactory, newArcFilter)
+  }
+
+  /**
+   * Returns an updated TaxonomyBuilder with the given document collector. This can be handy if we want
+   * to reuse an existing taxonomy builder except for the entrypoints of the DTS to discover.
+   */
+  def withDocumentCollector(newDocumentCollector: DocumentCollector): TaxonomyBuilder = {
+    new TaxonomyBuilder(documentBuilder, newDocumentCollector, extraSubstitutionGroupMap, relationshipFactory, arcFilter)
   }
 
   def build(): BasicTaxonomy = {
