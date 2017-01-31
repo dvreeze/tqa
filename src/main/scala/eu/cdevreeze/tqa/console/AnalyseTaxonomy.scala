@@ -68,6 +68,9 @@ object AnalyseTaxonomy {
 
     val basicTaxo = taxoBuilder.build()
 
+    val rootElems = basicTaxo.taxonomyBase.rootElems
+
+    logger.info(s"The taxonomy has ${rootElems.size} taxonomy root elements")
     logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")
 
     val relationshipGroups: Map[String, immutable.IndexedSeq[Relationship]] =
