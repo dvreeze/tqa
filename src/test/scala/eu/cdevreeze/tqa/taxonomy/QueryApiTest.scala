@@ -345,7 +345,7 @@ class QueryApiTest extends FunSuite {
       richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
     }
 
-    assertResult(richTaxo.filterGlobalElementDeclarationsInSubstitutionGroup(XbrliItemEName).map(_.targetEName).toSet) {
+    assertResult(richTaxo.filterGlobalElementDeclarationsOnOwnOrInheritedSubstitutionGroup(XbrliItemEName).map(_.targetEName).toSet) {
       richTaxo.findAllItemDeclarations.map(_.targetEName).toSet
     }
 

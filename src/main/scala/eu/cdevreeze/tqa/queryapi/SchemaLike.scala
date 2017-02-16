@@ -76,7 +76,7 @@ trait SchemaLike extends SchemaApi {
     filterGlobalElementDeclarations(e => e.substitutionGroupOption.exists(sg => p(sg)))
   }
 
-  final def filterGlobalElementDeclarationsInSubstitutionGroup(sg: EName): immutable.IndexedSeq[GlobalElementDeclaration] = {
+  final def filterGlobalElementDeclarationsOnOwnOrInheritedSubstitutionGroup(sg: EName): immutable.IndexedSeq[GlobalElementDeclaration] = {
     filterGlobalElementDeclarations(e => e.hasSubstitutionGroup(sg, substitutionGroupMap))
   }
 

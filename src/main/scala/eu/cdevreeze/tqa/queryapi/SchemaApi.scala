@@ -73,7 +73,7 @@ trait SchemaApi {
 
   def filterGlobalElementDeclarationsOnOwnSubstitutionGroup(p: EName => Boolean): immutable.IndexedSeq[GlobalElementDeclaration]
 
-  def filterGlobalElementDeclarationsInSubstitutionGroup(sg: EName): immutable.IndexedSeq[GlobalElementDeclaration]
+  def filterGlobalElementDeclarationsOnOwnOrInheritedSubstitutionGroup(sg: EName): immutable.IndexedSeq[GlobalElementDeclaration]
 
   def findGlobalElementDeclaration(p: GlobalElementDeclaration => Boolean): Option[GlobalElementDeclaration]
 

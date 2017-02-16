@@ -36,7 +36,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContainerApi { self: InterConceptRelationshipContainerLike =>
+trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContainerApi { self: InterConceptRelationshipContainerApi =>
 
   // Finding and filtering relationships without looking at source or target concept
 
