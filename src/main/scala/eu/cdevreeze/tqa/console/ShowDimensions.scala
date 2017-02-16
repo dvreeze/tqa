@@ -91,15 +91,15 @@ object ShowDimensions {
 
     val concretePrimaryItemDecls = basicTaxo.findAllPrimaryItemDeclarations.filter(e => !e.globalElementDeclaration.isAbstract)
 
-    val concretePrimariesNotInheritingHasHypercube = concretePrimaryItemDecls filter { itemDecl =>
-      basicTaxo.findAllInheritedHasHypercubes(itemDecl.targetEName).isEmpty
+    val concretePrimariesNotInheritingOrHavingHasHypercube = concretePrimaryItemDecls filter { itemDecl =>
+      basicTaxo.findAllOwnOrInheritedHasHypercubes(itemDecl.targetEName).isEmpty
     } map (_.targetEName)
 
-    val namespacesOfConcretePrimariesNotInheritingHasHypercube =
-      concretePrimariesNotInheritingHasHypercube.flatMap(_.namespaceUriOption).distinct.sortBy(_.toString)
+    val namespacesOfConcretePrimariesNotInheritingOrHavingHasHypercube =
+      concretePrimariesNotInheritingOrHavingHasHypercube.flatMap(_.namespaceUriOption).distinct.sortBy(_.toString)
 
-    logger.info(s"Number of (in total ${concretePrimaryItemDecls.size}) concrete primary items not inheriting any has-hypercube: ${concretePrimariesNotInheritingHasHypercube.distinct.size}")
-    logger.info(s"Namespaces of concrete primary items not inheriting any has-hypercube (first 50):\n\t${namespacesOfConcretePrimariesNotInheritingHasHypercube.take(50).mkString(", ")}")
+    logger.info(s"Number of (in total ${concretePrimaryItemDecls.size}) concrete primary items not inheriting or having any has-hypercube: ${concretePrimariesNotInheritingOrHavingHasHypercube.distinct.size}")
+    logger.info(s"Namespaces of concrete primary items not inheriting or having any has-hypercube (first 50):\n\t${namespacesOfConcretePrimariesNotInheritingOrHavingHasHypercube.take(50).mkString(", ")}")
 
     val inheritingPrimaries =
       (hasHypercubes flatMap { hh =>
@@ -108,22 +108,26 @@ object ShowDimensions {
         }
       } flatMap (_.relationships.map(_.member))).toSet
 
-    val inheritingConcretePrimaries =
-      inheritingPrimaries filter (item => basicTaxo.findPrimaryItemDeclaration(item).exists(e => !e.globalElementDeclaration.isAbstract))
+    val ownPrimaries = hasHypercubes.map(_.sourceConceptEName).toSet
+
+    val inheritingOrOwnPrimaries = inheritingPrimaries.union(ownPrimaries)
+
+    val inheritingOrOwnConcretePrimaries =
+      inheritingOrOwnPrimaries filter (item => basicTaxo.findPrimaryItemDeclaration(item).exists(e => !e.globalElementDeclaration.isAbstract))
 
     require(
-      concretePrimariesNotInheritingHasHypercube.toSet == concretePrimaryItemDecls.map(_.targetEName).toSet.diff(inheritingConcretePrimaries),
-      s"Finding concrete primary items not inheriting any has-hypercube from 2 directions must give the same result")
+      concretePrimariesNotInheritingOrHavingHasHypercube.toSet == concretePrimaryItemDecls.map(_.targetEName).toSet.diff(inheritingOrOwnConcretePrimaries),
+      s"Finding concrete primary items not inheriting or having any has-hypercube from 2 directions must give the same result")
 
     logger.info("Showing inheriting concrete items")
 
     concretePrimaryItemDecls.map(_.targetEName).distinct.sortBy(_.toString) foreach { item =>
-      val hasHypercubes = basicTaxo.findAllInheritedHasHypercubes(item)
+      val hasHypercubes = basicTaxo.findAllOwnOrInheritedHasHypercubes(item)
       val elrPrimariesPairs = hasHypercubes.groupBy(_.elr).mapValues(_.map(_.primary)).toSeq.sortBy(_._1)
 
       elrPrimariesPairs foreach {
         case (elr, primaries) =>
-          println(s"Concrete item $item inherits has-hypercubes for ELR $elr and with primaries ${primaries.distinct.sortBy(_.toString).mkString(", ")}")
+          println(s"Concrete item $item inherits or has has-hypercubes for ELR $elr and with primaries ${primaries.distinct.sortBy(_.toString).mkString(", ")}")
       }
     }
 

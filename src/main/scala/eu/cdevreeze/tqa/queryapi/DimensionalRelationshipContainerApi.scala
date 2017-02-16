@@ -208,13 +208,13 @@ trait DimensionalRelationshipContainerApi {
   // Other query methods
 
   /**
-   * Finds all inherited has-hypercubes. See section 2.6.1 of the XBRL Dimensions specification.
+   * Finds all own or inherited has-hypercubes. See section 2.6.1 of the XBRL Dimensions specification.
    */
-  def findAllInheritedHasHypercubes(targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
+  def findAllOwnOrInheritedHasHypercubes(concept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
 
   /**
-   * Finds all inherited has-hypercubes as a Map from ELRs to all primaries that are source concepts
+   * Finds all own or inherited has-hypercubes as a Map from ELRs to all primaries that are source concepts
    * of the has-hypercube relationships with that ELR. See section 2.6.1 of the XBRL Dimensions specification.
    */
-  def findAllInheritedHasHypercubesAsElrToPrimariesMap(targetConcept: EName): Map[String, Set[EName]]
+  def findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]]
 }

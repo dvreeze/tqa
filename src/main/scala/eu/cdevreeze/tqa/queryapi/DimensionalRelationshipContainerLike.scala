@@ -226,14 +226,19 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   // Other query methods
 
-  final def findAllInheritedHasHypercubes(targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
+  final def findAllOwnOrInheritedHasHypercubes(concept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
     val incomingRelationshipPaths =
-      filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)
+      filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(concept)(_ => true)
 
     val domainMemberRelationships = incomingRelationshipPaths.flatMap(_.relationships)
 
-    val elrSourceConceptPairs =
-      domainMemberRelationships.map(rel => (rel.elr -> rel.sourceConceptEName)).distinct
+    val inheritedElrSourceConceptPairs =
+      domainMemberRelationships.map(rel => (rel.elr -> rel.sourceConceptEName))
+
+    val ownElrSourceConceptPairs =
+      findAllOutgoingHasHypercubeRelationships(concept).map(rel => (rel.elr -> rel.sourceConceptEName))
+
+    val elrSourceConceptPairs = (inheritedElrSourceConceptPairs ++ ownElrSourceConceptPairs).distinct
 
     val hasHypercubes =
       elrSourceConceptPairs flatMap {
@@ -244,8 +249,8 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     hasHypercubes
   }
 
-  final def findAllInheritedHasHypercubesAsElrToPrimariesMap(targetConcept: EName): Map[String, Set[EName]] = {
-    val hasHypercubes = findAllInheritedHasHypercubes(targetConcept)
+  final def findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]] = {
+    val hasHypercubes = findAllOwnOrInheritedHasHypercubes(concept)
 
     hasHypercubes.groupBy(_.elr).mapValues(_.map(_.sourceConceptEName).toSet)
   }

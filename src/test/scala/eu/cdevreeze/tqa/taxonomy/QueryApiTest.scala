@@ -293,7 +293,7 @@ class QueryApiTest extends FunSuite {
 
     val anInheritingPrimary = EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}AmountDueToCustomersForConstructionContracts")
 
-    val elrToPrimaryMap = richTaxo.findAllInheritedHasHypercubesAsElrToPrimariesMap(anInheritingPrimary)
+    val elrToPrimaryMap = richTaxo.findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap(anInheritingPrimary)
 
     assertResult(Set("http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NoteTradeAndOtherPayables")) {
       elrToPrimaryMap.keySet
@@ -316,11 +316,11 @@ class QueryApiTest extends FunSuite {
       hhRels.flatMap(hh => richTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary)(_.firstRelationship.elr == hh.elr)).flatMap(_.concepts).toSet
 
     assertResult(true) {
-      inheritingPrimaries.flatMap(e => richTaxo.findAllInheritedHasHypercubes(e)).nonEmpty
+      inheritingPrimaries.flatMap(e => richTaxo.findAllOwnOrInheritedHasHypercubes(e)).nonEmpty
     }
 
     assertResult(hhRels.toSet) {
-      inheritingPrimaries.flatMap(e => richTaxo.findAllInheritedHasHypercubes(e)).toSet
+      inheritingPrimaries.flatMap(e => richTaxo.findAllOwnOrInheritedHasHypercubes(e)).toSet
     }
   }
 
