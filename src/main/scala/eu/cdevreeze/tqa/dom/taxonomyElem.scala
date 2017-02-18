@@ -327,6 +327,10 @@ sealed trait CanBeAbstract extends XsdElem {
   final def isAbstract: Boolean = {
     attributeOption(AbstractEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
   }
+
+  final def isConcrete: Boolean = {
+    !isAbstract
+  }
 }
 
 sealed trait NamedDeclOrDef extends XsdElem {

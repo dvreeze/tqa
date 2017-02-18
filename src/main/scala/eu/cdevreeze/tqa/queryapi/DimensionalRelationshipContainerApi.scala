@@ -89,6 +89,12 @@ trait DimensionalRelationshipContainerApi {
     sourceConcept: EName)(p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
 
   /**
+   * Filters has-hypercube relationships that are outgoing from the given concept on the given ELR.
+   */
+  def filterOutgoingHasHypercubeRelationshipsOnElr(
+    sourceConcept: EName, elr: String): immutable.IndexedSeq[HasHypercubeRelationship]
+
+  /**
    * Finds all hypercube-dimension relationships that are outgoing from the given concept.
    */
   def findAllOutgoingHypercubeDimensionRelationships(
@@ -99,6 +105,12 @@ trait DimensionalRelationshipContainerApi {
    */
   def filterOutgoingHypercubeDimensionRelationships(
     sourceConcept: EName)(p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
+
+  /**
+   * Filters hypercube-dimension relationships that are outgoing from the given concept on the given ELR.
+   */
+  def filterOutgoingHypercubeDimensionRelationshipsOnElr(
+    sourceConcept: EName, elr: String): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
    * Finds all dimension-domain relationships that are outgoing from the given concept.
@@ -113,6 +125,12 @@ trait DimensionalRelationshipContainerApi {
     sourceConcept: EName)(p: DimensionDomainRelationship => Boolean): immutable.IndexedSeq[DimensionDomainRelationship]
 
   /**
+   * Filters dimension-domain relationships that are outgoing from the given concept on the given ELR.
+   */
+  def filterOutgoingDimensionDomainRelationshipsOnElr(
+    sourceConcept: EName, elr: String): immutable.IndexedSeq[DimensionDomainRelationship]
+
+  /**
    * Finds all domain-member relationships that are outgoing from the given concept.
    */
   def findAllOutgoingDomainMemberRelationships(
@@ -125,6 +143,12 @@ trait DimensionalRelationshipContainerApi {
     sourceConcept: EName)(p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
+   * Filters domain-member relationships that are outgoing from the given concept on the given ELR.
+   */
+  def filterOutgoingDomainMemberRelationshipsOnElr(
+    sourceConcept: EName, elr: String): immutable.IndexedSeq[DomainMemberRelationship]
+
+  /**
    * Finds all dimension-default relationships that are outgoing from the given concept.
    */
   def findAllOutgoingDimensionDefaultRelationships(
@@ -135,6 +159,12 @@ trait DimensionalRelationshipContainerApi {
    */
   def filterOutgoingDimensionDefaultRelationships(
     sourceConcept: EName)(p: DimensionDefaultRelationship => Boolean): immutable.IndexedSeq[DimensionDefaultRelationship]
+
+  /**
+   * Filters dimension-default relationships that are outgoing from the given concept on the given ELR.
+   */
+  def filterOutgoingDimensionDefaultRelationshipsOnElr(
+    sourceConcept: EName, elr: String): immutable.IndexedSeq[DimensionDefaultRelationship]
 
   // Finding and filtering incoming relationships
 
@@ -217,4 +247,15 @@ trait DimensionalRelationshipContainerApi {
    * of the has-hypercube relationships with that ELR. See section 2.6.1 of the XBRL Dimensions specification.
    */
   def findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]]
+
+  /**
+   * Finds all inherited has-hypercubes. See section 2.6.1 of the XBRL Dimensions specification.
+   */
+  def findAllInheritedHasHypercubes(concept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
+
+  /**
+   * Finds all inherited has-hypercubes as a Map from ELRs to all primaries that are source concepts
+   * of the has-hypercube relationships with that ELR. See section 2.6.1 of the XBRL Dimensions specification.
+   */
+  def findAllInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]]
 }

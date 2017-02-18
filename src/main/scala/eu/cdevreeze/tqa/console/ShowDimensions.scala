@@ -89,7 +89,7 @@ object ShowDimensions {
 
     // Concrete primary items and inheritance of has-hypercubes
 
-    val concretePrimaryItemDecls = basicTaxo.findAllPrimaryItemDeclarations.filter(e => !e.globalElementDeclaration.isAbstract)
+    val concretePrimaryItemDecls = basicTaxo.findAllPrimaryItemDeclarations.filter(_.isConcrete)
 
     val concretePrimariesNotInheritingOrHavingHasHypercube = concretePrimaryItemDecls filter { itemDecl =>
       basicTaxo.findAllOwnOrInheritedHasHypercubes(itemDecl.targetEName).isEmpty
@@ -113,7 +113,7 @@ object ShowDimensions {
     val inheritingOrOwnPrimaries = inheritingPrimaries.union(ownPrimaries)
 
     val inheritingOrOwnConcretePrimaries =
-      inheritingOrOwnPrimaries filter (item => basicTaxo.findPrimaryItemDeclaration(item).exists(e => !e.globalElementDeclaration.isAbstract))
+      inheritingOrOwnPrimaries filter (item => basicTaxo.findPrimaryItemDeclaration(item).exists(_.isConcrete))
 
     require(
       concretePrimariesNotInheritingOrHavingHasHypercube.toSet == concretePrimaryItemDecls.map(_.targetEName).toSet.diff(inheritingOrOwnConcretePrimaries),

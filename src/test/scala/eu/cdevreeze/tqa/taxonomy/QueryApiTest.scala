@@ -193,17 +193,17 @@ class QueryApiTest extends FunSuite {
     }
 
     assertResult(Set(true)) {
-      richTaxo.findAllHypercubeDeclarations.map(_.globalElementDeclaration.isAbstract).toSet
+      richTaxo.findAllHypercubeDeclarations.map(_.isAbstract).toSet
     }
     assertResult(Set(true)) {
-      richTaxo.findAllDimensionDeclarations.map(_.globalElementDeclaration.isAbstract).toSet
+      richTaxo.findAllDimensionDeclarations.map(_.isAbstract).toSet
     }
     assertResult(Set(false, true)) {
-      richTaxo.findAllPrimaryItemDeclarations.map(_.globalElementDeclaration.isAbstract).toSet
+      richTaxo.findAllPrimaryItemDeclarations.map(_.isAbstract).toSet
     }
 
     assertResult(true) {
-      richTaxo.filterPrimaryItemDeclarations(_.globalElementDeclaration.isAbstract).map(_.targetEName.localPart).contains(
+      richTaxo.filterPrimaryItemDeclarations(_.isAbstract).map(_.targetEName.localPart).contains(
         "ChangesInWorkingCapitalAbstract")
     }
 
@@ -313,7 +313,8 @@ class QueryApiTest extends FunSuite {
     // Testing has-hypercube inheritance in bulk
 
     val inheritingPrimaries =
-      hhRels.flatMap(hh => richTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary)(_.firstRelationship.elr == hh.elr)).flatMap(_.concepts).toSet
+      hhRels.flatMap(hh => richTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary)(_.firstRelationship.elr == hh.elr)).
+        flatMap(_.concepts).toSet
 
     assertResult(true) {
       inheritingPrimaries.flatMap(e => richTaxo.findAllOwnOrInheritedHasHypercubes(e)).nonEmpty

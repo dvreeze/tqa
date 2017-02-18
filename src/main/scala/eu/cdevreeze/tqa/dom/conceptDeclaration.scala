@@ -45,6 +45,14 @@ sealed abstract class ConceptDeclaration private[dom] (val globalElementDeclarat
     globalElementDeclaration.targetEName
   }
 
+  final def isAbstract: Boolean = {
+    globalElementDeclaration.isAbstract
+  }
+
+  final def isConcrete: Boolean = {
+    globalElementDeclaration.isConcrete
+  }
+
   final override def equals(other: Any): Boolean = other match {
     case other: ConceptDeclaration => globalElementDeclaration == other.globalElementDeclaration
     case _                         => false
