@@ -40,7 +40,7 @@ import eu.cdevreeze.tqa.dom.XsdSchema
 final class DefaultDtsCollector(
     entrypointUris: Set[URI]) extends AbstractDtsCollector(entrypointUris) {
 
-  protected def findAllUsedDocUris(rootElem: TaxonomyRootElem): Set[URI] = {
+  def findAllUsedDocUris(rootElem: TaxonomyRootElem): Set[URI] = {
     rootElem match {
       case xsdSchema: XsdSchema =>
         // Minding embedded linkbases
@@ -53,7 +53,7 @@ final class DefaultDtsCollector(
     }
   }
 
-  private def findAllUsedDocUrisInXsdSchema(rootElem: XsdSchema): Set[URI] = {
+  def findAllUsedDocUrisInXsdSchema(rootElem: XsdSchema): Set[URI] = {
     // Using the base URI instead of document URI for xs:import and xs:include (although XML Schema knows nothing about XML Base)
 
     val imports = rootElem.findAllImports
@@ -70,7 +70,7 @@ final class DefaultDtsCollector(
     (importUris ++ includeUris ++ linkbaseRefUris).toSet.diff(Set(rootElem.docUri))
   }
 
-  private def findAllUsedDocUrisInLinkbase(rootElem: Linkbase): Set[URI] = {
+  def findAllUsedDocUrisInLinkbase(rootElem: Linkbase): Set[URI] = {
     // Only link:loc locators are used in DTS discovery.
 
     val locs = rootElem.findAllElemsOfType(classTag[StandardLoc])

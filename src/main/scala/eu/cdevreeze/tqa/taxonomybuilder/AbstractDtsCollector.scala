@@ -47,7 +47,7 @@ abstract class AbstractDtsCollector(val entrypointUris: Set[URI]) extends Docume
    * according to DTS discovery rules. The result excludes the document URI of the given
    * document root itself. Minds the possibility of having embedded linkbases in schemas.
    */
-  protected def findAllUsedDocUris(rootElem: TaxonomyRootElem): Set[URI]
+  def findAllUsedDocUris(rootElem: TaxonomyRootElem): Set[URI]
 
   @tailrec
   private def findDts(
