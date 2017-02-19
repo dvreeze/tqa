@@ -2,7 +2,7 @@
 TQA
 ===
 
-Improved leaner XBRL Taxonomy Query API (TQA). There are just 3 layers: taxonomy DOM, relationships, and taxonomies
+Lean XBRL Taxonomy Query API (TQA). There are just 3 layers: taxonomy DOM, relationships, and taxonomies
 that combine the 2 (as a taxonomy query API).
 
 It knows about taxonomy data as type-safe XML in an XBRL context, supporting several different DOM abstractions
@@ -14,7 +14,8 @@ It is immutable if the underlying yaidom elements are immutable. The underlying 
 
 It understands networks of relationships, and prohibition/overriding.
 
-It tries to keep memory footprint low, even if the underlying XML is always available. One trick to minimize memory footprint is almost emptying label/reference linkbases without breaking DTS discovery.
+It tries to keep memory footprint low, even if the underlying XML is always available. One trick to minimize memory footprint is almost
+emptying label/reference linkbases without breaking DTS discovery.
 
 Examples can be written against this API in tutorials explaining XBRL (for example dimensional validation) to developers.
 
