@@ -28,9 +28,11 @@ libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.6.1"
 
 libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-10"
 
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
+
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 
