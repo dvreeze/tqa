@@ -34,6 +34,7 @@ import eu.cdevreeze.yaidom.queryapi.DocumentApi
 import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 import net.sf.saxon.`type`.Type
+import net.sf.saxon.om.AbsolutePath
 import net.sf.saxon.om.AxisInfo
 import net.sf.saxon.om.NodeInfo
 import net.sf.saxon.om.TreeInfo
@@ -418,21 +419,21 @@ final class SaxonElem(
   }
 
   def path: Path = {
-    // Expensive!
+    // Not too slow, but not very fast either
 
-    val reverseAncestorOrSelfPairs = reverseAncestryOrSelf.sliding(2).toIndexedSeq.filter(_.size == 2)
+    val pathEntries: immutable.IndexedSeq[Path.Entry] = reverseAncestryOrSelf.tail map { elm =>
+      val saxonAbsolutePathString = AbsolutePath.pathToNode(elm.wrappedNode).getPathUsingUris
 
-    val pathEntries: immutable.IndexedSeq[Path.Entry] = reverseAncestorOrSelfPairs map { pair =>
-      val fromElem = pair(0)
-      val toElem = pair(1)
+      val lastSquareStartBracketIdx = saxonAbsolutePathString.lastIndexOf('[')
+      require(lastSquareStartBracketIdx > 0, s"Found no '[' in '${saxonAbsolutePathString}'")
+      require(saxonAbsolutePathString.endsWith("]"), s"Found no ']' at the end of '${saxonAbsolutePathString}'")
 
-      val expandedName = toElem.resolvedName
-      val sameNameChildElems = fromElem.filterChildElems(_.resolvedName == expandedName)
-      val idxOption = sameNameChildElems.zipWithIndex.find(pair => pair._1 == toElem).map(_._2)
-      require(idxOption.isDefined, s"Corrupt data. No Path found for element $wrappedNode")
+      val elementIndex =
+        saxonAbsolutePathString.substring(lastSquareStartBracketIdx + 1, saxonAbsolutePathString.length - 1).toInt - 1
 
-      Path.Entry(expandedName, idxOption.get)
+      Path.Entry(elm.resolvedName, elementIndex)
     }
+
     Path(pathEntries)
   }
 
