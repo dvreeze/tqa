@@ -42,6 +42,7 @@ import eu.cdevreeze.tqa.ENames.LinkReferenceLinkEName
 import eu.cdevreeze.tqa.ENames.LinkRoleRefEName
 import eu.cdevreeze.tqa.ENames.LinkSchemaRefEName
 import eu.cdevreeze.tqa.ENames.NameEName
+import eu.cdevreeze.tqa.ENames.OrderEName
 import eu.cdevreeze.tqa.ENames.PriorityEName
 import eu.cdevreeze.tqa.ENames.RefEName
 import eu.cdevreeze.tqa.ENames.SubstitutionGroupEName
@@ -264,6 +265,10 @@ sealed trait XLinkArc extends ChildXLink {
 
   final def priority: Int = {
     backingElem.attributeOption(PriorityEName).getOrElse("0").toInt
+  }
+
+  final def order: BigDecimal = {
+    BigDecimal(backingElem.attributeOption(OrderEName).getOrElse("1"))
   }
 }
 

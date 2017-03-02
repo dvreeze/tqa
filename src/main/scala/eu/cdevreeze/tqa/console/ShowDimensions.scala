@@ -29,6 +29,7 @@ import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
 
@@ -84,7 +85,26 @@ object ShowDimensions {
       println(s"Has-hypercube found for primary ${hasHypercube.primary} and ELR ${hasHypercube.elr}")
 
       val hypercubeDimensions = basicTaxo.filterOutgoingHypercubeDimensionRelationships(hasHypercube.hypercube)(rel => hasHypercube.isFollowedBy(rel))
-      println(s"It has dimensions: ${hypercubeDimensions.map(_.dimension).distinct.sortBy(_.toString).mkString("\n\t", ",\n\t", "")}")
+      val dimensions = hypercubeDimensions.map(_.dimension).distinct.sortBy(_.toString)
+      println(s"It has dimensions: ${dimensions.mkString("\n\t", ",\n\t", "")}")
+
+      val usableDimensionMembers: Map[EName, Set[EName]] =
+        hypercubeDimensions.groupBy(_.dimension) mapValues { hdRelationships =>
+          val dimension = hdRelationships.head.dimension
+          val ddRelationships =
+            hdRelationships.flatMap(hdRelationship => basicTaxo.filterOutgoingDimensionDomainRelationshipsOnElr(hdRelationship.dimension, hdRelationship.effectiveTargetRole))
+
+          basicTaxo.findAllUsableMembers(dimension, ddRelationships.map(rel => (rel.domain -> rel.elr)).toSet)
+        }
+
+      usableDimensionMembers.toSeq.sortBy(_._1.toString) foreach {
+        case (dimension, members) =>
+          println(s"\tDimension: $dimension. Usable members:")
+
+          members.toSeq.sortBy(_.toString) foreach { member =>
+            println(s"\t\t$member")
+          }
+      }
     }
 
     // Concrete primary items and inheritance of has-hypercubes

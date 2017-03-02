@@ -258,4 +258,39 @@ trait DimensionalRelationshipContainerApi {
    * of the has-hypercube relationships with that ELR. See section 2.6.1 of the XBRL Dimensions specification.
    */
   def findAllInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]]
+
+  /**
+   * Finds all members in the given dimension-domain. There should be at most one dimension-domain
+   * relationship from the given dimension to the given domain, having the given ELR.
+   */
+  def findAllMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
+
+  /**
+   * Finds all usable members in the given dimension-domain. There should be at most one dimension-domain
+   * relationship from the given dimension to the given domain, having the given ELR.
+   */
+  def findAllUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
+
+  /**
+   * Finds all non-usable members in the given dimension-domain. There should be at most one dimension-domain
+   * relationship from the given dimension to the given domain, having the given ELR.
+   */
+  def findAllNonUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
+
+  /**
+   * Finds all members in the given effective domain of the given dimension.
+   */
+  def findAllMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName]
+
+  /**
+   * Finds all usable members in the given effective domain of the given dimension. If a member is
+   * usable in one dimension-domain but not usable in another one, it is considered not usable.
+   */
+  def findAllUsableMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName]
+
+  /**
+   * Finds all non-usable members in the given effective domain of the given dimension. If a member is
+   * usable in one dimension-domain but not usable in another one, it is considered not usable.
+   */
+  def findAllNonUsableMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName]
 }

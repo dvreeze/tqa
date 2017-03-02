@@ -308,4 +308,55 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
     hasHypercubes.groupBy(_.elr).mapValues(_.map(_.sourceConceptEName).toSet)
   }
+
+  final def findAllMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
+    val dimensionDomainPaths =
+      filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
+        path.firstRelationship.isInstanceOf[DimensionDomainRelationship] &&
+          path.firstRelationship.targetConceptEName == domain &&
+          path.firstRelationship.elr == dimensionDomainElr
+      }
+
+    val result = dimensionDomainPaths.flatMap(_.relationships).map(_.targetConceptEName).toSet
+    result
+  }
+
+  final def findAllUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
+    val dimensionDomainPaths =
+      filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
+        path.firstRelationship.isInstanceOf[DimensionDomainRelationship] &&
+          path.firstRelationship.targetConceptEName == domain &&
+          path.firstRelationship.elr == dimensionDomainElr
+      }
+
+    val potentiallyUsableMembers =
+      dimensionDomainPaths.flatMap(_.relationships).filter(_.usable).map(_.targetConceptEName).toSet
+
+    val potentiallyNonUsableMembers =
+      dimensionDomainPaths.flatMap(_.relationships).filterNot(_.usable).map(_.targetConceptEName).toSet
+
+    potentiallyUsableMembers.diff(potentiallyNonUsableMembers)
+  }
+
+  final def findAllNonUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
+    findAllMembers(dimension, domain, dimensionDomainElr).diff(findAllUsableMembers(dimension, domain, dimensionDomainElr))
+  }
+
+  final def findAllMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName] = {
+    domainElrPairs.toSeq.flatMap({ case (domain, elr) => findAllMembers(dimension, domain, elr) }).toSet
+  }
+
+  final def findAllUsableMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName] = {
+    val potentiallyUsableMembers =
+      domainElrPairs.toSeq.flatMap({ case (domain, elr) => findAllUsableMembers(dimension, domain, elr) }).toSet
+
+    val potentiallyNonUsableMembers =
+      domainElrPairs.toSeq.flatMap({ case (domain, elr) => findAllNonUsableMembers(dimension, domain, elr) }).toSet
+
+    potentiallyUsableMembers.diff(potentiallyNonUsableMembers)
+  }
+
+  final def findAllNonUsableMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName] = {
+    findAllMembers(dimension, domainElrPairs).diff(findAllUsableMembers(dimension, domainElrPairs))
+  }
 }

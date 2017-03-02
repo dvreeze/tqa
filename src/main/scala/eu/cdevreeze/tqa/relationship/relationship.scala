@@ -18,6 +18,8 @@ package eu.cdevreeze.tqa.relationship
 
 import java.net.URI
 
+import javax.xml.bind.DatatypeConverter
+
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
@@ -26,7 +28,10 @@ import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
 import eu.cdevreeze.tqa.ENames.MsgMessageEName
+import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
+import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
+import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.CalculationArc
@@ -40,6 +45,7 @@ import eu.cdevreeze.tqa.dom.PresentationArc
 import eu.cdevreeze.tqa.dom.ReferenceArc
 import eu.cdevreeze.tqa.dom.StandardArc
 import eu.cdevreeze.tqa.dom.TaxonomyElem
+import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
@@ -94,7 +100,19 @@ sealed abstract class Relationship(
 
   final def baseSetKey: BaseSetKey = arc.baseSetKey
 
-  // TODO Order, equals and hashCode.
+  final def use: Use = arc.use
+
+  final def priority: Int = arc.priority
+
+  final def order: BigDecimal = arc.order
+
+  final override def equals(obj: Any): Boolean = obj match {
+    case other: Relationship =>
+      (other.arc == this.arc)
+    case _ => false
+  }
+
+  final override def hashCode: Int = arc.hashCode
 }
 
 sealed abstract class StandardRelationship(
@@ -170,7 +188,7 @@ final class ConceptLabelRelationship(
   def resourceRole: String = resource.roleOption.getOrElse("http://www.xbrl.org/2003/role/label")
 
   def language: String = {
-    resource.attributeOption(XmlLangEName).getOrElse(s"Missing xml:lang in $toPath in $docUri")
+    resource.attributeOption(XmlLangEName).getOrElse(sys.error(s"Missing xml:lang in $toPath in $docUri"))
   }
 
   def labelText: String = resource.text
@@ -260,6 +278,15 @@ sealed abstract class HasHypercubeRelationship(
 
   def isAllRelationship: Boolean
 
+  final def closed: Boolean = {
+    arc.attributeOption(XbrldtClosedEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
+  }
+
+  final def contextElement: String = {
+    arc.attributeOption(XbrldtContextElementEName).getOrElse(
+      sys.error(s"Missing attribute @xbrldt:contextElement on has-hypercube arc in $docUri."))
+  }
+
   protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
     rel.isInstanceOf[HypercubeDimensionRelationship]
   }
@@ -296,9 +323,14 @@ final class HypercubeDimensionRelationship(
 }
 
 sealed abstract class DomainAwareRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+
+  final def usable: Boolean = {
+    arc.attributeOption(XbrldtUsableEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(true)
+  }
+}
 
 final class DimensionDomainRelationship(
     arc: DefinitionArc,
