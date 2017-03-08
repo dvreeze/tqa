@@ -259,6 +259,40 @@ trait DimensionalRelationshipContainerApi {
    */
   def findAllInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]]
 
+  /**
+   * Finds all own or inherited has-hypercubes per concept. See section 2.6.1 of the XBRL Dimensions specification.
+   *
+   * This is an expensive bulk version of method findAllOwnOrInheritedHasHypercubes, and should be called
+   * as few times as possible.
+   */
+  def computeHasHypercubeInheritanceOrSelf: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
+
+  /**
+   * Finds all own or inherited has-hypercubes per concept returning Maps from ELRs to all primaries that are source concepts
+   * of the has-hypercube relationships with that ELR. See section 2.6.1 of the XBRL Dimensions specification.
+   *
+   * This is an expensive bulk version of method findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap, and should be called
+   * as few times as possible.
+   */
+  def computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps: Map[EName, Map[String, Set[EName]]]
+
+  /**
+   * Finds all inherited has-hypercubes per concept. See section 2.6.1 of the XBRL Dimensions specification.
+   *
+   * This is an expensive bulk version of method findAllInheritedHasHypercubes, and should be called
+   * as few times as possible.
+   */
+  def computeHasHypercubeInheritance: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
+
+  /**
+   * Finds all inherited has-hypercubes per concept returning Maps from ELRs to all primaries that are source concepts
+   * of the has-hypercube relationships with that ELR. See section 2.6.1 of the XBRL Dimensions specification.
+   *
+   * This is an expensive bulk version of method findAllInheritedHasHypercubesAsElrToPrimariesMap, and should be called
+   * as few times as possible.
+   */
+  def computeHasHypercubeInheritanceReturningElrToPrimariesMaps: Map[EName, Map[String, Set[EName]]]
+
   // TODO In the dimension member query methods below, mind default members!
 
   /**

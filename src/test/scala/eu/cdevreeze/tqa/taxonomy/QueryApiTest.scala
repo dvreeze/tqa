@@ -412,4 +412,52 @@ class QueryApiTest extends FunSuite {
       dimensions.forall(dim => richTaxo.findGlobalElementDeclaration(dim).map(_.targetEName) == Some(dim))
     }
   }
+
+  test("testDimensionalBulkQueries") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUris = Vector(
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/fr/sg-se/sg-se_2013-09-13_def.xml").toURI,
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13.xsd").toURI)
+
+    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
+
+    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+
+    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
+
+    assertResult(true) {
+      richTaxo.findAllGlobalElementDeclarations.size > 1600
+    }
+    assertResult(richTaxo.findAllGlobalElementDeclarations) {
+      richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
+    }
+
+    val hasHypercubeInheritanceOrSelf =
+      richTaxo.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
+
+    assertResult(true) {
+      hasHypercubeInheritanceOrSelf.nonEmpty
+    }
+
+    assertResult(hasHypercubeInheritanceOrSelf.keySet.toSeq.
+      map(concept => (concept -> richTaxo.findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap(concept))).toMap) {
+
+      hasHypercubeInheritanceOrSelf
+    }
+
+    val hasHypercubeInheritance =
+      richTaxo.computeHasHypercubeInheritanceReturningElrToPrimariesMaps
+
+    assertResult(true) {
+      hasHypercubeInheritance.nonEmpty
+    }
+
+    assertResult(hasHypercubeInheritance.keySet.toSeq.
+      map(concept => (concept -> richTaxo.findAllInheritedHasHypercubesAsElrToPrimariesMap(concept))).toMap) {
+
+      hasHypercubeInheritance
+    }
+  }
 }
