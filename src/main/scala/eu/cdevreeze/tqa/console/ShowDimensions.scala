@@ -141,9 +141,15 @@ object ShowDimensions {
 
     logger.info("Showing inheriting concrete items")
 
+    val hasHypercubeInheritanceOrSelf = basicTaxo.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
+
     concretePrimaryItemDecls.map(_.targetEName).distinct.sortBy(_.toString) foreach { item =>
       val hasHypercubes = basicTaxo.findAllOwnOrInheritedHasHypercubes(item)
       val elrPrimariesPairs = hasHypercubes.groupBy(_.elr).mapValues(_.map(_.primary)).toSeq.sortBy(_._1)
+
+      require(
+        elrPrimariesPairs.toMap.mapValues(_.toSet) == hasHypercubeInheritanceOrSelf.getOrElse(item, Map.empty),
+        s"Finding own or inherited has-hypercubes must be consistent with the bulk methods for has-hypercube inheritance-or-self")
 
       elrPrimariesPairs foreach {
         case (elr, primaries) =>
