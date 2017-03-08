@@ -259,6 +259,8 @@ trait DimensionalRelationshipContainerApi {
    */
   def findAllInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]]
 
+  // TODO In the dimension member query methods below, mind default members!
+
   /**
    * Finds all members in the given dimension-domain. There should be at most one dimension-domain
    * relationship from the given dimension to the given domain, having the given ELR.

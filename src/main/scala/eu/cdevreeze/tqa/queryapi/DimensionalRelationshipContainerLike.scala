@@ -309,6 +309,8 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     hasHypercubes.groupBy(_.elr).mapValues(_.map(_.sourceConceptEName).toSet)
   }
 
+  // TODO In the dimension member query methods below, mind default members!
+
   final def findAllMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
     val dimensionDomainPaths =
       filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
