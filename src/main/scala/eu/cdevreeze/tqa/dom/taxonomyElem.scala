@@ -41,6 +41,8 @@ import eu.cdevreeze.tqa.ENames.LinkReferenceEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceLinkEName
 import eu.cdevreeze.tqa.ENames.LinkRoleRefEName
 import eu.cdevreeze.tqa.ENames.LinkSchemaRefEName
+import eu.cdevreeze.tqa.ENames.MaxOccursEName
+import eu.cdevreeze.tqa.ENames.MinOccursEName
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.OrderEName
 import eu.cdevreeze.tqa.ENames.PriorityEName
@@ -94,13 +96,42 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 import javax.xml.bind.DatatypeConverter
 
 /**
- * Any taxonomy XML element. These classes are reasonably lenient when instantiating them (although schema validity helps), but query
+ * Any element in a taxonomy schema or linkbase document. The classes in this class hierarchy offer the yaidom query API,
+ * in particular the `ScopedElemApi` and `SubtypeAwareElemApi` query API.
+ *
+ * ==Usage==
+ *
+ * Suppose we have an [[eu.cdevreeze.tqa.dom.XsdSchema]] called `schema`. Then we can find all global element declarations in
+ * this schema as follows:
+ *
+ * {{{
+ * // Low level yaidom query, returning the result XML elements as TaxonomyElem elements
+ * val globalElemDecls1 = schema.filterChildElems(_.resolvedName == tqa.ENames.XsElementEName)
+ *
+ * // Higher level yaidom query, querying for the type GlobalElementDeclaration
+ * // Prefer this to the lower level yaidom query above
+ * val globalElemDecls2 = schema.findAllChildElemsOfType(classTag[GlobalElementDeclaration])
+ *
+ * // The following query would have given the same result, because all global element declarations
+ * // are child elements of the schema root. Instead of child elements, we now query for all
+ * // descendant-or-self elements that are global element declarations
+ * val globalElemDecls3 = schema.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration])
+ *
+ * // We can query the schema for global element declarations directly, so let's do that
+ * val globalElemDecls4 = schema.findAllGlobalElementDeclarations
+ * }}}
+ *
+ * ==Leniency==
+ *
+ * The classes in this type hierarchy are reasonably lenient when instantiating them (although schema validity helps), but query
  * methods may fail if the taxonomy XML is not schema-valid (against the schemas for this higher level taxonomy model).
  * Instantiation is designed to never fail, but the result may be something like an `OtherElem` instance. For example,
  * an element named xs:element with both a name and ref attribute cannot be both an element declaration and element
  * reference (it is not even allowed), and will be instantiated as an `OtherXsdElem`.
  *
  * The instance methods may fail, however, if taxonomy content is invalid, and if it is schema-invalid in particular.
+ *
+ * ==Other remarks==
  *
  * The type hierarchy for taxonomy elements is not a strict hierarchy. There are mixin traits for XLink content, "root elements",
  * elements in the xs and link namespaces, etc. Some element types mix in more than one of these traits.
@@ -110,8 +141,9 @@ import javax.xml.bind.DatatypeConverter
  *
  * It is perfectly fine to embed linkbase content in schema content, and such an element tree will be instantiated correctly.
  *
- * The underlying backing elements can be any backing element implementation, including BackingElemApi
- * wrappers around Saxon tiny trees!
+ * The underlying backing elements can be any backing element implementation, including `BackingElemApi`
+ * wrappers around Saxon tiny trees! Hence, this taxonomy DOM API is flexible in that it is not bound to one specific
+ * backing element implementation.
  *
  * @author Chris de Vreeze
  */
@@ -179,6 +211,9 @@ sealed trait TaxonomyRootElem extends TaxonomyElem
 
 /**
  * An XLink element in a taxonomy, obeying the constraints on XLink imposed by XBRL. For example, an XLink arc or extended link.
+ *
+ * XLink (see https://www.w3.org/TR/xlink11/) is a somewhat low level standard on top of XML, but it is
+ * very important in an XBRL context. Many taxonomy elements are also XLink elements, especially inside linkbases.
  */
 sealed trait XLinkElem extends TaxonomyElem {
 
@@ -189,8 +224,14 @@ sealed trait XLinkElem extends TaxonomyElem {
   }
 }
 
+/**
+ * Simple or extended XLink link.
+ */
 sealed trait XLinkLink extends XLinkElem
 
+/**
+ * XLink child element of an extended link, so an XLink arc, locator or resource.
+ */
 sealed trait ChildXLink extends XLinkElem {
 
   final def elr: String = {
@@ -202,6 +243,9 @@ sealed trait ChildXLink extends XLinkElem {
   }
 }
 
+/**
+ * XLink locator or resource.
+ */
 sealed trait LabeledXLink extends ChildXLink {
 
   final def xlinkLabel: String = {
@@ -209,6 +253,25 @@ sealed trait LabeledXLink extends ChildXLink {
   }
 }
 
+/**
+ * XLink extended link. For example (child elements have been left out):
+ *
+ * {{{
+ * <link:presentationLink
+ *   xlink:type="extended" xlink:role="http://mycompany.com/myPresentationElr">
+ *
+ * </link:presentationLink>
+ * }}}
+ *
+ * Or, for example (again leaving out child elements):
+ *
+ * {{{
+ * <link:labelLink
+ *   xlink:type="extended" xlink:role="http://www.xbrl.org/2003/role/link">
+ *
+ * </link:labelLink>
+ * }}}
+ */
 sealed trait ExtendedLink extends XLinkLink {
 
   final def xlinkType: String = {
@@ -236,6 +299,18 @@ sealed trait ExtendedLink extends XLinkLink {
   }
 }
 
+/**
+ * XLink arc. For example, showing an XLink arc in a presentation link:
+ *
+ * {{{
+ * <link:presentationArc xlink:type="arc"
+ *   xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child"
+ *   xlink:from="parentConcept" xlink:to="childConcept" />
+ * }}}
+ *
+ * The xlink:from and xlink:to attributes point to XLink locators or resources
+ * in the same extended link with the corresponding xlink:label attributes.
+ */
 sealed trait XLinkArc extends ChildXLink {
 
   final def xlinkType: String = {
@@ -272,6 +347,15 @@ sealed trait XLinkArc extends ChildXLink {
   }
 }
 
+/**
+ * XLink resource. For example, showing an XLink resource in a label link:
+ *
+ * {{{
+ * <link:label xlink:type="resource"
+ *   xlink:label="regionAxis_lbl" xml:lang="en"
+ *   xlink:role="http://www.xbrl.org/2003/role/label">Region [Axis]</link:label>
+ * }}}
+ */
 sealed trait XLinkResource extends LabeledXLink {
 
   final def xlinkType: String = {
@@ -283,6 +367,15 @@ sealed trait XLinkResource extends LabeledXLink {
   }
 }
 
+/**
+ * XLink locator. For example:
+ *
+ * {{{
+ * <link:loc xlink:type="locator"
+ *   xlink:label="entityAxis"
+ *   xlink:href="Axes.xsd#entityAxis" />
+ * }}}
+ */
 sealed trait XLinkLocator extends LabeledXLink {
 
   final def xlinkType: String = {
@@ -294,6 +387,15 @@ sealed trait XLinkLocator extends LabeledXLink {
   }
 }
 
+/**
+ * XLink simple link. For example, showing a roleRef:
+ *
+ * {{{
+ * <link:roleRef xlink:type="simple"
+ *   xlink:href="Concepts.xsd#SalesAnalysis"
+ *   roleURI="http://mycompany.com/2017/SalesAnalysis" />
+ * }}}
+ */
 sealed trait SimpleLink extends XLinkLink {
 
   final def xlinkType: String = {
@@ -308,7 +410,7 @@ sealed trait SimpleLink extends XLinkLink {
 // Schema content or linkbase content.
 
 /**
- * Element in the xs namespace.
+ * Element in the XML Schema namespace.
  */
 sealed trait XsdElem extends TaxonomyElem {
 
@@ -327,6 +429,9 @@ sealed trait LinkElem extends TaxonomyElem
 
 // The "capabilities" of schema content.
 
+/**
+ * Super-type of schema components that can be abstract.
+ */
 sealed trait CanBeAbstract extends XsdElem {
 
   final def isAbstract: Boolean = {
@@ -338,6 +443,9 @@ sealed trait CanBeAbstract extends XsdElem {
   }
 }
 
+/**
+ * Super-type of schema components that have a name attribute.
+ */
 sealed trait NamedDeclOrDef extends XsdElem {
 
   final def nameAttributeValue: String = {
@@ -345,6 +453,9 @@ sealed trait NamedDeclOrDef extends XsdElem {
   }
 }
 
+/**
+ * Super-type of schema components that are references.
+ */
 sealed trait Reference extends XsdElem {
 
   final def ref: EName = {
@@ -356,6 +467,18 @@ sealed trait Reference extends XsdElem {
 
 /**
  * The xs:schema root element of a taxonomy schema.
+ *
+ * ==Usage==
+ *
+ * Content inside a schema (root element) can be queried using the yaidom query API, of course, but this class also offers
+ * some own query methods (that are themselves implemented as yaidom queries). For example:
+ *
+ * {{{
+ * val globalElemDecls = schema.findAllGlobalElementDeclarations
+ *
+ * val globalElemDeclTypeENames =
+ *   globalElemDecls.flatMap(_.typeOption).toSet
+ * }}}
  */
 final class XsdSchema private[dom] (
     backingElem: BackingElemApi,
@@ -414,16 +537,59 @@ final class Linkbase private[dom] (
 
 // The remaining classes. First for schema content, then for linkbase content.
 
-sealed trait Particle extends XsdElem
+/**
+ * Particle (in the context of XML Schema), having optional minOccurs and maxOccurs attributes.
+ */
+sealed trait Particle extends XsdElem {
+
+  /**
+   * The minOccurs attribute as integer, defaulting to 1.
+   */
+  final def minOccurs: Int = {
+    attributeOption(MinOccursEName).getOrElse("1").toInt
+  }
+
+  /**
+   * The maxOccurs attribute as optional integer, defaulting to 1, but returning
+   * None if unbounded.
+   */
+  final def maxOccursOption: Option[Int] = {
+    attributeOption(MinOccursEName) match {
+      case Some("unbounded") => None
+      case Some(i)           => Some(i.toInt)
+      case None              => Some(1)
+    }
+  }
+}
 
 // Element declarations or references.
 
+/**
+ * Either an element declaration or an element reference.
+ */
 sealed trait ElementDeclarationOrReference extends XsdElem
 
+/**
+ * Either a global element declaration or a local element declaration.
+ */
 sealed trait ElementDeclaration extends ElementDeclarationOrReference with NamedDeclOrDef
 
 /**
- * Global element declaration. This element in isolation does not know if the element declaration is a concept declaration.
+ * Global element declaration. This element in isolation does not know if the element declaration is a concept declaration,
+ * because it does not know which from substitution groups its own substitution group, if any, derives.
+ *
+ * Example, assuming an xs:schema parent (and document root) element:
+ * {{{
+ * <xs:element
+ *   id="businessSegments"
+ *   name="BusinessSegments"
+ *   type="xbrli:monetaryItemType"
+ *   substitutionGroup="xbrli:item"
+ *   xbrli:periodType="duration" />
+ * }}}
+ *
+ * In this case, we see immediately that the global element declaration is an item concept declaration, but as said above,
+ * in general we cannot determine this without looking at the context of all other taxonomy documents in the same "taxonomy".
  */
 final class GlobalElementDeclaration private[dom] (
     backingElem: BackingElemApi,
