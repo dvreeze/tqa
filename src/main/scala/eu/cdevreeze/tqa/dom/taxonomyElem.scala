@@ -554,7 +554,7 @@ sealed trait Particle extends XsdElem {
    * None if unbounded.
    */
   final def maxOccursOption: Option[Int] = {
-    attributeOption(MinOccursEName) match {
+    attributeOption(MaxOccursEName) match {
       case Some("unbounded") => None
       case Some(i)           => Some(i.toInt)
       case None              => Some(1)
