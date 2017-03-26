@@ -28,10 +28,13 @@ import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Concept declaration, wrapping a GlobalElementDeclaration. It must be in substitution group xbrli:item or xbrli:tuple,
+ * Concept declaration, wrapping a `GlobalElementDeclaration`. It must be in substitution group xbrli:item or xbrli:tuple,
  * either directly or indirectly.
  *
- * There are no sub-classes for dimension members, because as global element declarations they are not defined in the Dimensions specification.
+ * There are no sub-classes for domain members, because as global element declarations they are defined in the Dimensions specification
+ * in the exact same way that primary items are defined. Therefore primary items and dimension members are indistinguishable.
+ *
+ * In order to build a `ConceptDeclaration` from a `GlobalElementDeclaration`, the builder needs a `SubstitutionGroupMap` as context.
  *
  * @author Chris de Vreeze
  */
@@ -133,12 +136,12 @@ final class TypedDimensionDeclaration private[dom] (globalElementDeclaration: Gl
 object ConceptDeclaration {
 
   /**
-   * Builder of ConceptDeclaration objects, given a SubstitutionGroupMap object.
+   * Builder of `ConceptDeclaration` objects, given a `SubstitutionGroupMap` object.
    */
   final class Builder(val substitutionGroupMap: SubstitutionGroupMap) {
 
     /**
-     * Optionally turns the global element declaration into a ConceptDeclaration, if it is indeed a concept.
+     * Optionally turns the global element declaration into a `ConceptDeclaration`, if it is indeed a concept.
      * This creation cannot fail (assuming that the SubstitutionGroupMap cannot be corrupted).
      */
     def optConceptDeclaration(elemDecl: GlobalElementDeclaration): Option[ConceptDeclaration] = {
