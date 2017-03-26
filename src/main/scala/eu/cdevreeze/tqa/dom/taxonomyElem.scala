@@ -529,7 +529,7 @@ final class XsdSchema private[dom] (
 }
 
 /**
- * The link:linkbase root element of a taxonomy schema. It may be embedded within a taxonomy schema document.
+ * The link:linkbase root element of a linkbase. It may be embedded within a taxonomy schema document.
  */
 final class Linkbase private[dom] (
   backingElem: BackingElemApi,
@@ -576,7 +576,7 @@ sealed trait ElementDeclaration extends ElementDeclarationOrReference with Named
 
 /**
  * Global element declaration. This element in isolation does not know if the element declaration is a concept declaration,
- * because it does not know which from substitution groups its own substitution group, if any, derives.
+ * because it does not know from which substitution groups its own substitution group, if any, derives.
  *
  * Example, assuming an xs:schema parent (and document root) element:
  * {{{
