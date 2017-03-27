@@ -33,25 +33,43 @@ import eu.cdevreeze.tqa.dom.XLinkArc
  */
 trait RelationshipFactory {
 
+  /**
+   * Returns all relationships in the given `TaxonomyBase` passing the provided arc filter.
+   */
   def extractRelationships(
     taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
+  /**
+   * Returns all relationships in the given document in the given `TaxonomyBase` passing the provided arc filter.
+   */
   def extractRelationshipsFromDocument(
     docUri: URI,
     taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
+  /**
+   * Returns all relationships in the given extended link in the given `TaxonomyBase` passing the provided arc filter.
+   */
   def extractRelationshipsFromExtendedLink(
     extendedLink: ExtendedLink,
     taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
+  /**
+   * Returns all relationships (typically one) having the given underlying XLink arc in the given `TaxonomyBase`.
+   * For performance a mapping from XLink labels to XLink locators and resources must be provided, and this mapping
+   * should be computed only once per extended link.
+   */
   def extractRelationshipsFromArc(
     arc: XLinkArc,
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
     taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship]
 
+  /**
+   * Returns the networks of relationships, computed from the given collection of relationships. The `TaxonomyBase`
+   * is passed as second parameter.
+   */
   def computeNetworks(
     relationships: immutable.IndexedSeq[Relationship],
     taxonomyBase: TaxonomyBase): Map[BaseSetKey, immutable.IndexedSeq[Relationship]]

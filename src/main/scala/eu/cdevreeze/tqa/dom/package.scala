@@ -17,15 +17,64 @@
 package eu.cdevreeze.tqa
 
 /**
- * Type-safe XBRL taxonomy DOM API. This contains DOM-like elements in taxonomy documents. It offers the yaidom query API
+ * Type-safe XBRL '''taxonomy DOM API'''. This contains DOM-like elements in taxonomy documents. It offers the '''yaidom''' query API
  * and more, and wraps an underlying element that itself offers the yaidom query API, whatever the underlying element
  * implementation. This package does not offer any taxonomy abstractions that cross any document boundaries, except
- * for the light-weight TaxonomyBase abstraction at the type-safe DOM level.
+ * for the light-weight `TaxonomyBase` abstraction at the type-safe DOM level.
+ *
+ * This package mainly contains:
+ * <ul>
+ * <li>Type [[eu.cdevreeze.tqa.dom.TaxonomyElem]] and its sub-types</li>
+ * <li>Type [[eu.cdevreeze.tqa.dom.ConceptDeclaration]] and its sub-types; see below</li>
+ * <li>Type [[eu.cdevreeze.tqa.dom.XPointer]] and its sub-types, modeling XPointer as used in XBRL</li>
+ * </ul>
+ *
+ * ==Usage==
+ *
+ * Suppose we have an [[eu.cdevreeze.tqa.dom.XsdSchema]] called `schema`. Then we can find all global element declarations in
+ * this schema as follows:
+ *
+ * {{{
+ * // Low level yaidom query, returning the result XML elements as TaxonomyElem elements
+ * val globalElemDecls1 = schema.filterChildElems(_.resolvedName == tqa.ENames.XsElementEName)
+ *
+ * // Higher level yaidom query, querying for the type GlobalElementDeclaration
+ * // Prefer this to the lower level yaidom query above
+ * val globalElemDecls2 = schema.findAllChildElemsOfType(classTag[GlobalElementDeclaration])
+ *
+ * // The following query would have given the same result, because all global element declarations
+ * // are child elements of the schema root. Instead of child elements, we now query for all
+ * // descendant-or-self elements that are global element declarations
+ * val globalElemDecls3 = schema.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration])
+ *
+ * // We can query the schema for global element declarations directly, so let's do that
+ * val globalElemDecls4 = schema.findAllGlobalElementDeclarations
+ * }}}
+ *
+ * Global element declarations in isolation do not know if they are (item or tuple) concept declarations. In order to
+ * turn them into concept declarations, we need a `SubstitutionGroupMap` as context. For example:
+ *
+ * {{{
+ * // One-time creation of a ConceptDeclaration builder
+ * val conceptDeclBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
+ *
+ * val globalElemDecls = schema.findAllGlobalElementDeclarations
+ *
+ * val conceptDecls = globalElemDecls.flatMap(decl => conceptDeclBuilder.optConceptDeclaration(decl))
+ * }}}
+ *
+ * Most TQA client code does not start with this package, however, but works with entire taxonomies instead of
+ * individual type-safe DOM trees, and with relationships instead of the underlying XLink arcs.
+ *
+ * ==Other remarks==
  *
  * To get the model right, there are many sources to look at for inspiration. First of all, for schema content
  * there are APIs like the Xerces schema API (https://xerces.apache.org/xerces2-j/javadocs/xs/org/apache/xerces/xs/XSModel.html).
  * Also have a look at http://www.datypic.com/sc/xsd/s-xmlschema.xsd.html for the schema of XML Schema itself.
- * Next, there are many XBRL APIs that model (instance and) taxonomy data.
+ * Moreover, there are many XBRL APIs that model (instance and) taxonomy data.
+ *
+ * On the other hand, this API (and the entirety of TQA) has its own design. Briefly, it starts bottom-up with yaidom,
+ * and gradually offers higher level (partial) abstractions on top of that. It does not hide yaidom, however.
  *
  * @author Chris de Vreeze
  */

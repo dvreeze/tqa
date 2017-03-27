@@ -17,8 +17,21 @@
 package eu.cdevreeze.tqa
 
 /**
- * This package contains relationships. Relationships are like their underlying arcs, but resolving the locators.
+ * This package contains '''relationships'''. Relationships are like their underlying arcs, but resolving the locators.
  * Note that an arc may represent more than 1 relationship.
+ *
+ * This package mainly contains:
+ * <ul>
+ * <li>Type [[eu.cdevreeze.tqa.relationship.Relationship]] and its sub-types</li>
+ * <li>Type [[eu.cdevreeze.tqa.relationship.RelationshipFactory]] and its sub-types</li>
+ * </ul>
+ *
+ * Relationship factories extract relationships from a [[eu.cdevreeze.tqa.dom.TaxonomyBase]]. They can be used
+ * directly, but typically they are used implicitly when creating a [[eu.cdevreeze.tqa.taxonomy.BasicTaxonomy]].
+ *
+ * For the usage of this API, see packages [[eu.cdevreeze.tqa.queryapi]] and [[eu.cdevreeze.tqa.taxonomy]].
+ *
+ * This package unidirectionally depends on the [[eu.cdevreeze.tqa.dom]] package.
  *
  * @author Chris de Vreeze
  */
