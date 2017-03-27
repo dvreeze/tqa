@@ -28,7 +28,7 @@ import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Partial implementation of trait SchemaApi.
+ * Partial implementation of trait `SchemaApi`.
  *
  * @author Chris de Vreeze
  */

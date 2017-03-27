@@ -33,7 +33,7 @@ import eu.cdevreeze.tqa.dom.TypedDimensionDeclaration
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Partial implementation of trait TaxonomySchemaApi.
+ * Partial implementation of trait `TaxonomySchemaApi`.
  *
  * @author Chris de Vreeze
  */

@@ -23,7 +23,7 @@ import eu.cdevreeze.tqa.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Partial implementation of StandardRelationshipContainerApi.
+ * Partial implementation of `StandardRelationshipContainerApi`.
  *
  * @author Chris de Vreeze
  */

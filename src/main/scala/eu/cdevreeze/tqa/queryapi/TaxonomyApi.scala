@@ -21,7 +21,7 @@ import scala.collection.immutable
 import eu.cdevreeze.tqa.relationship.Relationship
 
 /**
- * Purely abstract trait offering a taxonomy query API. It combines several other purely abstract query
+ * Purely abstract trait offering a '''taxonomy query API'''. It combines several other purely abstract query
  * API traits. The query API concerns the taxonomy as taxonomy schema, and as container of relationships,
  * standard relationships, inter-concept relationships and dimensional relationships.
  *

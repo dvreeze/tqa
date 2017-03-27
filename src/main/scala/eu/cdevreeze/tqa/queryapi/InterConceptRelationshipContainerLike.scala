@@ -23,7 +23,7 @@ import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Partial implementation of InterConceptRelationshipContainerApi.
+ * Partial implementation of `InterConceptRelationshipContainerApi`.
  *
  * @author Chris de Vreeze
  */

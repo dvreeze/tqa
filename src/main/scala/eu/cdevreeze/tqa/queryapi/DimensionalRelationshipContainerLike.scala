@@ -32,7 +32,7 @@ import eu.cdevreeze.tqa.relationship.NotAllRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Partial implementation of DimensionalRelationshipContainerApi.
+ * Partial implementation of `DimensionalRelationshipContainerApi`.
  *
  * @author Chris de Vreeze
  */

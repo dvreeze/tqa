@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.queryapi
 
 /**
- * Partial implementation of TaxonomyApi, formed by combining partial implementations of other
+ * Partial implementation of `TaxonomyApi`, formed by combining partial implementations of other
  * query API traits.
  *
  * @author Chris de Vreeze
