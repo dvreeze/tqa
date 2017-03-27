@@ -17,10 +17,9 @@
 package eu.cdevreeze.tqa.backingelem
 
 /**
- * Saxon-based BackingElemApi implementation that can be used as underlying element implementation in
- * the TQA taxonomy DOM. If Saxon tiny trees are used under the hood, this implementation is very efficient,
- * in particular in memory footprint.
+ * Native yaidom "indexed" BackingElemApi implementation that can be used as underlying element implementation in
+ * the TQA taxonomy DOM. It is not very efficient, in particular in memory footprint.
  *
  * @author Chris de Vreeze
  */
-package object nodeinfo
+package object indexed

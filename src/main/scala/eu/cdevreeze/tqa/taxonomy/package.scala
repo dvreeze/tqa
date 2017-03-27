@@ -17,7 +17,9 @@
 package eu.cdevreeze.tqa
 
 /**
- * Taxonomy classes, containing type-safe DOM trees, and mixing in taxonomy query API traits.
+ * Taxonomy classes, containing type-safe DOM trees, and mixing in taxonomy query API traits. In particular,
+ * the [[eu.cdevreeze.tqa.queryapi.TaxonomyApi]] trait is mixed in as taxonomy query API. See package
+ * [[eu.cdevreeze.tqa.queryapi]] for more information about how to query XBRL taxonomy content.
  *
  * The term taxonomy is used here in a very general sense, namely as a collection of taxonomy documents.
  *
@@ -35,6 +37,9 @@ package eu.cdevreeze.tqa
  * must exist in the collection of taxonomy DOM trees, or else the taxonomy is corrupt.
  *
  * TQA has no knowledge about XPath, so any XPath in taxonomies is just text, as far as TQA is concerned.
+ *
+ * This package unidirectionally depends on the [[eu.cdevreeze.tqa.queryapi]], [[eu.cdevreeze.tqa.relationship]] and
+ * [[eu.cdevreeze.tqa.dom]] packages.
  *
  * @author Chris de Vreeze
  */

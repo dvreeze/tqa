@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem
+package eu.cdevreeze.tqa
 
 /**
- * Saxon-based BackingElemApi implementation that can be used as underlying element implementation in
- * the TQA taxonomy DOM. If Saxon tiny trees are used under the hood, this implementation is very efficient,
- * in particular in memory footprint.
+ * Yaidom `BackingElemApi` implementations that can be used as underlying element implementation in
+ * the TQA taxonomy DOM.
  *
  * @author Chris de Vreeze
  */
-package object nodeinfo
+package object backingelem

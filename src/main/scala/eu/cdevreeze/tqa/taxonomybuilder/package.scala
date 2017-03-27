@@ -37,6 +37,9 @@ package eu.cdevreeze.tqa
  * the taxonomy DOM is instantiated. As another example, relationships resolution can be as lenient as
  * desired.
  *
+ * This package unidirectionally depends on the [[eu.cdevreeze.tqa.taxonomy]], [[eu.cdevreeze.tqa.queryapi]],
+ * [[eu.cdevreeze.tqa.relationship]] and [[eu.cdevreeze.tqa.dom]] packages.
+ *
  * @author Chris de Vreeze
  */
 package object taxonomybuilder
