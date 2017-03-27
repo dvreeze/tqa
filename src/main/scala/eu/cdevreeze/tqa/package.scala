@@ -40,7 +40,7 @@ package eu.cdevreeze
  *
  * ==Usage==
  *
- * How do we query XBRL taxonomies with TQA. For some examples, see package [[eu.cdevreeze.tqa.queryapi]].
+ * How do we query XBRL taxonomies with TQA? For some examples, see package [[eu.cdevreeze.tqa.queryapi]].
  *
  * It should be noted that typical queries involve all 3 packages [[eu.cdevreeze.tqa.queryapi]], [[eu.cdevreeze.tqa.relationship]]
  * and [[eu.cdevreeze.tqa.dom]].
