@@ -194,7 +194,7 @@ package eu.cdevreeze.tqa
  *
  * In other words, in "inner loops", do not query for taxonomy content other than querying based on specific concept ENames!
  * Note that in the examples above, we started with a slow query, and used fast queries based on concept ENames after that.
- * Keep in mind that in taxonomies with millions of relationships the slow queries may have to filter in collections of all
+ * Keep in mind that in taxonomies with millions of relationships the slow queries may have to process collections of all
  * those relationships.
  *
  * @author Chris de Vreeze
