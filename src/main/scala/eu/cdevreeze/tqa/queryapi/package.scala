@@ -49,10 +49,14 @@ package eu.cdevreeze.tqa
  * schema, as yaidom EName. Here is how we can get the concept labels:
  *
  * {{{
+ * import scala.reflect.classTag
+ * import eu.cdevreeze.yaidom.core.EName
+ * import eu.cdevreeze.tqa.relationship.ConceptLabelRelationship
+ *
  * val concepts: Set[EName] =
  *   taxonomy.findAllConceptDeclarations.map(_.targetEName).toSet
  *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toSeq map { conceptEName =>
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingStandardRelationshipsOfType(
  *       conceptEName,
@@ -82,7 +86,7 @@ package eu.cdevreeze.tqa
  * val concepts: Set[EName] =
  *   taxonomy.filterPrimaryItemDeclarations(_.isConcrete).map(_.targetEName).toSet
  *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toSeq map { conceptEName =>
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingStandardRelationshipsOfType(
  *       conceptEName,
@@ -103,6 +107,9 @@ package eu.cdevreeze.tqa
  * To simulate how TQA retrieves concrete primary item declarations, we could write more verbosely:
  *
  * {{{
+ * import eu.cdevreeze.tqa.dom.ConceptDeclaration
+ * import eu.cdevreeze.tqa.dom.PrimaryItemDeclaration
+ *
  * val substitutionGroupMap = taxonomy.substitutionGroupMap
  * val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
  *
@@ -115,14 +122,16 @@ package eu.cdevreeze.tqa
  * To simulate how TQA filters the concept label relationships we are interested in, we could write more verbosely:
  *
  * {{{
- * val conceptLabelRelationshipsByConceptEName = (concepts.toSeq map { conceptEName =>
+ * import eu.cdevreeze.tqa.ENames
+ *
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingStandardRelationshipsOfType(
  *       conceptEName,
  *       classTag[ConceptLabelRelationship]) { rel =>
  *
  *       rel.resolvedTo.resolvedElem.attribute(ENames.XmlLangEName) == "en" &&
- *         rel.resolvedTo.resolvedElem.roleOption == Some("http://www.xbrl.org/2003/role/terseLabel")
+ *         rel.resolvedTo.resolvedElem.attributeOption(ENames.XLinkRoleEName) == Some("http://www.xbrl.org/2003/role/terseLabel")
  *     }
  *
  *   (conceptEName -> conceptLabelRels)
@@ -139,9 +148,12 @@ package eu.cdevreeze.tqa
  * relationships instead of querying for the underlying XLink presentation arcs. Here is how we get the top 2 levels:
  *
  * {{{
+ * import scala.collection.immutable
+ * import eu.cdevreeze.tqa.relationship.ParentChildRelationship
+ *
  * val parentChildRelationships =
  *   taxonomy.filterInterConceptRelationshipsOfType(classTag[ParentChildRelationship]) { rel =>
- *     rel.elr = customElr
+ *     rel.elr == customElr
  *   }
  *
  * val topLevelConcepts: Set[EName] =
@@ -149,7 +161,7 @@ package eu.cdevreeze.tqa
  *     parentChildRelationships.map(_.targetConceptEName).toSet)
  *
  * val topLevelParentChildren: Map[EName, immutable.IndexedSeq[EName]] =
- *   (topLevelConcepts.toSeq map { conceptEName =>
+ *   (topLevelConcepts.toIndexedSeq map { conceptEName =>
  *     val parentChildren =
  *       taxonomy.filterOutgoingInterConceptRelationshipsOfType(
  *         conceptEName,

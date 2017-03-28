@@ -105,8 +105,12 @@ import javax.xml.bind.DatatypeConverter
  * this schema as follows:
  *
  * {{{
+ * import scala.reflect.classTag
+ * import eu.cdevreeze.tqa.ENames
+ * import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
+ *
  * // Low level yaidom query, returning the result XML elements as TaxonomyElem elements
- * val globalElemDecls1 = schema.filterChildElems(_.resolvedName == tqa.ENames.XsElementEName)
+ * val globalElemDecls1 = schema.filterChildElems(_.resolvedName == ENames.XsElementEName)
  *
  * // Higher level yaidom query, querying for the type GlobalElementDeclaration
  * // Prefer this to the lower level yaidom query above

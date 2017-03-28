@@ -20,8 +20,8 @@ package eu.cdevreeze
  * Root package of the '''Taxonomy Query API'''. This package itself contains commonly used data classes and many constants
  * for namespaces and expanded names.
  *
- * There are 3 levels of abstraction in TQA. The lowest layer is the '''type-safe taxonomy DOM model'''. It uses '''yaidom'''
- * (https://github.com/dvreeze/yaidom) for its "XML dialect support", where the XML dialect is XBRL taxonomy data. It
+ * There are 3 layers in TQA. The lowest layer is the '''type-safe taxonomy DOM model'''. It uses '''yaidom'''
+ * ([[https://github.com/dvreeze/yaidom]]) for its "XML dialect support", where the XML dialect is XBRL taxonomy data. It
  * knows only about individual DOM trees.
  *
  * On top of the type-safe DOM layer is the '''relationship layer'''. It resolves the arcs of the DOM layer as relationships.
@@ -30,9 +30,10 @@ package eu.cdevreeze
  * On top of the relationship layer is the '''taxonomy query API layer'''. It uses the underlying layers to offer a query
  * API in which taxonomy elements (such as concept declarations) and relationships can easily be queried.
  *
- * It is important to note that higher layers do not fully abstract away lower layers. Think of the layering more in
+ * It is important to note that higher layers do not abstract away lower layers. Think of the layering more in
  * terms of dependencies. The "taxonomy DOM" layer depends only on yaidom, the relationship layer only depends on the
- * taxonomy DOM layer, and the query API layer depends on both the taxonomy DOM and relationship layers.
+ * taxonomy DOM layer, and the query API layer depends on both the taxonomy DOM and relationship layers. On the other
+ * hand, relationships are indeed abstractions of the underlying XLink arcs and locators/resources.
  *
  * These 3 layers are as follows in terms of packages, from low to high:
  *
@@ -49,7 +50,7 @@ package eu.cdevreeze
  * It should be noted that typical queries involve all 3 packages [[eu.cdevreeze.tqa.queryapi]], [[eu.cdevreeze.tqa.relationship]]
  * and [[eu.cdevreeze.tqa.dom]].
  *
- * It should also be noted that TQA is deeply rooted in the '''yaidom''' XML query API (https://github.com/dvreeze/yaidom).
+ * It should also be noted that TQA is deeply rooted in the '''yaidom''' XML query API ([[https://github.com/dvreeze/yaidom]]).
  * This is true internally and externally. Internally TQA has been built in a bottom-up manner on top of yaidom, and this
  * is in particular visible in the internals of the TQA DOM package. Externally many TQA query methods remind of yaidom
  * query methods, but taking and returning type-safe TQA DOM taxonomy content instead of arbitrary XML content.
@@ -63,7 +64,7 @@ package eu.cdevreeze
  * XPointer in an XBRL context, embedded linkbases etc.
  *
  * TQA feels like an API designed in a bottom-up manner on top of yaidom, and that is indeed what it is. So, although
- * TQA can help in learning more about XBRL taxonomies, it is not an API for users that have no knowledge about XBRL.
+ * TQA can help in learning more about XBRL taxonomies, it is not an API for users who have no knowledge about XBRL.
  * From the lower level DOM-like operations to the higher level dimensional bulk query methods, TQA is useful only
  * for users who know what data they are looking for in a taxonomy.
  *
