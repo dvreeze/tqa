@@ -460,4 +460,55 @@ class QueryApiTest extends FunSuite {
       hasHypercubeInheritance
     }
   }
+
+  /**
+   * Testing that namespace prefixes are irrelevant, even the link, xlink and xsd prefixes.
+   */
+  test("testDimensionalBulkQueriesAfterEditingPrefixes") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUris = Vector(
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/fr/sg-se/sg-se_2013-09-13_def-with-edited-prefixes.xml").toURI,
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13-with-edited-prefixes.xsd").toURI)
+
+    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
+
+    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+
+    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
+
+    assertResult(true) {
+      richTaxo.findAllGlobalElementDeclarations.size > 1600
+    }
+    assertResult(richTaxo.findAllGlobalElementDeclarations) {
+      richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
+    }
+
+    val hasHypercubeInheritanceOrSelf =
+      richTaxo.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
+
+    assertResult(true) {
+      hasHypercubeInheritanceOrSelf.nonEmpty
+    }
+
+    assertResult(hasHypercubeInheritanceOrSelf.keySet.toSeq.
+      map(concept => (concept -> richTaxo.findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap(concept))).toMap) {
+
+      hasHypercubeInheritanceOrSelf
+    }
+
+    val hasHypercubeInheritance =
+      richTaxo.computeHasHypercubeInheritanceReturningElrToPrimariesMaps
+
+    assertResult(true) {
+      hasHypercubeInheritance.nonEmpty
+    }
+
+    assertResult(hasHypercubeInheritance.keySet.toSeq.
+      map(concept => (concept -> richTaxo.findAllInheritedHasHypercubesAsElrToPrimariesMap(concept))).toMap) {
+
+      hasHypercubeInheritance
+    }
+  }
 }
