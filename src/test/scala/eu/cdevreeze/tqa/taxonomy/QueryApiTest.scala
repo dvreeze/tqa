@@ -436,9 +436,6 @@ class QueryApiTest extends FunSuite {
     testDimensionalBulkQueries(docUris)
   }
 
-  /**
-   * Testing that namespace prefixes are irrelevant, even the link, xlink and xsd prefixes.
-   */
   private def testDimensionalBulkQueries(taxoDocUris: immutable.IndexedSeq[URI]) {
     val docParser = DocumentParserUsingStax.newInstance()
 
