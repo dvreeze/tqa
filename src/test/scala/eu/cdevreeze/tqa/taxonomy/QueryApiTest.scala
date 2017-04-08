@@ -16,6 +16,9 @@
 
 package eu.cdevreeze.tqa.taxonomy
 
+import java.net.URI
+
+import scala.collection.immutable
 import scala.reflect.classTag
 
 import org.junit.runner.RunWith
@@ -31,6 +34,7 @@ import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.queryapi.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
+import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.relationship.PresentationRelationship
@@ -414,64 +418,31 @@ class QueryApiTest extends FunSuite {
   }
 
   test("testDimensionalBulkQueries") {
-    val docParser = DocumentParserUsingStax.newInstance()
-
     val docUris = Vector(
       classOf[QueryApiTest].getResource("/taxonomies/acra/2013/fr/sg-se/sg-se_2013-09-13_def.xml").toURI,
       classOf[QueryApiTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13.xsd").toURI)
 
-    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
-
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
-
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
-    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
-
-    assertResult(true) {
-      richTaxo.findAllGlobalElementDeclarations.size > 1600
-    }
-    assertResult(richTaxo.findAllGlobalElementDeclarations) {
-      richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
-    }
-
-    val hasHypercubeInheritanceOrSelf =
-      richTaxo.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
-
-    assertResult(true) {
-      hasHypercubeInheritanceOrSelf.nonEmpty
-    }
-
-    assertResult(hasHypercubeInheritanceOrSelf.keySet.toSeq.
-      map(concept => (concept -> richTaxo.findAllOwnOrInheritedHasHypercubesAsElrToPrimariesMap(concept))).toMap) {
-
-      hasHypercubeInheritanceOrSelf
-    }
-
-    val hasHypercubeInheritance =
-      richTaxo.computeHasHypercubeInheritanceReturningElrToPrimariesMaps
-
-    assertResult(true) {
-      hasHypercubeInheritance.nonEmpty
-    }
-
-    assertResult(hasHypercubeInheritance.keySet.toSeq.
-      map(concept => (concept -> richTaxo.findAllInheritedHasHypercubesAsElrToPrimariesMap(concept))).toMap) {
-
-      hasHypercubeInheritance
-    }
+    testDimensionalBulkQueries(docUris)
   }
 
   /**
    * Testing that namespace prefixes are irrelevant, even the link, xlink and xsd prefixes.
    */
   test("testDimensionalBulkQueriesAfterEditingPrefixes") {
-    val docParser = DocumentParserUsingStax.newInstance()
-
     val docUris = Vector(
       classOf[QueryApiTest].getResource("/taxonomies/acra/2013/fr/sg-se/sg-se_2013-09-13_def-with-edited-prefixes.xml").toURI,
       classOf[QueryApiTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13-with-edited-prefixes.xsd").toURI)
 
-    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
+    testDimensionalBulkQueries(docUris)
+  }
+
+  /**
+   * Testing that namespace prefixes are irrelevant, even the link, xlink and xsd prefixes.
+   */
+  private def testDimensionalBulkQueries(taxoDocUris: immutable.IndexedSeq[URI]) {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docs = taxoDocUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
@@ -509,6 +480,75 @@ class QueryApiTest extends FunSuite {
       map(concept => (concept -> richTaxo.findAllInheritedHasHypercubesAsElrToPrimariesMap(concept))).toMap) {
 
       hasHypercubeInheritance
+    }
+
+    assertResult(true) {
+      hasHypercubeInheritanceOrSelf.keySet.size > 250
+    }
+
+    assertResult(Set.empty) {
+      val primaries: Set[EName] =
+        richTaxo.findAllPrimaryItemDeclarations.map(_.targetEName).toSet
+
+      hasHypercubeInheritanceOrSelf.keySet.diff(primaries)
+    }
+
+    assertResult(Set.empty) {
+      val someDimTrees: Set[Map[String, Set[EName]]] = {
+        Set(
+          Map(
+            "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NoteShareBasedPaymentsb" ->
+              Set(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}DescriptionOfInputsToOptionPricingModelShareOptionsGrantedAbstract"))),
+          Map(
+            "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/SOCIE" ->
+              Set(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}StatementOfChangesInEquityAbstract"))),
+          Map(
+            "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NotePropertyPlantAndEquipment" ->
+              Set(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}DisclosureOfDetailedInformationAboutPropertyPlantAndEquipmentAbstract")),
+            "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NoteIntangibleAssets" ->
+              Set(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}DisclosureOfIntangibleAssetsAbstract"))),
+          Map(
+            "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NoteShareBasedPaymentsa" ->
+              Set(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}InformationAboutShareOptionsExercisedDuringPeriodAbstract"))),
+          Map(
+            "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/NoteShareCapital" ->
+              Set(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}DisclosureOfAmountOfShareCapitalAbstract")),
+            "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/sg-se/role/SOCIE" ->
+              Set(EName("{http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-as}StatementOfChangesInEquityAbstract"))))
+      }
+
+      someDimTrees.diff(hasHypercubeInheritanceOrSelf.values.toSet)
+    }
+
+    assertResult(Set.empty) {
+      val primariesHavingHypercube: Set[EName] =
+        hasHypercubeInheritanceOrSelf.values.flatMap(_.values).flatten.toSet
+
+      val primaries = richTaxo.findAllPrimaryItemDeclarations.map(_.targetEName).toSet
+
+      primariesHavingHypercube.diff(primaries)
+    }
+
+    val dimTreeKeys: Set[Map[String, Set[EName]]] =
+      hasHypercubeInheritanceOrSelf.values.toSet
+
+    assertResult(true) {
+      richTaxo.findAllHypercubeDeclarations.size > 40
+    }
+
+    assertResult(Set.empty) {
+      val hasHypercubeKeys: Set[(String, Set[EName])] = dimTreeKeys.flatten
+
+      val hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship] =
+        hasHypercubeKeys.toIndexedSeq flatMap {
+          case (elr, primaries) =>
+            primaries.toIndexedSeq flatMap { prim =>
+              richTaxo.filterOutgoingHasHypercubeRelationshipsOnElr(prim, elr)
+            }
+        }
+
+      val allHypercubes = richTaxo.findAllHypercubeDeclarations.map(_.targetEName).toSet
+      hasHypercubes.map(_.hypercube).toSet.diff(allHypercubes)
     }
   }
 }
