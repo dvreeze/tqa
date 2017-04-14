@@ -27,4 +27,5 @@ trait TaxonomyLike
   with TaxonomySchemaLike
   with StandardRelationshipContainerLike
   with InterConceptRelationshipContainerLike
+  with PresentationRelationshipContainerLike
   with DimensionalRelationshipContainerLike

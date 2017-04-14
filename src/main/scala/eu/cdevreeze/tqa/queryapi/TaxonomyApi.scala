@@ -31,6 +31,7 @@ trait TaxonomyApi
     extends TaxonomySchemaApi
     with StandardRelationshipContainerApi
     with InterConceptRelationshipContainerApi
+    with PresentationRelationshipContainerApi
     with DimensionalRelationshipContainerApi {
 
   def relationships: immutable.IndexedSeq[Relationship]

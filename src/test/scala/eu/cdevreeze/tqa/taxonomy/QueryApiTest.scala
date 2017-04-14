@@ -76,7 +76,7 @@ class QueryApiTest extends FunSuite {
     val tns = "http://www.bizfinx.gov.sg/taxonomy/2013-09-13/elts/sg-dei"
     val plinkTop = EName(tns, "DisclosureOfFilingInformationAbstract")
 
-    val prels = richTaxo.filterInterConceptRelationshipsOfType(classTag[PresentationRelationship])(_.elr == elr)
+    val prels = richTaxo.filterPresentationRelationshipsOfType(classTag[PresentationRelationship])(_.elr == elr)
 
     assertResult(Set("http://www.xbrl.org/2003/arcrole/parent-child")) {
       prels.map(_.arcrole).toSet
@@ -88,29 +88,25 @@ class QueryApiTest extends FunSuite {
 
     val topENames = prels.map(_.sourceConceptEName).toSet.diff(prels.map(_.targetConceptEName).toSet)
 
-    def hasExpectedElr[A <: InterConceptRelationship](path: InterConceptRelationshipPath[A]): Boolean = {
-      path.firstRelationship.elr == elr && path.isElrValid
-    }
-
     assertResult(Set(plinkTop)) {
       topENames
     }
     assertResult(prels.map(_.targetConceptEName).toSet) {
-      val paths = richTaxo.filterLongestOutgoingInterConceptRelationshipPaths(plinkTop, classTag[PresentationRelationship])(hasExpectedElr)
+      val paths = richTaxo.findAllLongestOutgoingConsecutiveParentChildRelationshipPaths(plinkTop)
       paths.flatMap(_.relationships.map(_.targetConceptEName)).toSet
     }
     assertResult(prels.map(_.targetConceptEName).toSet.union(Set(plinkTop))) {
-      val paths = richTaxo.filterLongestOutgoingInterConceptRelationshipPaths(plinkTop, classTag[PresentationRelationship])(hasExpectedElr)
+      val paths = richTaxo.findAllLongestOutgoingConsecutiveParentChildRelationshipPaths(plinkTop)
       paths.flatMap(_.concepts).toSet
     }
 
     assertResult(Nil) {
-      richTaxo.filterLongestIncomingInterConceptRelationshipPaths(plinkTop, classTag[PresentationRelationship])(hasExpectedElr)
+      richTaxo.findAllLongestIncomingConsecutiveParentChildRelationshipPaths(plinkTop)
     }
 
     assertResult(Set(plinkTop)) {
       val paths = prels.map(_.targetConceptEName).distinct flatMap { concept =>
-        richTaxo.filterLongestIncomingInterConceptRelationshipPaths(concept, classTag[PresentationRelationship])(hasExpectedElr)
+        richTaxo.findAllLongestIncomingConsecutiveParentChildRelationshipPaths(concept)
       }
 
       paths.map(_.sourceConcept).toSet
@@ -118,7 +114,7 @@ class QueryApiTest extends FunSuite {
 
     assertResult(true) {
       val nonTopConcepts = prels.map(_.targetConceptEName).toSet
-      nonTopConcepts.forall(c => richTaxo.filterLongestIncomingInterConceptRelationshipPaths(c, classTag[PresentationRelationship])(hasExpectedElr).nonEmpty)
+      nonTopConcepts.forall(c => richTaxo.findAllLongestIncomingConsecutiveParentChildRelationshipPaths(c).nonEmpty)
     }
   }
 
