@@ -224,7 +224,7 @@ sealed trait XLinkElem extends TaxonomyElem {
   def xlinkType: String
 
   final def xlinkAttributes: Map[EName, String] = {
-    resolvedAttributes.toMap.filterKeys(_.namespaceUriOption == Some(XLinkNamespace))
+    resolvedAttributes.toMap.filterKeys(_.namespaceUriOption.contains(XLinkNamespace))
   }
 }
 
@@ -621,7 +621,7 @@ final class GlobalElementDeclaration private[dom] (
    * declaration directly has the substitution group itself.
    */
   def hasSubstitutionGroup(substGroup: EName, substitutionGroupMap: SubstitutionGroupMap): Boolean = {
-    (substitutionGroupOption == Some(substGroup)) || {
+    (substitutionGroupOption.contains(substGroup)) || {
       val derivedSubstGroups = substitutionGroupMap.substitutionGroupDerivations.getOrElse(substGroup, Set.empty)
 
       // Recursive calls
@@ -1230,7 +1230,7 @@ object Linkbase {
 object XsdElem {
 
   private[dom] def apply(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): XsdElem = {
-    require(backingElem.resolvedName.namespaceUriOption == Some(XsNamespace))
+    require(backingElem.resolvedName.namespaceUriOption.contains(XsNamespace))
 
     backingElem.resolvedName match {
       case XsSchemaEName         => new XsdSchema(backingElem, childElems)
@@ -1259,7 +1259,7 @@ object XsdElem {
 object LinkElem {
 
   private[dom] def apply(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): LinkElem = {
-    require(backingElem.resolvedName.namespaceUriOption == Some(LinkNamespace))
+    require(backingElem.resolvedName.namespaceUriOption.contains(LinkNamespace))
 
     backingElem.resolvedName match {
       case LinkLinkbaseEName         => new Linkbase(backingElem, childElems)

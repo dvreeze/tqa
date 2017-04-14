@@ -46,7 +46,7 @@ final case class BaseSetKey(
    * arc and extended link ENames, not at (arc and extended link) roles.
    */
   def isStandard: Boolean = {
-    arcEName.namespaceUriOption == Some(LinkNamespace) && extLinkEName.namespaceUriOption == Some(LinkNamespace)
+    arcEName.namespaceUriOption.contains(LinkNamespace) && extLinkEName.namespaceUriOption.contains(LinkNamespace)
   }
 }
 

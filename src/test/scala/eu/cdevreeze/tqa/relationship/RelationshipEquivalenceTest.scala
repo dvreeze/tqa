@@ -591,7 +591,7 @@ class RelationshipEquivalenceTest extends FunSuite {
     val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
 
     val filteredRelationships =
-      relationships.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName) == Some("fixedAssets"))
+      relationships.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
 
     assertResult(Map(BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> filteredRelationships)) {
       networkMap
@@ -640,7 +640,7 @@ class RelationshipEquivalenceTest extends FunSuite {
     val filteredRequiresElementRelationships =
       relationships collect {
         case rel: RequiresElementRelationship => rel
-      } filter (_.resolvedTo.resolvedElem.attributeOption(NameEName) == Some("fixedAssets"))
+      } filter (_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
 
     val filteredGeneralSpecialRelationships =
       relationships collect { case rel: GeneralSpecialRelationship => rel }

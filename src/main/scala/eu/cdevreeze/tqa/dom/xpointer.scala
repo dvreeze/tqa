@@ -43,7 +43,7 @@ sealed trait XPointer {
 final case class ShorthandPointer(id: String) extends XPointer {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
-    rootElem.findElemOrSelf(_.attributeOption(IdEName) == Some(id))
+    rootElem.findElemOrSelf(_.attributeOption(IdEName).contains(id))
   }
 
   override def toString: String = id
@@ -57,7 +57,7 @@ sealed trait ElementSchemePointer extends XPointer
 final case class IdPointer(id: String) extends ElementSchemePointer {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
-    rootElem.findElemOrSelf(_.attributeOption(IdEName) == Some(id))
+    rootElem.findElemOrSelf(_.attributeOption(IdEName).contains(id))
   }
 
   override def toString: String = s"element(${id})"
@@ -86,7 +86,7 @@ final case class ChildSequencePointer(childSequence: List[Int]) extends ElementS
   require(childSequence.size >= 1, "Empty child sequence not allowed")
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
-    if (childSequence.headOption == Some(1)) findElem(rootElem, childSequence.tail) else None
+    if (childSequence.headOption.contains(1)) findElem(rootElem, childSequence.tail) else None
   }
 
   private def findElem[E <: ScopedElemApi.Aux[E]](root: E, childSeq: List[Int]): Option[E] = childSeq match {

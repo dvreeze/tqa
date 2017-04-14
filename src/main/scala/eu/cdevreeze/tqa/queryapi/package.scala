@@ -131,7 +131,7 @@ package eu.cdevreeze.tqa
  *       classTag[ConceptLabelRelationship]) { rel =>
  *
  *       rel.resolvedTo.resolvedElem.attribute(ENames.XmlLangEName) == "en" &&
- *         rel.resolvedTo.resolvedElem.attributeOption(ENames.XLinkRoleEName) == Some("http://www.xbrl.org/2003/role/terseLabel")
+ *         rel.resolvedTo.resolvedElem.attributeOption(ENames.XLinkRoleEName).contains("http://www.xbrl.org/2003/role/terseLabel")
  *     }
  *
  *   (conceptEName -> conceptLabelRels)

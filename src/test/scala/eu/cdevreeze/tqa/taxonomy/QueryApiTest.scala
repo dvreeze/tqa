@@ -413,7 +413,7 @@ class QueryApiTest extends FunSuite {
     }
 
     assertResult(true) {
-      dimensions.forall(dim => richTaxo.findGlobalElementDeclaration(dim).map(_.targetEName) == Some(dim))
+      dimensions.forall(dim => richTaxo.findGlobalElementDeclaration(dim).map(_.targetEName).contains(dim))
     }
   }
 
