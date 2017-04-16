@@ -58,9 +58,7 @@ package eu.cdevreeze.tqa
  *
  * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
  *   val conceptLabelRels =
- *     taxonomy.filterOutgoingStandardRelationshipsOfType(
- *       conceptEName,
- *       classTag[ConceptLabelRelationship]) { rel =>
+ *     taxonomy.filterOutgoingConceptLabelRelationships(conceptEName) { rel =>
  *
  *       rel.language == "en" && rel.resourceRole == "http://www.xbrl.org/2003/role/verboseLabel"
  *     }
@@ -88,9 +86,7 @@ package eu.cdevreeze.tqa
  *
  * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
  *   val conceptLabelRels =
- *     taxonomy.filterOutgoingStandardRelationshipsOfType(
- *       conceptEName,
- *       classTag[ConceptLabelRelationship]) { rel =>
+ *     taxonomy.filterOutgoingConceptLabelRelationships(conceptEName) { rel =>
  *
  *       rel.language == "en" && rel.resourceRole == "http://www.xbrl.org/2003/role/terseLabel"
  *     }
@@ -124,6 +120,8 @@ package eu.cdevreeze.tqa
  * {{{
  * import eu.cdevreeze.tqa.ENames
  *
+ * // Falling back to more general method filterOutgoingStandardRelationshipsOfType
+ *
  * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingStandardRelationshipsOfType(
@@ -152,9 +150,7 @@ package eu.cdevreeze.tqa
  * import eu.cdevreeze.tqa.relationship.ParentChildRelationship
  *
  * val parentChildRelationships =
- *   taxonomy.filterInterConceptRelationshipsOfType(classTag[ParentChildRelationship]) { rel =>
- *     rel.elr == customElr
- *   }
+ *   taxonomy.filterParentChildRelationships(_.elr == customElr)
  *
  * val topLevelConcepts: Set[EName] =
  *   parentChildRelationships.map(_.sourceConceptEName).toSet.diff(
@@ -163,12 +159,7 @@ package eu.cdevreeze.tqa
  * val topLevelParentChildren: Map[EName, immutable.IndexedSeq[EName]] =
  *   (topLevelConcepts.toIndexedSeq map { conceptEName =>
  *     val parentChildren =
- *       taxonomy.filterOutgoingInterConceptRelationshipsOfType(
- *         conceptEName,
- *         classTag[ParentChildRelationship]) { rel =>
- *
- *         rel.elr == customElr
- *       }
+ *       taxonomy.filterOutgoingParentChildRelationships(conceptEName)(_.elr == customElr)
  *
  *     val childENames = parentChildren.sortBy(_.order).map(_.targetConceptEName)
  *
