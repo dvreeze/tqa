@@ -26,6 +26,9 @@ trait TaxonomyLike
   extends TaxonomyApi
   with TaxonomySchemaLike
   with StandardRelationshipContainerLike
+  with NonStandardRelationshipContainerLike
   with InterConceptRelationshipContainerLike
   with PresentationRelationshipContainerLike
+  with ConceptLabelRelationshipContainerLike
+  with ConceptReferenceRelationshipContainerLike
   with DimensionalRelationshipContainerLike

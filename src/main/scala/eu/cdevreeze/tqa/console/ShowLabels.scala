@@ -73,8 +73,7 @@ object ShowLabels {
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
-    val conceptLabelRelationships =
-      basicTaxo.findAllStandardRelationshipsOfType(classTag[ConceptLabelRelationship])
+    val conceptLabelRelationships = basicTaxo.findAllConceptLabelRelationships
 
     logger.info(s"The taxonomy has ${rootElems.size} taxonomy root elements")
     logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")

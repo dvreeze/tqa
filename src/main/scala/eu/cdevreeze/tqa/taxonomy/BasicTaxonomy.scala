@@ -23,6 +23,7 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.dom.ConceptDeclaration
 import eu.cdevreeze.tqa.dom.GlobalAttributeDeclaration
 import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
@@ -32,6 +33,7 @@ import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.tqa.queryapi.TaxonomyLike
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.relationship.Relationship
 import eu.cdevreeze.tqa.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.relationship.StandardRelationship
@@ -59,6 +61,7 @@ final class BasicTaxonomy private (
     val relationships: immutable.IndexedSeq[Relationship],
     val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
     val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
+    val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
     val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
 
@@ -107,6 +110,13 @@ final class BasicTaxonomy private (
     relationships collect { case rel: A => rel }
   }
 
+  def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
+    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+
+    implicit val clsTag = relationshipType
+    relationships collect { case rel: A => rel }
+  }
+
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
@@ -130,6 +140,7 @@ final class BasicTaxonomy private (
       relationships.filter(rel => docUris.contains(rel.docUri)),
       conceptDeclarationsByEName.filter(kv => docUris.contains(kv._2.globalElementDeclaration.docUri)),
       standardRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
+      nonStandardRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
       interConceptRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
       interConceptRelationshipsByTarget.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty))
   }
@@ -147,6 +158,7 @@ final class BasicTaxonomy private (
       relationships.filter(p),
       conceptDeclarationsByEName,
       standardRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
+      nonStandardRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
       interConceptRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
       interConceptRelationshipsByTarget.mapValues(_.filter(p)).filter(_._2.nonEmpty))
   }
@@ -212,6 +224,12 @@ object BasicTaxonomy {
       standardRelationships groupBy (_.sourceConceptEName)
     }
 
+    val nonStandardRelationships = relationships collect { case rel: NonStandardRelationship => rel }
+
+    val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
+      nonStandardRelationships groupBy (_.sourceElem.key)
+    }
+
     val interConceptRelationships = standardRelationships collect { case rel: InterConceptRelationship => rel }
 
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
@@ -229,6 +247,7 @@ object BasicTaxonomy {
       relationships,
       conceptDeclarationsByEName,
       standardRelationshipsBySource,
+      nonStandardRelationshipsBySource,
       interConceptRelationshipsBySource,
       interConceptRelationshipsByTarget)
   }

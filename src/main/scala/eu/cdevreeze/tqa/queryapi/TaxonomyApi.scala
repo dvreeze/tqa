@@ -30,8 +30,11 @@ import eu.cdevreeze.tqa.relationship.Relationship
 trait TaxonomyApi
     extends TaxonomySchemaApi
     with StandardRelationshipContainerApi
+    with NonStandardRelationshipContainerApi
     with InterConceptRelationshipContainerApi
     with PresentationRelationshipContainerApi
+    with ConceptLabelRelationshipContainerApi
+    with ConceptReferenceRelationshipContainerApi
     with DimensionalRelationshipContainerApi {
 
   def relationships: immutable.IndexedSeq[Relationship]
