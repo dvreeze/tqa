@@ -39,6 +39,6 @@ final class SaxonDocumentBuilder(
 
     val node = docBuilder.build(new File(localUri)).getUnderlyingNode
     node.setSystemId(uri.toString)
-    SaxonNode.wrapDocument(node.getTreeInfo).documentElement
+    SaxonDocument.wrapDocument(node.getTreeInfo).documentElement
   }
 }

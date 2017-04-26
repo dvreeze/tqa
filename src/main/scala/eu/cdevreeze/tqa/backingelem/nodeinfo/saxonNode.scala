@@ -30,14 +30,12 @@ import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.QNameProvider
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
-import eu.cdevreeze.yaidom.queryapi.DocumentApi
 import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 import net.sf.saxon.`type`.Type
 import net.sf.saxon.om.AbsolutePath
 import net.sf.saxon.om.AxisInfo
 import net.sf.saxon.om.NodeInfo
-import net.sf.saxon.om.TreeInfo
 import net.sf.saxon.pattern.NodeKindTest
 
 /**
@@ -100,30 +98,6 @@ sealed abstract class SaxonNode(val wrappedNode: NodeInfo) extends ResolvedNodes
     val nodeStream = Stream.continually(it.next()).takeWhile(_ ne null)
 
     nodeStream.map(nodeInfo => SaxonNode.wrapElement(nodeInfo)).find(p)
-  }
-}
-
-final class SaxonDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
-  require(wrappedNode ne null)
-  require(wrappedNode.getNodeKind == Type.DOCUMENT, s"Expected document but got node kind ${wrappedNode.getNodeKind}")
-
-  type ThisDoc = SaxonDocument
-
-  type DocElemType = SaxonElem
-
-  def wrappedNode: NodeInfo = wrappedTreeInfo.getRootNode
-
-  def uriOption: Option[URI] = Option(wrappedNode.getSystemId).map(s => URI.create(s))
-
-  def documentElement: SaxonElem =
-    (children collectFirst { case e: SaxonElem => e }).getOrElse(sys.error(s"Missing document element"))
-
-  final def children: immutable.IndexedSeq[SaxonNode] = {
-    val it = wrappedNode.iterateAxis(AxisInfo.CHILD)
-
-    val nodes = Stream.continually(it.next()).takeWhile(_ ne null).toVector
-
-    nodes.flatMap(nodeInfo => SaxonNode.wrapNodeOption(nodeInfo))
   }
 }
 
@@ -543,8 +517,6 @@ object SaxonNode {
       case _                           => None
     }
   }
-
-  def wrapDocument(doc: TreeInfo): SaxonDocument = new SaxonDocument(doc)
 
   def wrapElement(elm: NodeInfo): SaxonElem = new SaxonElem(elm)
 
