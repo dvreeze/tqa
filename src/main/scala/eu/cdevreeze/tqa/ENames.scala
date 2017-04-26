@@ -169,6 +169,8 @@ object ENames {
 
   val LinkRoleTypeEName = EName(LinkNamespace, "roleType")
   val LinkArcroleTypeEName = EName(LinkNamespace, "arcroleType")
+  val LinkDefinitionEName = EName(LinkNamespace, "definition")
+  val LinkUsedOnEName = EName(LinkNamespace, "usedOn")
 
   val LinkPartEName = EName(LinkNamespace, "part")
 
@@ -177,6 +179,28 @@ object ENames {
 
   val LabelLabelEName = EName(LabelNamespace, "label")
   val ReferenceReferenceEName = EName(ReferenceNamespace, "reference")
+
+  val RefPublisherEName = EName(RefNamespace, "Publisher")
+  val RefNameEName = EName(RefNamespace, "Name")
+  val RefNumberEName = EName(RefNamespace, "Number")
+  val RefIssueDateEName = EName(RefNamespace, "IssueDate")
+  val RefChapterEName = EName(RefNamespace, "Chapter")
+  val RefArticleEName = EName(RefNamespace, "Article")
+  val RefNoteEName = EName(RefNamespace, "Note")
+  val RefSectionEName = EName(RefNamespace, "Section")
+  val RefSubsectionEName = EName(RefNamespace, "Subsection")
+  val RefParagraphEName = EName(RefNamespace, "Paragraph")
+  val RefSubparagraphEName = EName(RefNamespace, "Subparagraph")
+  val RefClauseEName = EName(RefNamespace, "Clause")
+  val RefSubclauseEName = EName(RefNamespace, "Subclause")
+  val RefAppendixEName = EName(RefNamespace, "Appendix")
+  val RefExampleEName = EName(RefNamespace, "Example")
+  val RefPageEName = EName(RefNamespace, "Page")
+  val RefExhibitEName = EName(RefNamespace, "Exhibit")
+  val RefFootnoteEName = EName(RefNamespace, "Footnote")
+  val RefSentenceEName = EName(RefNamespace, "Sentence")
+  val RefURIEName = EName(RefNamespace, "URI")
+  val RefURIDateEName = EName(RefNamespace, "URIDate")
 
   val VariableVariableArcEName = EName(VariableNamespace, "variableArc")
   val VariableVariableFilterArcEName = EName(VariableNamespace, "variableFilterArc")

@@ -72,6 +72,16 @@ package eu.cdevreeze.tqa
  * Most TQA client code does not start with this package, however, but works with entire taxonomies instead of
  * individual type-safe DOM trees, and with relationships instead of the underlying XLink arcs.
  *
+ * ==Leniency==
+ *
+ * See the remarks on leniency for type `TaxonomyElem` and its sub-types. This type-safe XBRL DOM model has been
+ * designed to be very '''lenient on instantiation''' of the model. Therefore this TQA type-safe DOM model can also
+ * be used for validating potentially erroneous taxonomy documents.
+ *
+ * On the other hand, if the instantiated model cannot be trusted to be schema-valid, one should be careful in
+ * choosing the API calls that can safely be made on schema-invalid taxonomy content. Yaidom API level query
+ * methods that return collections or options are typically safe to use on potentially schema-invalid taxonomy content.
+ *
  * ==Other remarks==
  *
  * To get the model right, there are many sources to look at for inspiration. First of all, for schema content

@@ -87,7 +87,7 @@ import javax.xml.bind.DatatypeConverter
  * <li>methods that query for values of specific types (enumerations, integers etc.)</li>
  * </ul>
  * It is important to keep this in mind. Schema-invalid taxonomies will be instantiated successfully, but after instantiation the API user
- * should fall back to (defensive) yaidom level query methods when needed. This is the responsibility of the API user.
+ * should fall back to (defensive) yaidom level query methods when needed. This is indeed the responsibility of the API user.
  *
  * ==Other remarks==
  *
@@ -152,6 +152,8 @@ sealed abstract class TaxonomyElem private[dom] (
   final def baseUriOption: Option[URI] = backingElem.baseUriOption
 
   final def baseUri: URI = backingElem.baseUri
+
+  final def idOption: Option[String] = attributeOption(ENames.IdEName)
 
   // Internal functions
 
@@ -1218,6 +1220,8 @@ final class NonStandardSimpleLink private[dom] (
 
 /**
  * Non-standard arc, so an XLink arc that is not a standard arc. Typically it is a generic arc.
+ * Some well-known formula/table-related arcs also fall into this category. Finally, unknown (and
+ * possibly incorrect) arcs also fall into this category.
  */
 final class NonStandardArc private[dom] (
   backingElem: BackingElemApi,
@@ -1225,6 +1229,7 @@ final class NonStandardArc private[dom] (
 
 /**
  * Non-standard resource, so an XLink resource that is not a standard resource. Typically it is a generic label or generic reference.
+ * Formula/table-related XLink resources also fall into this category.
  */
 final class NonStandardResource private[dom] (
   backingElem: BackingElemApi,
@@ -1267,6 +1272,83 @@ final class ArcroleRef private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink
 
+// Role types, arcrole types etc.
+
+/**
+ * A link:roleType element.
+ */
+final class RoleType private[dom] (
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem {
+
+  /**
+   * Returns the roleURI attribute. This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def roleUri: String = {
+    attribute(ENames.RoleURIEName)
+  }
+
+  def definitionOption: Option[Definition] = {
+    findChildElemOfType(classTag[Definition])(anyElem)
+  }
+
+  def usedOn: immutable.IndexedSeq[UsedOn] = {
+    findAllChildElemsOfType(classTag[UsedOn])
+  }
+}
+
+/**
+ * A link:arcroleType element.
+ */
+final class ArcroleType private[dom] (
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem {
+
+  /**
+   * Returns the arcroleURI attribute. This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def arcroleUri: String = {
+    attribute(ENames.ArcroleURIEName)
+  }
+
+  /**
+   * Returns the cyclesAllowed attribute. This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def cyclesAllowed: CyclesAllowed = {
+    CyclesAllowed.fromString(attribute(ENames.CyclesAllowedEName))
+  }
+
+  def definitionOption: Option[Definition] = {
+    findChildElemOfType(classTag[Definition])(anyElem)
+  }
+
+  def usedOn: immutable.IndexedSeq[UsedOn] = {
+    findAllChildElemsOfType(classTag[UsedOn])
+  }
+}
+
+/**
+ * A link:definition element.
+ */
+final class Definition private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem
+
+/**
+ * A link:usedOn element.
+ */
+final class UsedOn private[dom] (
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem {
+
+  /**
+   * Returns the usedOn value as EName. This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def usedOnValue: EName = {
+    textAsResolvedQName
+  }
+}
+
 // Remaining elements.
 
 /**
@@ -1282,6 +1364,9 @@ final class OtherLinkbaseElem private[dom] (
  * non-standard arc or non-standard resource. It may still be valid taxonomy content, but even in taxonomies with XBRL formulas
  * or XBRL tables most non-standard linkbase content is still XLink arc or resource content, and therefore does not fall in
  * this `OtherElem` category.
+ *
+ * The elements that do fall into this `OtherElem` category are typically either reference parts (used in reference linkbases)
+ * or formula/table-related non-XLink content.
  */
 final class OtherElem private[dom] (
   backingElem: BackingElemApi,
@@ -1314,6 +1399,13 @@ object TaxonomyElem {
       case Some(XsNamespace)   => XsdElem(backingElem, childElems)
       case Some(LinkNamespace) => LinkElem(backingElem, childElems)
       case _ =>
+        // Elements not in the "xs" and "link" namespaces, but that may still be XLink elements.
+        // Note that a NonStandardArc may be a known generic arc, or an unknown or even incorrect arc.
+
+        // Also note that if by the element name we know that the element must be an arc, but if the
+        // XLink type attribute is (erroneously) absent, the element will not be recognized as a NonStandardArc.
+        // Analogous remarks apply to extended links and XLink resources.
+
         backingElem.attributeOption(ENames.XLinkTypeEName) match {
           case Some("extended") => new NonStandardExtendedLink(backingElem, childElems)
           case Some("simple")   => new NonStandardSimpleLink(backingElem, childElems)
@@ -1420,6 +1512,10 @@ object LinkElem {
       case ENames.LinkSchemaRefEName        => new SchemaRef(backingElem, childElems)
       case ENames.LinkRoleRefEName          => new RoleRef(backingElem, childElems)
       case ENames.LinkArcroleRefEName       => new ArcroleRef(backingElem, childElems)
+      case ENames.LinkRoleTypeEName         => new RoleType(backingElem, childElems)
+      case ENames.LinkArcroleTypeEName      => new ArcroleType(backingElem, childElems)
+      case ENames.LinkDefinitionEName       => new Definition(backingElem, childElems)
+      case ENames.LinkUsedOnEName           => new UsedOn(backingElem, childElems)
       case _                                => new OtherLinkbaseElem(backingElem, childElems)
     }
   }

@@ -35,6 +35,7 @@ object Namespaces {
   val GenNamespace = "http://xbrl.org/2008/generic"
   val LabelNamespace = "http://xbrl.org/2008/label"
   val ReferenceNamespace = "http://xbrl.org/2008/reference"
+  val RefNamespace = "http://www.xbrl.org/2006/ref"
   val VariableNamespace = "http://xbrl.org/2008/variable"
   val FormulaNamespace = "http://xbrl.org/2008/formula"
   val ValidationNamespace = "http://xbrl.org/2008/validation"
