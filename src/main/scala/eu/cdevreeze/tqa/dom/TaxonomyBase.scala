@@ -30,12 +30,12 @@ import eu.cdevreeze.yaidom.core.EName
  * (with fragments) to taxonomy elements, for quick element lookups based on URIs with fragments. It also contains
  * a map from ENames (names with target namespace) of global element declarations and named type definitions.
  *
- * It does not understand (resolved) relationships, and it has no taxonomy query API, but it supports creation of such
+ * It '''does not understand (resolved) relationships''', and it has no taxonomy query API, but it supports creation of such
  * a taxonomy that does know about relationships and does have a taxonomy query API. In that sense, the reason for this class to
  * exist is mainly its role in creating rich taxonomy objects.
  *
- * Not only does this class not understand (resolved) relationships, it also does not know about substitution
- * groups and therefore it does not know about concept declarations (unless all substitution groups are
+ * Not only does this class not understand (resolved) relationships, it also '''does not know about substitution
+ * groups''' and therefore it does not know about concept declarations (unless all substitution groups are
  * in the taxonomy base and we are prepared to follow them all).
  *
  * This object is rather expensive to create (through the build method), building the maps that support fast querying based on URI
@@ -223,6 +223,8 @@ object TaxonomyBase {
 
   /**
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
+   *
+   * It is the responsibility of the caller to pass different taxonomy document root elements.
    */
   def build(rootElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyBase = {
     val rootElemUriMap: Map[URI, TaxonomyElem] = {
