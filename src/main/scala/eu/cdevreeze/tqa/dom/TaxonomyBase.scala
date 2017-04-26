@@ -110,6 +110,8 @@ final class TaxonomyBase private (
     }
   }
 
+  // Some finder methods for very frequently queried taxonomy elements.
+
   /**
    * Finds the (first) optional global element declaration with the given target EName (name with target namespace).
    *
@@ -155,6 +157,8 @@ final class TaxonomyBase private (
     }
   }
 
+  // Creating a "sub-taxonomy".
+
   /**
    * Creates a "sub-taxonomy" in which only the given document URIs occur.
    * It can be used for a specific entrypoint DTS, or to make query methods (not taking an EName) cheaper.
@@ -169,41 +173,45 @@ final class TaxonomyBase private (
       globalAttributeDeclarationMap.filter(kv => docUris.contains(kv._2.docUri)))
   }
 
+  // Finding some "duplication errors".
+
   /**
-   * Returns true if the DOM tree with the given root element has any duplicate ID attributes.
-   * If so, the taxonomy is incorrect, and the map from URIs to elements loses data.
+   * Returns all duplicate ID attributes in the DOM tree with the given root element.
+   * If the result is non-empty, the taxonomy is incorrect, and the map from URIs to elements loses data.
    *
    * The type of the ID attributes is not taken into account, although strictly speaking that is incorrect.
    */
-  def hasDuplicateIds(rootElem: TaxonomyElem): Boolean = {
+  def findAllDuplicateIds(rootElem: TaxonomyElem): Set[String] = {
     val elemsWithId = rootElem.filterElemsOrSelf(_.attributeOption(IdEName).isDefined)
-    val ids = elemsWithId.map(_.attribute(IdEName))
+    val elemsGroupedById = elemsWithId.groupBy(_.attribute(IdEName))
 
-    ids.distinct.size < ids.size
+    elemsGroupedById.filter(kv => kv._2.size >= 2).keySet
   }
 
   /**
-   * Returns true if the DOM trees combined have any duplicate global element declaration "target ENames".
-   * If so, the taxonomy is incorrect, and the map from ENames to global element declarations loses data.
+   * Returns all duplicate global element declaration "target ENames" over all DOM trees combined.
+   * If the result is non-empty, the taxonomy is incorrect, and the map from ENames to global element declarations loses data.
    */
-  def hasDuplicateGlobalElementDeclarationENames: Boolean = {
+  def findAllDuplicateGlobalElementDeclarationENames: Set[EName] = {
     val globalElementDeclarations =
       rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration]))
-    val globalElementDeclarationENames = globalElementDeclarations.map(_.targetEName)
 
-    globalElementDeclarationENames.distinct.size < globalElementDeclarations.size
+    val globalElementDeclarationsGroupedByEName = globalElementDeclarations.groupBy(_.targetEName)
+
+    globalElementDeclarationsGroupedByEName.filter(kv => kv._2.size >= 2).keySet
   }
 
   /**
-   * Returns true if the DOM trees combined have any duplicate named type definition "target ENames".
-   * If so, the taxonomy is incorrect, and the map from ENames to named type definitions loses data.
+   * Returns all duplicate named type definition "target ENames" over all DOM trees combined.
+   * If the result is non-empty, the taxonomy is incorrect, and the map from ENames to named type definitions loses data.
    */
-  def hasDuplicateNamedTypeDefinitionENames: Boolean = {
+  def findAllDuplicateNamedTypeDefinitionENames: Set[EName] = {
     val namedTypeDefinitions =
       rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition]))
-    val namedTypeDefinitionENames = namedTypeDefinitions.map(_.targetEName)
 
-    namedTypeDefinitionENames.distinct.size < namedTypeDefinitions.size
+    val namedTypeDefinitionsGroupedByEName = namedTypeDefinitions.groupBy(_.targetEName)
+
+    namedTypeDefinitionsGroupedByEName.filter(kv => kv._2.size >= 2).keySet
   }
 
   private def removeFragment(uri: URI): URI = {

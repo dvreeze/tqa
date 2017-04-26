@@ -138,11 +138,11 @@ class QueryApiTest extends FunSuite {
     assertResult(richTaxo.findAllGlobalElementDeclarations) {
       richTaxo.findAllConceptDeclarations.map(_.globalElementDeclaration)
     }
-    assertResult(false) {
-      richTaxo.taxonomyBase.hasDuplicateGlobalElementDeclarationENames
+    assertResult(true) {
+      richTaxo.taxonomyBase.findAllDuplicateGlobalElementDeclarationENames.isEmpty
     }
-    assertResult(false) {
-      taxoRootElems.exists(e => richTaxo.taxonomyBase.hasDuplicateIds(e))
+    assertResult(true) {
+      taxoRootElems.forall(e => richTaxo.taxonomyBase.findAllDuplicateIds(e).isEmpty)
     }
 
     assertResult(Nil) {
