@@ -111,7 +111,7 @@ final class TaxonomyBase private (
   }
 
   /**
-   * Finds the (first) optional global element declaration with the given target EName (named with target namespace).
+   * Finds the (first) optional global element declaration with the given target EName (name with target namespace).
    *
    * This is a quick operation.
    */
@@ -120,7 +120,7 @@ final class TaxonomyBase private (
   }
 
   /**
-   * Finds the (first) optional named type definition with the given target EName (named with target namespace).
+   * Finds the (first) optional named type definition with the given target EName (name with target namespace).
    *
    * This is a quick operation.
    */
@@ -129,7 +129,7 @@ final class TaxonomyBase private (
   }
 
   /**
-   * Finds the (first) optional global attribute declaration with the given target EName (named with target namespace).
+   * Finds the (first) optional global attribute declaration with the given target EName (name with target namespace).
    *
    * This is a quick operation.
    */

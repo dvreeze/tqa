@@ -16,10 +16,6 @@
 
 package eu.cdevreeze.tqa
 
-import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
-import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
-import eu.cdevreeze.tqa.ENames.XbrliItemEName
-import eu.cdevreeze.tqa.ENames.XbrliTupleEName
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -27,6 +23,9 @@ import eu.cdevreeze.yaidom.core.EName
  * to their own substitution groups, if any. Well-known substitution groups such as xbrli:item, xbrli:tuple,
  * xbrldt:hypercubeItem and xbrldt:dimensionItem must not occur as keys in the mapping, but typically do occur
  * as mapped values.
+ *
+ * This class is essential for providing the necessary context in order to determine whether a global element
+ * declaration is a concept declaration, and, if so, what kind of concept declaration.
  *
  * Cycles are not allowed when following mappings, but this is not checked.
  *
@@ -37,6 +36,7 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
     mappings.keySet.filter(SubstitutionGroupMap.StandardConceptSubstitutionGroups).isEmpty,
     s"No standard substitution groups allowed as mapping keys")
 
+  import ENames._
   import SubstitutionGroupMap._
 
   /**
@@ -63,6 +63,8 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
 }
 
 object SubstitutionGroupMap {
+
+  import ENames._
 
   val StandardConceptSubstitutionGroups: Set[EName] =
     Set(XbrliItemEName, XbrliTupleEName, XbrldtHypercubeItemEName, XbrldtDimensionItemEName)

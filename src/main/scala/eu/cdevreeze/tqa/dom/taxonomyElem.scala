@@ -21,64 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 import scala.reflect.classTag
 
-import eu.cdevreeze.tqa.ENames.AbstractEName
-import eu.cdevreeze.tqa.ENames.BaseEName
-import eu.cdevreeze.tqa.ENames.LinkArcroleRefEName
-import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
-import eu.cdevreeze.tqa.ENames.LinkCalculationLinkEName
-import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
-import eu.cdevreeze.tqa.ENames.LinkDefinitionLinkEName
-import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
-import eu.cdevreeze.tqa.ENames.LinkLabelEName
-import eu.cdevreeze.tqa.ENames.LinkLabelLinkEName
-import eu.cdevreeze.tqa.ENames.LinkLinkbaseEName
-import eu.cdevreeze.tqa.ENames.LinkLinkbaseRefEName
-import eu.cdevreeze.tqa.ENames.LinkLocEName
-import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
-import eu.cdevreeze.tqa.ENames.LinkPresentationLinkEName
-import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
-import eu.cdevreeze.tqa.ENames.LinkReferenceEName
-import eu.cdevreeze.tqa.ENames.LinkReferenceLinkEName
-import eu.cdevreeze.tqa.ENames.LinkRoleRefEName
-import eu.cdevreeze.tqa.ENames.LinkSchemaRefEName
-import eu.cdevreeze.tqa.ENames.MaxOccursEName
-import eu.cdevreeze.tqa.ENames.MinOccursEName
-import eu.cdevreeze.tqa.ENames.NameEName
-import eu.cdevreeze.tqa.ENames.OrderEName
-import eu.cdevreeze.tqa.ENames.PriorityEName
-import eu.cdevreeze.tqa.ENames.RefEName
-import eu.cdevreeze.tqa.ENames.SubstitutionGroupEName
-import eu.cdevreeze.tqa.ENames.TargetNamespaceEName
-import eu.cdevreeze.tqa.ENames.TypeEName
-import eu.cdevreeze.tqa.ENames.UseEName
-import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
-import eu.cdevreeze.tqa.ENames.XLinkFromEName
-import eu.cdevreeze.tqa.ENames.XLinkHrefEName
-import eu.cdevreeze.tqa.ENames.XLinkLabelEName
-import eu.cdevreeze.tqa.ENames.XLinkRoleEName
-import eu.cdevreeze.tqa.ENames.XLinkToEName
-import eu.cdevreeze.tqa.ENames.XLinkTypeEName
-import eu.cdevreeze.tqa.ENames.XsAllEName
-import eu.cdevreeze.tqa.ENames.XsAnnotationEName
-import eu.cdevreeze.tqa.ENames.XsAnyTypeEName
-import eu.cdevreeze.tqa.ENames.XsAppinfoEName
-import eu.cdevreeze.tqa.ENames.XsAttributeEName
-import eu.cdevreeze.tqa.ENames.XsAttributeGroupEName
-import eu.cdevreeze.tqa.ENames.XsChoiceEName
-import eu.cdevreeze.tqa.ENames.XsComplexContentEName
-import eu.cdevreeze.tqa.ENames.XsComplexTypeEName
-import eu.cdevreeze.tqa.ENames.XsElementEName
-import eu.cdevreeze.tqa.ENames.XsExtensionEName
-import eu.cdevreeze.tqa.ENames.XsGroupEName
-import eu.cdevreeze.tqa.ENames.XsImportEName
-import eu.cdevreeze.tqa.ENames.XsIncludeEName
-import eu.cdevreeze.tqa.ENames.XsListEName
-import eu.cdevreeze.tqa.ENames.XsRestrictionEName
-import eu.cdevreeze.tqa.ENames.XsSchemaEName
-import eu.cdevreeze.tqa.ENames.XsSequenceEName
-import eu.cdevreeze.tqa.ENames.XsSimpleContentEName
-import eu.cdevreeze.tqa.ENames.XsSimpleTypeEName
-import eu.cdevreeze.tqa.ENames.XsUnionEName
+import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces.LinkNamespace
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
@@ -127,13 +70,24 @@ import javax.xml.bind.DatatypeConverter
  *
  * ==Leniency==
  *
- * The classes in this type hierarchy are reasonably lenient when instantiating them (although schema validity helps), but query
- * methods may fail if the taxonomy XML is not schema-valid (against the schemas for this higher level taxonomy model).
- * Instantiation is designed to never fail, but the result may be something like an `OtherElem` instance. For example,
+ * The classes in this type hierarchy have been designed to be very '''lenient when instantiating''' them, even for schema-invalid content.
+ * The few builder methods that may throw exceptions have been clearly documented to potentially do so. For schema-invalid taxonomy
+ * content, the resulting object may be something like `OtherXsdElem`, `OtherLinkbaseElem` or `OtherElem`. For example,
  * an element named xs:element with both a name and ref attribute cannot be both an element declaration and element
- * reference (it is not even allowed), and will be instantiated as an `OtherXsdElem`.
+ * reference, and will be instantiated as an `OtherXsdElem`. A non-standard XLink arc, whether a known generic arc or some
+ * unknown and potentially erroneous arc, becomes a `NonStandardArc`, etc.
  *
- * The instance methods may fail, however, if taxonomy content is invalid, and if it is schema-invalid in particular.
+ * Some '''instance methods''' may fail, however, if taxonomy content is invalid, and if it is '''schema-invalid''' in particular.
+ * All instance methods must not fail on schema-valid content, unless mentioned otherwise.
+ *
+ * Typical instance methods that may fail on schema-invalid content are:
+ * <ul>
+ * <li>methods that query for one mandatory attribute (as far as the schema is concerned)</li>
+ * <li>methods that query for one mandatory child element (as far as the schema is concerned)</li>
+ * <li>methods that query for values of specific types (enumerations, integers etc.)</li>
+ * </ul>
+ * It is important to keep this in mind. Schema-invalid taxonomies will be instantiated successfully, but after instantiation the API user
+ * should fall back to (defensive) yaidom level query methods when needed. This is the responsibility of the API user.
  *
  * ==Other remarks==
  *
@@ -228,6 +182,8 @@ sealed trait XLinkElem extends TaxonomyElem {
   }
 }
 
+// TODO XLink title and documentation (abstract) elements have not been modeled (yet).
+
 /**
  * Simple or extended XLink link.
  */
@@ -238,10 +194,28 @@ sealed trait XLinkLink extends XLinkElem
  */
 sealed trait ChildXLink extends XLinkElem {
 
+  /**
+   * Returns the extended link role of the surrounding extended link element.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, use the following code instead:
+   * {{{
+   * backingElem.parentOption.flatMap(_.attributeOption(ENames.XLinkRoleEName))
+   * }}}
+   */
   final def elr: String = {
-    underlyingParentElem.attribute(XLinkRoleEName)
+    underlyingParentElem.attribute(ENames.XLinkRoleEName)
   }
 
+  /**
+   * Returns the underlying parent element.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, use the following code instead:
+   * {{{
+   * backingElem.parentOption
+   * }}}
+   */
   final def underlyingParentElem: BackingElemApi = {
     backingElem.parent
   }
@@ -252,8 +226,20 @@ sealed trait ChildXLink extends XLinkElem {
  */
 sealed trait LabeledXLink extends ChildXLink {
 
+  /**
+   * Returns the XLink label. This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, use the following code instead:
+   * {{{
+   * attributeOption(ENames.XLinkLabelEName)
+   * }}}
+   */
   final def xlinkLabel: String = {
-    attribute(XLinkLabelEName)
+    attribute(ENames.XLinkLabelEName)
+  }
+
+  final def roleOption: Option[String] = {
+    attributeOption(ENames.XLinkRoleEName)
   }
 }
 
@@ -282,8 +268,16 @@ sealed trait ExtendedLink extends XLinkLink {
     "extended"
   }
 
-  final def roleOption: Option[String] = {
-    attributeOption(XLinkRoleEName)
+  /**
+   * Returns the extended link role. This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, use the following code instead:
+   * {{{
+   * attributeOption(ENames.XLinkRoleEName)
+   * }}}
+   */
+  final def role: String = {
+    attribute(ENames.XLinkRoleEName)
   }
 
   final def xlinkChildren: immutable.IndexedSeq[ChildXLink] = {
@@ -298,6 +292,11 @@ sealed trait ExtendedLink extends XLinkLink {
     findAllChildElemsOfType(classTag[XLinkArc])
   }
 
+  /**
+   * Returns the XLink locators and resources grouped by XLink label.
+   * This is an expensive methods, so when processing an extended link, this method should
+   * be called only once per extended link.
+   */
   final def labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]] = {
     labeledXlinkChildren.groupBy(_.xlinkLabel)
   }
@@ -321,33 +320,71 @@ sealed trait XLinkArc extends ChildXLink {
     "arc"
   }
 
+  /**
+   * Returns the arcrole. This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, use the following code instead:
+   * {{{
+   * attributeOption(ENames.XLinkArcroleEName)
+   * }}}
+   */
   final def arcrole: String = {
-    attribute(XLinkArcroleEName)
+    attribute(ENames.XLinkArcroleEName)
   }
 
+  /**
+   * Returns the XLink "from". This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, use the following code instead:
+   * {{{
+   * attributeOption(ENames.XLinkFromEName)
+   * }}}
+   */
   final def from: String = {
-    attribute(XLinkFromEName)
+    attribute(ENames.XLinkFromEName)
   }
 
+  /**
+   * Returns the XLink "to". This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, use the following code instead:
+   * {{{
+   * attributeOption(ENames.XLinkToEName)
+   * }}}
+   */
   final def to: String = {
-    attribute(XLinkToEName)
+    attribute(ENames.XLinkToEName)
   }
 
+  /**
+   * Returns the Base Set key. This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * If the taxonomy is not known to be schema-valid, it may be impossible to create a Base Set key.
+   */
   final def baseSetKey: BaseSetKey = {
     val underlyingParent = underlyingParentElem
-    BaseSetKey(resolvedName, arcrole, underlyingParent.resolvedName, underlyingParent.attribute(XLinkRoleEName))
+    BaseSetKey(resolvedName, arcrole, underlyingParent.resolvedName, underlyingParent.attribute(ENames.XLinkRoleEName))
   }
 
+  /**
+   * Returns the "use" attribute (defaulting to "optional"). This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def use: Use = {
-    Use.fromString(backingElem.attributeOption(UseEName).getOrElse("optional"))
+    Use.fromString(attributeOption(ENames.UseEName).getOrElse("optional"))
   }
 
+  /**
+   * Returns the "priority" integer attribute (defaulting to 0). This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def priority: Int = {
-    backingElem.attributeOption(PriorityEName).getOrElse("0").toInt
+    attributeOption(ENames.PriorityEName).getOrElse("0").toInt
   }
 
+  /**
+   * Returns the "order" decimal attribute (defaulting to 1). This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def order: BigDecimal = {
-    BigDecimal(backingElem.attributeOption(OrderEName).getOrElse("1"))
+    BigDecimal(attributeOption(ENames.OrderEName).getOrElse("1"))
   }
 }
 
@@ -364,10 +401,6 @@ sealed trait XLinkResource extends LabeledXLink {
 
   final def xlinkType: String = {
     "resource"
-  }
-
-  final def roleOption: Option[String] = {
-    attributeOption(XLinkRoleEName)
   }
 }
 
@@ -386,8 +419,19 @@ sealed trait XLinkLocator extends LabeledXLink {
     "locator"
   }
 
+  /**
+   * Returns the XLink href as URI. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def rawHref: URI = {
-    URI.create(attribute(XLinkHrefEName))
+    URI.create(attribute(ENames.XLinkHrefEName))
+  }
+
+  /**
+   * Returns the XLink href as URI, resolved using XML Base. This may fail with an exception if the taxonomy
+   * is not schema-valid.
+   */
+  final def resolvedHref: URI = {
+    baseUriOption.map(u => u.resolve(rawHref)).getOrElse(rawHref)
   }
 }
 
@@ -406,8 +450,27 @@ sealed trait SimpleLink extends XLinkLink {
     "simple"
   }
 
+  final def arcroleOption: Option[String] = {
+    attributeOption(ENames.XLinkArcroleEName)
+  }
+
+  final def roleOption: Option[String] = {
+    attributeOption(ENames.XLinkRoleEName)
+  }
+
+  /**
+   * Returns the XLink href as URI. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def rawHref: URI = {
-    URI.create(attribute(XLinkHrefEName))
+    URI.create(attribute(ENames.XLinkHrefEName))
+  }
+
+  /**
+   * Returns the XLink href as URI, resolved using XML Base. This may fail with an exception if the taxonomy
+   * is not schema-valid.
+   */
+  final def resolvedHref: URI = {
+    baseUriOption.map(u => u.resolve(rawHref)).getOrElse(rawHref)
   }
 }
 
@@ -419,10 +482,11 @@ sealed trait SimpleLink extends XLinkLink {
 sealed trait XsdElem extends TaxonomyElem {
 
   /**
-   * Returns the optional target namespace of the surrounding schema root element (or self), ignoring the possibility that this is an included chameleon schema.
+   * Returns the optional target namespace of the surrounding schema root element (or self), ignoring the possibility that
+   * this is an included chameleon schema.
    */
   final def schemaTargetNamespaceOption: Option[String] = {
-    backingElem.findAncestorOrSelf(_.resolvedName == XsSchemaEName).flatMap(_.attributeOption(TargetNamespaceEName))
+    backingElem.findAncestorOrSelf(_.resolvedName == ENames.XsSchemaEName).flatMap(_.attributeOption(ENames.TargetNamespaceEName))
   }
 }
 
@@ -438,8 +502,11 @@ sealed trait LinkElem extends TaxonomyElem
  */
 sealed trait CanBeAbstract extends XsdElem {
 
+  /**
+   * Returns the boolean "abstract" attribute (defaulting to false). This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def isAbstract: Boolean = {
-    attributeOption(AbstractEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
+    attributeOption(ENames.AbstractEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
   }
 
   final def isConcrete: Boolean = {
@@ -452,8 +519,11 @@ sealed trait CanBeAbstract extends XsdElem {
  */
 sealed trait NamedDeclOrDef extends XsdElem {
 
+  /**
+   * Returns the "name" attribute. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def nameAttributeValue: String = {
-    attribute(NameEName)
+    attribute(ENames.NameEName)
   }
 }
 
@@ -462,8 +532,11 @@ sealed trait NamedDeclOrDef extends XsdElem {
  */
 sealed trait Reference extends XsdElem {
 
+  /**
+   * Returns the "ref" attribute as EName. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def ref: EName = {
-    attributeAsResolvedQName(RefEName)
+    attributeAsResolvedQName(ENames.RefEName)
   }
 }
 
@@ -492,7 +565,7 @@ final class XsdSchema private[dom] (
    * Returns the optional target namespace of this schema root element itself, ignoring the possibility that this is an included chameleon schema.
    */
   def targetNamespaceOption: Option[String] = {
-    attributeOption(TargetNamespaceEName)
+    attributeOption(ENames.TargetNamespaceEName)
   }
 
   def findAllImports: immutable.IndexedSeq[Import] = {
@@ -548,17 +621,18 @@ sealed trait Particle extends XsdElem {
 
   /**
    * The minOccurs attribute as integer, defaulting to 1.
+   * This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def minOccurs: Int = {
-    attributeOption(MinOccursEName).getOrElse("1").toInt
+    attributeOption(ENames.MinOccursEName).getOrElse("1").toInt
   }
 
   /**
    * The maxOccurs attribute as optional integer, defaulting to 1, but returning
-   * None if unbounded.
+   * None if unbounded. This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def maxOccursOption: Option[Int] = {
-    attributeOption(MaxOccursEName) match {
+    attributeOption(ENames.MaxOccursEName) match {
       case Some("unbounded") => None
       case Some(i)           => Some(i.toInt)
       case None              => Some(1)
@@ -602,23 +676,36 @@ final class GlobalElementDeclaration private[dom] (
     backingElem: BackingElemApi,
     childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElementDeclaration with CanBeAbstract {
 
+  /**
+   * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
+   * name attribute as local part. This may fail with an exception if the taxonomy is not schema-valid, although such a failure
+   * is very unlikely.
+   */
   def targetEName: EName = {
     val tnsOption = schemaTargetNamespaceOption
     EName(tnsOption, nameAttributeValue)
   }
 
+  /**
+   * Returns the optional substitution group (as EName). This may fail with an exception if the taxonomy is not schema-valid.
+   */
   def substitutionGroupOption: Option[EName] = {
-    attributeAsResolvedQNameOption(SubstitutionGroupEName)
+    attributeAsResolvedQNameOption(ENames.SubstitutionGroupEName)
   }
 
+  /**
+   * Returns the optional type attribute (as EName). This may fail with an exception if the taxonomy is not schema-valid.
+   */
   def typeOption: Option[EName] = {
-    attributeAsResolvedQNameOption(TypeEName)
+    attributeAsResolvedQNameOption(ENames.TypeEName)
   }
 
   /**
    * Returns true if this global element declaration has the given substitution group, either
    * directly or indirectly. The given mappings are used as the necessary context, but are not needed if the element
    * declaration directly has the substitution group itself.
+   *
+   * This method may fail with an exception if the taxonomy is not schema-valid.
    */
   def hasSubstitutionGroup(substGroup: EName, substitutionGroupMap: SubstitutionGroupMap): Boolean = {
     (substitutionGroupOption.contains(substGroup)) || {
@@ -672,6 +759,11 @@ final class GlobalAttributeDeclaration private[dom] (
     backingElem: BackingElemApi,
     childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeDeclaration {
 
+  /**
+   * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
+   * name attribute as local part. This may fail with an exception if the taxonomy is not schema-valid, although such a failure
+   * is very unlikely.
+   */
   def targetEName: EName = {
     val tnsOption = schemaTargetNamespaceOption
     EName(tnsOption, nameAttributeValue)
@@ -707,6 +799,8 @@ sealed trait TypeDefinition extends XsdElem {
    * For type xs:anyType, None is returned. For union and list types, None is returned as well.
    *
    * For simple types, derivation (from the base type) is always by restriction.
+   *
+   * This method may fail with an exception if the taxonomy is not schema-valid.
    */
   def baseTypeOption: Option[EName]
 }
@@ -716,6 +810,11 @@ sealed trait TypeDefinition extends XsdElem {
  */
 sealed trait NamedTypeDefinition extends TypeDefinition with NamedDeclOrDef {
 
+  /**
+   * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
+   * name attribute as local part. This may fail with an exception if the taxonomy is not schema-valid, although such a failure
+   * is very unlikely.
+   */
   def targetEName: EName = {
     val tnsOption = schemaTargetNamespaceOption
     EName(tnsOption, nameAttributeValue)
@@ -732,18 +831,24 @@ sealed trait AnonymousTypeDefinition extends TypeDefinition
  */
 sealed trait SimpleTypeDefinition extends TypeDefinition {
 
+  /**
+   * Returns the variety. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def variety: Variety = {
-    if (findChildElem(_.resolvedName == XsListEName).isDefined) {
+    if (findChildElem(_.resolvedName == ENames.XsListEName).isDefined) {
       Variety.List
-    } else if (findChildElem(_.resolvedName == XsUnionEName).isDefined) {
+    } else if (findChildElem(_.resolvedName == ENames.XsUnionEName).isDefined) {
       Variety.Union
-    } else if (findChildElem(_.resolvedName == XsRestrictionEName).isDefined) {
+    } else if (findChildElem(_.resolvedName == ENames.XsRestrictionEName).isDefined) {
       Variety.Atomic
     } else {
       sys.error(msg(s"Could not determine variety"))
     }
   }
 
+  /**
+   * Returns the optional base type. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def baseTypeOption: Option[EName] = variety match {
     case Variety.Atomic =>
       findChildElemOfType(classTag[Restriction])(anyElem).headOption.flatMap(_.baseTypeOption)
@@ -763,8 +868,11 @@ sealed trait ComplexTypeDefinition extends TypeDefinition {
     complexContentOption.orElse(simpleContentOption)
   }
 
+  /**
+   * Returns the optional base type. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def baseTypeOption: Option[EName] = {
-    contentElemOption.flatMap(_.baseTypeOption).orElse(Some(XsAnyTypeEName))
+    contentElemOption.flatMap(_.baseTypeOption).orElse(Some(ENames.XsAnyTypeEName))
   }
 }
 
@@ -871,8 +979,11 @@ final class AllModelGroup private[dom] (
  */
 sealed trait RestrictionOrExtension extends XsdElem {
 
+  /**
+   * Returns the optional base type. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   def baseTypeOption: Option[EName] = {
-    attributeAsResolvedQNameOption(BaseEName)
+    attributeAsResolvedQNameOption(ENames.BaseEName)
   }
 }
 
@@ -895,6 +1006,9 @@ final class Extension private[dom] (
  */
 sealed trait Content extends XsdElem {
 
+  /**
+   * Returns the derivation. This may fail with an exception if the taxonomy is not schema-valid.
+   */
   final def derivation: RestrictionOrExtension = {
     findChildElemOfType(classTag[Restriction])(anyElem).
       orElse(findChildElemOfType(classTag[Extension])(anyElem)).
@@ -903,6 +1017,7 @@ sealed trait Content extends XsdElem {
 
   /**
    * Convenience method to get the base type of the child restriction or extension element.
+   * This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def baseTypeOption: Option[EName] = derivation.baseTypeOption
 }
@@ -1079,11 +1194,18 @@ final class ConceptReferenceResource private[dom] (
 // Generic linkbase content.
 
 /**
- * Non-standard link, so an XLink extended link that is not a standard link. Typically it is a generic link.
+ * Non-standard extended link, so an XLink extended link that is not a standard link. Typically it is a generic link.
  */
-final class NonStandardLink private[dom] (
+final class NonStandardExtendedLink private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ExtendedLink
+
+/**
+ * Non-standard simple link, so an XLink simple link that is not a standard simple link. Rarely, if ever, encountered in practice.
+ */
+final class NonStandardSimpleLink private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with SimpleLink
 
 /**
  * Non-standard arc, so an XLink arc that is not a standard arc. Typically it is a generic arc.
@@ -1098,6 +1220,13 @@ final class NonStandardArc private[dom] (
 final class NonStandardResource private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkResource
+
+/**
+ * Non-standard locator, so an XLink locator that is not a standard locator. Rarely, if ever, encountered in practice.
+ */
+final class NonStandardLocator private[dom] (
+  backingElem: BackingElemApi,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkLocator
 
 // Known simple links etc.
 
@@ -1163,7 +1292,7 @@ object TaxonomyElem {
    *
    * This property makes the TQA DOM type hierarchy useful in situations where TQA is used for validating (possibly
    * invalid) taxonomies, but it does imply that `OtherXsdElem`, `OtherLinkElem` and `OtherElem` elements must be
-   * recognized and possibly rejected during validation.
+   * recognized and possibly rejected during validation. The same may be true for some `NonStandardArc` objects, etc.
    */
   def build(backingElem: BackingElemApi): TaxonomyElem = {
     // Recursive calls
@@ -1176,10 +1305,12 @@ object TaxonomyElem {
       case Some(XsNamespace)   => XsdElem(backingElem, childElems)
       case Some(LinkNamespace) => LinkElem(backingElem, childElems)
       case _ =>
-        backingElem.attributeOption(XLinkTypeEName) match {
-          case Some("extended") => new NonStandardLink(backingElem, childElems)
+        backingElem.attributeOption(ENames.XLinkTypeEName) match {
+          case Some("extended") => new NonStandardExtendedLink(backingElem, childElems)
+          case Some("simple")   => new NonStandardSimpleLink(backingElem, childElems)
           case Some("arc")      => new NonStandardArc(backingElem, childElems)
           case Some("resource") => new NonStandardResource(backingElem, childElems)
+          case Some("locator")  => new NonStandardLocator(backingElem, childElems)
           case _                => new OtherElem(backingElem, childElems)
         }
     }
@@ -1233,25 +1364,25 @@ object XsdElem {
     require(backingElem.resolvedName.namespaceUriOption.contains(XsNamespace))
 
     backingElem.resolvedName match {
-      case XsSchemaEName         => new XsdSchema(backingElem, childElems)
-      case XsElementEName        => ElementDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
-      case XsAttributeEName      => AttributeDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
-      case XsSimpleTypeEName     => SimpleTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
-      case XsComplexTypeEName    => ComplexTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
-      case XsGroupEName          => ModelGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
-      case XsAttributeGroupEName => AttributeGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
-      case XsSequenceEName       => new SequenceModelGroup(backingElem, childElems)
-      case XsChoiceEName         => new ChoiceModelGroup(backingElem, childElems)
-      case XsAllEName            => new AllModelGroup(backingElem, childElems)
-      case XsRestrictionEName    => new Restriction(backingElem, childElems)
-      case XsExtensionEName      => new Extension(backingElem, childElems)
-      case XsSimpleContentEName  => new SimpleContent(backingElem, childElems)
-      case XsComplexContentEName => new ComplexContent(backingElem, childElems)
-      case XsAnnotationEName     => new Annotation(backingElem, childElems)
-      case XsAppinfoEName        => new Appinfo(backingElem, childElems)
-      case XsImportEName         => new Import(backingElem, childElems)
-      case XsIncludeEName        => new Include(backingElem, childElems)
-      case _                     => new OtherXsdElem(backingElem, childElems)
+      case ENames.XsSchemaEName         => new XsdSchema(backingElem, childElems)
+      case ENames.XsElementEName        => ElementDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
+      case ENames.XsAttributeEName      => AttributeDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
+      case ENames.XsSimpleTypeEName     => SimpleTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
+      case ENames.XsComplexTypeEName    => ComplexTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
+      case ENames.XsGroupEName          => ModelGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
+      case ENames.XsAttributeGroupEName => AttributeGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherXsdElem(backingElem, childElems))
+      case ENames.XsSequenceEName       => new SequenceModelGroup(backingElem, childElems)
+      case ENames.XsChoiceEName         => new ChoiceModelGroup(backingElem, childElems)
+      case ENames.XsAllEName            => new AllModelGroup(backingElem, childElems)
+      case ENames.XsRestrictionEName    => new Restriction(backingElem, childElems)
+      case ENames.XsExtensionEName      => new Extension(backingElem, childElems)
+      case ENames.XsSimpleContentEName  => new SimpleContent(backingElem, childElems)
+      case ENames.XsComplexContentEName => new ComplexContent(backingElem, childElems)
+      case ENames.XsAnnotationEName     => new Annotation(backingElem, childElems)
+      case ENames.XsAppinfoEName        => new Appinfo(backingElem, childElems)
+      case ENames.XsImportEName         => new Import(backingElem, childElems)
+      case ENames.XsIncludeEName        => new Include(backingElem, childElems)
+      case _                            => new OtherXsdElem(backingElem, childElems)
     }
   }
 }
@@ -1262,25 +1393,25 @@ object LinkElem {
     require(backingElem.resolvedName.namespaceUriOption.contains(LinkNamespace))
 
     backingElem.resolvedName match {
-      case LinkLinkbaseEName         => new Linkbase(backingElem, childElems)
-      case LinkLocEName              => new StandardLoc(backingElem, childElems)
-      case LinkLabelEName            => new ConceptLabelResource(backingElem, childElems)
-      case LinkReferenceEName        => new ConceptReferenceResource(backingElem, childElems)
-      case LinkDefinitionLinkEName   => new DefinitionLink(backingElem, childElems)
-      case LinkPresentationLinkEName => new PresentationLink(backingElem, childElems)
-      case LinkCalculationLinkEName  => new CalculationLink(backingElem, childElems)
-      case LinkLabelLinkEName        => new LabelLink(backingElem, childElems)
-      case LinkReferenceLinkEName    => new ReferenceLink(backingElem, childElems)
-      case LinkDefinitionArcEName    => new DefinitionArc(backingElem, childElems)
-      case LinkPresentationArcEName  => new PresentationArc(backingElem, childElems)
-      case LinkCalculationArcEName   => new CalculationArc(backingElem, childElems)
-      case LinkLabelArcEName         => new LabelArc(backingElem, childElems)
-      case LinkReferenceArcEName     => new ReferenceArc(backingElem, childElems)
-      case LinkLinkbaseRefEName      => new LinkbaseRef(backingElem, childElems)
-      case LinkSchemaRefEName        => new SchemaRef(backingElem, childElems)
-      case LinkRoleRefEName          => new RoleRef(backingElem, childElems)
-      case LinkArcroleRefEName       => new ArcroleRef(backingElem, childElems)
-      case _                         => new OtherLinkbaseElem(backingElem, childElems)
+      case ENames.LinkLinkbaseEName         => new Linkbase(backingElem, childElems)
+      case ENames.LinkLocEName              => new StandardLoc(backingElem, childElems)
+      case ENames.LinkLabelEName            => new ConceptLabelResource(backingElem, childElems)
+      case ENames.LinkReferenceEName        => new ConceptReferenceResource(backingElem, childElems)
+      case ENames.LinkDefinitionLinkEName   => new DefinitionLink(backingElem, childElems)
+      case ENames.LinkPresentationLinkEName => new PresentationLink(backingElem, childElems)
+      case ENames.LinkCalculationLinkEName  => new CalculationLink(backingElem, childElems)
+      case ENames.LinkLabelLinkEName        => new LabelLink(backingElem, childElems)
+      case ENames.LinkReferenceLinkEName    => new ReferenceLink(backingElem, childElems)
+      case ENames.LinkDefinitionArcEName    => new DefinitionArc(backingElem, childElems)
+      case ENames.LinkPresentationArcEName  => new PresentationArc(backingElem, childElems)
+      case ENames.LinkCalculationArcEName   => new CalculationArc(backingElem, childElems)
+      case ENames.LinkLabelArcEName         => new LabelArc(backingElem, childElems)
+      case ENames.LinkReferenceArcEName     => new ReferenceArc(backingElem, childElems)
+      case ENames.LinkLinkbaseRefEName      => new LinkbaseRef(backingElem, childElems)
+      case ENames.LinkSchemaRefEName        => new SchemaRef(backingElem, childElems)
+      case ENames.LinkRoleRefEName          => new RoleRef(backingElem, childElems)
+      case ENames.LinkArcroleRefEName       => new ArcroleRef(backingElem, childElems)
+      case _                                => new OtherLinkbaseElem(backingElem, childElems)
     }
   }
 }
@@ -1288,11 +1419,11 @@ object LinkElem {
 object ElementDeclarationOrReference {
 
   private[dom] def opt(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ElementDeclarationOrReference] = {
-    require(backingElem.resolvedName == XsElementEName)
+    require(backingElem.resolvedName == ENames.XsElementEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.exists(_ == XsSchemaEName)
-    val hasName = backingElem.attributeOption(NameEName).isDefined
-    val hasRef = backingElem.attributeOption(RefEName).isDefined
+    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
+    val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
     if (parentIsSchema && hasName && !hasRef) {
       Some(new GlobalElementDeclaration(backingElem, childElems))
@@ -1309,11 +1440,11 @@ object ElementDeclarationOrReference {
 object AttributeDeclarationOrReference {
 
   private[dom] def opt(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[AttributeDeclarationOrReference] = {
-    require(backingElem.resolvedName == XsAttributeEName)
+    require(backingElem.resolvedName == ENames.XsAttributeEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.exists(_ == XsSchemaEName)
-    val hasName = backingElem.attributeOption(NameEName).isDefined
-    val hasRef = backingElem.attributeOption(RefEName).isDefined
+    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
+    val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
     if (parentIsSchema && hasName && !hasRef) {
       Some(new GlobalAttributeDeclaration(backingElem, childElems))
@@ -1330,10 +1461,10 @@ object AttributeDeclarationOrReference {
 object SimpleTypeDefinition {
 
   private[dom] def opt(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[SimpleTypeDefinition] = {
-    require(backingElem.resolvedName == XsSimpleTypeEName)
+    require(backingElem.resolvedName == ENames.XsSimpleTypeEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.exists(_ == XsSchemaEName)
-    val hasName = backingElem.attributeOption(NameEName).isDefined
+    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
 
     if (parentIsSchema && hasName) {
       Some(new NamedSimpleTypeDefinition(backingElem, childElems))
@@ -1348,10 +1479,10 @@ object SimpleTypeDefinition {
 object ComplexTypeDefinition {
 
   private[dom] def opt(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ComplexTypeDefinition] = {
-    require(backingElem.resolvedName == XsComplexTypeEName)
+    require(backingElem.resolvedName == ENames.XsComplexTypeEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.exists(_ == XsSchemaEName)
-    val hasName = backingElem.attributeOption(NameEName).isDefined
+    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
 
     if (parentIsSchema && hasName) {
       Some(new NamedComplexTypeDefinition(backingElem, childElems))
@@ -1366,11 +1497,11 @@ object ComplexTypeDefinition {
 object ModelGroupDefinitionOrReference {
 
   private[dom] def opt(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ModelGroupDefinitionOrReference] = {
-    require(backingElem.resolvedName == XsGroupEName)
+    require(backingElem.resolvedName == ENames.XsGroupEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.exists(_ == XsSchemaEName)
-    val hasName = backingElem.attributeOption(NameEName).isDefined
-    val hasRef = backingElem.attributeOption(RefEName).isDefined
+    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
+    val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
     if (parentIsSchema && hasName && !hasRef) {
       Some(new ModelGroupDefinition(backingElem, childElems))
@@ -1385,11 +1516,11 @@ object ModelGroupDefinitionOrReference {
 object AttributeGroupDefinitionOrReference {
 
   private[dom] def opt(backingElem: BackingElemApi, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[AttributeGroupDefinitionOrReference] = {
-    require(backingElem.resolvedName == XsAttributeGroupEName)
+    require(backingElem.resolvedName == ENames.XsAttributeGroupEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.exists(_ == XsSchemaEName)
-    val hasName = backingElem.attributeOption(NameEName).isDefined
-    val hasRef = backingElem.attributeOption(RefEName).isDefined
+    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
+    val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
     if (parentIsSchema && hasName && !hasRef) {
       Some(new AttributeGroupDefinition(backingElem, childElems))

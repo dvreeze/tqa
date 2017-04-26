@@ -42,7 +42,7 @@ class BackingElemTest extends AbstractBackingElemTest {
     val docUri = classOf[AbstractBackingElemTest].getResource("some-data.xsd").toURI
     val inputSource = new StreamSource(new File(docUri))
     val doc = processor.getUnderlyingConfiguration.buildDocumentTree(inputSource)
-    SaxonNode.wrapDocument(doc).documentElement
+    SaxonDocument.wrapDocument(doc).documentElement
   }
 
   def getChildren(elem: E): immutable.IndexedSeq[Nodes.Node] = {

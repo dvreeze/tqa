@@ -35,6 +35,10 @@ import eu.cdevreeze.yaidom.core.EName
  * in the exact same way that primary items are defined. Therefore primary items and dimension members are indistinguishable.
  *
  * In order to build a `ConceptDeclaration` from a `GlobalElementDeclaration`, the builder needs a `SubstitutionGroupMap` as context.
+ * The created `ConceptDeclaration` does not retain that used `SubstitutionGroupMap`. As a consequence, these concept declaration objects
+ * only make sense in a context where the used substitution group map is fixed. In taxonomies that know their substitution group map, this
+ * is clearly the case. In other words, outside the context of a taxonomy that knows its substitution group map, concept declarations
+ * are not "portable" objects, whereas the underlying global element declarations are.
  *
  * @author Chris de Vreeze
  */

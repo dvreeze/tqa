@@ -65,7 +65,7 @@ class TaxonomyElemTest extends FunSuite {
     }
 
     assertResult(List("http://www.xbrl.org/2003/role/link")) {
-      embeddedLinks.flatMap(_.roleOption).distinct
+      embeddedLinks.map(_.role).distinct
     }
 
     assertResult(List("http://www.xbrl.org/2003/role/link")) {
