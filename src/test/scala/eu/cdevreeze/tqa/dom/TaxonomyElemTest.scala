@@ -49,7 +49,7 @@ class TaxonomyElemTest extends FunSuite {
 
     val xsdSchema = XsdSchema.build(doc.documentElement)
 
-    val embeddedLinks = xsdSchema.findAllElemsOfType(classTag[StandardLink])
+    val embeddedLinks = xsdSchema.findAllElemsOfType(classTag[StandardExtendedLink])
 
     assertResult(3) {
       embeddedLinks.size

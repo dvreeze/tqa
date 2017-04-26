@@ -294,7 +294,7 @@ sealed trait ExtendedLink extends XLinkLink {
 
   /**
    * Returns the XLink locators and resources grouped by XLink label.
-   * This is an expensive methods, so when processing an extended link, this method should
+   * This is an expensive method, so when processing an extended link, this method should
    * be called only once per extended link.
    */
   final def labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]] = {
@@ -477,7 +477,7 @@ sealed trait SimpleLink extends XLinkLink {
 // Schema content or linkbase content.
 
 /**
- * Element in the XML Schema namespace.
+ * Element in the XML Schema namespace ("http://www.w3.org/2001/XMLSchema").
  */
 sealed trait XsdElem extends TaxonomyElem {
 
@@ -491,7 +491,7 @@ sealed trait XsdElem extends TaxonomyElem {
 }
 
 /**
- * Element in the link namespace.
+ * Element in the link namespace ("http://www.xbrl.org/2003/linkbase").
  */
 sealed trait LinkElem extends TaxonomyElem
 
@@ -650,7 +650,15 @@ sealed trait ElementDeclarationOrReference extends XsdElem
 /**
  * Either a global element declaration or a local element declaration.
  */
-sealed trait ElementDeclaration extends ElementDeclarationOrReference with NamedDeclOrDef
+sealed trait ElementDeclaration extends ElementDeclarationOrReference with NamedDeclOrDef {
+
+  /**
+   * Returns the optional type attribute (as EName). This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def typeOption: Option[EName] = {
+    attributeAsResolvedQNameOption(ENames.TypeEName)
+  }
+}
 
 /**
  * Global element declaration. This element in isolation does not know if the element declaration is a concept declaration,
@@ -691,13 +699,6 @@ final class GlobalElementDeclaration private[dom] (
    */
   def substitutionGroupOption: Option[EName] = {
     attributeAsResolvedQNameOption(ENames.SubstitutionGroupEName)
-  }
-
-  /**
-   * Returns the optional type attribute (as EName). This may fail with an exception if the taxonomy is not schema-valid.
-   */
-  def typeOption: Option[EName] = {
-    attributeAsResolvedQNameOption(ENames.TypeEName)
   }
 
   /**
@@ -750,7 +751,15 @@ sealed trait AttributeDeclarationOrReference extends XsdElem
 /**
  * Either a global attribute declaration or a local attribute declaration.
  */
-sealed trait AttributeDeclaration extends AttributeDeclarationOrReference with NamedDeclOrDef
+sealed trait AttributeDeclaration extends AttributeDeclarationOrReference with NamedDeclOrDef {
+
+  /**
+   * Returns the optional type attribute (as EName). This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def typeOption: Option[EName] = {
+    attributeAsResolvedQNameOption(ENames.TypeEName)
+  }
+}
 
 /**
  * Global attribute declaration. It is an xs:attribute element, and a child element of the xs:schema root element.
@@ -1078,10 +1087,10 @@ final class OtherXsdElem private[dom] (
 // Linkbase content.
 
 /**
- * An XBRL standard link. This is an XLink extended link, and it is either a definition link, presentation link,
+ * An XBRL standard extended link. This is an XLink extended link, and it is either a definition link, presentation link,
  * calculation link, label link or reference link.
  */
-sealed abstract class StandardLink private[dom] (
+sealed abstract class StandardExtendedLink private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with ExtendedLink
 
@@ -1090,35 +1099,35 @@ sealed abstract class StandardLink private[dom] (
  */
 final class DefinitionLink private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardLink(backingElem, childElems)
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL presentation link. It is a link:presentationLink element.
  */
 final class PresentationLink private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardLink(backingElem, childElems)
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL calculation link. It is a link:calculationLink element.
  */
 final class CalculationLink private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardLink(backingElem, childElems)
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL label link. It is a link:labelLink element.
  */
 final class LabelLink private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardLink(backingElem, childElems)
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL reference link. It is a link:referenceLink element.
  */
 final class ReferenceLink private[dom] (
   backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardLink(backingElem, childElems)
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL standard arc. This is an XLink arc, and it is either a definition arc, presentation arc,
