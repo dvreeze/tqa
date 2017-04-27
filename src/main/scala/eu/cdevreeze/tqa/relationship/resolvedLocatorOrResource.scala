@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.relationship
 
 import eu.cdevreeze.tqa.XmlFragmentKey
-import eu.cdevreeze.tqa.dom.AnyTaxonomyElem
+import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.dom.LabeledXLink
 import eu.cdevreeze.tqa.dom.XLinkLocator
 import eu.cdevreeze.tqa.dom.XLinkResource
@@ -29,7 +29,7 @@ import eu.cdevreeze.tqa.dom.XLinkResource
  *
  * @author Chris de Vreeze
  */
-sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
+sealed trait ResolvedLocatorOrResource[E <: TaxonomyElem] {
 
   def xlinkLocatorOrResource: LabeledXLink
 
@@ -46,7 +46,7 @@ sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
  * An XLink locator with the taxonomy element referred to by that locator. The taxonomy element referred to may occur
  * in another document than the locator, which is typically the case.
  */
-final class ResolvedLocator[E <: AnyTaxonomyElem](val locator: XLinkLocator, val resolvedElem: E) extends ResolvedLocatorOrResource[E] {
+final class ResolvedLocator[E <: TaxonomyElem](val locator: XLinkLocator, val resolvedElem: E) extends ResolvedLocatorOrResource[E] {
 
   def xlinkLocatorOrResource: XLinkLocator = locator
 }

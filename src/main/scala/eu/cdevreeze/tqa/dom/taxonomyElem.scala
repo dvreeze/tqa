@@ -107,7 +107,7 @@ import javax.xml.bind.DatatypeConverter
  */
 sealed abstract class TaxonomyElem private[dom] (
     val backingElem: BackingElemApi,
-    val childElems: immutable.IndexedSeq[TaxonomyElem]) extends AnyTaxonomyElem with Nodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
+    val childElems: immutable.IndexedSeq[TaxonomyElem]) extends Nodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
   type ThisElem = TaxonomyElem
 
@@ -143,9 +143,9 @@ sealed abstract class TaxonomyElem private[dom] (
 
   final override def hashCode: Int = backingElem.hashCode
 
-  final override def key: XmlFragmentKey = backingElem.key
-
   // Other public methods
+
+  final def key: XmlFragmentKey = backingElem.key
 
   final def docUri: URI = backingElem.docUri
 
