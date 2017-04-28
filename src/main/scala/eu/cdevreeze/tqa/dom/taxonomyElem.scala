@@ -28,6 +28,7 @@ import eu.cdevreeze.tqa.Namespaces.XsNamespace
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
+import eu.cdevreeze.tqa.xlink
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
@@ -175,7 +176,7 @@ sealed trait TaxonomyRootElem extends TaxonomyElem
  * XLink (see https://www.w3.org/TR/xlink11/) is a somewhat low level standard on top of XML, but it is
  * very important in an XBRL context. Many taxonomy elements are also XLink elements, especially inside linkbases.
  */
-sealed trait XLinkElem extends TaxonomyElem {
+sealed trait XLinkElem extends TaxonomyElem with xlink.XLinkElem {
 
   def xlinkType: String
 
@@ -189,12 +190,12 @@ sealed trait XLinkElem extends TaxonomyElem {
 /**
  * Simple or extended XLink link.
  */
-sealed trait XLinkLink extends XLinkElem
+sealed trait XLinkLink extends XLinkElem with xlink.XLinkLink
 
 /**
  * XLink child element of an extended link, so an XLink arc, locator or resource.
  */
-sealed trait ChildXLink extends XLinkElem {
+sealed trait ChildXLink extends XLinkElem with xlink.ChildXLink {
 
   /**
    * Returns the extended link role of the surrounding extended link element.
@@ -226,7 +227,7 @@ sealed trait ChildXLink extends XLinkElem {
 /**
  * XLink locator or resource.
  */
-sealed trait LabeledXLink extends ChildXLink {
+sealed trait LabeledXLink extends ChildXLink with xlink.LabeledXLink {
 
   /**
    * Returns the XLink label. This may fail with an exception if the taxonomy is not schema-valid.
@@ -264,7 +265,7 @@ sealed trait LabeledXLink extends ChildXLink {
  * </link:labelLink>
  * }}}
  */
-sealed trait ExtendedLink extends XLinkLink {
+sealed trait ExtendedLink extends XLinkLink with xlink.ExtendedLink {
 
   final def xlinkType: String = {
     "extended"
@@ -316,7 +317,7 @@ sealed trait ExtendedLink extends XLinkLink {
  * The xlink:from and xlink:to attributes point to XLink locators or resources
  * in the same extended link with the corresponding xlink:label attributes.
  */
-sealed trait XLinkArc extends ChildXLink {
+sealed trait XLinkArc extends ChildXLink with xlink.XLinkArc {
 
   final def xlinkType: String = {
     "arc"
@@ -399,7 +400,7 @@ sealed trait XLinkArc extends ChildXLink {
  *   xlink:role="http://www.xbrl.org/2003/role/label">Region [Axis]</link:label>
  * }}}
  */
-sealed trait XLinkResource extends LabeledXLink {
+sealed trait XLinkResource extends LabeledXLink with xlink.XLinkResource {
 
   final def xlinkType: String = {
     "resource"
@@ -415,7 +416,7 @@ sealed trait XLinkResource extends LabeledXLink {
  *   xlink:href="Axes.xsd#entityAxis" />
  * }}}
  */
-sealed trait XLinkLocator extends LabeledXLink {
+sealed trait XLinkLocator extends LabeledXLink with xlink.XLinkLocator {
 
   final def xlinkType: String = {
     "locator"
@@ -446,7 +447,7 @@ sealed trait XLinkLocator extends LabeledXLink {
  *   roleURI="http://mycompany.com/2017/SalesAnalysis" />
  * }}}
  */
-sealed trait SimpleLink extends XLinkLink {
+sealed trait SimpleLink extends XLinkLink with xlink.SimpleLink {
 
   final def xlinkType: String = {
     "simple"
