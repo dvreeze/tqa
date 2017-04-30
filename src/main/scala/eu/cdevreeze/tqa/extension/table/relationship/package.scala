@@ -17,13 +17,13 @@
 package eu.cdevreeze.tqa.extension.table
 
 /**
- * Type-safe XBRL '''table linkbase DOM extension'''. This package contains models for XLink arcs,
- * XLink resources and non-XLink elements in a table linkbase context.
+ * Type-safe XBRL '''table linkbase relationship extension'''. This package contains models for relationships
+ * in a table linkbase context.
  *
- * Like for the normal taxonomy DOM model, instantiation of the table DOM extensions should be successful
+ * Like for the normal relationship model, instantiation of the table relationship extensions should be successful
  * even if the table linkbase content is not schema-valid, but the less forgiving query methods should be used defensively
  * on potentially non-schema-valid table linkbase content.
  *
  * @author Chris de Vreeze
  */
-package object dom
+package object relationship

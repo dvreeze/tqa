@@ -31,6 +31,8 @@ sealed trait TableArc {
 
   def underlyingArc: tqa.dom.NonStandardArc
 
+  def arcrole: String = underlyingArc.arcrole
+
   protected[dom] def requireResolvedName(ename: EName): Unit = {
     require(
       underlyingArc.resolvedName == ename,
