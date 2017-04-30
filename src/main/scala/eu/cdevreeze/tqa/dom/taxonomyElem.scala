@@ -1207,6 +1207,9 @@ final class ConceptReferenceResource private[dom] (
 
 /**
  * Non-standard extended link, so an XLink extended link that is not a standard link. Typically it is a generic link.
+ *
+ * Note that in general it is very hard to determine if a non-standard link is a generic link by looking
+ * at the link element itself, because we need substitution group (inheritance) context.
  */
 final class NonStandardExtendedLink private[dom] (
   backingElem: BackingElemApi,
