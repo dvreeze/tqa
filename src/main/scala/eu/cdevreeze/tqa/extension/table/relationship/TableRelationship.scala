@@ -218,19 +218,49 @@ object TableRelationship {
       val sourceElem = toOptionalTableResource(underlyingRelationship.sourceElem).getOrElse(underlyingRelationship.sourceElem)
       val targetElem = toOptionalTableResource(underlyingRelationship.targetElem).getOrElse(underlyingRelationship.targetElem)
 
-      (arc, sourceElem, targetElem, underlyingRelationship.arcrole) match {
-        case (arc: TableBreakdownArc, source: Table, target: TableBreakdown, "http://xbrl.org/arcrole/2014/table-breakdown") =>
-          Some(new TableBreakdownRelationship(underlyingRelationship, arc, source, target))
-        case (arc: BreakdownTreeArc, source: TableBreakdown, target: DefinitionNode, "http://xbrl.org/arcrole/2014/breakdown-tree") =>
-          Some(new BreakdownTreeRelationship(underlyingRelationship, arc, source, target))
-        case (arc: DefinitionNodeSubtreeArc, source: DefinitionNode, target: DefinitionNode, "http://xbrl.org/arcrole/2014/definition-node-subtree") =>
-          Some(new DefinitionNodeSubtreeRelationship(underlyingRelationship, arc, source, target))
-        case (arc: TableFilterArc, source: Table, target: NonStandardResource, "http://xbrl.org/arcrole/2014/table-filter") =>
-          Some(new TableFilterRelationship(underlyingRelationship, arc, source, target))
-        case (arc: TableParameterArc, source: Table, target: NonStandardResource, "http://xbrl.org/arcrole/2014/table-parameter") =>
-          Some(new TableParameterRelationship(underlyingRelationship, arc, source, target))
-        case (arc: AspectNodeFilterArc, source: AspectNode, target: NonStandardResource, "http://xbrl.org/arcrole/2014/aspect-node-filter") =>
-          Some(new AspectNodeFilterRelationship(underlyingRelationship, arc, source, target))
+      underlyingRelationship.arcrole match {
+        case "http://xbrl.org/arcrole/2014/table-breakdown" =>
+          (arc, sourceElem, targetElem) match {
+            case (arc: TableBreakdownArc, source: Table, target: TableBreakdown) =>
+              Some(new TableBreakdownRelationship(underlyingRelationship, arc, source, target))
+            case _ =>
+              None
+          }
+        case "http://xbrl.org/arcrole/2014/breakdown-tree" =>
+          (arc, sourceElem, targetElem) match {
+            case (arc: BreakdownTreeArc, source: TableBreakdown, target: DefinitionNode) =>
+              Some(new BreakdownTreeRelationship(underlyingRelationship, arc, source, target))
+            case _ =>
+              None
+          }
+        case "http://xbrl.org/arcrole/2014/definition-node-subtree" =>
+          (arc, sourceElem, targetElem) match {
+            case (arc: DefinitionNodeSubtreeArc, source: DefinitionNode, target: DefinitionNode) =>
+              Some(new DefinitionNodeSubtreeRelationship(underlyingRelationship, arc, source, target))
+            case _ =>
+              None
+          }
+        case "http://xbrl.org/arcrole/2014/table-filter" =>
+          (arc, sourceElem, targetElem) match {
+            case (arc: TableFilterArc, source: Table, target: NonStandardResource) =>
+              Some(new TableFilterRelationship(underlyingRelationship, arc, source, target))
+            case _ =>
+              None
+          }
+        case "http://xbrl.org/arcrole/2014/table-parameter" =>
+          (arc, sourceElem, targetElem) match {
+            case (arc: TableParameterArc, source: Table, target: NonStandardResource) =>
+              Some(new TableParameterRelationship(underlyingRelationship, arc, source, target))
+            case _ =>
+              None
+          }
+        case "http://xbrl.org/arcrole/2014/aspect-node-filter" =>
+          (arc, sourceElem, targetElem) match {
+            case (arc: AspectNodeFilterArc, source: AspectNode, target: NonStandardResource) =>
+              Some(new AspectNodeFilterRelationship(underlyingRelationship, arc, source, target))
+            case _ =>
+              None
+          }
       }
     } else {
       None
