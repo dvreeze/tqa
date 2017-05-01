@@ -24,6 +24,7 @@ import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
+import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.yaidom.core.EName
 import javax.xml.bind.DatatypeConverter
 
@@ -32,9 +33,11 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait OtherTableElem {
+sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
 
   def underlyingElem: tqa.dom.OtherElem
+
+  final def key: XmlFragmentKey = underlyingElem.key
 
   protected[dom] def requireResolvedName(ename: EName): Unit = {
     require(

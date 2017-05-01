@@ -21,6 +21,7 @@ import java.net.URI
 import javax.xml.bind.DatatypeConverter
 
 import scala.collection.immutable
+import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
@@ -539,7 +540,7 @@ object StandardRelationship {
       case elemDecl: GlobalElementDeclaration =>
         InterConceptRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocator[GlobalElementDeclaration]])
       case res: XLinkResource =>
-        ConceptResourceRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]])
+        ConceptResourceRelationship.opt(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource]))
       case _ => None
     }
   }
@@ -559,11 +560,11 @@ object NonStandardRelationship {
 
     (arc.arcrole, arc, resolvedTo.resolvedElem) match {
       case ("http://xbrl.org/arcrole/2008/element-label", arc: NonStandardArc, res: XLinkResource) =>
-        Some(new ElementLabelRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]]))
+        Some(new ElementLabelRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource])))
       case ("http://xbrl.org/arcrole/2008/element-reference", arc: NonStandardArc, res: XLinkResource) =>
-        Some(new ElementReferenceRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]]))
+        Some(new ElementReferenceRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource])))
       case (_, arc: NonStandardArc, res: XLinkResource) if resolvedTo.resolvedElem.resolvedName == MsgMessageEName =>
-        Some(new ElementMessageRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[XLinkResource]]))
+        Some(new ElementMessageRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource])))
       case _ =>
         Some(new OtherNonStandardRelationship(arc, resolvedFrom, resolvedTo))
     }
@@ -605,9 +606,9 @@ object ConceptResourceRelationship {
 
     (arc.resolvedName, arc, resolvedTo.resolvedElem) match {
       case (LinkLabelArcEName, arc: LabelArc, lbl: ConceptLabelResource) =>
-        Some(new ConceptLabelRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[ConceptLabelResource]]))
+        Some(new ConceptLabelRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[ConceptLabelResource])))
       case (LinkReferenceArcEName, arc: ReferenceArc, ref: ConceptReferenceResource) =>
-        Some(new ConceptReferenceRelationship(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource[ConceptReferenceResource]]))
+        Some(new ConceptReferenceRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[ConceptReferenceResource])))
       case _ => None
     }
   }

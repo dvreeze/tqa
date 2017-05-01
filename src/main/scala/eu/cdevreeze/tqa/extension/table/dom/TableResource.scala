@@ -23,7 +23,10 @@ import scala.reflect.ClassTag
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
+import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import javax.xml.bind.DatatypeConverter
 
 /**
@@ -31,9 +34,25 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait TableResource {
+sealed trait TableResource extends tqa.dom.AnyTaxonomyElem with XLinkResource {
 
   def underlyingResource: tqa.dom.NonStandardResource
+
+  final def backingElem: BackingElemApi = underlyingResource.backingElem
+
+  final def xlinkType: String = underlyingResource.xlinkType
+
+  final def xlinkAttributes: Map[EName, String] = underlyingResource.xlinkAttributes
+
+  final def elr: String = underlyingResource.elr
+
+  final def underlyingParentElem: BackingElemApi = underlyingResource.backingElem.parent
+
+  final def xlinkLabel: String = underlyingResource.xlinkLabel
+
+  final def roleOption: Option[String] = underlyingResource.roleOption
+
+  final def key: XmlFragmentKey = underlyingResource.key
 
   protected[dom] def requireResolvedName(ename: EName): Unit = {
     require(

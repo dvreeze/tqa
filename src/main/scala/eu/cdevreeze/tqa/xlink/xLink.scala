@@ -22,12 +22,9 @@ import scala.collection.immutable
 
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
-import eu.cdevreeze.yaidom.queryapi.ScopedElemApi
 
 /**
  * An XLink element in a taxonomy, obeying the constraints on XLink imposed by XBRL. For example, an XLink arc or extended link.
- *
- * The XLink elements offer (at least) the yaidom `ScopedElemApi` query API.
  *
  * The XLink elements are backed by a yaidom `BackingElemApi`. As a consequence, XLink child elements of an extended link know their
  * parent element (as BackingElemApi), and therefore know their ELR (extended link role).
@@ -37,7 +34,7 @@ import eu.cdevreeze.yaidom.queryapi.ScopedElemApi
  *
  * @author Chris de Vreeze
  */
-trait XLinkElem extends ScopedElemApi {
+trait XLinkElem {
 
   def backingElem: BackingElemApi
 

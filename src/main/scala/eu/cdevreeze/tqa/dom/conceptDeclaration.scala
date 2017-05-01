@@ -42,7 +42,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-sealed abstract class ConceptDeclaration private[dom] (val globalElementDeclaration: GlobalElementDeclaration) {
+sealed abstract class ConceptDeclaration private[dom] (val globalElementDeclaration: GlobalElementDeclaration) extends AnyTaxonomyElem {
 
   final def key: XmlFragmentKey = {
     globalElementDeclaration.key

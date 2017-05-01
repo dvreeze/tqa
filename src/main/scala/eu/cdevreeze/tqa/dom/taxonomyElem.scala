@@ -108,7 +108,7 @@ import javax.xml.bind.DatatypeConverter
  */
 sealed abstract class TaxonomyElem private[dom] (
     val backingElem: BackingElemApi,
-    val childElems: immutable.IndexedSeq[TaxonomyElem]) extends Nodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
+    val childElems: immutable.IndexedSeq[TaxonomyElem]) extends AnyTaxonomyElem with Nodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
   type ThisElem = TaxonomyElem
 

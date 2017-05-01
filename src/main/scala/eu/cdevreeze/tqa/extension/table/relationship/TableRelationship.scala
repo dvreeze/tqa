@@ -18,11 +18,14 @@ package eu.cdevreeze.tqa.extension.table.relationship
 
 import java.net.URI
 
+import scala.reflect.classTag
+
 import eu.cdevreeze.tqa.Namespaces
+import eu.cdevreeze.tqa.dom.AnyTaxonomyElem
+import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.TaxonomyElem
-import eu.cdevreeze.tqa.dom.XLinkArc
+import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.AspectNodeFilterArc
 import eu.cdevreeze.tqa.extension.table.dom.BreakdownTreeArc
@@ -36,6 +39,9 @@ import eu.cdevreeze.tqa.extension.table.dom.TableFilterArc
 import eu.cdevreeze.tqa.extension.table.dom.TableParameterArc
 import eu.cdevreeze.tqa.extension.table.dom.TableResource
 import eu.cdevreeze.tqa.relationship.NonStandardRelationship
+import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource
+import eu.cdevreeze.tqa.xlink.XLinkArc
+import eu.cdevreeze.yaidom.core.Path
 
 /**
  * Relationship in a table link.
@@ -43,28 +49,56 @@ import eu.cdevreeze.tqa.relationship.NonStandardRelationship
  * @author Chris de Vreeze
  */
 sealed abstract class TableRelationship(
-    val underlyingRelationship: NonStandardRelationship,
     val arc: TableArc,
-    val sourceElem: AnyRef,
-    val targetElem: AnyRef) {
+    val resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    val resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]) {
 
-  requireArcrole(arc.arcrole)
+  require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
+  require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
 
-  def validated: this.type
+  final def validated: TableRelationship = {
+    require(resolvedFrom.elr == arc.elr, s"Arc and 'from' not in same ELR in $docUri")
+    require(resolvedTo.elr == arc.elr, s"Arc and 'to' not in same ELR in $docUri")
+    this
+  }
 
-  final def elr: String = underlyingRelationship.elr
+  final def sourceElem: AnyTaxonomyElem = resolvedFrom.resolvedElem
 
-  final def arcrole: String = underlyingRelationship.arcrole
+  final def targetElem: AnyTaxonomyElem = resolvedTo.resolvedElem
 
-  final def docUri: URI = underlyingRelationship.docUri
+  final def docUri: URI = arc.underlyingArc.docUri
+
+  final def baseUri: URI = arc.underlyingArc.baseUri
+
+  final def elr: String = arc.elr
+
+  final def arcrole: String = arc.arcrole
+
+  final def arcPath: Path = arc.underlyingArc.backingElem.path
+
+  final def fromPath: Path = resolvedFrom.xlinkLocatorOrResource.backingElem.path
+
+  final def toPath: Path = resolvedTo.xlinkLocatorOrResource.backingElem.path
+
+  final def baseSetKey: BaseSetKey = arc.underlyingArc.baseSetKey
+
+  final def use: Use = arc.underlyingArc.use
+
+  final def priority: Int = arc.underlyingArc.priority
+
+  final def order: BigDecimal = arc.underlyingArc.order
+
+  // TODO Method underlyingRelationship
 
   final override def equals(obj: Any): Boolean = obj match {
     case other: TableRelationship =>
-      other.underlyingRelationship == this.underlyingRelationship
+      (other.arc == this.arc) &&
+        (other.resolvedFrom.resolvedElem == this.resolvedFrom.resolvedElem) &&
+        (other.resolvedTo.resolvedElem == this.resolvedTo.resolvedElem)
     case _ => false
   }
 
-  final override def hashCode: Int = underlyingRelationship.hashCode
+  final override def hashCode: Int = (arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem).hashCode
 
   protected[relationship] def requireArcrole(arcrole: String): Unit = {
     require(
@@ -77,62 +111,45 @@ sealed abstract class TableRelationship(
  * A table-breakdown relationship.
  */
 final class TableBreakdownRelationship(
-    underlyingRelationship: NonStandardRelationship,
-    arc: TableArc,
-    sourceElem: Table,
-    targetElem: TableBreakdown) extends TableRelationship(underlyingRelationship, arc, sourceElem, targetElem) {
+    arc: TableBreakdownArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TableBreakdown]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-breakdown")
 
-  final def validated: this.type = {
-    require(sourceElem.underlyingResource == underlyingRelationship.sourceElem, s"Source element not matching source of underlying relationship in $docUri")
-    require(targetElem.underlyingResource == underlyingRelationship.targetElem, s"Target element not matching target of underlying relationship in $docUri")
-    this
-  }
+  def table: Table = resolvedFrom.resolvedElem
 
-  def table: Table = sourceElem
-
-  def breakdown: TableBreakdown = targetElem
+  def breakdown: TableBreakdown = resolvedTo.resolvedElem
 }
 
 /**
  * A breakdown-tree relationship.
  */
 final class BreakdownTreeRelationship(
-    underlyingRelationship: NonStandardRelationship,
-    arc: TableArc,
-    sourceElem: TableBreakdown,
-    targetElem: DefinitionNode) extends TableRelationship(underlyingRelationship, arc, sourceElem, targetElem) {
+    arc: BreakdownTreeArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TableBreakdown],
+    resolvedTo: ResolvedLocatorOrResource[_ <: DefinitionNode]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/breakdown-tree")
 
-  final def validated: this.type = {
-    require(sourceElem.underlyingResource == underlyingRelationship.sourceElem, s"Source element not matching source of underlying relationship in $docUri")
-    require(targetElem.underlyingResource == underlyingRelationship.targetElem, s"Target element not matching target of underlying relationship in $docUri")
-    this
-  }
+  def breakdown: TableBreakdown = resolvedFrom.resolvedElem
 
-  def breakdown: TableBreakdown = sourceElem
-
-  def definitionNode: DefinitionNode = targetElem
+  def definitionNode: DefinitionNode = resolvedTo.resolvedElem
 }
 
 /**
  * A definition-node-subtree relationship.
  */
 final class DefinitionNodeSubtreeRelationship(
-    underlyingRelationship: NonStandardRelationship,
-    arc: TableArc,
-    sourceElem: DefinitionNode,
-    targetElem: DefinitionNode) extends TableRelationship(underlyingRelationship, arc, sourceElem, targetElem) {
+    arc: DefinitionNodeSubtreeArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: DefinitionNode],
+    resolvedTo: ResolvedLocatorOrResource[_ <: DefinitionNode]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/definition-node-subtree")
 
-  final def validated: this.type = {
-    require(sourceElem.underlyingResource == underlyingRelationship.sourceElem, s"Source element not matching source of underlying relationship in $docUri")
-    require(targetElem.underlyingResource == underlyingRelationship.targetElem, s"Target element not matching target of underlying relationship in $docUri")
-    this
-  }
+  def fromNode: DefinitionNode = resolvedFrom.resolvedElem
+
+  def toNode: DefinitionNode = resolvedTo.resolvedElem
 }
 
 /**
@@ -141,22 +158,15 @@ final class DefinitionNodeSubtreeRelationship(
  * TODO Filter in formula DOM.
  */
 final class TableFilterRelationship(
-    underlyingRelationship: NonStandardRelationship,
-    arc: TableArc,
-    sourceElem: Table,
-    targetElem: NonStandardResource) extends TableRelationship(underlyingRelationship, arc, sourceElem, targetElem) {
+    arc: TableFilterArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
+    resolvedTo: ResolvedLocatorOrResource[_ <: NonStandardResource]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-filter")
 
-  final def validated: this.type = {
-    require(sourceElem.underlyingResource == underlyingRelationship.sourceElem, s"Source element not matching source of underlying relationship in $docUri")
-    require(targetElem == underlyingRelationship.targetElem, s"Target element not matching target of underlying relationship in $docUri")
-    this
-  }
+  def table: Table = resolvedFrom.resolvedElem
 
-  def table: Table = sourceElem
-
-  def filter: NonStandardResource = targetElem
+  def filter: NonStandardResource = resolvedTo.resolvedElem
 }
 
 /**
@@ -165,22 +175,15 @@ final class TableFilterRelationship(
  * TODO Parameter in formula DOM.
  */
 final class TableParameterRelationship(
-    underlyingRelationship: NonStandardRelationship,
-    arc: TableArc,
-    sourceElem: Table,
-    targetElem: NonStandardResource) extends TableRelationship(underlyingRelationship, arc, sourceElem, targetElem) {
+    arc: TableParameterArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
+    resolvedTo: ResolvedLocatorOrResource[_ <: NonStandardResource]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-parameter")
 
-  final def validated: this.type = {
-    require(sourceElem.underlyingResource == underlyingRelationship.sourceElem, s"Source element not matching source of underlying relationship in $docUri")
-    require(targetElem == underlyingRelationship.targetElem, s"Target element not matching target of underlying relationship in $docUri")
-    this
-  }
+  def table: Table = resolvedFrom.resolvedElem
 
-  def table: Table = sourceElem
-
-  def parameter: NonStandardResource = targetElem
+  def parameter: NonStandardResource = resolvedTo.resolvedElem
 }
 
 /**
@@ -189,81 +192,52 @@ final class TableParameterRelationship(
  * TODO Filter in formula DOM.
  */
 final class AspectNodeFilterRelationship(
-    underlyingRelationship: NonStandardRelationship,
-    arc: TableArc,
-    sourceElem: AspectNode,
-    targetElem: NonStandardResource) extends TableRelationship(underlyingRelationship, arc, sourceElem, targetElem) {
+    arc: AspectNodeFilterArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AspectNode],
+    resolvedTo: ResolvedLocatorOrResource[_ <: NonStandardResource]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/aspect-node-filter")
 
-  final def validated: this.type = {
-    require(sourceElem.underlyingResource == underlyingRelationship.sourceElem, s"Source element not matching source of underlying relationship in $docUri")
-    require(targetElem == underlyingRelationship.targetElem, s"Target element not matching target of underlying relationship in $docUri")
-    this
-  }
+  def aspectNode: AspectNode = resolvedFrom.resolvedElem
 
-  def aspectNode: AspectNode = sourceElem
-
-  def filter: NonStandardResource = targetElem
+  def filter: NonStandardResource = resolvedTo.resolvedElem
 }
 
 object TableRelationship {
 
   /**
+   * Optionally builds a `TableRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: TableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[TableRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
+      TableBreakdownRelationship.opt(arc, resolvedFrom, resolvedTo).
+        orElse(BreakdownTreeRelationship.opt(arc, resolvedFrom, resolvedTo)).
+        orElse(DefinitionNodeSubtreeRelationship.opt(arc, resolvedFrom, resolvedTo)).
+        orElse(TableFilterRelationship.opt(arc, resolvedFrom, resolvedTo)).
+        orElse(TableParameterRelationship.opt(arc, resolvedFrom, resolvedTo)).
+        orElse(AspectNodeFilterRelationship.opt(arc, resolvedFrom, resolvedTo)).
+        orElse(None)
+    } else {
+      None
+    }
+  }
+
+  /**
    * Lenient method to optionally create a TableRelationship from an underlying tqa.relationship.StandardRelationship.
    */
   def opt(underlyingRelationship: NonStandardRelationship): Option[TableRelationship] = {
-    if (underlyingRelationship.arc.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
-      val arc = toOptionalTableArc(underlyingRelationship.arc).getOrElse(underlyingRelationship.arc)
-      val sourceElem = toOptionalTableResource(underlyingRelationship.sourceElem).getOrElse(underlyingRelationship.sourceElem)
-      val targetElem = toOptionalTableResource(underlyingRelationship.targetElem).getOrElse(underlyingRelationship.targetElem)
+    val tableArcOption: Option[TableArc] = toOptionalTableArc(underlyingRelationship.arc)
 
-      underlyingRelationship.arcrole match {
-        case "http://xbrl.org/arcrole/2014/table-breakdown" =>
-          (arc, sourceElem, targetElem) match {
-            case (arc: TableBreakdownArc, source: Table, target: TableBreakdown) =>
-              Some(new TableBreakdownRelationship(underlyingRelationship, arc, source, target))
-            case _ =>
-              None
-          }
-        case "http://xbrl.org/arcrole/2014/breakdown-tree" =>
-          (arc, sourceElem, targetElem) match {
-            case (arc: BreakdownTreeArc, source: TableBreakdown, target: DefinitionNode) =>
-              Some(new BreakdownTreeRelationship(underlyingRelationship, arc, source, target))
-            case _ =>
-              None
-          }
-        case "http://xbrl.org/arcrole/2014/definition-node-subtree" =>
-          (arc, sourceElem, targetElem) match {
-            case (arc: DefinitionNodeSubtreeArc, source: DefinitionNode, target: DefinitionNode) =>
-              Some(new DefinitionNodeSubtreeRelationship(underlyingRelationship, arc, source, target))
-            case _ =>
-              None
-          }
-        case "http://xbrl.org/arcrole/2014/table-filter" =>
-          (arc, sourceElem, targetElem) match {
-            case (arc: TableFilterArc, source: Table, target: NonStandardResource) =>
-              Some(new TableFilterRelationship(underlyingRelationship, arc, source, target))
-            case _ =>
-              None
-          }
-        case "http://xbrl.org/arcrole/2014/table-parameter" =>
-          (arc, sourceElem, targetElem) match {
-            case (arc: TableParameterArc, source: Table, target: NonStandardResource) =>
-              Some(new TableParameterRelationship(underlyingRelationship, arc, source, target))
-            case _ =>
-              None
-          }
-        case "http://xbrl.org/arcrole/2014/aspect-node-filter" =>
-          (arc, sourceElem, targetElem) match {
-            case (arc: AspectNodeFilterArc, source: AspectNode, target: NonStandardResource) =>
-              Some(new AspectNodeFilterRelationship(underlyingRelationship, arc, source, target))
-            case _ =>
-              None
-          }
-      }
-    } else {
-      None
+    tableArcOption flatMap { tableArc =>
+      val resolvedFrom = underlyingRelationship.resolvedFrom.transform(e => toOptionalTableResource(e).getOrElse(e))
+      val resolvedTo = underlyingRelationship.resolvedTo.transform(e => toOptionalTableResource(e).getOrElse(e))
+
+      opt(tableArc, resolvedFrom, resolvedTo)
     }
   }
 
@@ -274,10 +248,154 @@ object TableRelationship {
     }
   }
 
-  private def toOptionalTableResource(taxoElem: TaxonomyElem): Option[TableResource] = {
+  private def toOptionalTableResource(taxoElem: AnyTaxonomyElem): Option[TableResource] = {
     taxoElem match {
       case res: NonStandardResource => TableResource.opt(res)
       case _                        => None
+    }
+  }
+}
+
+object TableBreakdownRelationship {
+
+  /**
+   * Optionally builds a `TableBreakdownRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: TableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[TableBreakdownRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2014/table-breakdown", arc: TableBreakdownArc, source: Table, target: TableBreakdown) =>
+          Some(new TableBreakdownRelationship(arc, resolvedFrom.cast(classTag[Table]), resolvedTo.cast(classTag[TableBreakdown])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
+    }
+  }
+}
+
+object BreakdownTreeRelationship {
+
+  /**
+   * Optionally builds a `BreakdownTreeRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: TableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[BreakdownTreeRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2014/breakdown-tree", arc: BreakdownTreeArc, source: TableBreakdown, target: DefinitionNode) =>
+          Some(new BreakdownTreeRelationship(arc, resolvedFrom.cast(classTag[TableBreakdown]), resolvedTo.cast(classTag[DefinitionNode])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
+    }
+  }
+}
+
+object DefinitionNodeSubtreeRelationship {
+
+  /**
+   * Optionally builds a `DefinitionNodeSubtreeRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: TableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[DefinitionNodeSubtreeRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2014/definition-node-subtree", arc: DefinitionNodeSubtreeArc, source: DefinitionNode, target: DefinitionNode) =>
+          Some(new DefinitionNodeSubtreeRelationship(arc, resolvedFrom.cast(classTag[DefinitionNode]), resolvedTo.cast(classTag[DefinitionNode])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
+    }
+  }
+}
+
+object TableFilterRelationship {
+
+  /**
+   * Optionally builds a `TableFilterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: TableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[TableFilterRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2014/table-filter", arc: TableFilterArc, source: Table, target: NonStandardResource) =>
+          Some(new TableFilterRelationship(arc, resolvedFrom.cast(classTag[Table]), resolvedTo.cast(classTag[NonStandardResource])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
+    }
+  }
+}
+
+object TableParameterRelationship {
+
+  /**
+   * Optionally builds a `TableParameterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: TableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[TableParameterRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2014/table-parameter", arc: TableParameterArc, source: Table, target: NonStandardResource) =>
+          Some(new TableParameterRelationship(arc, resolvedFrom.cast(classTag[Table]), resolvedTo.cast(classTag[NonStandardResource])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
+    }
+  }
+}
+
+object AspectNodeFilterRelationship {
+
+  /**
+   * Optionally builds a `AspectNodeFilterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: TableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[AspectNodeFilterRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2014/aspect-node-filter", arc: AspectNodeFilterArc, source: AspectNode, target: NonStandardResource) =>
+          Some(new AspectNodeFilterRelationship(arc, resolvedFrom.cast(classTag[AspectNode]), resolvedTo.cast(classTag[NonStandardResource])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
     }
   }
 }

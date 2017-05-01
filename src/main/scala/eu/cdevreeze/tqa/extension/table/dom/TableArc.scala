@@ -19,7 +19,10 @@ package eu.cdevreeze.tqa.extension.table.dom
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
+import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import javax.xml.bind.DatatypeConverter
 
 /**
@@ -27,11 +30,27 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait TableArc {
+sealed trait TableArc extends tqa.dom.AnyTaxonomyElem with XLinkArc {
 
   def underlyingArc: tqa.dom.NonStandardArc
 
-  def arcrole: String = underlyingArc.arcrole
+  final def backingElem: BackingElemApi = underlyingArc.backingElem
+
+  final def xlinkType: String = underlyingArc.xlinkType
+
+  final def xlinkAttributes: Map[EName, String] = underlyingArc.xlinkAttributes
+
+  final def elr: String = underlyingArc.elr
+
+  final def underlyingParentElem: BackingElemApi = underlyingArc.backingElem.parent
+
+  final def arcrole: String = underlyingArc.arcrole
+
+  final def from: String = underlyingArc.from
+
+  final def to: String = underlyingArc.to
+
+  final def key: XmlFragmentKey = underlyingArc.key
 
   protected[dom] def requireResolvedName(ename: EName): Unit = {
     require(
