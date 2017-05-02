@@ -48,18 +48,6 @@ sealed trait ResolvedLocatorOrResource[E <: AnyTaxonomyElem] {
   }
 
   final def elr: String = xlinkLocatorOrResource.elr
-
-  /**
-   * Creates an equivalent ResolvedLocatorOrResource, but transforming the resolved element.
-   * An example transformation lifts a low level taxonomy element to a higher level of abstraction (such as the table DOM level).
-   */
-  def transform[A <: AnyTaxonomyElem](f: E => A): ResolvedLocatorOrResource[A]
-
-  /**
-   * Creates an equivalent ResolvedLocatorOrResource, but casting the resolved element.
-   * If we know that the resolved element is of type `A`, then the cast will succeed.
-   */
-  final def cast[A <: AnyTaxonomyElem](clsTag: ClassTag[A]): ResolvedLocatorOrResource[A] = transform(_.asInstanceOf[A])
 }
 
 /**
@@ -70,18 +58,69 @@ final class ResolvedLocator[E <: AnyTaxonomyElem](val locator: XLinkLocator, val
 
   def xlinkLocatorOrResource: XLinkLocator = locator
 
-  def transform[A <: AnyTaxonomyElem](f: E => A): ResolvedLocator[A] = new ResolvedLocator(locator, f(resolvedElem))
+  /**
+   * Creates an equivalent ResolvedLocatorOrResource, but transforming the resolved element.
+   * An example transformation lifts a low level taxonomy element to a higher level of abstraction (such as the table DOM level).
+   */
+  def transform[A <: AnyTaxonomyElem](f: E => A): ResolvedLocatorOrResource[A] = {
+    new ResolvedLocator(locator, f(resolvedElem))
+  }
+
+  /**
+   * Creates an equivalent ResolvedLocatorOrResource, but casting the resolved element.
+   * If we know that the resolved element is of type `A`, then the cast will succeed.
+   */
+  def cast[A <: AnyTaxonomyElem](clsTag: ClassTag[A]): ResolvedLocatorOrResource[A] = transform(_.asInstanceOf[A])
 }
 
 /**
  * An XLink resource wrapped as `ResolvedLocatorOrResource`.
  */
-final class ResolvedResource[E <: AnyTaxonomyElem](val resource: E) extends ResolvedLocatorOrResource[E] {
-  require(resource.isInstanceOf[XLinkResource], s"Expected an XLink resource")
+final class ResolvedResource[E <: AnyTaxonomyElem with XLinkResource](val resource: E) extends ResolvedLocatorOrResource[E] {
 
-  def xlinkLocatorOrResource: XLinkResource = resource.asInstanceOf[XLinkResource]
+  def xlinkLocatorOrResource: E = resource
 
   def resolvedElem: E = resource
+}
 
-  def transform[A <: AnyTaxonomyElem](f: E => A): ResolvedResource[A] = new ResolvedResource(f(resolvedElem))
+object ResolvedLocatorOrResource {
+
+  type AnyResource = AnyTaxonomyElem with XLinkResource
+
+  /**
+   * Creates an equivalent ResolvedLocatorOrResource, but transforming the resolved XLink resource element.
+   * An example transformation lifts a low level taxonomy element to a higher level of abstraction (such as the table DOM level).
+   */
+  def transformResource[E1 <: AnyResource, E2 <: AnyResource](resolvedLocOrRes: ResolvedLocatorOrResource[E1], f: E1 => E2): ResolvedLocatorOrResource[E2] = {
+    resolvedLocOrRes match {
+      case loc: ResolvedLocator[E1] =>
+        new ResolvedLocator(loc.locator, f(loc.resolvedElem))
+      case res: ResolvedResource[E1] =>
+        new ResolvedResource(f(res.resolvedElem))
+    }
+  }
+
+  /**
+   * Creates an equivalent ResolvedLocatorOrResource, but casting the resolved XLink resource element.
+   * If we know that the resolved element is of type `E2`, then the cast will succeed.
+   */
+  def castResource[E1 <: AnyResource, E2 <: AnyResource](resolvedLocOrRes: ResolvedLocatorOrResource[E1], clsTag: ClassTag[E2]): ResolvedLocatorOrResource[E2] = {
+    transformResource(resolvedLocOrRes, { (e: E1) => e.asInstanceOf[E2] })
+  }
+
+  // TODO Make the following methods obsolete
+
+  /**
+   * Like `transformResource`, but assuming and not checking that the input is resolved as a `AnyResource`.
+   */
+  def unsafeTransformResource[A <: AnyResource](resolvedLocOrRes: ResolvedLocatorOrResource[_], f: AnyTaxonomyElem => A): ResolvedLocatorOrResource[A] = {
+    transformResource(resolvedLocOrRes.asInstanceOf[ResolvedLocatorOrResource[AnyResource]], { (e: AnyResource) => f(e) })
+  }
+
+  /**
+   * Like `castResource`, but assuming and not checking that the input is resolved as a `AnyResource`.
+   */
+  def unsafeCastResource[A <: AnyResource](resolvedLocOrRes: ResolvedLocatorOrResource[_], clsTag: ClassTag[A]): ResolvedLocatorOrResource[A] = {
+    unsafeTransformResource(resolvedLocOrRes, { (e: AnyTaxonomyElem) => e.asInstanceOf[A] })
+  }
 }

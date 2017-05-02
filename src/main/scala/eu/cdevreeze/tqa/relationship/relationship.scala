@@ -18,8 +18,6 @@ package eu.cdevreeze.tqa.relationship
 
 import java.net.URI
 
-import javax.xml.bind.DatatypeConverter
-
 import scala.collection.immutable
 import scala.reflect.classTag
 
@@ -51,6 +49,7 @@ import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Path
+import javax.xml.bind.DatatypeConverter
 
 /**
  * Any '''relationship'''. Relationships are like their underlying arcs, but resolving the locators.
@@ -526,6 +525,8 @@ object Relationship {
 
 object StandardRelationship {
 
+  import ResolvedLocatorOrResource.unsafeCastResource
+
   /**
    * Optionally builds a [[eu.cdevreeze.tqa.relationship.StandardRelationship]] from an underlying [[eu.cdevreeze.tqa.dom.StandardArc]],
    * a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]] and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]],
@@ -540,13 +541,15 @@ object StandardRelationship {
       case elemDecl: GlobalElementDeclaration =>
         InterConceptRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocator[GlobalElementDeclaration]])
       case res: XLinkResource =>
-        ConceptResourceRelationship.opt(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource]))
+        ConceptResourceRelationship.opt(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource]))
       case _ => None
     }
   }
 }
 
 object NonStandardRelationship {
+
+  import ResolvedLocatorOrResource.unsafeCastResource
 
   /**
    * Optionally builds a [[eu.cdevreeze.tqa.relationship.NonStandardRelationship]] from an underlying [[eu.cdevreeze.tqa.dom.NonStandardArc]],
@@ -560,11 +563,11 @@ object NonStandardRelationship {
 
     (arc.arcrole, arc, resolvedTo.resolvedElem) match {
       case ("http://xbrl.org/arcrole/2008/element-label", arc: NonStandardArc, res: XLinkResource) =>
-        Some(new ElementLabelRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource])))
+        Some(new ElementLabelRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource])))
       case ("http://xbrl.org/arcrole/2008/element-reference", arc: NonStandardArc, res: XLinkResource) =>
-        Some(new ElementReferenceRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource])))
+        Some(new ElementReferenceRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource])))
       case (_, arc: NonStandardArc, res: XLinkResource) if resolvedTo.resolvedElem.resolvedName == MsgMessageEName =>
-        Some(new ElementMessageRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[XLinkResource])))
+        Some(new ElementMessageRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource])))
       case _ =>
         Some(new OtherNonStandardRelationship(arc, resolvedFrom, resolvedTo))
     }
@@ -594,6 +597,8 @@ object InterConceptRelationship {
 
 object ConceptResourceRelationship {
 
+  import ResolvedLocatorOrResource.unsafeCastResource
+
   /**
    * Optionally builds a [[eu.cdevreeze.tqa.relationship.ConceptResourceRelationship]] from an underlying [[eu.cdevreeze.tqa.dom.StandardArc]],
    * a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]] and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]],
@@ -606,9 +611,9 @@ object ConceptResourceRelationship {
 
     (arc.resolvedName, arc, resolvedTo.resolvedElem) match {
       case (LinkLabelArcEName, arc: LabelArc, lbl: ConceptLabelResource) =>
-        Some(new ConceptLabelRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[ConceptLabelResource])))
+        Some(new ConceptLabelRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[ConceptLabelResource])))
       case (LinkReferenceArcEName, arc: ReferenceArc, ref: ConceptReferenceResource) =>
-        Some(new ConceptReferenceRelationship(arc, resolvedFrom, resolvedTo.cast(classTag[ConceptReferenceResource])))
+        Some(new ConceptReferenceRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[ConceptReferenceResource])))
       case _ => None
     }
   }
