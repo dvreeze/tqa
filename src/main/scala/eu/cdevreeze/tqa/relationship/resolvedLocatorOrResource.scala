@@ -59,18 +59,18 @@ final class ResolvedLocator[E <: AnyTaxonomyElem](val locator: XLinkLocator, val
   def xlinkLocatorOrResource: XLinkLocator = locator
 
   /**
-   * Creates an equivalent ResolvedLocatorOrResource, but transforming the resolved element.
+   * Creates an equivalent ResolvedLocator, but transforming the resolved element.
    * An example transformation lifts a low level taxonomy element to a higher level of abstraction (such as the table DOM level).
    */
-  def transform[A <: AnyTaxonomyElem](f: E => A): ResolvedLocatorOrResource[A] = {
+  def transform[A <: AnyTaxonomyElem](f: E => A): ResolvedLocator[A] = {
     new ResolvedLocator(locator, f(resolvedElem))
   }
 
   /**
-   * Creates an equivalent ResolvedLocatorOrResource, but casting the resolved element.
+   * Creates an equivalent ResolvedLocator, but casting the resolved element.
    * If we know that the resolved element is of type `A`, then the cast will succeed.
    */
-  def cast[A <: AnyTaxonomyElem](clsTag: ClassTag[A]): ResolvedLocatorOrResource[A] = transform(_.asInstanceOf[A])
+  def cast[A <: AnyTaxonomyElem](clsTag: ClassTag[A]): ResolvedLocator[A] = transform(_.asInstanceOf[A])
 }
 
 /**
