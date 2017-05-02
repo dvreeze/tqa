@@ -29,6 +29,7 @@ import eu.cdevreeze.tqa.dom.GlobalAttributeDeclaration
 import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
 import eu.cdevreeze.tqa.dom.NamedTypeDefinition
 import eu.cdevreeze.tqa.dom.TaxonomyBase
+import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.tqa.queryapi.TaxonomyLike
@@ -64,6 +65,8 @@ final class BasicTaxonomy private (
     val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
     val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
+
+  def rootElems: immutable.IndexedSeq[TaxonomyElem] = taxonomyBase.rootElems
 
   def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
 

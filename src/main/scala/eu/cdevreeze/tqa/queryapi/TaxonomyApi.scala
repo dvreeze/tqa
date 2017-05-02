@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.queryapi
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.relationship.Relationship
 
 /**
@@ -38,4 +39,6 @@ trait TaxonomyApi
     with DimensionalRelationshipContainerApi {
 
   def relationships: immutable.IndexedSeq[Relationship]
+
+  def rootElems: immutable.IndexedSeq[TaxonomyElem]
 }

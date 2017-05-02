@@ -20,6 +20,12 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.dom.NonStandardArc
+import eu.cdevreeze.tqa.dom.NonStandardResource
+import eu.cdevreeze.tqa.dom.OtherElem
+import eu.cdevreeze.tqa.extension.table.dom.OtherTableElem
+import eu.cdevreeze.tqa.extension.table.dom.TableArc
+import eu.cdevreeze.tqa.extension.table.dom.TableResource
 import eu.cdevreeze.tqa.extension.table.queryapi.TableRelationshipContainerLike
 import eu.cdevreeze.tqa.extension.table.relationship.TableRelationship
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
@@ -34,7 +40,10 @@ import eu.cdevreeze.tqa.relationship.NonStandardRelationship
 final class BasicTableTaxonomy private (
   val underlyingTaxonomy: TaxonomyApi,
   val tableRelationships: immutable.IndexedSeq[TableRelationship],
-  val tableRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[TableRelationship]]) extends TableRelationshipContainerLike
+  val tableRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[TableRelationship]],
+  val tableArcs: immutable.IndexedSeq[TableArc],
+  val tableResources: immutable.IndexedSeq[TableResource],
+  val otherTableElems: immutable.IndexedSeq[OtherTableElem]) extends TableRelationshipContainerLike
 
 object BasicTableTaxonomy {
 
@@ -47,6 +56,22 @@ object BasicTableTaxonomy {
 
     val tableRelationshipsBySource = tableRelationships.groupBy(_.sourceElem.key)
 
-    new BasicTableTaxonomy(underlyingTaxonomy, tableRelationships, tableRelationshipsBySource)
+    val rootElems = underlyingTaxonomy.rootElems
+
+    val nonStandardArcs = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NonStandardArc]))
+    val nonStandardResources = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NonStandardResource]))
+    val otherElems = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[OtherElem]))
+
+    val tableArcs = nonStandardArcs.flatMap(e => TableArc.opt(e))
+    val tableResources = nonStandardResources.flatMap(e => TableResource.opt(e))
+    val otherTableElems = otherElems.flatMap(e => OtherTableElem.opt(e))
+
+    new BasicTableTaxonomy(
+      underlyingTaxonomy,
+      tableRelationships,
+      tableRelationshipsBySource,
+      tableArcs,
+      tableResources,
+      otherTableElems)
   }
 }
