@@ -20,6 +20,7 @@ import java.net.URI
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 
@@ -37,6 +38,8 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 trait XLinkElem {
 
   def backingElem: BackingElemApi
+
+  def key: XmlFragmentKey
 
   def xlinkType: String
 
