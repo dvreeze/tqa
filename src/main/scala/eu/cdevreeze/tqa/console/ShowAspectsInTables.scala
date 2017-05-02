@@ -96,6 +96,12 @@ object ShowAspectsInTables {
 
     logger.info(s"The taxonomy has ${tables.size} tables")
 
+    val aspectsInTaxonomy = findAllAspects(tableTaxo.underlyingTaxonomy)
+
+    aspectsInTaxonomy.toSeq.sortBy(_.toString) foreach { aspect =>
+      logger.info(s"Aspect in taxonomy: $aspect")
+    }
+
     tables foreach { table =>
       val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
       val elr = table.elr
