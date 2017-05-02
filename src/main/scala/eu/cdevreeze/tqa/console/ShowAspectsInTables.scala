@@ -23,6 +23,7 @@ import java.util.logging.Logger
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa
+import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
@@ -144,20 +145,12 @@ object ShowAspectsInTables {
       case node: RuleNode =>
         findAllAspectsInRuleNode(node)
       case node: ConceptRelationshipNode =>
-        Set(ConceptAspect)
+        Set(Aspect.ConceptAspect)
       case node: DimensionRelationshipNode =>
-        Set(DimensionAspect(node.dimensionName))
+        Set(Aspect.DimensionAspect(node.dimensionName))
       case node: AspectNode =>
-        Set(toAspect(node.aspectSpec))
+        Set(node.aspectSpec.aspect)
     }
-  }
-
-  def toAspect(aspectSpec: AspectSpec): Aspect = aspectSpec match {
-    case spec: ConceptAspectSpec          => ConceptAspect
-    case spec: UnitAspectSpec             => UnitAspect
-    case spec: EntityIdentifierAspectSpec => EntityIdentifierAspect
-    case spec: PeriodAspectSpec           => PeriodAspect
-    case spec: DimensionAspectSpec        => DimensionAspect(spec.dimension)
   }
 
   def findAllAspects(taxo: TaxonomyApi): Set[Aspect] = {
@@ -166,9 +159,9 @@ object ShowAspectsInTables {
     Aspect.WellKnownAspects.union(dimensionAspects)
   }
 
-  def findAllDimensionAspects(taxo: TaxonomyApi): Set[DimensionAspect] = {
+  def findAllDimensionAspects(taxo: TaxonomyApi): Set[Aspect.DimensionAspect] = {
     // Are relationships and ELRs important here?
-    taxo.findAllDimensionDeclarations.map(dimDecl => DimensionAspect(dimDecl.dimensionEName)).toSet
+    taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
   }
 
   private def findAllAspectsInRuleNode(node: RuleNode): Set[Aspect] = {
@@ -177,14 +170,14 @@ object ShowAspectsInTables {
   }
 
   private def toAspectOption(formulaAspect: tqa.dom.OtherElem): Option[Aspect] = formulaAspect.resolvedName match {
-    case ENames.FormulaConceptEName          => Some(ConceptAspect)
-    case ENames.FormulaEntityIdentifierEName => Some(EntityIdentifierAspect)
-    case ENames.FormulaPeriodEName           => Some(PeriodAspect)
-    case ENames.FormulaUnitEName             => Some(UnitAspect)
+    case ENames.FormulaConceptEName          => Some(Aspect.ConceptAspect)
+    case ENames.FormulaEntityIdentifierEName => Some(Aspect.EntityIdentifierAspect)
+    case ENames.FormulaPeriodEName           => Some(Aspect.PeriodAspect)
+    case ENames.FormulaUnitEName             => Some(Aspect.UnitAspect)
     case ENames.FormulaExplicitDimensionEName =>
-      Some(DimensionAspect(formulaAspect.attributeAsResolvedQName(ENames.DimensionEName)))
+      Some(Aspect.DimensionAspect(formulaAspect.attributeAsResolvedQName(ENames.DimensionEName)))
     case ENames.FormulaTypedDimensionEName =>
-      Some(DimensionAspect(formulaAspect.attributeAsResolvedQName(ENames.DimensionEName)))
+      Some(Aspect.DimensionAspect(formulaAspect.attributeAsResolvedQName(ENames.DimensionEName)))
     case _ => None
   }
 
@@ -208,18 +201,6 @@ object ShowAspectsInTables {
     } else {
       new IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriToLocalUri(_, rootDir))
     }
-  }
-
-  sealed trait Aspect
-  case object ConceptAspect extends Aspect
-  case object PeriodAspect extends Aspect
-  case object EntityIdentifierAspect extends Aspect
-  case object UnitAspect extends Aspect
-  final case class DimensionAspect(dimension: EName) extends Aspect
-
-  object Aspect {
-
-    val WellKnownAspects: Set[Aspect] = Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect)
   }
 
   // TODO Location? Language?

@@ -21,6 +21,7 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
+import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
@@ -64,13 +65,18 @@ sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
 /**
  * An aspect spec.
  */
-sealed abstract class AspectSpec(val underlyingElem: tqa.dom.OtherElem) extends OtherTableElem
+sealed abstract class AspectSpec(val underlyingElem: tqa.dom.OtherElem) extends OtherTableElem {
+
+  def aspect: Aspect
+}
 
 /**
  * A table:conceptAspect.
  */
 final class ConceptAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableConceptAspectEName)
+
+  def aspect: Aspect = Aspect.ConceptAspect
 }
 
 /**
@@ -78,6 +84,8 @@ final class ConceptAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectS
  */
 final class UnitAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableUnitAspectEName)
+
+  def aspect: Aspect = Aspect.UnitAspect
 }
 
 /**
@@ -85,6 +93,8 @@ final class UnitAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectSpec
  */
 final class EntityIdentifierAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableEntityIdentifierAspectEName)
+
+  def aspect: Aspect = Aspect.EntityIdentifierAspect
 }
 
 /**
@@ -92,6 +102,8 @@ final class EntityIdentifierAspectSpec(underlyingElem: tqa.dom.OtherElem) extend
  */
 final class PeriodAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TablePeriodAspectEName)
+
+  def aspect: Aspect = Aspect.PeriodAspect
 }
 
 /**
@@ -99,6 +111,8 @@ final class PeriodAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectSp
  */
 final class DimensionAspectSpec(underlyingElem: tqa.dom.OtherElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableDimensionAspectEName)
+
+  def aspect: Aspect = Aspect.DimensionAspect(dimension)
 
   /**
    * Returns the dimension as EName. This may fail with an exception if the taxonomy is not schema-valid.
