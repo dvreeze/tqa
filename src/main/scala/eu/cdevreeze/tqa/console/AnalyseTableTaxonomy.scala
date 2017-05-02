@@ -86,12 +86,12 @@ object AnalyseTableTaxonomy {
 
     sortedTableRelationshipGroups foreach {
       case (relationshipName, relationships) =>
-        val tableRelationshipsByUri: Map[URI, immutable.IndexedSeq[TableRelationship]] = tableRelationships.groupBy(_.docUri)
+        val relationshipsByUri: Map[URI, immutable.IndexedSeq[TableRelationship]] = relationships.groupBy(_.docUri)
 
-        val uris = tableRelationshipsByUri.keySet.toSeq.sortBy(_.toString)
+        val uris = relationshipsByUri.keySet.toSeq.sortBy(_.toString)
 
         uris foreach { uri =>
-          val currentRelationships = tableRelationshipsByUri.getOrElse(uri, Vector())
+          val currentRelationships = relationshipsByUri.getOrElse(uri, Vector())
           val elrs = currentRelationships.map(_.elr).distinct.sorted
           val arcroles = currentRelationships.map(_.arcrole).distinct.sorted
 
