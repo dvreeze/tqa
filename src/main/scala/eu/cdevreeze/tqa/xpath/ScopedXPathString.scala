@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.xpath
 
 import eu.cdevreeze.yaidom.core.Scope
 

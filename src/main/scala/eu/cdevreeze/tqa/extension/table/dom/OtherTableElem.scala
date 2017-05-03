@@ -24,8 +24,8 @@ import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
-import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.xpath.ScopedXPathString
 import eu.cdevreeze.yaidom.core.EName
 import javax.xml.bind.DatatypeConverter
 

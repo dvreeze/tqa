@@ -21,6 +21,8 @@ import java.net.URI
 import java.util.logging.Logger
 
 import scala.collection.immutable
+import scala.reflect.classTag
+import scala.reflect.ClassTag
 
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.Aspect
@@ -45,6 +47,7 @@ import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.xpath.ScopedXPathString
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
