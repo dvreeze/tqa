@@ -439,7 +439,29 @@ object OtherTableElem {
 
 object ConceptRelationshipNodeFormulaAxis {
 
-  sealed trait FormulaAxis
+  sealed trait FormulaAxis {
+
+    def includesSelf: Boolean = {
+      this == DescendantOrSelfAxis || this == ChildOrSelfAxis ||
+        this == SiblingOrSelfAxis || this == SiblingOrDescendantOrSelfAxis
+    }
+
+    def includesDescendantsOrChildren: Boolean = {
+      this == SiblingOrDescendantAxis || this == SiblingOrDescendantOrSelfAxis ||
+        this == DescendantAxis || this == DescendantOrSelfAxis ||
+        this == ChildAxis || this == ChildOrSelfAxis
+    }
+
+    def includesSiblings: Boolean = {
+      this == SiblingAxis || this == SiblingOrSelfAxis ||
+        this == SiblingOrDescendantAxis || this == SiblingOrDescendantOrSelfAxis
+    }
+
+    def includesChildrenButNotDeeperDescendants: Boolean = {
+      this == ChildAxis || this == ChildOrSelfAxis
+    }
+  }
+
   case object DescendantAxis extends FormulaAxis
   case object DescendantOrSelfAxis extends FormulaAxis
   case object ChildAxis extends FormulaAxis

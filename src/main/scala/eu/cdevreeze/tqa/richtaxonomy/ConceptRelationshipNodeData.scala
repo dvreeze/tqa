@@ -18,7 +18,6 @@ package eu.cdevreeze.tqa.richtaxonomy
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNodeFormulaAxis
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
@@ -74,17 +73,17 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
     }
   }
 
-  def formulaAxisOption(implicit xpathEvaluator: XPathEvaluator): Option[ConceptRelationshipNodeFormulaAxis.FormulaAxis] = {
+  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): ConceptRelationshipNodeFormulaAxis.FormulaAxis = {
     conceptRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
       conceptRelationshipNode.formulaAxisExpressionOption.map(_.scopedXPathString) map { expr =>
         val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
 
         ConceptRelationshipNodeFormulaAxis.FormulaAxis.fromString(resultAsString)
       }
-    }
+    } getOrElse (ConceptRelationshipNodeFormulaAxis.DescendantOrSelfAxis)
   }
 
-  def generationsOption(implicit xpathEvaluator: XPathEvaluator): Option[Int] = {
+  def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
     val resultAsStringOption =
       conceptRelationshipNode.generationsOption.map(_.underlyingElem.text) orElse {
         conceptRelationshipNode.generationsExpressionOption.map(_.scopedXPathString) map { expr =>
@@ -92,6 +91,6 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
         }
       }
 
-    resultAsStringOption.map(_.toInt)
+    resultAsStringOption.map(_.toInt).getOrElse(0)
   }
 }
