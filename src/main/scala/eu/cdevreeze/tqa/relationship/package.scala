@@ -29,6 +29,8 @@ package eu.cdevreeze.tqa
  * Relationship factories extract relationships from a [[eu.cdevreeze.tqa.dom.TaxonomyBase]]. They can be used
  * directly, but typically they are used implicitly when creating a [[eu.cdevreeze.tqa.taxonomy.BasicTaxonomy]].
  *
+ * This package has no knowledge about and dependency on XPath processing.
+ *
  * For the usage of this API, see packages [[eu.cdevreeze.tqa.queryapi]] and [[eu.cdevreeze.tqa.taxonomy]].
  *
  * This package unidirectionally depends on the [[eu.cdevreeze.tqa.dom]] package.

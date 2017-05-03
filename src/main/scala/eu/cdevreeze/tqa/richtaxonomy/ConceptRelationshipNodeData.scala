@@ -20,6 +20,7 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
+import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNodeFormulaAxis
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
 
@@ -43,7 +44,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 
   def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.linkroleOption.map(_.underlyingElem.text) orElse {
-      conceptRelationshipNode.linkroleExpressionOption.map(e => ScopedXPathString(e.underlyingElem.text, e.underlyingElem.scope)) map { expr =>
+      conceptRelationshipNode.linkroleExpressionOption.map(_.scopedXPathString) map { expr =>
         xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
       }
     }
@@ -51,7 +52,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 
   def arcroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.arcroleOption.map(_.underlyingElem.text) orElse {
-      conceptRelationshipNode.arcroleExpressionOption.map(e => ScopedXPathString(e.underlyingElem.text, e.underlyingElem.scope)) map { expr =>
+      conceptRelationshipNode.arcroleExpressionOption.map(_.scopedXPathString) map { expr =>
         xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
       }
     }
@@ -59,7 +60,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 
   def linknameOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.linknameOption.map(_.underlyingElem.text) orElse {
-      conceptRelationshipNode.linknameExpressionOption.map(e => ScopedXPathString(e.underlyingElem.text, e.underlyingElem.scope)) map { expr =>
+      conceptRelationshipNode.linknameExpressionOption.map(_.scopedXPathString) map { expr =>
         xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
       }
     }
@@ -67,25 +68,30 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 
   def arcnameOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.arcnameOption.map(_.underlyingElem.text) orElse {
-      conceptRelationshipNode.arcnameExpressionOption.map(e => ScopedXPathString(e.underlyingElem.text, e.underlyingElem.scope)) map { expr =>
+      conceptRelationshipNode.arcnameExpressionOption.map(_.scopedXPathString) map { expr =>
         xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
       }
     }
   }
 
-  def formulaAxisOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    conceptRelationshipNode.formulaAxisOption.map(_.underlyingElem.text) orElse {
-      conceptRelationshipNode.formulaAxisExpressionOption.map(e => ScopedXPathString(e.underlyingElem.text, e.underlyingElem.scope)) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+  def formulaAxisOption(implicit xpathEvaluator: XPathEvaluator): Option[ConceptRelationshipNodeFormulaAxis.FormulaAxis] = {
+    conceptRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
+      conceptRelationshipNode.formulaAxisExpressionOption.map(_.scopedXPathString) map { expr =>
+        val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+
+        ConceptRelationshipNodeFormulaAxis.FormulaAxis.fromString(resultAsString)
       }
     }
   }
 
   def generationsOption(implicit xpathEvaluator: XPathEvaluator): Option[Int] = {
-    conceptRelationshipNode.generationsOption.map(_.underlyingElem.text.toInt) orElse {
-      conceptRelationshipNode.generationsExpressionOption.map(e => ScopedXPathString(e.underlyingElem.text, e.underlyingElem.scope)) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None).toInt
+    val resultAsStringOption =
+      conceptRelationshipNode.generationsOption.map(_.underlyingElem.text) orElse {
+        conceptRelationshipNode.generationsExpressionOption.map(_.scopedXPathString) map { expr =>
+          xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+        }
       }
-    }
+
+    resultAsStringOption.map(_.toInt)
   }
 }

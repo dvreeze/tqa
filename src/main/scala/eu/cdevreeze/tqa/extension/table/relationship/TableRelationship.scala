@@ -232,20 +232,26 @@ object TableRelationship {
    * Lenient method to optionally create a TableRelationship from an underlying tqa.relationship.StandardRelationship.
    */
   def opt(underlyingRelationship: NonStandardRelationship): Option[TableRelationship] = {
-    val tableArcOption: Option[TableArc] = toOptionalTableArc(underlyingRelationship.arc)
+    if (!underlyingRelationship.resolvedFrom.isInstanceOf[XLinkResource] ||
+      !underlyingRelationship.resolvedTo.isInstanceOf[XLinkResource]) {
 
-    tableArcOption flatMap { tableArc =>
-      val resolvedFrom =
-        ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](
-          underlyingRelationship.resolvedFrom,
-          { e => toOptionalTableResource(e).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource]) })
+      None
+    } else {
+      val tableArcOption: Option[TableArc] = toOptionalTableArc(underlyingRelationship.arc)
 
-      val resolvedTo =
-        ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](
-          underlyingRelationship.resolvedTo,
-          { e => toOptionalTableResource(e).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource]) })
+      tableArcOption flatMap { tableArc =>
+        val resolvedFrom =
+          ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](
+            underlyingRelationship.resolvedFrom,
+            { e => toOptionalTableResource(e).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource]) })
 
-      opt(tableArc, resolvedFrom, resolvedTo)
+        val resolvedTo =
+          ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](
+            underlyingRelationship.resolvedTo,
+            { e => toOptionalTableResource(e).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource]) })
+
+        opt(tableArc, resolvedFrom, resolvedTo)
+      }
     }
   }
 

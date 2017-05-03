@@ -29,6 +29,8 @@ package eu.cdevreeze.tqa
  * <li>Type [[eu.cdevreeze.tqa.dom.XPointer]] and its sub-types, modeling XPointer as used in XBRL</li>
  * </ul>
  *
+ * This package has no knowledge about and dependency on XPath processing.
+ *
  * ==Usage==
  *
  * Suppose we have an [[eu.cdevreeze.tqa.dom.XsdSchema]] called `schema`. Then we can find all global element declarations in

@@ -33,7 +33,8 @@ package eu.cdevreeze.tqa
  * also be easy to mix taxonomy query API traits, and to compose taxonomy implementations that know about specific
  * relationship types (such as in formulas or tables), or that store specific data that is queried quite often.
  *
- * TQA has no knowledge about XPath, so any XPath in the taxonomy is just text, as far as TQA is concerned.
+ * TQA (except the "richtaxonomy" namespace) has no knowledge about XPath, so any XPath in the taxonomy is
+ * just text, as far as TQA is concerned.
  *
  * This package unidirectionally depends on the [[eu.cdevreeze.tqa.relationship]] and [[eu.cdevreeze.tqa.dom]] packages.
  *

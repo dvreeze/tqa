@@ -17,8 +17,8 @@
 package eu.cdevreeze.tqa.extension.table.dom
 
 import scala.collection.immutable
-import scala.reflect.classTag
 import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames

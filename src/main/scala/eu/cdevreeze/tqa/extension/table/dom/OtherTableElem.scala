@@ -235,8 +235,12 @@ final class ArcroleExpression(val underlyingElem: tqa.dom.OtherElem) extends Oth
 final class ConceptRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.OtherElem) extends OtherTableElem {
   requireResolvedName(ENames.TableFormulaAxisEName)
 
-  // TODO Make type-safe
-  def formulaAxis: String = underlyingElem.text
+  /**
+   * Returns the value as FormulaAxis. This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def formulaAxis: ConceptRelationshipNodeFormulaAxis.FormulaAxis = {
+    ConceptRelationshipNodeFormulaAxis.FormulaAxis.fromString(underlyingElem.text)
+  }
 }
 
 /**
@@ -259,8 +263,12 @@ final class ConceptRelationshipNodeFormulaAxisExpression(val underlyingElem: tqa
 final class DimensionRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.OtherElem) extends OtherTableElem {
   requireResolvedName(ENames.TableFormulaAxisEName)
 
-  // TODO Make type-safe
-  def formulaAxis: String = underlyingElem.text
+  /**
+   * Returns the value as FormulaAxis. This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def formulaAxis: DimensionRelationshipNodeFormulaAxis.FormulaAxis = {
+    DimensionRelationshipNodeFormulaAxis.FormulaAxis.fromString(underlyingElem.text)
+  }
 }
 
 /**
@@ -369,6 +377,8 @@ final class TableDimension(val underlyingElem: tqa.dom.OtherElem) extends OtherT
   }
 }
 
+// Companion objects
+
 object OtherTableElem {
 
   /**
@@ -425,4 +435,52 @@ object OtherTableElem {
     ENames.FormulaOccXpathEName,
     ENames.FormulaExplicitDimensionEName,
     ENames.FormulaTypedDimensionEName)
+}
+
+object ConceptRelationshipNodeFormulaAxis {
+
+  sealed trait FormulaAxis
+  case object DescendantAxis extends FormulaAxis
+  case object DescendantOrSelfAxis extends FormulaAxis
+  case object ChildAxis extends FormulaAxis
+  case object ChildOrSelfAxis extends FormulaAxis
+  case object SiblingAxis extends FormulaAxis
+  case object SiblingOrSelfAxis extends FormulaAxis
+  case object SiblingOrDescendantAxis extends FormulaAxis
+  case object SiblingOrDescendantOrSelfAxis extends FormulaAxis
+
+  object FormulaAxis {
+
+    def fromString(s: String): FormulaAxis = s match {
+      case "descendant"                    => DescendantAxis
+      case "descendant-or-self"            => DescendantOrSelfAxis
+      case "child"                         => ChildAxis
+      case "child-or-self"                 => ChildOrSelfAxis
+      case "sibling"                       => SiblingAxis
+      case "sibling-or-self"               => SiblingOrSelfAxis
+      case "sibling-or-descendant"         => SiblingOrDescendantAxis
+      case "sibling-or-descendant-or-self" => SiblingOrDescendantOrSelfAxis
+      case _                               => sys.error(s"Not a valid 'formula axis': $s")
+    }
+  }
+}
+
+object DimensionRelationshipNodeFormulaAxis {
+
+  sealed trait FormulaAxis
+  case object DescendantAxis extends FormulaAxis
+  case object DescendantOrSelfAxis extends FormulaAxis
+  case object ChildAxis extends FormulaAxis
+  case object ChildOrSelfAxis extends FormulaAxis
+
+  object FormulaAxis {
+
+    def fromString(s: String): FormulaAxis = s match {
+      case "descendant"         => DescendantAxis
+      case "descendant-or-self" => DescendantOrSelfAxis
+      case "child"              => ChildAxis
+      case "child-or-self"      => ChildOrSelfAxis
+      case _                    => sys.error(s"Not a valid 'formula axis': $s")
+    }
+  }
 }
