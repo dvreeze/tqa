@@ -17,8 +17,8 @@
 package eu.cdevreeze.tqa
 
 /**
- * Utilities used internally by TQA, but also available to TQA client code.
+ * Rich taxonomy querying support, where XPath evaluations (on formula/table link content) can be performed.
  *
  * @author Chris de Vreeze
  */
-package object util
+package object richtaxonomy

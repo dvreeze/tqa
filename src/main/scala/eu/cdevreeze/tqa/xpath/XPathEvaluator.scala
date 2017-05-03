@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.tqa.xpath
 
-import scala.reflect.ClassTag
+import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.yaidom.core.EName
@@ -38,20 +38,20 @@ trait XPathEvaluator {
   type XPathExpression
 
   /**
-   * Returns the supported return types. This must include String and EName.
+   * The DOM node type in (DOM) evaluation results.
    */
-  def supportedReturnTypes: Set[ClassTag[_]]
+  type Node
 
-  def evaluate[A](expr: XPathExpression, contextItemOption: Option[Any], classTag: ClassTag[A]): A
-
-  /**
-   * Returns `evaluate(expr, contextItemOption, classTag[String])`.
-   */
   def evaluateAsString(expr: XPathExpression, contextItemOption: Option[Any]): String
 
-  /**
-   * Returns `evaluate(expr, contextItemOption, classTag[EName])`.
-   */
+  def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[Any]): Node
+
+  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[Any]): immutable.IndexedSeq[Node]
+
+  def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[Any]): BigDecimal
+
+  def evaluateAsBoolean(expr: XPathExpression, contextItemOption: Option[Any]): Boolean
+
   def evaluateAsEName(expr: XPathExpression, contextItemOption: Option[Any]): EName
 
   /**

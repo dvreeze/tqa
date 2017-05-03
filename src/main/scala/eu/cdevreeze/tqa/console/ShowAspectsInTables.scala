@@ -47,6 +47,7 @@ import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.richtaxonomy.ConceptRelationshipNodeData
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
@@ -115,6 +116,62 @@ object ShowAspectsInTables {
 
       logger.info(s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tAspects: ${aspects.toSeq.sortBy(_.toString).mkString(", ")}")
     }
+  }
+
+  /**
+   * Returns all concepts "touched" by the table. These are the concepts in expanded concept relationship nodes,
+   * and the concepts in rule nodes.
+   */
+  def findAllConceptsInTable(table: Table, taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+    ???
+  }
+
+  def findAllConceptsInConceptRelationshipNode(
+    conceptRelationshipNode: ConceptRelationshipNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    val conceptRelationNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    // Conceptually we model this as a collection of source concepts (real ones, not xfi:root) on which we query
+    // for descendant(-or-self) concepts, using query method filterLongestOutgoingNonCyclicInterConceptRelationshipPaths.
+    // The variables below must be interpreted in this context.
+
+    val effectiveRelationshipSources: immutable.IndexedSeq[EName] = ???
+
+    val linkroleOption: Option[String] = conceptRelationNodeData.linkroleOption(xpathEvaluator)
+
+    val arcroleOption: Option[String] = conceptRelationNodeData.arcroleOption(xpathEvaluator)
+
+    val linknameOption: Option[String] = conceptRelationNodeData.linknameOption(xpathEvaluator)
+
+    val arcnameOption: Option[String] = conceptRelationNodeData.arcnameOption(xpathEvaluator)
+
+    val conceptTreeWalkSpecs: immutable.IndexedSeq[ConceptTreeWalkSpec] =
+      effectiveRelationshipSources map { startConcept =>
+        val includeStart: Boolean = ???
+        val generationsOption: Option[Int] = ???
+
+        new ConceptTreeWalkSpec(startConcept, includeStart, generationsOption, linkroleOption, arcroleOption, linknameOption, arcnameOption)
+      }
+
+    val concepts: Set[EName] =
+      (conceptTreeWalkSpecs.map(spec => findAllDescendantOrSelfConcepts(spec, taxo)(xpathEvaluator))).flatten.toSet
+
+    concepts
+  }
+
+  def findAllDescendantOrSelfConcepts(treeWalkSpec: ConceptTreeWalkSpec, taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+    val relationshipPaths =
+      taxo.underlyingTaxonomy.filterLongestOutgoingNonCyclicInterConceptRelationshipPaths(treeWalkSpec.startConcept, classTag[InterConceptRelationship]) { path =>
+        path.isElrValid &&
+          treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
+          treeWalkSpec.linkroleOption.forall(lr => path.relationships.head.elr == lr) &&
+          treeWalkSpec.arcroleOption.forall(ar => path.relationships.head.arcrole == ar) &&
+          treeWalkSpec.linknameOption.forall(ln => path.relationships.map(_.baseSetKey.extLinkEName).forall(_ == ln)) &&
+          treeWalkSpec.arcnameOption.forall(an => path.relationships.map(_.baseSetKey.arcEName).forall(_ == an))
+      }
+
+    relationshipPaths.flatMap(_.concepts).toSet
   }
 
   def findAllAspects(table: Table, taxo: BasicTableTaxonomy): Set[Aspect] = {
@@ -209,4 +266,20 @@ object ShowAspectsInTables {
   }
 
   // TODO Location? Language?
+
+  /**
+   * Specification of a concept tree walk starting with one concept (not xfi:root).
+   * The tree walk finds descendant-or-self concepts in the network, but if the start concept must
+   * be excluded the tree walk only finds descendant concepts.
+   *
+   * The optional generations cannot contain 0.
+   */
+  final case class ConceptTreeWalkSpec(
+    val startConcept: EName,
+    val includeStart: Boolean,
+    val generationsOption: Option[Int],
+    val linkroleOption: Option[String],
+    val arcroleOption: Option[String],
+    val linknameOption: Option[String],
+    val arcnameOption: Option[String])
 }
