@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.xpath
 
 import scala.reflect.ClassTag
 
+import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.yaidom.core.EName
 
 /**
