@@ -65,9 +65,14 @@ trait XPathEvaluator {
 
 object XPathEvaluator {
 
-  sealed trait NodeOrAtomResult
+  sealed trait NodeOrAtomResult {
 
-  final class NodeResult[N](node: N) extends NodeOrAtomResult
+    def asNodeResult[N]: NodeResult[N] = asInstanceOf[NodeResult[N]]
 
-  final class AtomResult(value: String) extends NodeOrAtomResult
+    def asAtomResult: AtomResult = asInstanceOf[AtomResult]
+  }
+
+  final class NodeResult[N](val node: N) extends NodeOrAtomResult
+
+  final class AtomResult(val value: String) extends NodeOrAtomResult
 }
