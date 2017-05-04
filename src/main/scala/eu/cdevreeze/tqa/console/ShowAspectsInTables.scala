@@ -27,7 +27,6 @@ import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
-import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
@@ -43,8 +42,10 @@ import eu.cdevreeze.tqa.richtaxonomy.ConceptRelationshipNodeData
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
+import eu.cdevreeze.tqa.xpath.jaxp.saxon.JaxpXPathEvaluatorUsingSaxon
+import eu.cdevreeze.tqa.xpath.jaxp.saxon.SimpleUriResolver
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import eu.cdevreeze.yaidom.core.Scope
 import net.sf.saxon.s9api.Processor
 
 /**
@@ -60,6 +61,8 @@ object ShowAspectsInTables {
 
   private val logger = Logger.getGlobal
 
+  private val processor = new Processor(false)
+
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: ShowAspectsInTables <taxo root dir> <entrypoint URI 1> ...")
     val rootDir = new File(args(0))
@@ -67,9 +70,7 @@ object ShowAspectsInTables {
 
     val entrypointUris = args.drop(1).map(u => URI.create(u)).toSet
 
-    val useSaxon = System.getProperty("useSaxon", "false").toBoolean
-
-    val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
+    val documentBuilder = getDocumentBuilder(rootDir)
     val documentCollector = DefaultDtsCollector(entrypointUris)
 
     val lenient = System.getProperty("lenient", "false").toBoolean
@@ -95,19 +96,35 @@ object ShowAspectsInTables {
 
     logger.info(s"The taxonomy has ${tables.size} tables")
 
-    val aspectsInTaxonomy = findAllAspects(tableTaxo.underlyingTaxonomy)
-
-    aspectsInTaxonomy.toSeq.sortBy(_.toString) foreach { aspect =>
-      logger.info(s"Aspect in taxonomy: $aspect")
-    }
+    logger.info(s"Created XPathEvaluator")
 
     tables foreach { table =>
       val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
       val elr = table.elr
-      val aspects = findAllAspects(table, tableTaxo)
 
-      logger.info(s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tAspects: ${aspects.toSeq.sortBy(_.toString).mkString(", ")}")
+      val xpathEvaluator =
+        makeXPathEvaluator(
+          table.underlyingResource.docUri,
+          table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
+          rootDir)
+
+      val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
+      val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
+
+      logger.info(s"Analysing table with ID $tableId")
+
+      sortedConcepts foreach { concept =>
+        logger.info(s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}). Concept in table: $concept}")
+      }
     }
+  }
+
+  def makeXPathEvaluator(docUri: URI, scope: Scope, localRootDir: File): XPathEvaluator = {
+    JaxpXPathEvaluatorUsingSaxon.createXPathEvaluator(
+      processor.getUnderlyingConfiguration,
+      docUri,
+      scope,
+      new SimpleUriResolver(u => uriToLocalUri(u, localRootDir)))
   }
 
   /**
@@ -115,7 +132,19 @@ object ShowAspectsInTables {
    * and the concepts in rule nodes.
    */
   def findAllConceptsInTable(table: Table, taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
-    ???
+    val nodes = findAllNodes(table, taxo)
+
+    // TODO Rule nodes etc.
+
+    val concepts: Seq[EName] =
+      nodes flatMap {
+        case node: ConceptRelationshipNode =>
+          findAllConceptsInConceptRelationshipNode(node, taxo)(xpathEvaluator)
+        case node =>
+          Seq.empty
+      }
+
+    concepts.toSet
   }
 
   def findAllConceptsInConceptRelationshipNode(
@@ -278,14 +307,8 @@ object ShowAspectsInTables {
     f.toURI
   }
 
-  private def getDocumentBuilder(useSaxon: Boolean, rootDir: File): DocumentBuilder = {
-    if (useSaxon) {
-      val processor = new Processor(false)
-
-      new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
-    } else {
-      new IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriToLocalUri(_, rootDir))
-    }
+  private def getDocumentBuilder(rootDir: File): DocumentBuilder = {
+    new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
   }
 
   // TODO Location? Language?

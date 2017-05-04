@@ -30,12 +30,14 @@ import eu.cdevreeze.yaidom.core.EName
  */
 final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRelationshipNode) {
 
+  // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
+
   def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
     val directlyMentionedSources = conceptRelationshipNode.relationshipSources.map(_.source)
 
     val xpathResultSources =
       conceptRelationshipNode.relationshipSourceExpressions.map(_.scopedXPathString) map { expr =>
-        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr), None)
+        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
 
     directlyMentionedSources ++ xpathResultSources
@@ -44,7 +46,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.linkroleOption.map(_.underlyingElem.text) orElse {
       conceptRelationshipNode.linkroleExpressionOption.map(_.scopedXPathString) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
   }
@@ -52,7 +54,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   def arcroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.arcroleOption.map(_.underlyingElem.text) orElse {
       conceptRelationshipNode.arcroleExpressionOption.map(_.scopedXPathString) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
   }
@@ -60,7 +62,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   def linknameOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.linknameOption.map(_.underlyingElem.text) orElse {
       conceptRelationshipNode.linknameExpressionOption.map(_.scopedXPathString) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
   }
@@ -68,7 +70,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   def arcnameOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     conceptRelationshipNode.arcnameOption.map(_.underlyingElem.text) orElse {
       conceptRelationshipNode.arcnameExpressionOption.map(_.scopedXPathString) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
   }
@@ -76,7 +78,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   def formulaAxis(implicit xpathEvaluator: XPathEvaluator): ConceptRelationshipNodeFormulaAxis.FormulaAxis = {
     conceptRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
       conceptRelationshipNode.formulaAxisExpressionOption.map(_.scopedXPathString) map { expr =>
-        val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+        val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
 
         ConceptRelationshipNodeFormulaAxis.FormulaAxis.fromString(resultAsString)
       }
@@ -87,7 +89,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
     val resultAsStringOption =
       conceptRelationshipNode.generationsOption.map(_.underlyingElem.text) orElse {
         conceptRelationshipNode.generationsExpressionOption.map(_.scopedXPathString) map { expr =>
-          xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr), None)
+          xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
         }
       }
 

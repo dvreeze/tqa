@@ -32,6 +32,8 @@ import eu.cdevreeze.yaidom.core.EName
  */
 trait XPathEvaluator {
 
+  import XPathEvaluator.NodeOrAtomResult
+
   /**
    * XPath expression. Typically (but not necessarily) a "compiled" one.
    */
@@ -46,7 +48,7 @@ trait XPathEvaluator {
 
   def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[Any]): Node
 
-  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[Any]): immutable.IndexedSeq[Node]
+  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[Any]): immutable.IndexedSeq[NodeOrAtomResult]
 
   def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[Any]): BigDecimal
 
@@ -55,7 +57,17 @@ trait XPathEvaluator {
   def evaluateAsEName(expr: XPathExpression, contextItemOption: Option[Any]): EName
 
   /**
-   * Creates an XPathExpression from the given ScopedXPathString. Typically (but not necessarily) "compiles" the XPath string.
+   * Creates an XPathExpression from the given expression string. Typically (but not necessarily) "compiles" the XPath string.
+   * Make sure to pass only XPath strings for which all needed namespace bindings are known to the XPath evaluator.
    */
-  def toXPathExpression(scopedXPathString: ScopedXPathString): XPathExpression
+  def toXPathExpression(xPathString: String): XPathExpression
+}
+
+object XPathEvaluator {
+
+  sealed trait NodeOrAtomResult
+
+  final class NodeResult[N](node: N) extends NodeOrAtomResult
+
+  final class AtomResult(value: String) extends NodeOrAtomResult
 }
