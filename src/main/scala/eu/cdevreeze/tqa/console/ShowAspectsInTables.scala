@@ -114,7 +114,7 @@ object ShowAspectsInTables {
       logger.info(s"Analysing table with ID $tableId")
 
       sortedConcepts foreach { concept =>
-        logger.info(s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}). Concept in table: $concept}")
+        logger.info(s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tConcept in table: $concept}")
       }
     }
   }

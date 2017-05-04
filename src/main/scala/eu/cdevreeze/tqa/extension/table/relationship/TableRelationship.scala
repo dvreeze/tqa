@@ -232,8 +232,8 @@ object TableRelationship {
    * Lenient method to optionally create a TableRelationship from an underlying tqa.relationship.StandardRelationship.
    */
   def opt(underlyingRelationship: NonStandardRelationship): Option[TableRelationship] = {
-    if (!underlyingRelationship.resolvedFrom.isInstanceOf[XLinkResource] ||
-      !underlyingRelationship.resolvedTo.isInstanceOf[XLinkResource]) {
+    if (!underlyingRelationship.resolvedFrom.resolvedElem.isInstanceOf[XLinkResource] ||
+      !underlyingRelationship.resolvedTo.resolvedElem.isInstanceOf[XLinkResource]) {
 
       None
     } else {
