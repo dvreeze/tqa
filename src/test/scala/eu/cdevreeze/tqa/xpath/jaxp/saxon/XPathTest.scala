@@ -34,6 +34,7 @@ import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import javax.xml.xpath.XPathFunction
 import javax.xml.xpath.XPathFunctionResolver
+import javax.xml.xpath.XPathVariableResolver
 import net.sf.saxon.om.NodeInfo
 import net.sf.saxon.s9api.Processor
 
@@ -48,6 +49,7 @@ class XPathTest extends FunSuite {
   private val processor = new Processor(false)
 
   private val MyFuncNamespace = "http://example.com/xbrl-xpath-functions"
+  private val MyVarNamespace = "http://example.com/xbrl-xpath-variables"
 
   private val rootDir = new File(classOf[XPathTest].getResource("/taxonomies").toURI)
 
@@ -62,7 +64,8 @@ class XPathTest extends FunSuite {
     JaxpXPathEvaluatorUsingSaxon.createXPathEvaluator(
       processor.getUnderlyingConfiguration,
       rootElem.docUri,
-      rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope ++ Scope.from("myfun" -> MyFuncNamespace),
+      rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope ++
+        Scope.from("myfun" -> MyFuncNamespace, "myvar" -> MyVarNamespace),
       new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
 
   xpathEvaluator.underlyingEvaluator.setXPathFunctionResolver(new XPathFunctionResolver {
@@ -72,6 +75,19 @@ class XPathTest extends FunSuite {
         new FindAllXbrliContexts
       } else {
         sys.error(s"Unknown function with name $functionName and arity $arity")
+      }
+    }
+  })
+
+  xpathEvaluator.underlyingEvaluator.setXPathVariableResolver(new XPathVariableResolver {
+
+    def resolveVariable(variableName: javax.xml.namespace.QName): AnyRef = {
+      if (variableName == EName("contextPosition").toJavaQName(None)) {
+        java.lang.Integer.valueOf(4)
+      } else if (variableName == EName(MyVarNamespace, "contextPosition").toJavaQName(None)) {
+        java.lang.Integer.valueOf(4)
+      } else {
+        sys.error(s"Unknown variable with name $variableName")
       }
     }
   })
@@ -223,6 +239,38 @@ class XPathTest extends FunSuite {
 
   test("testCustomFunction") {
     val exprString = "myfun:contexts(.)[4]"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsNode(expr, Some(rootElem.wrappedNode))
+
+    val resultElem = SaxonNode.wrapElement(result.asInstanceOf[NodeInfo])
+
+    assertResult(EName(Namespaces.XbrliNamespace, "context")) {
+      resultElem.resolvedName
+    }
+    assertResult(Some("I-2005")) {
+      resultElem.attributeOption(ENames.IdEName)
+    }
+  }
+
+  test("testCustomFunctionAndVariable") {
+    val exprString = "myfun:contexts(.)[$contextPosition]"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsNode(expr, Some(rootElem.wrappedNode))
+
+    val resultElem = SaxonNode.wrapElement(result.asInstanceOf[NodeInfo])
+
+    assertResult(EName(Namespaces.XbrliNamespace, "context")) {
+      resultElem.resolvedName
+    }
+    assertResult(Some("I-2005")) {
+      resultElem.attributeOption(ENames.IdEName)
+    }
+  }
+
+  test("testCustomFunctionAndPrefixedVariable") {
+    val exprString = "myfun:contexts(.)[$myvar:contextPosition]"
 
     val expr = xpathEvaluator.toXPathExpression(exprString)
     val result = xpathEvaluator.evaluateAsNode(expr, Some(rootElem.wrappedNode))
