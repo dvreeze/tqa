@@ -18,7 +18,6 @@ package eu.cdevreeze.tqa.xpath
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -28,11 +27,12 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * An XPath evaluator is needed as context when querying formula and table link content where XPath expressions are used.
  *
+ * This trait looks a bit like the JAXP `XPath` interface. Like the `XPath` interface, this trait does not support the
+ * XDM data types that succeeded XPath 1.0. In contrast to that interface, this trait is more Scala-esque and type-safe.
+ *
  * @author Chris de Vreeze
  */
 trait XPathEvaluator {
-
-  import XPathEvaluator.NodeOrAtomResult
 
   /**
    * XPath expression. Typically (but not necessarily) a "compiled" one.
@@ -49,11 +49,13 @@ trait XPathEvaluator {
    */
   type ContextItem
 
+  // TODO Simple XDM model, and evaluation methods that return XDM items.
+
   def evaluateAsString(expr: XPathExpression, contextItemOption: Option[ContextItem]): String
 
   def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[ContextItem]): Node
 
-  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[NodeOrAtomResult]
+  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[Node]
 
   def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[ContextItem]): BigDecimal
 
@@ -75,15 +77,4 @@ object XPathEvaluator {
     type Node = N
     type ContextItem = C
   }
-
-  sealed trait NodeOrAtomResult {
-
-    def asNodeResult[N]: NodeResult[N] = asInstanceOf[NodeResult[N]]
-
-    def asAtomResult: AtomResult = asInstanceOf[AtomResult]
-  }
-
-  final class NodeResult[N](val node: N) extends NodeOrAtomResult
-
-  final class AtomResult(val value: String) extends NodeOrAtomResult
 }

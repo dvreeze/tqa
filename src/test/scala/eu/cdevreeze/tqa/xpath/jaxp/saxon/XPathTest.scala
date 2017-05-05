@@ -177,7 +177,7 @@ class XPathTest extends FunSuite {
 
     // Use yaidom query API on results
 
-    val resultElems = result.map(e => e.asNodeResult[NodeInfo].node).map(e => SaxonNode.wrapElement(e))
+    val resultElems = result.map(e => SaxonNode.wrapElement(e))
 
     assertResult(true) {
       val someDimQNames =

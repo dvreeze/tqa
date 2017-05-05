@@ -84,7 +84,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
-  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[XPathEvaluator.NodeOrAtomResult] = {
+  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[Node] = {
     require(!contextItemOption.contains(null), s"Null context not allowed. Use empty Option instead.")
 
     transformXPathException {
@@ -96,12 +96,9 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
           // This is very sensitive (and undoubtedly incomplete) code!
           results.asScala.toIndexedSeq map { retVal =>
             retVal match {
-              case n: NodeInfo =>
-                new XPathEvaluator.NodeResult(n)
-              case v: AtomicValue =>
-                new XPathEvaluator.AtomResult(v.getStringValue)
-              case v =>
-                new XPathEvaluator.AtomResult(v.toString)
+              case n: NodeInfo    => n
+              case v: AtomicValue => sys.error(s"Atomic values as results are not supported by this method.")
+              case v              => sys.error(s"Values of type ${v.getClass} as results are not supported by this method.")
             }
           }
         case _ =>
