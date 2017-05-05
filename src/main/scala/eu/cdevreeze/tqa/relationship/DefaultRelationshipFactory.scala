@@ -164,7 +164,8 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     taxonomyBase: TaxonomyBase): Option[ResolvedLocatorOrResource[_ <: TaxonomyElem]] = {
 
     xlink match {
-      case res: XLinkResource => Some(new ResolvedResource(res))
+      case res: XLinkResource =>
+        Some(new ResolvedLocatorOrResource.Resource(res))
       case loc: XLinkLocator =>
         val elemUri = loc.baseUri.resolve(loc.rawHref)
 
@@ -175,7 +176,7 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
               if (config.allowWrongXPointer) None else sys.error(s"Error in URI '${elemUri}'")
           }
 
-        val optResolvedLoc = optTaxoElem.map(e => new ResolvedLocator(loc, e))
+        val optResolvedLoc = optTaxoElem.map(e => new ResolvedLocatorOrResource.Locator(loc, e))
 
         if (config.allowUnresolvedLocator) {
           optResolvedLoc
