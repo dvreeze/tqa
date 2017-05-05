@@ -31,6 +31,9 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonNode
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
+import javax.xml.xpath.XPathFunction
+import javax.xml.xpath.XPathFunctionResolver
 import net.sf.saxon.om.NodeInfo
 import net.sf.saxon.s9api.Processor
 
@@ -43,6 +46,8 @@ import net.sf.saxon.s9api.Processor
 class XPathTest extends FunSuite {
 
   private val processor = new Processor(false)
+
+  private val MyFuncNamespace = "http://example.com/xbrl-xpath-functions"
 
   private val rootDir = new File(classOf[XPathTest].getResource("/taxonomies").toURI)
 
@@ -57,8 +62,19 @@ class XPathTest extends FunSuite {
     JaxpXPathEvaluatorUsingSaxon.createXPathEvaluator(
       processor.getUnderlyingConfiguration,
       rootElem.docUri,
-      rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
+      rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope ++ Scope.from("myfun" -> MyFuncNamespace),
       new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
+
+  xpathEvaluator.underlyingEvaluator.setXPathFunctionResolver(new XPathFunctionResolver {
+
+    def resolveFunction(functionName: javax.xml.namespace.QName, arity: Int): XPathFunction = {
+      if (arity == 1 && (functionName == EName(MyFuncNamespace, "contexts").toJavaQName(None))) {
+        new FindAllXbrliContexts
+      } else {
+        sys.error(s"Unknown function with name $functionName and arity $arity")
+      }
+    }
+  })
 
   test("testSimpleStringXPathWithoutContextItem") {
     val exprString = "string(count((1, 2, 3, 4, 5)))"
@@ -202,6 +218,22 @@ class XPathTest extends FunSuite {
     assertResult(Some("urn:kvk:linkrole:balance-sheet-education")) {
       // Getting parent element, to make the example more exciting
       resultElem.parent.attributeOption(ENames.XLinkRoleEName)
+    }
+  }
+
+  test("testCustomFunction") {
+    val exprString = "myfun:contexts(.)[4]"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsNode(expr, Some(rootElem.wrappedNode))
+
+    val resultElem = SaxonNode.wrapElement(result.asInstanceOf[NodeInfo])
+
+    assertResult(EName(Namespaces.XbrliNamespace, "context")) {
+      resultElem.resolvedName
+    }
+    assertResult(Some("I-2005")) {
+      resultElem.attributeOption(ENames.IdEName)
     }
   }
 

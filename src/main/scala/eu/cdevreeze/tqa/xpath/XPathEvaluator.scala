@@ -44,17 +44,22 @@ trait XPathEvaluator {
    */
   type Node
 
-  def evaluateAsString(expr: XPathExpression, contextItemOption: Option[Any]): String
+  /**
+   * The context item type.
+   */
+  type ContextItem
 
-  def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[Any]): Node
+  def evaluateAsString(expr: XPathExpression, contextItemOption: Option[ContextItem]): String
 
-  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[Any]): immutable.IndexedSeq[NodeOrAtomResult]
+  def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[ContextItem]): Node
 
-  def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[Any]): BigDecimal
+  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[NodeOrAtomResult]
 
-  def evaluateAsBoolean(expr: XPathExpression, contextItemOption: Option[Any]): Boolean
+  def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[ContextItem]): BigDecimal
 
-  def evaluateAsEName(expr: XPathExpression, contextItemOption: Option[Any]): EName
+  def evaluateAsBoolean(expr: XPathExpression, contextItemOption: Option[ContextItem]): Boolean
+
+  def evaluateAsEName(expr: XPathExpression, contextItemOption: Option[ContextItem]): EName
 
   /**
    * Creates an XPathExpression from the given expression string. Typically (but not necessarily) "compiles" the XPath string.
@@ -64,6 +69,12 @@ trait XPathEvaluator {
 }
 
 object XPathEvaluator {
+
+  type Aux[E, N, C] = XPathEvaluator {
+    type XPathExpression = E
+    type Node = N
+    type ContextItem = C
+  }
 
   sealed trait NodeOrAtomResult {
 

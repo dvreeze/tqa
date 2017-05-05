@@ -65,7 +65,9 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
 
   type Node = NodeInfo
 
-  def evaluateAsString(expr: XPathExpression, contextItemOption: Option[Any]): String = {
+  type ContextItem = NodeInfo
+
+  def evaluateAsString(expr: XPathExpression, contextItemOption: Option[ContextItem]): String = {
     require(!contextItemOption.contains(null), s"Null context not allowed. Use empty Option instead.")
 
     transformXPathException {
@@ -73,7 +75,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
-  def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[Any]): Node = {
+  def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[ContextItem]): Node = {
     require(!contextItemOption.contains(null), s"Null context not allowed. Use empty Option instead.")
 
     transformXPathException {
@@ -82,7 +84,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
-  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[Any]): immutable.IndexedSeq[XPathEvaluator.NodeOrAtomResult] = {
+  def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[XPathEvaluator.NodeOrAtomResult] = {
     require(!contextItemOption.contains(null), s"Null context not allowed. Use empty Option instead.")
 
     transformXPathException {
@@ -90,8 +92,6 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
 
       // See http://saxonica.com/html/documentation/xpath-api/jaxp-xpath/return-types.html.
       result match {
-        case results: org.w3c.dom.NodeList =>
-          sys.error(s"Unsupported result type: ${result.getClass}. Only java.util.List is supported (we do not allow org.w3c.dom.NodeList).")
         case results: java.util.List[_] =>
           // This is very sensitive (and undoubtedly incomplete) code!
           results.asScala.toIndexedSeq map { retVal =>
@@ -110,7 +110,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
-  def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[Any]): BigDecimal = {
+  def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[ContextItem]): BigDecimal = {
     require(!contextItemOption.contains(null), s"Null context not allowed. Use empty Option instead.")
 
     transformXPathException {
@@ -119,7 +119,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
-  def evaluateAsBoolean(expr: XPathExpression, contextItemOption: Option[Any]): Boolean = {
+  def evaluateAsBoolean(expr: XPathExpression, contextItemOption: Option[ContextItem]): Boolean = {
     require(!contextItemOption.contains(null), s"Null context not allowed. Use empty Option instead.")
 
     transformXPathException {
@@ -128,7 +128,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
-  def evaluateAsEName(expr: XPathExpression, contextItemOption: Option[Any]): EName = {
+  def evaluateAsEName(expr: XPathExpression, contextItemOption: Option[ContextItem]): EName = {
     transformXPathException {
       val stringResult = evaluateAsString(expr, contextItemOption)
 
@@ -174,7 +174,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
   /**
    * Turns an absent item into an "empty" item that Saxon can handle.
    */
-  private def adaptNoneContextItem(itemOption: Option[Any]): Any = {
+  private def adaptNoneContextItem(itemOption: Option[ContextItem]): ContextItem = {
     if (itemOption.isEmpty) {
       // This seems to be a hack, but how can we otherwise create an empty sequence that is accepted as context item?
       val result = new DocumentImpl
@@ -212,12 +212,14 @@ object JaxpXPathEvaluatorUsingSaxon {
     config: Configuration,
     docUri: URI,
     scope: Scope,
-    uriResolver: URIResolver): XPathEvaluator = {
+    uriResolver: URIResolver): JaxpXPathEvaluatorUsingSaxon = {
 
     config.setURIResolver(uriResolver)
 
     // Saxon XPathFactory
     val xpathEvaluatorFactory = new net.sf.saxon.xpath.XPathFactoryImpl(config)
+
+    // TODO Support registering functions (and variables)
 
     val xpathEvaluator = xpathEvaluatorFactory.newXPath().asInstanceOf[net.sf.saxon.xpath.XPathEvaluator]
 
