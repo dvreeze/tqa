@@ -34,7 +34,6 @@ import javax.xml.transform.URIResolver
 import javax.xml.xpath
 import javax.xml.xpath.XPathConstants
 import net.sf.saxon
-import net.sf.saxon.Configuration
 import net.sf.saxon.event.Builder
 import net.sf.saxon.om.NamespaceResolver
 import net.sf.saxon.om.NodeInfo
@@ -197,7 +196,7 @@ object JaxpXPathEvaluatorUsingSaxon {
   }
 
   /**
-   * Creates an XPathEvaluator from the provided Saxon Configuration, document URI, scope and document builder.
+   * Creates an XPathEvaluator from the provided JaxpXPathEvaluatorFactoryUsingSaxon, document URI, scope and document builder.
    *
    * The scope is typically the scope of the root element of the document whose URI is provided, enhanced with the
    * minimal scope (for XPath evaluation).
@@ -205,30 +204,29 @@ object JaxpXPathEvaluatorUsingSaxon {
    * The URIResolver should build Saxon tiny trees using the same Configuration as the one passed as the first
    * parameter. Consider passing a SimpleUriResolver.
    */
-  def createXPathEvaluator(
-    config: Configuration,
+  def newInstance(
+    xpathEvaluatorFactory: JaxpXPathEvaluatorFactoryUsingSaxon,
     docUri: URI,
     scope: Scope,
     uriResolver: URIResolver): JaxpXPathEvaluatorUsingSaxon = {
 
+    val config = xpathEvaluatorFactory.config
     config.setURIResolver(uriResolver)
 
-    // Saxon XPathFactory
-    val xpathEvaluatorFactory = new net.sf.saxon.xpath.XPathFactoryImpl(config)
+    val saxonXPathEvaluatorFactory = xpathEvaluatorFactory.underlyingEvaluatorFactory
 
-    // TODO Support registering functions (and variables)
-
-    val xpathEvaluator = xpathEvaluatorFactory.newXPath().asInstanceOf[net.sf.saxon.xpath.XPathEvaluator]
+    val saxonXPathEvaluator =
+      saxonXPathEvaluatorFactory.newXPath().asInstanceOf[net.sf.saxon.xpath.XPathEvaluator]
 
     // Just passing scope.toNamespaceContext will lead to an UnsupportedOperationException in
     // net.sf.saxon.xpath.JAXPXPathStaticContext.iteratePrefixes later on. Hence we create a Saxon NamespaceResolver
     // and turn that into a JAXP NamespaceContext that is also a Saxon NamespaceResolver.
 
-    xpathEvaluator.setNamespaceContext(new NamespaceContextImpl(makeSaxonNamespaceResolver(scope)))
+    saxonXPathEvaluator.setNamespaceContext(new NamespaceContextImpl(makeSaxonNamespaceResolver(scope)))
 
-    xpathEvaluator.getStaticContext().setBaseURI(docUri.toString)
+    saxonXPathEvaluator.getStaticContext().setBaseURI(docUri.toString)
 
-    new JaxpXPathEvaluatorUsingSaxon(xpathEvaluator).ensuring(_.underlyingEvaluator.getConfiguration == config)
+    new JaxpXPathEvaluatorUsingSaxon(saxonXPathEvaluator).ensuring(_.underlyingEvaluator.getConfiguration == config)
   }
 
   /**

@@ -60,15 +60,10 @@ class XPathTest extends FunSuite {
 
   private val rootElem: SaxonElem = docBuilder.build(docUri)
 
-  private val xpathEvaluator =
-    JaxpXPathEvaluatorUsingSaxon.createXPathEvaluator(
-      processor.getUnderlyingConfiguration,
-      rootElem.docUri,
-      rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope ++
-        Scope.from("myfun" -> MyFuncNamespace, "myvar" -> MyVarNamespace),
-      new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
+  private val xpathEvaluatorFactory =
+    JaxpXPathEvaluatorFactoryUsingSaxon.newInstance(processor.getUnderlyingConfiguration)
 
-  xpathEvaluator.underlyingEvaluator.setXPathFunctionResolver(new XPathFunctionResolver {
+  xpathEvaluatorFactory.underlyingEvaluatorFactory.setXPathFunctionResolver(new XPathFunctionResolver {
 
     def resolveFunction(functionName: javax.xml.namespace.QName, arity: Int): XPathFunction = {
       if (arity == 1 && (functionName == EName(MyFuncNamespace, "contexts").toJavaQName(None))) {
@@ -79,7 +74,7 @@ class XPathTest extends FunSuite {
     }
   })
 
-  xpathEvaluator.underlyingEvaluator.setXPathVariableResolver(new XPathVariableResolver {
+  xpathEvaluatorFactory.underlyingEvaluatorFactory.setXPathVariableResolver(new XPathVariableResolver {
 
     def resolveVariable(variableName: javax.xml.namespace.QName): AnyRef = {
       if (variableName == EName("contextPosition").toJavaQName(None)) {
@@ -91,6 +86,14 @@ class XPathTest extends FunSuite {
       }
     }
   })
+
+  private val xpathEvaluator =
+    JaxpXPathEvaluatorUsingSaxon.newInstance(
+      xpathEvaluatorFactory,
+      rootElem.docUri,
+      rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope ++
+        Scope.from("myfun" -> MyFuncNamespace, "myvar" -> MyVarNamespace),
+      new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
 
   test("testSimpleStringXPathWithoutContextItem") {
     val exprString = "string(count((1, 2, 3, 4, 5)))"

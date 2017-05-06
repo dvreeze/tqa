@@ -28,7 +28,7 @@ import eu.cdevreeze.yaidom.core.EName
  * An XPath evaluator is needed as context when querying formula and table link content where XPath expressions are used.
  *
  * This trait looks a bit like the JAXP `XPath` interface. Like the `XPath` interface, this trait does not support the
- * XDM data types that succeeded XPath 1.0. In contrast to that interface, this trait is more Scala-esque and type-safe.
+ * XDM data types that succeeded XPath 1.0. In contrast to the JAXP `XPath` interface, this trait is more Scala-esque and type-safe.
  *
  * @author Chris de Vreeze
  */

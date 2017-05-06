@@ -42,6 +42,7 @@ import eu.cdevreeze.tqa.richtaxonomy.ConceptRelationshipNodeData
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
+import eu.cdevreeze.tqa.xpath.jaxp.saxon.JaxpXPathEvaluatorFactoryUsingSaxon
 import eu.cdevreeze.tqa.xpath.jaxp.saxon.JaxpXPathEvaluatorUsingSaxon
 import eu.cdevreeze.tqa.xpath.jaxp.saxon.SimpleUriResolver
 import eu.cdevreeze.yaidom.core.EName
@@ -120,8 +121,13 @@ object ShowAspectsInTables {
   }
 
   def makeXPathEvaluator(docUri: URI, scope: Scope, localRootDir: File): XPathEvaluator = {
-    JaxpXPathEvaluatorUsingSaxon.createXPathEvaluator(
-      processor.getUnderlyingConfiguration,
+    val factory =
+      JaxpXPathEvaluatorFactoryUsingSaxon.newInstance(processor.getUnderlyingConfiguration)
+
+    // TODO Register variables and functions
+
+    JaxpXPathEvaluatorUsingSaxon.newInstance(
+      factory,
       docUri,
       scope,
       new SimpleUriResolver(u => uriToLocalUri(u, localRootDir)))
