@@ -303,6 +303,8 @@ final class AspectNode(underlyingResource: tqa.dom.NonStandardResource) extends 
   }
 }
 
+// Companion objects
+
 object TableResource {
 
   /**
