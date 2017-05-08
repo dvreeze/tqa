@@ -146,6 +146,10 @@ final class RuleNode(underlyingResource: tqa.dom.NonStandardResource) extends Cl
     findAllNonXLinkChildElemsOfType(classTag[FormulaAspect])
   }
 
+  def allAspects: immutable.IndexedSeq[FormulaAspect] = {
+    untaggedAspects ++ (ruleSets.flatMap(_.aspects))
+  }
+
   def findAllUntaggedAspectsOfType[A <: FormulaAspect](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
     implicit val clsTag = cls
     untaggedAspects collect { case asp: A => asp }

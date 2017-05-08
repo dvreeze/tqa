@@ -33,6 +33,9 @@ import eu.cdevreeze.tqa.xlink.XLinkResource
 /**
  * Purely abstract trait offering a table relationship query API.
  *
+ * DefinitionNodeSubtreeRelationship trees are not supported directly. One has to recursively query for such relationships
+ * in order to obtain trees of them.
+ *
  * Implementations should make sure that looking up relationships by source resource is fast.
  *
  * Implementations may be strict or lenient in enforced requirements on the relationship container.

@@ -45,4 +45,10 @@ object Aspect {
 
   val WellKnownAspects: Set[Aspect] =
     Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, SegmentOccAspect, ScenarioOccAspect)
+
+  val RequiredItemAspects: Set[Aspect] =
+    Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect)
+
+  val RequiredNumericItemAspects: Set[Aspect] =
+    RequiredItemAspects.union(Set(UnitAspect))
 }

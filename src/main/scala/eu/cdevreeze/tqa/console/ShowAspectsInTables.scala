@@ -35,6 +35,7 @@ import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
+import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelationship
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
@@ -110,10 +111,18 @@ object ShowAspectsInTables {
           table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
           rootDir)
 
+      logger.info(s"Analysing table with ID $tableId (${table.underlyingResource.docUri})")
+
+      val aspectsInTable = findAllTouchedAspects(table, tableTaxo)
+
+      logger.info(s"Aspects in table with ID $tableId\n\t ${aspectsInTable.toSeq.sortBy(_.toString).mkString(", ")}")
+
+      Aspect.RequiredItemAspects.diff(Set(Aspect.EntityIdentifierAspect)).diff(aspectsInTable) foreach { aspect =>
+        logger.warning(s"Table with ID $tableId misses required item aspect (other than EntityIdentifierAspect): $aspect")
+      }
+
       val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
       val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
-
-      logger.info(s"Analysing table with ID $tableId")
 
       sortedConcepts foreach { concept =>
         logger.info(s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tConcept in table: $concept")
@@ -233,7 +242,7 @@ object ShowAspectsInTables {
     if (treeWalkSpec.includeSelf) resultIncludingStartConcept else resultIncludingStartConcept.diff(Set(treeWalkSpec.startConcept))
   }
 
-  def findAllAspects(table: Table, taxo: BasicTableTaxonomy): Set[Aspect] = {
+  def findAllTouchedAspects(table: Table, taxo: BasicTableTaxonomy): Set[Aspect] = {
     val nodes = findAllNodes(table, taxo)
     nodes.flatMap(node => findAllAspects(node)).toSet
   }
@@ -241,10 +250,12 @@ object ShowAspectsInTables {
   def findAllNodes(table: Table, taxo: BasicTableTaxonomy): immutable.IndexedSeq[DefinitionNode] = {
     // Naive implementation
 
+    val elr = table.elr
+
     val breakdownTreeRels =
       for {
-        tableBreakdownRel <- taxo.findAllOutgoingTableBreakdownRelationships(table)
-        breakdownTreeRel <- taxo.findAllOutgoingBreakdownTreeRelationships(tableBreakdownRel.breakdown)
+        tableBreakdownRel <- taxo.filterOutgoingTableBreakdownRelationships(table)(_.elr == elr)
+        breakdownTreeRel <- taxo.filterOutgoingBreakdownTreeRelationships(tableBreakdownRel.breakdown)(_.elr == elr)
       } yield {
         breakdownTreeRel
       }
@@ -252,7 +263,8 @@ object ShowAspectsInTables {
     val nodeSubtreeRels =
       for {
         breakdownTreeRel <- breakdownTreeRels
-        nodeSubtreeRel <- taxo.findAllOutgoingDefinitionNodeSubtreeRelationships(breakdownTreeRel.definitionNode)
+        directNodeSubtreeRel <- taxo.filterOutgoingDefinitionNodeSubtreeRelationships(breakdownTreeRel.definitionNode)(_.elr == elr)
+        nodeSubtreeRel <- findAllDefinitionNodeSubtreeRelationships(directNodeSubtreeRel, taxo)
       } yield {
         nodeSubtreeRel
       }
@@ -261,10 +273,21 @@ object ShowAspectsInTables {
     nodes
   }
 
+  def findAllDefinitionNodeSubtreeRelationships(
+    relationship: DefinitionNodeSubtreeRelationship,
+    taxo: BasicTableTaxonomy): immutable.IndexedSeq[DefinitionNodeSubtreeRelationship] = {
+
+    val nextRelationships =
+      taxo.filterOutgoingDefinitionNodeSubtreeRelationships(relationship.toNode)(_.elr == relationship.elr)
+
+    // Recursive calls
+    relationship +: (nextRelationships.flatMap(rel => findAllDefinitionNodeSubtreeRelationships(rel, taxo)))
+  }
+
   def findAllAspects(node: DefinitionNode): Set[Aspect] = {
     node match {
       case node: RuleNode =>
-        findAllAspectsInRuleNode(node)
+        node.allAspects.map(_.aspect).toSet
       case node: ConceptRelationshipNode =>
         Set(Aspect.ConceptAspect)
       case node: DimensionRelationshipNode =>
@@ -274,20 +297,9 @@ object ShowAspectsInTables {
     }
   }
 
-  def findAllAspects(taxo: TaxonomyApi): Set[Aspect] = {
-    val dimensionAspects: Set[Aspect] = findAllDimensionAspects(taxo) collect { case aspect: Aspect => aspect }
-
-    Aspect.WellKnownAspects.union(dimensionAspects)
-  }
-
   def findAllDimensionAspects(taxo: TaxonomyApi): Set[Aspect.DimensionAspect] = {
     // Are relationships and ELRs important here?
     taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
-  }
-
-  private def findAllAspectsInRuleNode(node: RuleNode): Set[Aspect] = {
-    // TODO Tagged aspects. How to deal with tagged aspects?
-    node.untaggedAspects.map(_.aspect).toSet
   }
 
   private def uriToLocalUri(uri: URI, rootDir: File): URI = {
