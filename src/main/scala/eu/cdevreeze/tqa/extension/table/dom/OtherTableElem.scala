@@ -34,7 +34,7 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
+sealed trait OtherTableElem extends OtherTableOrFormulaElem {
 
   def underlyingElem: tqa.dom.OtherElem
 
@@ -46,16 +46,16 @@ sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
       s"Expected $ename but found ${underlyingElem.resolvedName} in ${underlyingElem.docUri}")
   }
 
-  protected[dom] def filterNonXLinkChildElemsOfType[A <: OtherTableElem](
+  protected[dom] def filterNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
     cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = cls
 
     underlyingElem.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
-      flatMap(e => OtherTableElem.opt(e)) collect { case e: A if p(e) => e }
+      flatMap(e => OtherTableElem.opt(e).orElse(OtherFormulaElem.opt(e))) collect { case e: A if p(e) => e }
   }
 
-  protected[dom] def findAllNonXLinkChildElemsOfType[A <: OtherTableElem](
+  protected[dom] def findAllNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
     cls: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterNonXLinkChildElemsOfType(cls)(_ => true)

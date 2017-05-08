@@ -364,4 +364,7 @@ object ENames {
   val MinimumEName = EName("minimum")
   val WeightEName = EName("weight")
   val CyclesAllowedEName = EName("cyclesAllowed")
+  val StartEName = EName("start")
+  val EndEName = EName("end")
+  val MeasureEName = EName("measure")
 }

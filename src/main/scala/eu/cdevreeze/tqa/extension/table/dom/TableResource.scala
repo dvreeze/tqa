@@ -60,16 +60,16 @@ sealed trait TableResource extends tqa.dom.AnyTaxonomyElem with XLinkResource {
       s"Expected $ename but found ${underlyingResource.resolvedName} in ${underlyingResource.docUri}")
   }
 
-  protected[dom] def filterNonXLinkChildElemsOfType[A <: OtherTableElem](
+  protected[dom] def filterNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
     cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = cls
 
     underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
-      flatMap(e => OtherTableElem.opt(e)) collect { case e: A if p(e) => e }
+      flatMap(e => OtherTableElem.opt(e).orElse(OtherFormulaElem.opt(e))) collect { case e: A if p(e) => e }
   }
 
-  protected[dom] def findAllNonXLinkChildElemsOfType[A <: OtherTableElem](
+  protected[dom] def findAllNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
     cls: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterNonXLinkChildElemsOfType(cls)(_ => true)
