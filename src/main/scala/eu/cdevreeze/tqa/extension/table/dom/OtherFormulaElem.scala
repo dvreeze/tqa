@@ -21,6 +21,7 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
+import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
@@ -75,6 +76,11 @@ sealed abstract class FormulaAspect(val underlyingElem: tqa.dom.OtherElem) exten
     val scope = underlyingElem.scope.withoutDefaultNamespace
     underlyingElem.attributeAsQNameOption(ENames.SourceEName).map(qn => scope.resolveQNameOption(qn).get)
   }
+
+  /**
+   * Returns the aspect value.
+   */
+  def aspect: Aspect
 }
 
 /**
@@ -82,6 +88,8 @@ sealed abstract class FormulaAspect(val underlyingElem: tqa.dom.OtherElem) exten
  */
 final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaConceptEName)
+
+  def aspect: Aspect = Aspect.ConceptAspect
 
   def qnameElemOption: Option[QNameElem] = {
     findAllNonXLinkChildElemsOfType(classTag[QNameElem]).headOption
@@ -98,6 +106,8 @@ final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspe
 final class EntityIdentifierAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaEntityIdentifierEName)
 
+  def aspect: Aspect = Aspect.EntityIdentifierAspect
+
   def schemeExprOption: Option[ScopedXPathString] = {
     underlyingElem.attributeOption(ENames.SchemeEName).map(v => ScopedXPathString(v, underlyingElem.scope))
   }
@@ -112,6 +122,8 @@ final class EntityIdentifierAspect(underlyingElem: tqa.dom.OtherElem) extends Fo
  */
 final class PeriodAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaPeriodEName)
+
+  def aspect: Aspect = Aspect.PeriodAspect
 
   def foreverElemOption: Option[ForeverElem] = {
     findAllNonXLinkChildElemsOfType(classTag[ForeverElem]).headOption
@@ -131,6 +143,8 @@ final class PeriodAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspec
  */
 final class UnitAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaUnitEName)
+
+  def aspect: Aspect = Aspect.UnitAspect
 
   def multiplyByElems: immutable.IndexedSeq[MultiplyByElem] = {
     findAllNonXLinkChildElemsOfType(classTag[MultiplyByElem])
@@ -152,6 +166,11 @@ final class UnitAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(
  * An OCC aspect.
  */
 sealed abstract class OccAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+
+  final def aspect: Aspect.OccAspect = occ match {
+    case Occ.Segment  => Aspect.SegmentOccAspect
+    case Occ.Scenario => Aspect.ScenarioOccAspect
+  }
 
   /**
    * Returns the occ attribute as Occ. This may fail with an exception if the taxonomy is not schema-valid.
@@ -190,6 +209,8 @@ final class OccXpathAspect(underlyingElem: tqa.dom.OtherElem) extends OccAspect(
  * A dimension aspect.
  */
 sealed abstract class DimensionAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+
+  final def aspect: Aspect.DimensionAspect = Aspect.DimensionAspect(dimension)
 
   /**
    * Returns the dimension attribute as EName. This may fail with an exception if the taxonomy is not schema-valid.

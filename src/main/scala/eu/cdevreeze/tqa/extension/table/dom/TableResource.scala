@@ -142,15 +142,22 @@ sealed abstract class OpenDefinitionNode(underlyingResource: tqa.dom.NonStandard
 final class RuleNode(underlyingResource: tqa.dom.NonStandardResource) extends ClosedDefinitionNode(underlyingResource) {
   requireResolvedName(ENames.TableRuleNodeEName)
 
-  // TODO Model formula aspects.
-  def untaggedAspects: immutable.IndexedSeq[tqa.dom.OtherElem] = {
-    underlyingResource.filterChildElemsOfType(classTag[tqa.dom.OtherElem]) { e =>
-      e.resolvedName.namespaceUriOption.contains(Namespaces.FormulaNamespace) &&
-        TableResource.FormulaAspectENames.contains(e.resolvedName)
-    }
+  def untaggedAspects: immutable.IndexedSeq[FormulaAspect] = {
+    findAllNonXLinkChildElemsOfType(classTag[FormulaAspect])
   }
 
-  // TODO Methods like findAllUntaggedAspectsOfType and allAspectsByTagOption
+  def findAllUntaggedAspectsOfType[A <: FormulaAspect](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
+    implicit val clsTag = cls
+    untaggedAspects collect { case asp: A => asp }
+  }
+
+  def allAspectsByTagOption: Map[Option[String], immutable.IndexedSeq[FormulaAspect]] = {
+    val taggedAspects: immutable.IndexedSeq[(FormulaAspect, Option[String])] =
+      untaggedAspects.map(aspect => (aspect, None)) ++
+        ruleSets.flatMap(ruleSet => ruleSet.aspects.map(aspect => (aspect, Some(ruleSet.tag))))
+
+    taggedAspects.groupBy({ case (aspect, tagOption) => tagOption }).mapValues(taggedAspects => taggedAspects.map(_._1))
+  }
 
   def ruleSets: immutable.IndexedSeq[RuleSet] = {
     findAllNonXLinkChildElemsOfType(classTag[RuleSet])
@@ -325,15 +332,4 @@ object TableResource {
       None
     }
   }
-
-  private[dom] val FormulaAspectENames = Set[EName](
-    ENames.FormulaConceptEName,
-    ENames.FormulaEntityIdentifierEName,
-    ENames.FormulaPeriodEName,
-    ENames.FormulaUnitEName,
-    ENames.FormulaOccEmptyEName,
-    ENames.FormulaOccFragmentsEName,
-    ENames.FormulaOccXpathEName,
-    ENames.FormulaExplicitDimensionEName,
-    ENames.FormulaTypedDimensionEName)
 }

@@ -35,7 +35,14 @@ object Aspect {
 
   case object UnitAspect extends Aspect
 
+  sealed trait OccAspect extends Aspect
+
+  case object SegmentOccAspect extends OccAspect
+
+  case object ScenarioOccAspect extends OccAspect
+
   final case class DimensionAspect(dimension: EName) extends Aspect
 
-  val WellKnownAspects: Set[Aspect] = Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect)
+  val WellKnownAspects: Set[Aspect] =
+    Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, SegmentOccAspect, ScenarioOccAspect)
 }

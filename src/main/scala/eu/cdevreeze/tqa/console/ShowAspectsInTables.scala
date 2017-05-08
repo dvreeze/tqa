@@ -32,6 +32,7 @@ import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
+import eu.cdevreeze.tqa.extension.table.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
@@ -286,19 +287,7 @@ object ShowAspectsInTables {
 
   private def findAllAspectsInRuleNode(node: RuleNode): Set[Aspect] = {
     // TODO Tagged aspects. How to deal with tagged aspects?
-    node.untaggedAspects.flatMap(e => toAspectOption(e)).toSet
-  }
-
-  private def toAspectOption(formulaAspect: tqa.dom.OtherElem): Option[Aspect] = formulaAspect.resolvedName match {
-    case ENames.FormulaConceptEName          => Some(Aspect.ConceptAspect)
-    case ENames.FormulaEntityIdentifierEName => Some(Aspect.EntityIdentifierAspect)
-    case ENames.FormulaPeriodEName           => Some(Aspect.PeriodAspect)
-    case ENames.FormulaUnitEName             => Some(Aspect.UnitAspect)
-    case ENames.FormulaExplicitDimensionEName =>
-      Some(Aspect.DimensionAspect(formulaAspect.attributeAsResolvedQName(ENames.DimensionEName)))
-    case ENames.FormulaTypedDimensionEName =>
-      Some(Aspect.DimensionAspect(formulaAspect.attributeAsResolvedQName(ENames.DimensionEName)))
-    case _ => None
+    node.untaggedAspects.map(_.aspect).toSet
   }
 
   private def uriToLocalUri(uri: URI, rootDir: File): URI = {

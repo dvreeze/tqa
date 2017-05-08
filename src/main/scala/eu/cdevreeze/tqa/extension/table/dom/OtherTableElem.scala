@@ -137,15 +137,14 @@ final class DimensionAspectSpec(underlyingElem: tqa.dom.OtherElem) extends Aspec
 final class RuleSet(val underlyingElem: tqa.dom.OtherElem) extends OtherTableElem {
   requireResolvedName(ENames.TableRuleSetEName)
 
-  // TODO Model formula aspects.
-  def aspects: immutable.IndexedSeq[tqa.dom.OtherElem] = {
-    underlyingElem.filterChildElemsOfType(classTag[tqa.dom.OtherElem]) { e =>
-      e.resolvedName.namespaceUriOption.contains(Namespaces.FormulaNamespace) &&
-        TableResource.FormulaAspectENames.contains(e.resolvedName)
-    }
+  def aspects: immutable.IndexedSeq[FormulaAspect] = {
+    findAllNonXLinkChildElemsOfType(classTag[FormulaAspect])
   }
 
-  // TODO Method findAllAspectsOfType
+  def findAllAspectsOfType[A <: FormulaAspect](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
+    implicit val clsTag = cls
+    aspects collect { case asp: A => asp }
+  }
 
   /**
    * Returns the tag attribute. This may fail with an exception if the taxonomy is not schema-valid.
@@ -424,17 +423,6 @@ object OtherTableElem {
       None
     }
   }
-
-  private[dom] val FormulaAspectENames = Set[EName](
-    ENames.FormulaConceptEName,
-    ENames.FormulaEntityIdentifierEName,
-    ENames.FormulaPeriodEName,
-    ENames.FormulaUnitEName,
-    ENames.FormulaOccEmptyEName,
-    ENames.FormulaOccFragmentsEName,
-    ENames.FormulaOccXpathEName,
-    ENames.FormulaExplicitDimensionEName,
-    ENames.FormulaTypedDimensionEName)
 }
 
 object ConceptRelationshipNodeFormulaAxis {
