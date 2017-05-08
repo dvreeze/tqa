@@ -23,16 +23,15 @@ import java.util.logging.Logger
 import scala.collection.immutable
 import scala.reflect.classTag
 
-import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
+import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
-import eu.cdevreeze.tqa.extension.table.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelationship
@@ -40,6 +39,7 @@ import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.richtaxonomy.ConceptAspectData
 import eu.cdevreeze.tqa.richtaxonomy.ConceptRelationshipNodeData
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
@@ -150,16 +150,29 @@ object ShowAspectsInTables {
   def findAllConceptsInTable(table: Table, taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
     val nodes = findAllNodes(table, taxo)
 
-    // TODO Rule nodes etc.
-
     val concepts: Seq[EName] =
       nodes flatMap {
         case node: ConceptRelationshipNode =>
           findAllConceptsInConceptRelationshipNode(node, taxo)(xpathEvaluator)
+        case node: RuleNode =>
+          findAllConceptsInRuleNode(node, taxo)(xpathEvaluator)
         case node =>
           Seq.empty
       }
 
+    concepts.toSet
+  }
+
+  def findAllConceptsInRuleNode(
+    ruleNode: RuleNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    val conceptAspectElems =
+      ruleNode.allAspects collect { case conceptAspect: ConceptAspect => conceptAspect }
+
+    val conceptAspectDataObjects = conceptAspectElems.map(e => new ConceptAspectData(e))
+
+    val concepts = conceptAspectDataObjects.flatMap(ca => ca.qnameValueOption)
     concepts.toSet
   }
 
