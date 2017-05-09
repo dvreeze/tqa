@@ -33,16 +33,23 @@ import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
+import eu.cdevreeze.tqa.extension.table.dom.ExplicitDimensionAspect
 import eu.cdevreeze.tqa.extension.table.dom.PeriodAspect
 import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelationship
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
+import eu.cdevreeze.tqa.queryapi.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
+import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
+import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.richtaxonomy.ConceptAspectData
 import eu.cdevreeze.tqa.richtaxonomy.ConceptRelationshipNodeData
+import eu.cdevreeze.tqa.richtaxonomy.DimensionRelationshipNodeData
+import eu.cdevreeze.tqa.richtaxonomy.ExplicitDimensionAspectData
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
@@ -265,6 +272,54 @@ object ShowAspectsInTables {
     if (treeWalkSpec.includeSelf) resultIncludingStartConcept else resultIncludingStartConcept.diff(Set(treeWalkSpec.startConcept))
   }
 
+  def findAllExplicitDimensionsInRuleNode(
+    ruleNode: RuleNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    val explicitDimensionAspectElems =
+      ruleNode.allAspects collect { case dimensionAspect: ExplicitDimensionAspect => dimensionAspect }
+
+    explicitDimensionAspectElems.map(_.dimension).toSet
+  }
+
+  def findAllExplicitDimensionMembersInRuleNode(
+    ruleNode: RuleNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Map[EName, EName] = {
+
+    val explicitDimensionAspectElems =
+      ruleNode.allAspects collect { case dimensionAspect: ExplicitDimensionAspect => dimensionAspect }
+
+    val explicitDimensionAspectDataObjects = explicitDimensionAspectElems.map(e => new ExplicitDimensionAspectData(e))
+
+    val dimensionMembers =
+      explicitDimensionAspectDataObjects.flatMap(da => da.memberOption(xpathEvaluator).map(m => da.dimensionName -> m))
+    dimensionMembers.toMap
+  }
+
+  /**
+   * Returns the descendant-or-self members in a dimension-member tree walk according to the parameter specification of the walk.
+   * If the start member must not be included, the tree walk finds descendant members instead of descendant-or-self members.
+   *
+   * It is assumed yet not checked that the tree walk corresponds to the given dimension.
+   *
+   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
+   */
+  def filterDescendantOrSelfMembers(
+    treeWalkSpec: DimensionMemberTreeWalkSpec,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    val relationshipPaths =
+      taxo.underlyingTaxonomy.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+        treeWalkSpec.startMember) { path =>
+          path.isElrValid &&
+            treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
+            treeWalkSpec.linkroleOption.forall(lr => treeWalkSpec.elrToCheck(path) == lr)
+        }
+
+    val resultIncludingStartMember = relationshipPaths.flatMap(_.concepts).toSet
+    if (treeWalkSpec.includeSelf) resultIncludingStartMember else resultIncludingStartMember.diff(Set(treeWalkSpec.startMember))
+  }
+
   /**
    * Returns all period types in rule nodes in the table.
    */
@@ -396,4 +451,32 @@ object ShowAspectsInTables {
     val arcroleOption: Option[String],
     val linknameOption: Option[String],
     val arcnameOption: Option[String])
+
+  /**
+   * Specification of a dimension member tree walk for some explicit dimension, starting with one member.
+   * The tree walk finds descendant-or-self members in the network, but if the start member must
+   * be excluded the tree walk only finds descendant members.
+   *
+   * The optional generations cannot contain 0. None means unbounded.
+   *
+   * The start relationship must be either a dimension-domain relationship for the given explicit dimension,
+   * or a domain-member relationship in the DRS of such a dimension-domain relationship. Otherwise this
+   * data is corrupt.
+   */
+  final case class DimensionMemberTreeWalkSpec(
+      val explicitDimension: EName,
+      val startRelationship: DomainAwareRelationship,
+      val includeSelf: Boolean,
+      val generationsOption: Option[Int],
+      val linkroleOption: Option[String]) {
+
+    def startMember: EName = startRelationship.targetConceptEName
+
+    def elrToCheck(path: InterConceptRelationshipPath[DomainMemberRelationship]): String = {
+      startRelationship match {
+        case rel: DimensionDomainRelationship => rel.elr
+        case rel                              => path.relationships.head.elr
+      }
+    }
+  }
 }
