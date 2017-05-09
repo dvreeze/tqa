@@ -73,7 +73,12 @@ sealed abstract class ConceptDeclaration private[dom] (val globalElementDeclarat
 /**
  * Item declaration. It must be in the xbrli:item substitution group, directly or indirectly.
  */
-sealed abstract class ItemDeclaration private[dom] (globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration)
+sealed abstract class ItemDeclaration private[dom] (globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration) {
+
+  final def periodType: PeriodType = {
+    globalElementDeclaration.periodTypeOption.getOrElse(sys.error(s"Missing xbrli:periodType attribute"))
+  }
+}
 
 /**
  * Tuple declaration. It must be in the xbrli:tuple substitution group, directly or indirectly.

@@ -26,6 +26,7 @@ import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.dom.PeriodType
 import eu.cdevreeze.yaidom.core.EName
 import javax.xml.bind.DatatypeConverter
 
@@ -135,6 +136,10 @@ final class PeriodAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspec
 
   def durationElemOption: Option[DurationElem] = {
     findAllNonXLinkChildElemsOfType(classTag[DurationElem]).headOption
+  }
+
+  def periodElems: immutable.IndexedSeq[PeriodElem] = {
+    findAllNonXLinkChildElemsOfType(classTag[PeriodElem])
   }
 }
 
@@ -280,27 +285,39 @@ final class QNameExpressionElem(val underlyingElem: tqa.dom.OtherElem) extends O
 }
 
 /**
+ * A child element of a PeriodAspect.
+ */
+sealed abstract class PeriodElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+
+  def periodType: PeriodType
+}
+
+/**
  * A formula:forever.
  */
-final class ForeverElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class ForeverElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(underlyingElem) {
   requireResolvedName(ENames.FormulaForeverEName)
+
+  def periodType: PeriodType = PeriodType.Duration
 }
 
 /**
  * A formula:instant.
  */
-final class InstantElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class InstantElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(underlyingElem) {
   requireResolvedName(ENames.FormulaInstantEName)
 
   def valueExprOption: Option[ScopedXPathString] = {
     underlyingElem.attributeOption(ENames.ValueEName).map(v => ScopedXPathString(v, underlyingElem.scope))
   }
+
+  def periodType: PeriodType = PeriodType.Instant
 }
 
 /**
  * A formula:duration.
  */
-final class DurationElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class DurationElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(underlyingElem) {
   requireResolvedName(ENames.FormulaDurationEName)
 
   def startExprOption: Option[ScopedXPathString] = {
@@ -310,6 +327,8 @@ final class DurationElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFor
   def endExprOption: Option[ScopedXPathString] = {
     underlyingElem.attributeOption(ENames.EndEName).map(v => ScopedXPathString(v, underlyingElem.scope))
   }
+
+  def periodType: PeriodType = PeriodType.Duration
 }
 
 /**

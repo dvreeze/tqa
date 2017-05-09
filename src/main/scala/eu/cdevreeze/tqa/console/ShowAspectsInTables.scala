@@ -27,11 +27,13 @@ import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.dom.PeriodType
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
+import eu.cdevreeze.tqa.extension.table.dom.PeriodAspect
 import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelationship
@@ -105,11 +107,7 @@ object ShowAspectsInTables {
       val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
       val elr = table.elr
 
-      val xpathEvaluator =
-        makeXPathEvaluator(
-          table.underlyingResource.docUri,
-          table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
-          rootDir)
+      val xpathEvaluator = makeXPathEvaluator(table, rootDir)
 
       logger.info(s"Analysing table with ID $tableId (${table.underlyingResource.docUri})")
 
@@ -124,23 +122,28 @@ object ShowAspectsInTables {
       val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
       val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
 
+      val itemDecls = tableTaxo.underlyingTaxonomy.filterItemDeclarations(decl => concepts.contains(decl.targetEName))
+      val expectedPeriodTypes: Set[PeriodType] = itemDecls.map(_.periodType).toSet
+
+      val periodTypes: Set[PeriodType] = findAllPeriodTypesInTable(table, tableTaxo)(xpathEvaluator)
+
+      if (periodTypes.diff(expectedPeriodTypes).nonEmpty) {
+        logger.warning(s"Table with ID $tableId has rule nodes for period type(s) ${periodTypes.mkString(", ")}, but expected only ${expectedPeriodTypes.mkString(", ")}")
+      }
+
+      if (expectedPeriodTypes.diff(periodTypes).nonEmpty) {
+        logger.warning(s"Table with ID $tableId misses rule nodes for period type(s) ${expectedPeriodTypes.diff(periodTypes).mkString(", ")}")
+      }
+
       sortedConcepts foreach { concept =>
-        logger.info(s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tConcept in table: $concept")
+        val conceptDecl = tableTaxo.underlyingTaxonomy.getConceptDeclaration(concept)
+        val periodTypeOption = conceptDecl.globalElementDeclaration.periodTypeOption
+
+        val rawMsg = s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tConcept in table: $concept"
+        val msg = if (periodTypeOption.isEmpty) rawMsg else rawMsg + s" (periodType: ${periodTypeOption.get})"
+        logger.info(msg)
       }
     }
-  }
-
-  def makeXPathEvaluator(docUri: URI, scope: Scope, localRootDir: File): XPathEvaluator = {
-    val factory =
-      JaxpXPathEvaluatorFactoryUsingSaxon.newInstance(processor.getUnderlyingConfiguration)
-
-    // TODO Register variables and functions
-
-    JaxpXPathEvaluatorUsingSaxon.newInstance(
-      factory,
-      docUri,
-      scope,
-      new SimpleUriResolver(u => uriToLocalUri(u, localRootDir)))
   }
 
   /**
@@ -255,6 +258,24 @@ object ShowAspectsInTables {
     if (treeWalkSpec.includeSelf) resultIncludingStartConcept else resultIncludingStartConcept.diff(Set(treeWalkSpec.startConcept))
   }
 
+  /**
+   * Returns all period types in rule nodes in the table.
+   */
+  def findAllPeriodTypesInTable(table: Table, taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[PeriodType] = {
+    val nodes = findAllNodes(table, taxo)
+
+    val periodTypes: Seq[PeriodType] =
+      nodes flatMap {
+        case node: RuleNode =>
+          val periodAspectElems = node.allAspects collect { case e: PeriodAspect => e }
+          periodAspectElems.flatMap(_.periodElems).map(_.periodType)
+        case node =>
+          Seq.empty
+      }
+
+    periodTypes.toSet
+  }
+
   def findAllTouchedAspects(table: Table, taxo: BasicTableTaxonomy): Set[Aspect] = {
     val nodes = findAllNodes(table, taxo)
     nodes.flatMap(node => findAllAspects(node)).toSet
@@ -313,6 +334,26 @@ object ShowAspectsInTables {
   def findAllDimensionAspects(taxo: TaxonomyApi): Set[Aspect.DimensionAspect] = {
     // Are relationships and ELRs important here?
     taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
+  }
+
+  private def makeXPathEvaluator(table: Table, localRootDir: File): XPathEvaluator = {
+    makeXPathEvaluator(
+      table.underlyingResource.docUri,
+      table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
+      localRootDir)
+  }
+
+  private def makeXPathEvaluator(docUri: URI, scope: Scope, localRootDir: File): XPathEvaluator = {
+    val factory =
+      JaxpXPathEvaluatorFactoryUsingSaxon.newInstance(processor.getUnderlyingConfiguration)
+
+    // TODO Register variables and functions
+
+    JaxpXPathEvaluatorUsingSaxon.newInstance(
+      factory,
+      docUri,
+      scope,
+      new SimpleUriResolver(u => uriToLocalUri(u, localRootDir)))
   }
 
   private def uriToLocalUri(uri: URI, rootDir: File): URI = {

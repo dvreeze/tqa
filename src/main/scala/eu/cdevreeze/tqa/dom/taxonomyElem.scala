@@ -720,6 +720,15 @@ final class GlobalElementDeclaration private[dom] (
       derivedSubstGroups.exists(substGrp => hasSubstitutionGroup(substGrp, substitutionGroupMap))
     }
   }
+
+  /**
+   * Returns the optional xbrli:periodType attribute, as `PeriodType`.
+   *
+   * This method may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def periodTypeOption: Option[PeriodType] = {
+    attributeOption(ENames.XbrliPeriodTypeEName).map(v => PeriodType.fromString(v))
+  }
 }
 
 /**
