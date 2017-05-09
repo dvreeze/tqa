@@ -104,45 +104,52 @@ object ShowAspectsInTables {
     logger.info(s"Created XPathEvaluator")
 
     tables foreach { table =>
-      val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
-      val elr = table.elr
-
       val xpathEvaluator = makeXPathEvaluator(table, rootDir)
 
-      logger.info(s"Analysing table with ID $tableId (${table.underlyingResource.docUri})")
+      showTableAspectInfo(table, tableTaxo, xpathEvaluator)
+    }
+  }
 
-      val aspectsInTable = findAllTouchedAspects(table, tableTaxo)
+  def showTableAspectInfo(table: Table, tableTaxo: BasicTableTaxonomy, xpathEvaluator: XPathEvaluator): Unit = {
+    val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
+    val elr = table.elr
 
-      logger.info(s"Aspects in table with ID $tableId\n\t ${aspectsInTable.toSeq.sortBy(_.toString).mkString(", ")}")
+    logger.info(s"Analysing table with ID $tableId (${table.underlyingResource.docUri})")
 
-      Aspect.RequiredItemAspects.diff(Set(Aspect.EntityIdentifierAspect)).diff(aspectsInTable) foreach { aspect =>
-        logger.warning(s"Table with ID $tableId misses required item aspect (other than EntityIdentifierAspect): $aspect")
-      }
+    val aspectsInTable = findAllTouchedAspects(table, tableTaxo)
 
-      val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
-      val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
+    logger.info(s"Aspects in table with ID $tableId\n\t ${aspectsInTable.toSeq.sortBy(_.toString).mkString(", ")}")
 
-      val itemDecls = tableTaxo.underlyingTaxonomy.filterItemDeclarations(decl => concepts.contains(decl.targetEName))
-      val expectedPeriodTypes: Set[PeriodType] = itemDecls.map(_.periodType).toSet
+    Aspect.RequiredItemAspects.diff(Set(Aspect.EntityIdentifierAspect)).diff(aspectsInTable) foreach { aspect =>
+      logger.warning(s"Table with ID $tableId misses required item aspect (other than EntityIdentifierAspect): $aspect")
+    }
 
-      val periodTypes: Set[PeriodType] = findAllPeriodTypesInTable(table, tableTaxo)(xpathEvaluator)
+    val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
+    val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
 
-      if (periodTypes.diff(expectedPeriodTypes).nonEmpty) {
-        logger.warning(s"Table with ID $tableId has rule nodes for period type(s) ${periodTypes.mkString(", ")}, but expected only ${expectedPeriodTypes.mkString(", ")}")
-      }
+    val itemDecls = tableTaxo.underlyingTaxonomy.filterItemDeclarations(decl => concepts.contains(decl.targetEName))
+    val expectedPeriodTypes: Set[PeriodType] = itemDecls.map(_.periodType).toSet
 
-      if (expectedPeriodTypes.diff(periodTypes).nonEmpty) {
-        logger.warning(s"Table with ID $tableId misses rule nodes for period type(s) ${expectedPeriodTypes.diff(periodTypes).mkString(", ")}")
-      }
+    val periodTypes: Set[PeriodType] = findAllPeriodTypesInTable(table, tableTaxo)(xpathEvaluator)
 
-      sortedConcepts foreach { concept =>
-        val conceptDecl = tableTaxo.underlyingTaxonomy.getConceptDeclaration(concept)
-        val periodTypeOption = conceptDecl.globalElementDeclaration.periodTypeOption
+    logger.info(s"Found period type(s) for the concepts 'touched' by the table with ID $tableId: ${periodTypes.mkString(", ")}")
+    logger.info(s"Expected period type(s) for the concepts 'touched' by the table with ID $tableId: ${expectedPeriodTypes.mkString(", ")}")
 
-        val rawMsg = s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tConcept in table: $concept"
-        val msg = if (periodTypeOption.isEmpty) rawMsg else rawMsg + s" (periodType: ${periodTypeOption.get})"
-        logger.info(msg)
-      }
+    if (periodTypes.diff(expectedPeriodTypes).nonEmpty) {
+      logger.warning(s"Table with ID $tableId has rule nodes for period type(s) ${periodTypes.mkString(", ")}, but expected only ${expectedPeriodTypes.mkString(", ")}")
+    }
+
+    if (expectedPeriodTypes.diff(periodTypes).nonEmpty) {
+      logger.warning(s"Table with ID $tableId misses rule nodes for period type(s) ${expectedPeriodTypes.diff(periodTypes).mkString(", ")}")
+    }
+
+    sortedConcepts foreach { concept =>
+      val conceptDecl = tableTaxo.underlyingTaxonomy.getConceptDeclaration(concept)
+      val periodTypeOption = conceptDecl.globalElementDeclaration.periodTypeOption
+
+      val rawMsg = s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tConcept in table: $concept"
+      val msg = if (periodTypeOption.isEmpty) rawMsg else rawMsg + s" (periodType: ${periodTypeOption.get})"
+      logger.info(msg)
     }
   }
 
