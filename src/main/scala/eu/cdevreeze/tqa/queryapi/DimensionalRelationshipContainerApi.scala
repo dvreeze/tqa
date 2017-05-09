@@ -181,6 +181,18 @@ trait DimensionalRelationshipContainerApi {
   def filterIncomingDomainMemberRelationships(
     targetConcept: EName)(p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
 
+  /**
+   * Finds all "domain-aware" relationships that are incoming to the given concept.
+   */
+  def findAllIncomingDomainAwareRelationships(
+    targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationship]
+
+  /**
+   * Filters "domain-aware" relationships that are incoming to the given concept.
+   */
+  def filterIncomingDomainAwareRelationships(
+    targetConcept: EName)(p: DomainAwareRelationship => Boolean): immutable.IndexedSeq[DomainAwareRelationship]
+
   // Filtering outgoing and incoming relationship paths
 
   /**
@@ -218,6 +230,23 @@ trait DimensionalRelationshipContainerApi {
   def filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
     sourceConcept: EName)(
       p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
+
+  /**
+   * Returns `filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept)(_ => true)`.
+   */
+  def findAllLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+    targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
+
+  /**
+   * Filters the longest consecutive (!) dimension-domain-or-domain-member relationship paths that are incoming to the given concept.
+   * Only relationship paths for which all (non-empty) "tails" pass the predicate are accepted by the filter!
+   *
+   * It is a dangerous method in that termination is not guaranteed, but may depend on the passed
+   * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
+   * false on detecting them.
+   */
+  def filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+    targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
    * Returns `filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)`.

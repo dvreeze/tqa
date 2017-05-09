@@ -209,6 +209,18 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainMemberRelationship])(p)
   }
 
+  final def findAllIncomingDomainAwareRelationships(
+    targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationship] = {
+
+    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainAwareRelationship])
+  }
+
+  final def filterIncomingDomainAwareRelationships(
+    targetConcept: EName)(p: DomainAwareRelationship => Boolean): immutable.IndexedSeq[DomainAwareRelationship] = {
+
+    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainAwareRelationship])(p)
+  }
+
   // Filtering outgoing and incoming relationship paths
 
   final def findAllLongestOutgoingConsecutiveDomainAwareRelationshipPaths(
@@ -237,6 +249,20 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
       p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
     filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship]) { path =>
+      path.isElrValid && p(path)
+    }
+  }
+
+  final def findAllLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+    targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
+
+    filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept)(_ => true)
+  }
+
+  final def filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+    targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
+
+    filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship]) { path =>
       path.isElrValid && p(path)
     }
   }
