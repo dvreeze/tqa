@@ -20,6 +20,7 @@ import scala.collection.immutable
 import scala.reflect.ClassTag
 
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.yaidom.core.EName
 
 /**

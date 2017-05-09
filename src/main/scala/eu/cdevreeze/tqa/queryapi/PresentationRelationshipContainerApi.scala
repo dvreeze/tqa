@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.queryapi
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
+import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.relationship.ParentChildRelationship
 import eu.cdevreeze.tqa.relationship.PresentationRelationship
 import eu.cdevreeze.yaidom.core.EName

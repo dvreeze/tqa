@@ -39,13 +39,13 @@ import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelationship
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
-import eu.cdevreeze.tqa.queryapi.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
 import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.richtaxonomy.ConceptAspectData
 import eu.cdevreeze.tqa.richtaxonomy.ConceptRelationshipNodeData
 import eu.cdevreeze.tqa.richtaxonomy.DimensionRelationshipNodeData
@@ -289,7 +289,8 @@ object ShowAspectsInTables {
     val explicitDimensionAspectElems =
       ruleNode.allAspects collect { case dimensionAspect: ExplicitDimensionAspect => dimensionAspect }
 
-    val explicitDimensionAspectDataObjects = explicitDimensionAspectElems.map(e => new ExplicitDimensionAspectData(e))
+    val explicitDimensionAspectDataObjects =
+      explicitDimensionAspectElems.map(e => new ExplicitDimensionAspectData(e))
 
     val dimensionMembers =
       explicitDimensionAspectDataObjects.flatMap(da => da.memberOption(xpathEvaluator).map(m => da.dimensionName -> m))

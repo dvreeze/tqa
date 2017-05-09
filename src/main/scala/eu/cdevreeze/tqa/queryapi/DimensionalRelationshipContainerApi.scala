@@ -26,6 +26,7 @@ import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
+import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.yaidom.core.EName
 
 /**

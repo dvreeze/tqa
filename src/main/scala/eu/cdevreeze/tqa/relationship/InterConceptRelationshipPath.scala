@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.queryapi
+package eu.cdevreeze.tqa.relationship
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 /**

@@ -31,12 +31,12 @@ import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
-import eu.cdevreeze.tqa.queryapi.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.relationship.PresentationRelationship
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
