@@ -477,7 +477,17 @@ object ConceptRelationshipNodeFormulaAxis {
 
 object DimensionRelationshipNodeFormulaAxis {
 
-  sealed trait FormulaAxis
+  sealed trait FormulaAxis {
+
+    def includesSelf: Boolean = {
+      this == DescendantOrSelfAxis || this == ChildOrSelfAxis
+    }
+
+    def includesChildrenButNotDeeperDescendants: Boolean = {
+      this == ChildAxis || this == ChildOrSelfAxis
+    }
+  }
+
   case object DescendantAxis extends FormulaAxis
   case object DescendantOrSelfAxis extends FormulaAxis
   case object ChildAxis extends FormulaAxis

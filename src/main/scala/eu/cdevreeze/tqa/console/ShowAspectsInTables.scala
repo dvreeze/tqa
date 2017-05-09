@@ -158,6 +158,13 @@ object ShowAspectsInTables {
       val msg = if (periodTypeOption.isEmpty) rawMsg else rawMsg + s" (periodType: ${periodTypeOption.get})"
       logger.info(msg)
     }
+
+    val dimensionMembers: Map[EName, Set[EName]] =
+      findAllExplicitDimensionMembersInTable(table, tableTaxo)(xpathEvaluator)
+
+    // TODO Check that dimension is explicit dimension
+
+    // ...
   }
 
   /**
@@ -272,6 +279,27 @@ object ShowAspectsInTables {
     if (treeWalkSpec.includeSelf) resultIncludingStartConcept else resultIncludingStartConcept.diff(Set(treeWalkSpec.startConcept))
   }
 
+  /**
+   * Returns all dimension members "touched" by the table. These are the dimension members in expanded dimension relationship nodes,
+   * and the dimension members in rule nodes. Not only usable members are returned per specified dimension, but all the ones found.
+   */
+  def findAllExplicitDimensionMembersInTable(table: Table, taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Map[EName, Set[EName]] = {
+    val nodes = findAllNodes(table, taxo)
+
+    val dimMemPairs: Seq[(EName, EName)] =
+      nodes flatMap {
+        case node: DimensionRelationshipNode =>
+          findAllMembersInDimensionRelationshipNode(node, taxo)(xpathEvaluator).toSeq.
+            map(mem => (node.dimensionName -> mem))
+        case node: RuleNode =>
+          findAllExplicitDimensionMembersInRuleNode(node, taxo)(xpathEvaluator).toSeq
+        case node =>
+          Seq.empty
+      }
+
+    dimMemPairs.groupBy(_._1).mapValues(_.map(_._2).toSet)
+  }
+
   def findAllExplicitDimensionsInRuleNode(
     ruleNode: RuleNode,
     taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
@@ -297,11 +325,72 @@ object ShowAspectsInTables {
     dimensionMembers.toMap
   }
 
+  // TODO Only usable members? No, not at this point.
+
+  def findAllMembersInDimensionRelationshipNode(
+    dimensionRelationshipNode: DimensionRelationshipNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    val dimension: EName = dimensionRelationshipNode.dimensionName
+
+    val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator)
+
+    val rawRelationshipSources: immutable.IndexedSeq[EName] =
+      dimensionRelationNodeData.relationshipSources(xpathEvaluator)
+
+    val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator)
+
+    val startRelationships: immutable.IndexedSeq[DomainAwareRelationship] = {
+      if (rawRelationshipSources.isEmpty) {
+        val dimDomRelationships =
+          taxo.underlyingTaxonomy.filterOutgoingDimensionDomainRelationships(dimension) { rel =>
+            linkroleOption.forall(_ == rel.elr)
+          }
+
+        dimDomRelationships
+      } else {
+        val incomingPaths =
+          rawRelationshipSources flatMap { member =>
+            taxo.underlyingTaxonomy.filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(member) { path =>
+              path.firstRelationship.isInstanceOf[DimensionDomainRelationship] &&
+                path.firstRelationship.sourceConceptEName == dimension
+            }
+          }
+
+        incomingPaths.map(_.lastRelationship)
+      }
+    }
+
+    val includeSelf: Boolean = axis.includesSelf
+
+    // Number of generations (optional), from the perspective of finding the descendant-or-self
+    // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
+    val effectiveGenerationsOption: Option[Int] = {
+      val rawValue = dimensionRelationNodeData.generations(xpathEvaluator)
+      val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
+      val resultOption = if (axis.includesChildrenButNotDeeperDescendants) Some(1) else optionalRawResult
+      resultOption
+    }
+
+    val dimensionMemberTreeWalkSpecs: immutable.IndexedSeq[DimensionMemberTreeWalkSpec] =
+      startRelationships map { startRelationship =>
+        new DimensionMemberTreeWalkSpec(dimension, startRelationship, includeSelf, effectiveGenerationsOption, linkroleOption)
+      }
+
+    // Find the descendant-or-self or descendant members for the given number of generations, if applicable.
+    val conceptsExcludingSiblings: Set[EName] =
+      (dimensionMemberTreeWalkSpecs.map(spec => filterDescendantOrSelfMembers(spec, taxo)(xpathEvaluator))).flatten.toSet
+
+    conceptsExcludingSiblings
+  }
+
   /**
    * Returns the descendant-or-self members in a dimension-member tree walk according to the parameter specification of the walk.
    * If the start member must not be included, the tree walk finds descendant members instead of descendant-or-self members.
    *
-   * It is assumed yet not checked that the tree walk corresponds to the given dimension.
+   * It is assumed yet not checked that the tree walk can be made for the given dimension (so the dimension is indeed an ancestor
+   * in a sequence of consecutive "domain-aware" relationships).
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
@@ -312,7 +401,8 @@ object ShowAspectsInTables {
     val relationshipPaths =
       taxo.underlyingTaxonomy.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
         treeWalkSpec.startMember) { path =>
-          path.isElrValid &&
+          treeWalkSpec.startRelationship.isFollowedBy(path.firstRelationship) &&
+            path.isElrValid &&
             treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
             treeWalkSpec.linkroleOption.forall(lr => treeWalkSpec.elrToCheck(path) == lr)
         }
