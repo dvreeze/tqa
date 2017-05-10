@@ -359,4 +359,19 @@ trait DimensionalRelationshipContainerApi {
    * usable in one dimension-domain but not usable in another one, it is considered not usable.
    */
   def findAllNonUsableMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName]
+
+  /**
+   * Finds all (explicit) dimension members for the given has-hypercube relationship.
+   */
+  def findAllDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]]
+
+  /**
+   * Finds all usable (explicit) dimension members for the given has-hypercube relationship.
+   */
+  def findAllUsableDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]]
+
+  /**
+   * Finds all non-usable (explicit) dimension members for the given has-hypercube relationship.
+   */
+  def findAllNonUsableDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]]
 }

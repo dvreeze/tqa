@@ -433,4 +433,37 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def findAllNonUsableMembers(dimension: EName, domainElrPairs: Set[(EName, String)]): Set[EName] = {
     findAllMembers(dimension, domainElrPairs).diff(findAllUsableMembers(dimension, domainElrPairs))
   }
+
+  final def findAllDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]] = {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship) map {
+      case (dim, domainElrPairs) =>
+        (dim -> findAllMembers(dim, domainElrPairs))
+    }
+  }
+
+  final def findAllUsableDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]] = {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship) map {
+      case (dim, domainElrPairs) =>
+        (dim -> findAllUsableMembers(dim, domainElrPairs))
+    }
+  }
+
+  final def findAllNonUsableDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]] = {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship) map {
+      case (dim, domainElrPairs) =>
+        (dim -> findAllNonUsableMembers(dim, domainElrPairs))
+    }
+  }
+
+  private def findAllDomainElrPairsPerDimension(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[(EName, String)]] = {
+    val hypercubeDimensionRelationships =
+      filterOutgoingHypercubeDimensionRelationshipsOnElr(hasHypercubeRelationship.hypercube, hasHypercubeRelationship.effectiveTargetRole)
+
+    val dimensionDomainRelationships =
+      hypercubeDimensionRelationships.flatMap(hd => filterOutgoingDimensionDomainRelationshipsOnElr(hd.dimension, hd.effectiveTargetRole))
+
+    val dimensionDomainRelationshipsByDimension = dimensionDomainRelationships.groupBy(_.dimension)
+
+    dimensionDomainRelationshipsByDimension.mapValues(_.map(rel => (rel.domain -> rel.elr)).toSet)
+  }
 }

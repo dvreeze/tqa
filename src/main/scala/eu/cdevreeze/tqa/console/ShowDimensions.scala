@@ -84,18 +84,12 @@ object ShowDimensions {
     hasHypercubes foreach { hasHypercube =>
       println(s"Has-hypercube found for primary ${hasHypercube.primary} and ELR ${hasHypercube.elr}")
 
-      val hypercubeDimensions = basicTaxo.filterOutgoingHypercubeDimensionRelationships(hasHypercube.hypercube)(rel => hasHypercube.isFollowedBy(rel))
+      val hypercubeDimensions =
+        basicTaxo.filterOutgoingHypercubeDimensionRelationshipsOnElr(hasHypercube.hypercube, hasHypercube.effectiveTargetRole)
       val dimensions = hypercubeDimensions.map(_.dimension).distinct.sortBy(_.toString)
       println(s"It has dimensions: ${dimensions.mkString("\n\t", ",\n\t", "")}")
 
-      val usableDimensionMembers: Map[EName, Set[EName]] =
-        hypercubeDimensions.groupBy(_.dimension) mapValues { hdRelationships =>
-          val dimension = hdRelationships.head.dimension
-          val ddRelationships =
-            hdRelationships.flatMap(hdRelationship => basicTaxo.filterOutgoingDimensionDomainRelationshipsOnElr(hdRelationship.dimension, hdRelationship.effectiveTargetRole))
-
-          basicTaxo.findAllUsableMembers(dimension, ddRelationships.map(rel => (rel.domain -> rel.elr)).toSet)
-        }
+      val usableDimensionMembers: Map[EName, Set[EName]] = basicTaxo.findAllUsableDimensionMembers(hasHypercube)
 
       usableDimensionMembers.toSeq.sortBy(_._1.toString) foreach {
         case (dimension, members) =>
