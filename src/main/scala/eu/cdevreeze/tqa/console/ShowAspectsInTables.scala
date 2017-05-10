@@ -122,8 +122,8 @@ object ShowAspectsInTables {
     val xpathEvaluator =
       JaxpXPathEvaluatorUsingSaxon.newInstance(
         xpathEvaluatorFactory,
-        parameterElems.head.docUri,
-        parameterElems.head.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
+        parameterElems.headOption.map(_.docUri).getOrElse(URI.create("")),
+        parameterElems.headOption.map(_.scope).getOrElse(Scope.Empty) ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
         new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
 
     val paramValues: Map[EName, AnyRef] =
@@ -153,6 +153,8 @@ object ShowAspectsInTables {
 
       showTableAspectInfo(table, tableTaxo, conceptHasHypercubeMap, xpathEvaluator)
     }
+
+    logger.info("Ready")
   }
 
   def showTableAspectInfo(
