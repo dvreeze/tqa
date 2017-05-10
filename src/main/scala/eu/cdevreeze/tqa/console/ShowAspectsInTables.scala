@@ -140,16 +140,26 @@ object ShowAspectsInTables {
       }
     })
 
+    logger.info("Computing concept has-hypercube inheritance map ...")
+
+    val conceptDimTreeMap: Map[EName, Map[String, Set[EName]]] =
+      tableTaxo.underlyingTaxonomy.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
+
     tables foreach { table =>
       val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, rootDir)
 
       logger.info(s"Created XPathEvaluator")
 
-      showTableAspectInfo(table, tableTaxo, xpathEvaluator)
+      showTableAspectInfo(table, tableTaxo, conceptDimTreeMap, xpathEvaluator)
     }
   }
 
-  def showTableAspectInfo(table: Table, tableTaxo: BasicTableTaxonomy, xpathEvaluator: XPathEvaluator): Unit = {
+  def showTableAspectInfo(
+    table: Table,
+    tableTaxo: BasicTableTaxonomy,
+    conceptDimTreeMap: Map[EName, Map[String, Set[EName]]],
+    xpathEvaluator: XPathEvaluator): Unit = {
+
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
     val elr = table.elr
 
