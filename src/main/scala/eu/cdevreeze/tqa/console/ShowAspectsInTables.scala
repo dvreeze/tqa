@@ -27,6 +27,7 @@ import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.PeriodType
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
@@ -58,6 +59,7 @@ import eu.cdevreeze.tqa.xpath.jaxp.saxon.JaxpXPathEvaluatorUsingSaxon
 import eu.cdevreeze.tqa.xpath.jaxp.saxon.SimpleUriResolver
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
+import javax.xml.xpath.XPathVariableResolver
 import net.sf.saxon.s9api.Processor
 
 /**
@@ -108,10 +110,40 @@ object ShowAspectsInTables {
 
     logger.info(s"The taxonomy has ${tables.size} tables")
 
-    logger.info(s"Created XPathEvaluator")
+    val xpathEvaluatorFactory =
+      JaxpXPathEvaluatorFactoryUsingSaxon.newInstance(processor.getUnderlyingConfiguration)
+
+    val parameterElems: immutable.IndexedSeq[NonStandardResource] =
+      tableTaxo.underlyingTaxonomy.rootElems.flatMap(_.filterElemsOfType(classTag[NonStandardResource])(_.resolvedName == ENames.VariableParameterEName))
+
+    // Disregarding arcs to parameters
+    // Assuming all parameters to occur in one and the same document
+    val xpathEvaluator =
+      JaxpXPathEvaluatorUsingSaxon.newInstance(
+        xpathEvaluatorFactory,
+        parameterElems.head.docUri,
+        parameterElems.head.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
+        new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
+
+    val paramValues: Map[EName, AnyRef] =
+      (parameterElems map { e =>
+        val expr = xpathEvaluator.toXPathExpression(e.attribute(ENames.SelectEName))
+        val v = xpathEvaluator.evaluateAsString(expr, None)
+        (e.attributeAsResolvedQName(ENames.NameEName) -> v)
+      }).toMap
+
+    xpathEvaluatorFactory.underlyingEvaluatorFactory.setXPathVariableResolver(new XPathVariableResolver {
+
+      def resolveVariable(variableName: javax.xml.namespace.QName): AnyRef = {
+        val variableEName = EName.fromJavaQName(variableName)
+        paramValues.getOrElse(variableEName, sys.error(s"Missing variable $variableEName"))
+      }
+    })
 
     tables foreach { table =>
-      val xpathEvaluator = makeXPathEvaluator(table, rootDir)
+      val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, rootDir)
+
+      logger.info(s"Created XPathEvaluator")
 
       showTableAspectInfo(table, tableTaxo, xpathEvaluator)
     }
@@ -489,19 +521,15 @@ object ShowAspectsInTables {
     taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
   }
 
-  private def makeXPathEvaluator(table: Table, localRootDir: File): XPathEvaluator = {
+  private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, table: Table, localRootDir: File): XPathEvaluator = {
     makeXPathEvaluator(
+      factory,
       table.underlyingResource.docUri,
       table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
       localRootDir)
   }
 
-  private def makeXPathEvaluator(docUri: URI, scope: Scope, localRootDir: File): XPathEvaluator = {
-    val factory =
-      JaxpXPathEvaluatorFactoryUsingSaxon.newInstance(processor.getUnderlyingConfiguration)
-
-    // TODO Register variables and functions
-
+  private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, docUri: URI, scope: Scope, localRootDir: File): XPathEvaluator = {
     JaxpXPathEvaluatorUsingSaxon.newInstance(
       factory,
       docUri,
