@@ -338,9 +338,14 @@ object ShowAspectsInTables {
         if (axis.includesSelf) effectiveRelationshipSources.toSet else Set.empty
       }
 
-    // Include siblings if needed
-    // TODO
-    val includedSiblings: Set[EName] = Set()
+    val includedSiblings: Set[EName] = {
+      if (axis.includesSiblings) {
+        rawRelationshipSources.filterNot(Set(ENames.XfiRootEName)).
+          flatMap(c => findAllSiblings(c, linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo)).toSet
+      } else {
+        Set()
+      }
+    }
 
     conceptsExcludingSiblings.union(includedSiblings)
   }
@@ -573,7 +578,7 @@ object ShowAspectsInTables {
     taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
   }
 
-  def resolveXfiRoot(
+  private def resolveXfiRoot(
     linkroleOption: Option[String],
     arcroleOption: Option[String],
     linknameOption: Option[String],
@@ -582,16 +587,50 @@ object ShowAspectsInTables {
 
     val relationships =
       taxo.underlyingTaxonomy.filterInterConceptRelationshipsOfType(classTag[InterConceptRelationship]) { rel =>
-
-        linkroleOption.forall(lr => rel.elr == lr) &&
-          arcroleOption.forall(ar => rel.arcrole == ar) &&
-          linknameOption.forall(ln => rel.baseSetKey.extLinkEName == ln) &&
-          arcnameOption.forall(an => rel.baseSetKey.arcEName == an)
+        relationshipMatchesCriteria(rel, linkroleOption, arcroleOption, linknameOption, arcnameOption)
       }
 
     val sources = relationships.map(_.sourceConceptEName).toSet
     val targets = relationships.map(_.targetConceptEName).toSet
     sources.diff(targets)
+  }
+
+  private def findAllSiblings(
+    concept: EName,
+    linkroleOption: Option[String],
+    arcroleOption: Option[String],
+    linknameOption: Option[String],
+    arcnameOption: Option[String],
+    taxo: BasicTableTaxonomy): Set[EName] = {
+
+    val incomingRelationships =
+      taxo.underlyingTaxonomy.filterIncomingInterConceptRelationshipsOfType(concept, classTag[InterConceptRelationship]) { rel =>
+        relationshipMatchesCriteria(rel, linkroleOption, arcroleOption, linknameOption, arcnameOption)
+      }
+
+    if (incomingRelationships.nonEmpty) {
+      (incomingRelationships flatMap { rel =>
+        taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationshipsOfType(rel.sourceConceptEName, classTag[InterConceptRelationship]) { r =>
+          relationshipMatchesCriteria(r, linkroleOption, arcroleOption, linknameOption, arcnameOption)
+        }
+      }).map(_.targetConceptEName).toSet.diff(Set(concept))
+    } else {
+      // Find roots
+      resolveXfiRoot(linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo).diff(Set(concept))
+    }
+  }
+
+  private def relationshipMatchesCriteria(
+    relationship: InterConceptRelationship,
+    linkroleOption: Option[String],
+    arcroleOption: Option[String],
+    linknameOption: Option[String],
+    arcnameOption: Option[String]): Boolean = {
+
+    linkroleOption.forall(lr => relationship.elr == lr) &&
+      arcroleOption.forall(ar => relationship.arcrole == ar) &&
+      linknameOption.forall(ln => relationship.baseSetKey.extLinkEName == ln) &&
+      arcnameOption.forall(an => relationship.baseSetKey.arcEName == an)
   }
 
   private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, table: Table, localRootDir: File): XPathEvaluator = {
