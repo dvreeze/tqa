@@ -65,6 +65,7 @@ import net.sf.saxon.s9api.Processor
 
 /**
  * Table-aware taxonomy parser and analyser, showing modeled aspects in the tables of the table-aware taxonomy.
+ * Potential problems with the tables are logged as warnings.
  *
  * TODO Mind filters, ELRs, tags (?), and evaluate XPath where needed.
  * TODO Mind aspects that can have only one value and that can therefore be ignored.
@@ -219,31 +220,36 @@ object ShowAspectsInTables {
     val dimensionMembersInTable: Map[EName, Set[EName]] =
       findAllExplicitDimensionMembersInTable(table, tableTaxo)(xpathEvaluator)
 
-    // TODO Check that dimension is explicit dimension
+    val nonExplicitDimensionENames: Set[EName] =
+      dimensionMembersInTable.keySet.filter(en => tableTaxo.underlyingTaxonomy.findExplicitDimensionDeclaration(en).isEmpty)
+
+    for (ename <- nonExplicitDimensionENames.toSeq.sortBy(_.toString)) {
+      logger.warning(s"Table $tableId erroneously claims the following to be an explicit dimension: $ename")
+    }
 
     val hasHypercubes = conceptHasHypercubeMap.filterKeys(concepts).values.flatten.toIndexedSeq
 
-    val allUsableDimMemPairs: immutable.IndexedSeq[(EName, EName)] =
+    // Usable and non-usable members in the taxonomy
+    val allDimMemPairs: immutable.IndexedSeq[(EName, EName)] =
       hasHypercubes flatMap { hh =>
-        tableTaxo.underlyingTaxonomy.findAllUsableDimensionMembers(hh).toSeq.flatMap(dimMems => dimMems._2.map(mem => (dimMems._1 -> mem)))
+        tableTaxo.underlyingTaxonomy.findAllDimensionMembers(hh).toSeq.flatMap(dimMems => dimMems._2.map(mem => (dimMems._1 -> mem)))
       }
 
-    val allUsableDimensionMembers: Map[EName, Set[EName]] = allUsableDimMemPairs.groupBy(_._1).mapValues(_.map(_._2).toSet)
+    val allDimensionMembers: Map[EName, Set[EName]] = allDimMemPairs.groupBy(_._1).mapValues(_.map(_._2).toSet)
 
-    // TODO Is this correct? Must all dimension members implied by the table be usable?
     val unexpectedDimensionMembersInTable =
       dimensionMembersInTable map {
         case (dim, members) =>
-          (dim -> members.filter(m => !allUsableDimensionMembers.getOrElse(dim, Set()).contains(m)))
+          (dim -> members.filter(m => !allDimensionMembers.getOrElse(dim, Set()).contains(m)))
       } filter (_._2.nonEmpty)
 
     if (unexpectedDimensionMembersInTable.nonEmpty) {
       unexpectedDimensionMembersInTable foreach {
         case (dim, members) =>
-          logger.warning(s"In table $tableId, some unexpected members for dimension $dim are ${members.toSeq.sortBy(_.toString).take(15).mkString(", ")}")
+          logger.warning(s"In table $tableId, some unexpected members for dimension $dim are: ${members.toSeq.sortBy(_.toString).take(15).mkString(", ")}")
       }
     } else {
-      logger.info(s"In table $tableId, all dimension members implied by the table are potentially indeed usable members for concepts implied by the table")
+      logger.info(s"In table $tableId, all dimension members implied by the table are potentially indeed members for concepts implied by the table")
     }
   }
 
@@ -467,6 +473,8 @@ object ShowAspectsInTables {
   def filterDescendantOrSelfMembers(
     treeWalkSpec: DimensionMemberTreeWalkSpec,
     taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    // Ignoring unusable members without any usable descendants
 
     val relationshipPaths =
       taxo.underlyingTaxonomy.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
