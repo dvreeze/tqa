@@ -295,6 +295,8 @@ object ENames {
 
   val GplPreferredLabelEName = EName(GplNamespace, "preferredLabel")
 
+  val XfiRootEName = EName(XfiNamespace, "root")
+
   val NameEName = EName("name")
   val IdEName = EName("id")
   val FormEName = EName("form")

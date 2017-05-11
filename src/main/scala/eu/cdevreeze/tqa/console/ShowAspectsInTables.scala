@@ -67,9 +67,7 @@ import net.sf.saxon.s9api.Processor
  * Table-aware taxonomy parser and analyser, showing modeled aspects in the tables of the table-aware taxonomy.
  * Potential problems with the tables are logged as warnings.
  *
- * TODO Mind filters, ELRs, tags (?), and evaluate XPath where needed.
- * TODO Mind aspects that can have only one value and that can therefore be ignored.
- * TODO Are merging and abstract relevant?
+ * TODO Mind table filters.
  *
  * @author Chris de Vreeze
  */
@@ -296,10 +294,6 @@ object ShowAspectsInTables {
     val rawRelationshipSources: immutable.IndexedSeq[EName] =
       conceptRelationNodeData.relationshipSources(xpathEvaluator)
 
-    // Resolving xfi:root.
-    // TODO
-    val effectiveRelationshipSources: immutable.IndexedSeq[EName] = rawRelationshipSources
-
     val linkroleOption: Option[String] = conceptRelationNodeData.linkroleOption(xpathEvaluator)
 
     val arcroleOption: Option[String] = conceptRelationNodeData.arcroleOption(xpathEvaluator)
@@ -307,6 +301,18 @@ object ShowAspectsInTables {
     val linknameOption: Option[String] = conceptRelationNodeData.linknameOption(xpathEvaluator)
 
     val arcnameOption: Option[String] = conceptRelationNodeData.arcnameOption(xpathEvaluator)
+
+    val doResolveXfiRoot = rawRelationshipSources.isEmpty || rawRelationshipSources.contains(ENames.XfiRootEName)
+
+    val effectiveRelationshipSources: immutable.IndexedSeq[EName] = {
+      if (doResolveXfiRoot) {
+        val resolvedXfiRoot = resolveXfiRoot(linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo).toIndexedSeq
+
+        (resolvedXfiRoot ++ rawRelationshipSources.filterNot(Set(ENames.XfiRootEName))).sortBy(_.toString)
+      } else {
+        rawRelationshipSources.toIndexedSeq.sortBy(_.toString)
+      }
+    }
 
     val includeSelf: Boolean = axis.includesSelf
 
@@ -565,6 +571,27 @@ object ShowAspectsInTables {
   def findAllDimensionAspects(taxo: TaxonomyApi): Set[Aspect.DimensionAspect] = {
     // Are relationships and ELRs important here?
     taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
+  }
+
+  def resolveXfiRoot(
+    linkroleOption: Option[String],
+    arcroleOption: Option[String],
+    linknameOption: Option[String],
+    arcnameOption: Option[String],
+    taxo: BasicTableTaxonomy): Set[EName] = {
+
+    val relationships =
+      taxo.underlyingTaxonomy.filterInterConceptRelationshipsOfType(classTag[InterConceptRelationship]) { rel =>
+
+        linkroleOption.forall(lr => rel.elr == lr) &&
+          arcroleOption.forall(ar => rel.arcrole == ar) &&
+          linknameOption.forall(ln => rel.baseSetKey.extLinkEName == ln) &&
+          arcnameOption.forall(an => rel.baseSetKey.arcEName == an)
+      }
+
+    val sources = relationships.map(_.sourceConceptEName).toSet
+    val targets = relationships.map(_.targetConceptEName).toSet
+    sources.diff(targets)
   }
 
   private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, table: Table, localRootDir: File): XPathEvaluator = {
