@@ -102,9 +102,12 @@ object ShowAspectsInTables {
 
     val basicTaxo = taxoBuilder.build()
 
+    logger.info(s"Found ${basicTaxo.relationships.size} relationships in the DTS")
     logger.info(s"Starting building the table-aware taxonomy with entrypoint(s) ${entrypointUris.mkString(", ")}")
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    logger.info(s"Found ${tableTaxo.tableRelationships.size} 'table relationships' in the DTS")
 
     val tables = tableTaxo.tableResources collect { case table: Table => table }
 
@@ -127,6 +130,8 @@ object ShowAspectsInTables {
 
     val paramValues: Map[EName, AnyRef] =
       (parameterElems map { e =>
+        logger.info(s"Compiling and evaluating XPath expression in document ${e.docUri}. XPath expression:\n\t${e.attribute(ENames.SelectEName)}")
+
         val expr = xpathEvaluator.toXPathExpression(e.attribute(ENames.SelectEName))
         val v = xpathEvaluator.evaluateAsString(expr, None)
         (e.attributeAsResolvedQName(ENames.NameEName) -> v)
@@ -136,6 +141,8 @@ object ShowAspectsInTables {
 
       def resolveVariable(variableName: javax.xml.namespace.QName): AnyRef = {
         val variableEName = EName.fromJavaQName(variableName)
+
+        logger.fine(s"Resolving variable $variableEName")
         paramValues.getOrElse(variableEName, sys.error(s"Missing variable $variableEName"))
       }
     })
