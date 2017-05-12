@@ -32,6 +32,7 @@ import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
+import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
@@ -693,6 +694,80 @@ class DimensionalQueryTest extends FunSuite {
     }
     assertResult(true) {
       taxo.findExplicitDimensionDeclaration(hasHypercubes.head.sourceConceptEName).isDefined
+    }
+  }
+
+  test("testTargetHasHypercubeIsItemInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/105-HasHypercubeTargetError/targetHasHypercubeIsItemInvalid.xsd",
+      "100-xbrldte/105-HasHypercubeTargetError/targetHasHypercubeIsItemInvalid-definition.xml"))
+
+    val targetName = EName("{http://www.example.com/new}Hypercube")
+
+    val hasHypercubes =
+      taxo.findAllIncomingInterConceptRelationshipsOfType(targetName, classTag[HasHypercubeRelationship])
+
+    assertResult(1) {
+      hasHypercubes.size
+    }
+    assertResult(Some(ENames.XbrliItemEName)) {
+      taxo.findConceptDeclaration(targetName).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+    }
+    assertResult(false) {
+      taxo.findHypercubeDeclaration(targetName).isDefined
+    }
+    assertResult(true) {
+      taxo.findPrimaryItemDeclaration(targetName).isDefined
+    }
+  }
+
+  test("testTargetHasHypercubeIsDimensionInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/105-HasHypercubeTargetError/targetHasHypercubeIsDimensionInvalid.xsd",
+      "100-xbrldte/105-HasHypercubeTargetError/targetHasHypercubeIsDimensionInvalid-definition.xml"))
+
+    val targetName = EName("{http://www.example.com/new}Hypercube")
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships
+
+    assertResult(1) {
+      hasHypercubes.size
+    }
+    assertResult(false) {
+      taxo.findHypercubeDeclaration(targetName).isDefined
+    }
+    assertResult(true) {
+      taxo.findExplicitDimensionDeclaration(targetName).isDefined
+    }
+  }
+
+  test("testHasHypercubeNoContextElementInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid.xsd",
+      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid-definition.xml"))
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isAllRelationship)
+
+    assertResult(1) {
+      hasHypercubes.size
+    }
+    assertResult(true) {
+      hasHypercubes.head.arc.attributeOption(ENames.XbrldtContextElementEName).isEmpty
+    }
+  }
+
+  test("testNotAllHasHypercubeNoContextElementInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid.xsd",
+      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/notAllHasHypercubeNoContextElementInvalid-definition.xml"))
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isNotAllRelationship)
+
+    assertResult(1) {
+      hasHypercubes.size
+    }
+    assertResult(true) {
+      hasHypercubes.head.arc.attributeOption(ENames.XbrldtContextElementEName).isEmpty
     }
   }
 
