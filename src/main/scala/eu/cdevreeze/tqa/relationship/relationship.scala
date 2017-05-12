@@ -341,6 +341,8 @@ sealed abstract class HasHypercubeRelationship(
 
   def isAllRelationship: Boolean
 
+  final def isNotAllRelationship: Boolean = !isAllRelationship
+
   final def closed: Boolean = {
     arc.attributeOption(XbrldtClosedEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
   }
