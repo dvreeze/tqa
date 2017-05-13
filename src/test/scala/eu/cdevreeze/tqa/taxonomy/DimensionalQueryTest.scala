@@ -28,6 +28,7 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.dom.LocalElementDeclaration
 import eu.cdevreeze.tqa.dom.RoleRef
 import eu.cdevreeze.tqa.dom.RoleType
 import eu.cdevreeze.tqa.dom.TaxonomyBase
@@ -1051,6 +1052,323 @@ class DimensionalQueryTest extends FunSuite {
     }
     assertResult(false) {
       hypercubeDimensions.head.effectiveTargetRole == dimensionDomains.head.elr
+    }
+  }
+
+  test("testDimensionDeclarationValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/108-DimensionElementIsNotAbstractError/dimensionValid.xsd"))
+
+    val dimension = EName("{http://www.xbrl.org/dim/conf/110/dimensionValid}MyDimension")
+
+    val dimDecl = taxo.getDimensionDeclaration(dimension)
+
+    assertResult(true) {
+      dimDecl.isAbstract
+    }
+    assertResult(false) {
+      dimDecl.isConcrete
+    }
+    assertResult(true) {
+      dimDecl.globalElementDeclaration.isAbstract
+    }
+  }
+
+  test("testDimensionDeclarationNotAbstractInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/108-DimensionElementIsNotAbstractError/dimensionNotAbstract.xsd"))
+
+    val dimension = EName("{http://www.xbrl.org/dim/conf/110/dimensionNotAbstract}MyDimension")
+
+    val dimDecl = taxo.getDimensionDeclaration(dimension)
+
+    assertResult(false) {
+      dimDecl.isAbstract
+    }
+    assertResult(true) {
+      dimDecl.isConcrete
+    }
+    assertResult(true) {
+      dimDecl.globalElementDeclaration.isConcrete
+    }
+  }
+
+  test("testTypedDomainRefvalid-1") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/109-TypedDomainRefError/typedDomainRefvalid.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val dimension = EName(tns, "dPhone")
+
+    val dimDecl = taxo.getTypedDimensionDeclaration(dimension)
+
+    assertResult(Some(ENames.XbrldtDimensionItemEName)) {
+      dimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+    assertResult(dimDecl.globalElementDeclaration.baseUri.resolve("#duriv_phone")) {
+      dimDecl.typedDomainRef
+    }
+    assertResult(true) {
+      taxo.findGlobalElementDeclarationByUri(dimDecl.typedDomainRef).nonEmpty
+    }
+    assertResult(None) {
+      taxo.getGlobalElementDeclarationByUri(dimDecl.typedDomainRef).substitutionGroupOption
+    }
+    assertResult(true) {
+      taxo.getGlobalElementDeclarationByUri(dimDecl.typedDomainRef).isConcrete
+    }
+    assertResult(EName(tns, "phone")) {
+      taxo.getGlobalElementDeclarationByUri(dimDecl.typedDomainRef).targetEName
+    }
+  }
+
+  test("testTypedDomainRefvalid-2") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/109-TypedDomainRefError/typedDomainRefvalid2.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val dimension = EName(tns, "dPhone")
+
+    val dimDecl = taxo.getTypedDimensionDeclaration(dimension)
+
+    assertResult(Some(EName(tns, "headPhone"))) {
+      dimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+    assertResult(Some(ENames.XbrldtDimensionItemEName)) {
+      taxo.getDimensionDeclaration(EName(tns, "headPhone")).globalElementDeclaration.substitutionGroupOption
+    }
+
+    assertResult(dimDecl.globalElementDeclaration.baseUri.resolve("#duriv_phone")) {
+      dimDecl.typedDomainRef
+    }
+    assertResult(true) {
+      taxo.findGlobalElementDeclarationByUri(dimDecl.typedDomainRef).nonEmpty
+    }
+    assertResult(None) {
+      taxo.getGlobalElementDeclarationByUri(dimDecl.typedDomainRef).substitutionGroupOption
+    }
+    assertResult(true) {
+      taxo.getGlobalElementDeclarationByUri(dimDecl.typedDomainRef).isConcrete
+    }
+    assertResult(EName(tns, "phone")) {
+      taxo.getGlobalElementDeclarationByUri(dimDecl.typedDomainRef).targetEName
+    }
+  }
+
+  test("testTypedDomainRefonNonItemDeclaration") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/109-TypedDomainRefError/typedDomainRefonNonItemDeclaration.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val wrongDimension = EName(tns, "dPhone")
+
+    val wrongDimDecl = taxo.getConceptDeclaration(wrongDimension)
+
+    assertResult(true) {
+      wrongDimDecl.globalElementDeclaration.attributeOption(ENames.XbrldtTypedDomainRefEName).isDefined
+    }
+
+    assertResult(true) {
+      taxo.findTupleDeclaration(wrongDimension).nonEmpty
+    }
+    assertResult(false) {
+      taxo.findItemDeclaration(wrongDimension).nonEmpty
+    }
+  }
+
+  test("testTwotypedDomainRefattributesContainSameRef") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/109-TypedDomainRefError/TwotypedDomainRefattributesContainSameRef.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val typedDimDecls = taxo.findAllTypedDimensionDeclarations
+
+    assertResult(List(EName(tns, "dPhone"), EName(tns, "dFax"))) {
+      typedDimDecls.map(_.targetEName)
+    }
+    // Only 1 typed domain, shared by 2 typed dimensions
+    assertResult(Set(typedDimDecls.head.globalElementDeclaration.baseUri.resolve("#duriv_phone"))) {
+      typedDimDecls.map(_.typedDomainRef).toSet
+    }
+
+    assertResult(true) {
+      taxo.findGlobalElementDeclarationByUri(typedDimDecls.head.typedDomainRef).nonEmpty
+    }
+  }
+
+  test("testTwotypedDomainRefattributesContainRefsLocatingSameElement") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/109-TypedDomainRefError/TwotypedDomainRefattributesContainRefsLocatingSameElement.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val typedDimDecls = taxo.findAllTypedDimensionDeclarations
+
+    assertResult(List(EName(tns, "dPhone"), EName(tns, "dFax"))) {
+      typedDimDecls.map(_.targetEName)
+    }
+    // Only 1 typed domain, shared by 2 typed dimensions, although the (unresolved) typed domain references differ
+    assertResult(Set(typedDimDecls.head.globalElementDeclaration.baseUri.resolve("#duriv_phone"))) {
+      typedDimDecls.map(_.typedDomainRef).toSet
+    }
+
+    assertResult(true) {
+      taxo.findGlobalElementDeclarationByUri(typedDimDecls.head.typedDomainRef).nonEmpty
+    }
+  }
+
+  test("testTypedDomainReflocatesDeclarationInSameFile") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInSameFile.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
+
+    assertResult(Some(EName(tns, "headPhone"))) {
+      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+    assertResult(Some(ENames.XbrldtDimensionItemEName)) {
+      taxo.getDimensionDeclaration(EName(tns, "headPhone")).
+        globalElementDeclaration.substitutionGroupOption
+    }
+
+    assertResult(true) {
+      taxo.findGlobalElementDeclarationByUri(typedDimDecl.typedDomainRef).nonEmpty
+    }
+  }
+
+  test("testTypedDomainReftoAbstractItemDeclaration") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/110-TypedDimensionError/typedDomainReftoAbstractItemDeclaration.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
+
+    assertResult(Some(ENames.XbrldtDimensionItemEName)) {
+      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+
+    assertResult(false) {
+      taxo.getGlobalElementDeclarationByUri(typedDimDecl.typedDomainRef).isConcrete
+    }
+  }
+
+  test("testTypedDomainReflocatesTypeDeclaration") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesTypeDeclaration.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
+
+    assertResult(Some(EName(tns, "headPhone"))) {
+      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+    assertResult(Some(ENames.XbrldtDimensionItemEName)) {
+      taxo.getDimensionDeclaration(EName(tns, "headPhone")).
+        globalElementDeclaration.substitutionGroupOption
+    }
+
+    assertResult(false) {
+      taxo.findGlobalElementDeclarationByUri(typedDimDecl.typedDomainRef).nonEmpty
+    }
+    assertResult(true) {
+      taxo.findNamedTypeDefinition(_.idOption == Some(typedDimDecl.typedDomainRef).map(_.getFragment)).nonEmpty
+    }
+  }
+
+  test("testTypedDomainRefLocatesNonGlobalElementDeclaration") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/110-TypedDimensionError/typedDomainRefLocatesNonGlobalElementDeclaration.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
+
+    assertResult(Some(ENames.XbrldtDimensionItemEName)) {
+      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+
+    assertResult(false) {
+      taxo.findGlobalElementDeclarationByUri(typedDimDecl.typedDomainRef).nonEmpty
+    }
+
+    val localElemDeclOption =
+      taxo.getRootElem(typedDimDecl.globalElementDeclaration).
+        findElemOfType(classTag[LocalElementDeclaration])(_.idOption == Some(typedDimDecl.typedDomainRef).map(_.getFragment))
+
+    assertResult(true) {
+      localElemDeclOption.nonEmpty
+    }
+    assertResult(EName(tns, "country")) {
+      EName(
+        localElemDeclOption.get.schemaTargetNamespaceOption,
+        localElemDeclOption.get.nameAttributeValue)
+    }
+  }
+
+  test("testTypedDomainReflocatesDeclarationInDifferentFileWithImport") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInDifferentFileWithImport.xsd",
+      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInDifferentFile_File2.xsd"))
+
+    val tns1 = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+    val tns2 = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid_File2"
+
+    val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns1, "dPhone"))
+
+    assertResult(Some(EName(tns1, "headPhone"))) {
+      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+    assertResult(true) {
+      typedDimDecl.globalElementDeclaration.hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
+    }
+
+    val typedDomainDeclOption = taxo.findGlobalElementDeclarationByUri(typedDimDecl.typedDomainRef)
+
+    assertResult(true) {
+      typedDomainDeclOption.nonEmpty
+    }
+    assertResult(true) {
+      typedDomainDeclOption.get.isConcrete
+    }
+
+    assertResult(EName(tns2, "phone")) {
+      typedDomainDeclOption.get.targetEName
+    }
+
+    assertResult(Some(EName(tns2, "phoneType"))) {
+      typedDomainDeclOption.get.typeOption
+    }
+
+    assertResult(true) {
+      taxo.findNamedTypeDefinition(EName(tns2, "phoneType")).isDefined
+    }
+  }
+
+  test("testTypedDomainRefHasNoFragment") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/111-TypedDimensionURIError/typedDomainRefHasNoFragment.xsd"))
+
+    val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
+
+    val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
+
+    assertResult(Some(EName(tns, "headPhone"))) {
+      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+    }
+    assertResult(true) {
+      typedDimDecl.globalElementDeclaration.hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
+    }
+
+    assertResult(None) {
+      Option(typedDimDecl.typedDomainRef.getFragment)
     }
   }
 
