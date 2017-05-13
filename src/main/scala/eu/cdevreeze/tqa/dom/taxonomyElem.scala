@@ -1275,15 +1275,25 @@ final class SchemaRef private[dom] (
  * A link:roleRef element.
  */
 final class RoleRef private[dom] (
-  backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink {
+
+  def roleUri: String = {
+    attribute(ENames.RoleURIEName)
+  }
+}
 
 /**
  * A link:arcroleRef element.
  */
 final class ArcroleRef private[dom] (
-  backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with SimpleLink {
+
+  def arcroleUri: String = {
+    attribute(ENames.ArcroleURIEName)
+  }
+}
 
 // Role types, arcrole types etc.
 

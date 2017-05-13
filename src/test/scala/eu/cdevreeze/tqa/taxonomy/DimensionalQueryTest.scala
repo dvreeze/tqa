@@ -28,6 +28,8 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.dom.RoleRef
+import eu.cdevreeze.tqa.dom.RoleType
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
@@ -768,6 +770,287 @@ class DimensionalQueryTest extends FunSuite {
     }
     assertResult(true) {
       hasHypercubes.head.arc.attributeOption(ENames.XbrldtContextElementEName).isEmpty
+    }
+  }
+
+  test("testHypercubeDimensionTargetRoleValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleValid.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleValid-definition.xml"))
+
+    val hypercube = EName("{http://www.xbrl.org/dim/conf}AllCube")
+
+    val hypercubeDimensions = taxo.findAllOutgoingHypercubeDimensionRelationships(hypercube)
+
+    val expectedTargetRole = "http://www.xbrl.org/dim/conf/role/role-products"
+
+    assertResult(1) {
+      hypercubeDimensions.size
+    }
+    assertResult(expectedTargetRole) {
+      hypercubeDimensions.head.effectiveTargetRole
+    }
+
+    assertResult(true) {
+      val rootElem = taxo.getRootElem(hypercubeDimensions.head.arc)
+      val roleRefOption = rootElem.findElemOfType(classTag[RoleRef])(_.roleUri == expectedTargetRole)
+      roleRefOption.nonEmpty
+    }
+    assertResult(true) {
+      taxo.rootElems.flatMap(_.findElemOfType(classTag[RoleType])(_.roleUri == expectedTargetRole)).nonEmpty
+    }
+
+    assertResult(true) {
+      taxo.filterDimensionalRelationshipsOfType(classTag[DimensionalRelationship])(_.elr == expectedTargetRole).nonEmpty
+    }
+  }
+
+  test("testHypercubeDimensionTargetRoleNotResolved") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleNotResolved.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleNotResolved-definition.xml"))
+
+    val hypercubeDimensions = taxo.findAllHypercubeDimensionRelationships
+
+    val targetRole = "http://www.xbrl.org/dim/conf/role/foobar"
+
+    assertResult(1) {
+      hypercubeDimensions.size
+    }
+    assertResult(targetRole) {
+      hypercubeDimensions.head.effectiveTargetRole
+    }
+
+    assertResult(true) {
+      val rootElem = taxo.getRootElem(hypercubeDimensions.head.arc)
+      val roleRefOption = rootElem.findElemOfType(classTag[RoleRef])(_.roleUri == targetRole)
+      roleRefOption.isEmpty
+    }
+  }
+
+  test("testHasHypercubeTargetRoleValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleValid.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleValid-definition.xml"))
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships
+
+    assertResult(1) {
+      hasHypercubes.size
+    }
+    assertResult("http://www.xbrl.org/2003/role/link") {
+      hasHypercubes.head.elr
+    }
+    // Standard role. Not roleRef needed.
+    assertResult(hasHypercubes.head.elr) {
+      hasHypercubes.head.effectiveTargetRole
+    }
+  }
+
+  test("testHasHypercubeTargetRoleNotResolved") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleNotResolved.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleNotResolved-definition.xml"))
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships
+
+    val targetRole = "http://www.example.com/new/role/role-foobar"
+
+    assertResult(1) {
+      hasHypercubes.size
+    }
+    assertResult(targetRole) {
+      hasHypercubes.head.effectiveTargetRole
+    }
+    assertResult(None) {
+      taxo.getRootElem(hasHypercubes.head.arc).findElemOfType(classTag[RoleRef])(_.roleUri == targetRole)
+    }
+  }
+
+  test("testDimensionDomainTargetRoleValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleValid.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleValid-definition.xml"))
+
+    val dimensionDomains = taxo.findAllDimensionDomainRelationships
+
+    assertResult(1) {
+      dimensionDomains.size
+    }
+    assertResult("http://www.example.com/new/role/role-cube") {
+      dimensionDomains.head.elr
+    }
+    // Standard role. Not roleRef needed.
+    assertResult("http://www.xbrl.org/2003/role/link") {
+      dimensionDomains.head.effectiveTargetRole
+    }
+  }
+
+  test("testDimensionDomainTargetRoleNotResolved") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleNotResolved.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleNotResolved-definition.xml"))
+
+    val dimensionDomains = taxo.findAllDimensionDomainRelationships
+
+    val targetRole = "http://www.xbrl.org/2003/role/foobar"
+
+    assertResult(1) {
+      dimensionDomains.size
+    }
+    assertResult("http://www.example.com/new/role/role-cube") {
+      dimensionDomains.head.elr
+    }
+    assertResult(targetRole) {
+      dimensionDomains.head.effectiveTargetRole
+    }
+    assertResult(None) {
+      taxo.getRootElem(dimensionDomains.head.arc).findElemOfType(classTag[RoleRef])(_.roleUri == targetRole)
+    }
+  }
+
+  test("testDomainMemberTargetRoleValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleValid.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleValid-definition.xml"))
+
+    val domainMembers = taxo.findAllDomainMemberRelationships
+
+    val targetRole = "http://www.example.com/new/role/secondary"
+
+    assertResult(Set("http://www.xbrl.org/2003/role/link", targetRole)) {
+      domainMembers.map(_.elr).toSet
+    }
+    assertResult(Set(targetRole)) {
+      domainMembers.map(_.effectiveTargetRole).toSet
+    }
+    assertResult(true) {
+      taxo.getRootElem(domainMembers.head.arc).findElemOfType(classTag[RoleRef])(_.roleUri == targetRole).nonEmpty
+    }
+  }
+
+  test("testDomainMemberTargetRoleNotResolved") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleNotResolved.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleNotResolved-definition.xml"))
+
+    val domainMembers = taxo.findAllDomainMemberRelationships
+
+    val targetRole = "http://www.example.com/new/role/foobar"
+    val knownRole = "http://www.example.com/new/role/secondary"
+
+    assertResult(Set("http://www.xbrl.org/2003/role/link", knownRole)) {
+      domainMembers.map(_.elr).toSet
+    }
+    assertResult(Set(targetRole, knownRole)) {
+      domainMembers.map(_.effectiveTargetRole).toSet
+    }
+    assertResult(false) {
+      taxo.getRootElem(domainMembers.head.arc).findElemOfType(classTag[RoleRef])(_.roleUri == targetRole).nonEmpty
+    }
+    assertResult(true) {
+      taxo.getRootElem(domainMembers.head.arc).findElemOfType(classTag[RoleRef])(_.roleUri == knownRole).nonEmpty
+    }
+  }
+
+  test("testNotAllHasHypercubeTargetRoleValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleValid.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleValid-definition.xml"))
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isNotAllRelationship)
+
+    val targetRole = "http://www.xbrl.org/2003/role/link"
+
+    // Standard role. No roleRef needed.
+    assertResult(Set(targetRole)) {
+      hasHypercubes.map(_.elr).toSet
+    }
+    assertResult(Set(targetRole)) {
+      hasHypercubes.map(_.effectiveTargetRole).toSet
+    }
+    assertResult(false) {
+      taxo.getRootElem(hasHypercubes.head.arc).findElemOfType(classTag[RoleRef])(_.roleUri == targetRole).nonEmpty
+    }
+  }
+
+  test("testNotAllHasHypercubeTargetRoleNotResolved") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleNotResolved.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleNotResolved-definition.xml"))
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isNotAllRelationship)
+
+    val elr = "http://www.xbrl.org/2003/role/link"
+    val targetRole = "http://www.example.com/new/role/role-foobar"
+
+    // Standard role. No roleRef needed.
+    assertResult(Set(elr)) {
+      hasHypercubes.map(_.elr).toSet
+    }
+    // Non-standard role. RoleRef needed bu absent.
+    assertResult(Set(targetRole)) {
+      hasHypercubes.map(_.effectiveTargetRole).toSet
+    }
+    assertResult(false) {
+      taxo.getRootElem(hasHypercubes.head.arc).findElemOfType(classTag[RoleRef])(_.roleUri == targetRole).nonEmpty
+    }
+  }
+
+  test("testDomainMemberTargetRoleMissingRoleRef") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef-definition.xml",
+      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef-definition2.xml"))
+
+    val domainMembers = taxo.findAllDomainMemberRelationships
+
+    val standardElr = "http://www.xbrl.org/2003/role/link"
+    val otherElr = "http://www.example.com/new/role/foobar"
+
+    assertResult(Set(standardElr, otherElr)) {
+      domainMembers.map(_.elr).toSet
+    }
+    assertResult(Set(otherElr)) {
+      domainMembers.map(_.effectiveTargetRole).toSet
+    }
+
+    val rootElems = domainMembers.map(dm => taxo.getRootElem(dm.arc)).distinct
+
+    assertResult(2) {
+      rootElems.size
+    }
+    // Missing one roleRef for otherElr
+    assertResult(1) {
+      rootElems.flatMap(_.findElemOfType(classTag[RoleRef])(_.roleUri == otherElr)).size
+    }
+  }
+
+  test("testUnconnectedDRS") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/107-TargetRoleNotResolvedError/unconnectedDRS.xsd",
+      "100-xbrldte/107-TargetRoleNotResolvedError/unconnectedDRS-definition.xml"))
+
+    val hypercube = EName("{http://www.xbrl.org/dim/conf}AllCube")
+
+    val hypercubeDimensions = taxo.findAllOutgoingHypercubeDimensionRelationships(hypercube)
+
+    assertResult(1) {
+      hypercubeDimensions.size
+    }
+
+    val dimension = hypercubeDimensions.head.dimension
+
+    val dimensionDomains = taxo.findAllOutgoingDimensionDomainRelationships(dimension)
+
+    assertResult(1) {
+      dimensionDomains.size
+    }
+    assertResult(false) {
+      hypercubeDimensions.head.isFollowedBy(dimensionDomains.head)
+    }
+    assertResult(false) {
+      hypercubeDimensions.head.effectiveTargetRole == dimensionDomains.head.elr
     }
   }
 

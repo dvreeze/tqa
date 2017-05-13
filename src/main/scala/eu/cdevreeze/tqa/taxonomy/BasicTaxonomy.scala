@@ -70,6 +70,13 @@ final class BasicTaxonomy private (
 
   def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
 
+  def getRootElem(elem: TaxonomyElem): TaxonomyElem = {
+    val docUri = elem.docUri
+    val rootElem =
+      taxonomyBase.rootElemUriMap.getOrElse(docUri, sys.error(s"Missing root elem for document URI $docUri"))
+    rootElem
+  }
+
   def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
     taxonomyBase.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[XsdSchema]))
   }
