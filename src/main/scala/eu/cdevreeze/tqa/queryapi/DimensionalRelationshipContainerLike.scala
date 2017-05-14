@@ -392,7 +392,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
       }
 
     val result = dimensionDomainPaths.flatMap(_.relationships).map(_.targetConceptEName).toSet
-    result.ensuring(_.contains(domain))
+    result
   }
 
   final def findAllUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
