@@ -1693,6 +1693,126 @@ class DimensionalQueryTest extends FunSuite {
     }
   }
 
+  test("testPrimaryItemPolymorphismDirectUsableFalse") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDirectUnusableError-definition.xml"))
+
+    val primaryTns = "http://www.xbrl.org/dim/conf/primary"
+    val tns = "http://www.conformance-dimensions.com/xbrl/"
+
+    val primary = EName(tns, "PrimaryItemsForCube")
+
+    val hasHypercubes = taxo.findAllOutgoingHasHypercubeRelationships(primary)
+
+    val dimMembers = taxo.findAllDimensionMembers(hasHypercubes.head)
+
+    // Sales is in a dimension domain
+    assertResult(Some(Set(
+      EName(primaryTns, "Sales")))) {
+
+      dimMembers.get(EName(tns, "BalanceDim"))
+    }
+
+    // Sales is not usable, but that does not matter
+    assertResult(Some(Set())) {
+      taxo.findAllUsableDimensionMembers(hasHypercubes.head).get(EName(tns, "BalanceDim"))
+    }
+
+    // Sales also inherits the hypercube
+    assertResult(hasHypercubes.toSet) {
+      taxo.findAllInheritedHasHypercubes(EName(primaryTns, "Sales")).toSet
+    }
+
+    assertResult(Set(EName(primaryTns, "Sales"))) {
+      taxo.filterOutgoingDomainMemberRelationshipsOnElr(primary, hasHypercubes.head.elr).map(_.member).toSet
+    }
+    assertResult(Set(EName(primaryTns, "Sales"))) {
+      taxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(_.firstRelationship.elr == hasHypercubes.head.elr).
+        flatMap(_.relationships).map(_.member).toSet
+    }
+  }
+
+  test("testPrimaryItemPolymorphismIndirectUsableFalse") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismIndirectUnusableError-definition.xml"))
+
+    val primaryTns = "http://www.xbrl.org/dim/conf/primary"
+    val tns = "http://www.conformance-dimensions.com/xbrl/"
+
+    val primary = EName(tns, "PrimaryItemsForCube")
+
+    val hasHypercubes = taxo.findAllOutgoingHasHypercubeRelationships(primary)
+
+    val dimMembers = taxo.findAllDimensionMembers(hasHypercubes.head)
+
+    // Sales is in a dimension domain
+    assertResult(Some(Set(
+      EName(tns, "Domain"),
+      EName(primaryTns, "IncomeStatement"),
+      EName(primaryTns, "GrossProfit"),
+      EName(primaryTns, "GrossProfitPresentation"),
+      EName(primaryTns, "RevenueTotal"),
+      EName(primaryTns, "CostOfSales"),
+      EName(primaryTns, "Sales")))) {
+
+      dimMembers.get(EName(tns, "BalanceDim"))
+    }
+
+    // Sales is not usable, but that does not matter
+    assertResult(Some(Set(
+      EName(tns, "Domain"),
+      EName(primaryTns, "IncomeStatement"),
+      EName(primaryTns, "GrossProfit"),
+      EName(primaryTns, "GrossProfitPresentation"),
+      EName(primaryTns, "RevenueTotal"),
+      EName(primaryTns, "CostOfSales")))) {
+
+      taxo.findAllUsableDimensionMembers(hasHypercubes.head).get(EName(tns, "BalanceDim"))
+    }
+
+    // Sales also inherits the hypercube
+    assertResult(hasHypercubes.toSet) {
+      taxo.findAllInheritedHasHypercubes(EName(primaryTns, "Sales")).toSet
+    }
+
+    assertResult(Set(EName(primaryTns, "Sales"))) {
+      taxo.filterOutgoingDomainMemberRelationshipsOnElr(primary, hasHypercubes.head.elr).map(_.member).toSet
+    }
+    assertResult(Set(EName(primaryTns, "Sales"))) {
+      taxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(_.firstRelationship.elr == hasHypercubes.head.elr).
+        flatMap(_.relationships).map(_.member).toSet
+    }
+  }
+
+  test("testPrimaryItemPolymorphismDifferentSubGraphs") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph-presentation.xml",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph-definition.xml"))
+
+    val tns = "http://www.test.com/t"
+
+    val biologicalAssets = EName(tns, "BiologicalAssets")
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships
+
+    assertResult(2) {
+      hasHypercubes.size
+    }
+
+    // TODO
+
+    println(taxo.findAllOwnOrInheritedHasHypercubes(biologicalAssets))
+
+    println(taxo.findAllDimensionMembers(hasHypercubes.head))
+    println(taxo.findAllDimensionMembers(hasHypercubes.tail.head))
+  }
+
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
     val rootDir = new File(classOf[DimensionalQueryTest].getResource("/conf-suite-dim").toURI)
     val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
