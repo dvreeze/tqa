@@ -1804,13 +1804,127 @@ class DimensionalQueryTest extends FunSuite {
     assertResult(2) {
       hasHypercubes.size
     }
+    assertResult(List(
+      EName(tns, "MovementsAnalysisAbstract"),
+      EName(tns, "Assets"))) {
 
-    // TODO
+      hasHypercubes.map(_.primary)
+    }
+    assertResult(List(
+      EName(tns, "ClassesHypercube"),
+      EName(tns, "ValuationHypercube"))) {
 
-    println(taxo.findAllOwnOrInheritedHasHypercubes(biologicalAssets))
+      hasHypercubes.map(_.hypercube)
+    }
 
-    println(taxo.findAllDimensionMembers(hasHypercubes.head))
-    println(taxo.findAllDimensionMembers(hasHypercubes.tail.head))
+    val classesHasHypercube = hasHypercubes.filter(_.hypercube == EName(tns, "ClassesHypercube")).head
+    val validationHasHypercube = hasHypercubes.filter(_.hypercube == EName(tns, "ValuationHypercube")).head
+
+    // First consider the "classes" has-hypercube.
+    // The biological assets concept is in a dimension domain, but not in the has-hypercube inheritance tree.
+
+    val classesHypercubeDimMembers = taxo.findAllDimensionMembers(classesHasHypercube)
+
+    assertResult(Map(
+      EName(tns, "ClassesDimension") -> Set(
+        EName(tns, "Assets"),
+        EName(tns, "PPE"),
+        EName(tns, "BiologicalAssets")))) {
+
+      classesHypercubeDimMembers
+    }
+
+    val inheritingDomMemsForClassesHasHypercube =
+      taxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(classesHasHypercube.primary) { path =>
+        path.firstRelationship.elr == classesHasHypercube.elr
+      }
+
+    assertResult(false) {
+      inheritingDomMemsForClassesHasHypercube.flatMap(_.concepts).contains(biologicalAssets)
+    }
+    assertResult(Set(EName(tns, "MovementsAnalysisAbstract"), EName(tns, "NetValue"), EName(tns, "Changes"), EName(tns, "Increases"), EName(tns, "Decreases"))) {
+      inheritingDomMemsForClassesHasHypercube.flatMap(_.concepts).toSet
+    }
+
+    // Next consider the "validation" has-hypercube.
+    // The biological assets concept is not in a dimension domain, but it is in the has-hypercube inheritance tree.
+
+    val validationHypercubeDimMembers = taxo.findAllDimensionMembers(validationHasHypercube)
+
+    assertResult(Map(
+      EName(tns, "ValuationDimension") -> Set(
+        EName(tns, "AtCost"),
+        EName(tns, "FairValue")))) {
+
+      validationHypercubeDimMembers
+    }
+
+    val ownOrInheritedHasHypercubes = taxo.findAllOwnOrInheritedHasHypercubes(biologicalAssets)
+
+    assertResult(List(validationHasHypercube)) {
+      ownOrInheritedHasHypercubes
+    }
+  }
+
+  test("testPrimaryItemPolymorphismInherited") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorInherited.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+      "lib/base/primary.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorInherited-definition.xml"))
+
+    val tns = "http://www.conformance-dimensions.com/xbrl/inherited"
+
+    val sales2 = EName(tns, "Sales2")
+
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships
+
+    assertResult(1) {
+      hasHypercubes.size
+    }
+
+    val dimension = EName("{http://www.conformance-dimensions.com/xbrl/}BalanceDim")
+
+    // The sales2 concept is in a dimension domain of the has-hypercube
+
+    assertResult(true) {
+      taxo.findAllDimensionMembers(hasHypercubes.head).getOrElse(dimension, Set()).contains(sales2)
+    }
+
+    val hasHypercubeInheritanceOrSelf = taxo.computeHasHypercubeInheritanceOrSelf
+
+    // And the sales2 concept also inherits that has-hypercube
+
+    assertResult(true) {
+      hasHypercubeInheritanceOrSelf exists {
+        case (concept, hasHypercubeRels) =>
+          concept == sales2 && hasHypercubeRels.contains(hasHypercubes.head)
+      }
+    }
+  }
+
+  test("testPolymorphismDefaultTest1") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDefaultTest1.xsd",
+      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDefaultTest1-definition.xml"))
+
+    val tns = "http://www.conformance-dimensions.com/xbrl/"
+
+    val dimensionDefaults = taxo.findAllDimensionDefaultRelationships
+
+    assertResult(1) {
+      dimensionDefaults.size
+    }
+
+    assertResult(EName(tns, "dim")) {
+      dimensionDefaults.head.dimension
+    }
+
+    assertResult(EName(tns, "item")) {
+      dimensionDefaults.head.defaultOfDimension
+    }
   }
 
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
