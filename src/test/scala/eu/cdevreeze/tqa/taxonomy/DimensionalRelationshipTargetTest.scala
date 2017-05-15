@@ -262,6 +262,110 @@ class DimensionalRelationshipTargetTest extends FunSuite {
     }
   }
 
+  test("testTargetDomainMemberIsDimensionInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/117-DomainMemberTargetError/targetDomainMemberIsDimensionInvalid.xsd",
+      "100-xbrldte/117-DomainMemberTargetError/targetDomainMemberIsDimensionInvalid-definition.xml"))
+
+    val domainMembers = taxo.findAllDomainMemberRelationships
+
+    assertResult(1) {
+      domainMembers.size
+    }
+
+    assertResult(domainMembers.map(_.targetConceptEName)) {
+      domainMembers.map(_.member)
+    }
+    assertResult(false) {
+      taxo.findPrimaryItemDeclaration(domainMembers.head.member).nonEmpty
+    }
+    assertResult(true) {
+      taxo.findDimensionDeclaration(domainMembers.head.member).nonEmpty
+    }
+  }
+
+  test("testTargetDomainMemberIsHypercubeInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/117-DomainMemberTargetError/targetDomainMemberIsHypercubeInvalid.xsd",
+      "100-xbrldte/117-DomainMemberTargetError/targetDomainMemberIsHypercubeInvalid-definition.xml"))
+
+    val domainMembers = taxo.findAllDomainMemberRelationships
+
+    assertResult(1) {
+      domainMembers.size
+    }
+
+    assertResult(domainMembers.map(_.targetConceptEName)) {
+      domainMembers.map(_.member)
+    }
+    assertResult(false) {
+      taxo.findPrimaryItemDeclaration(domainMembers.head.member).nonEmpty
+    }
+    assertResult(true) {
+      taxo.findHypercubeDeclaration(domainMembers.head.member).nonEmpty
+    }
+  }
+
+  test("testTargetDimensionDefaultIsDimensionInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/123-DimensionDefaultTargetError/targetDimensionDefaultIsDimensionInvalid.xsd",
+      "100-xbrldte/123-DimensionDefaultTargetError/targetDimensionDefaultIsDimensionInvalid-definition.xml"))
+
+    val dimensionDefaults = taxo.findAllDimensionDefaultRelationships
+
+    assertResult(1) {
+      dimensionDefaults.size
+    }
+
+    assertResult(dimensionDefaults.map(_.targetConceptEName)) {
+      dimensionDefaults.map(_.defaultOfDimension)
+    }
+    assertResult(false) {
+      taxo.findPrimaryItemDeclaration(dimensionDefaults.head.defaultOfDimension).nonEmpty
+    }
+    assertResult(true) {
+      taxo.findDimensionDeclaration(dimensionDefaults.head.defaultOfDimension).nonEmpty
+    }
+  }
+
+  test("testTargetDimensionDefaultNotMemberInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/123-DimensionDefaultTargetError/targetDimensionDefaultNotMemberInvalid.xsd",
+      "100-xbrldte/123-DimensionDefaultTargetError/targetDimensionDefaultNotMemberInvalid-definition.xml"))
+
+    val dimensionDefaults = taxo.findAllDimensionDefaultRelationships
+
+    assertResult(1) {
+      dimensionDefaults.size
+    }
+
+    assertResult(dimensionDefaults.map(_.targetConceptEName)) {
+      dimensionDefaults.map(_.defaultOfDimension)
+    }
+    assertResult(true) {
+      taxo.findPrimaryItemDeclaration(dimensionDefaults.head.defaultOfDimension).nonEmpty
+    }
+
+    val hasHypercube = taxo.findAllHasHypercubeRelationships.head
+
+    val members =
+      taxo.findAllDimensionMembers(hasHypercube).getOrElse(dimensionDefaults.head.dimension, Set())
+
+    val tns = "http://www.example.com/new"
+
+    assertResult(EName(tns, "NotDomainMember")) {
+      dimensionDefaults.head.defaultOfDimension
+    }
+
+    // The dimension default is not a member of the dimension for any hypercube
+    assertResult(Set(EName(tns, "Domain"), EName(tns, "DomainMember"))) {
+      members
+    }
+    assertResult(false) {
+      members.contains(dimensionDefaults.head.defaultOfDimension)
+    }
+  }
+
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
     val rootDir = new File(classOf[DimensionalRelationshipTargetTest].getResource("/conf-suite-dim").toURI)
     val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))

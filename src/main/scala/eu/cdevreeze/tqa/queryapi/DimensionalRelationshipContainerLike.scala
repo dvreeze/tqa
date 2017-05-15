@@ -381,8 +381,6 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     }
   }
 
-  // TODO In the dimension member query methods below, mind default members!
-
   final def findAllMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
     val dimensionDomainPaths =
       filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>

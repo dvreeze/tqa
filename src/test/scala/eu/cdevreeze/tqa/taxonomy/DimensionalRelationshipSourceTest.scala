@@ -679,6 +679,108 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     }
   }
 
+  test("testSourceDomainMemberIsDimensionInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/116-DomainMemberSourceError/sourceDomainMemberIsDimensionInvalid.xsd",
+      "100-xbrldte/116-DomainMemberSourceError/sourceDomainMemberIsDimensionInvalid-definition.xml"))
+
+    val domainMembers = taxo.findAllDomainMemberRelationships
+
+    assertResult(1) {
+      domainMembers.size
+    }
+
+    assertResult(domainMembers.map(_.sourceConceptEName)) {
+      domainMembers.map(_.domain)
+    }
+    assertResult(false) {
+      taxo.findPrimaryItemDeclaration(domainMembers.head.domain).nonEmpty
+    }
+    assertResult(true) {
+      taxo.findDimensionDeclaration(domainMembers.head.domain).nonEmpty
+    }
+
+    assertResult(domainMembers.map(_.domain).toSet) {
+      domainMembers.map(_.domain).flatMap(dom => taxo.findAllOutgoingDomainMemberRelationships(dom)).map(_.domain).toSet
+    }
+  }
+
+  test("testSourceDomainMemberIsHypercubeInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/116-DomainMemberSourceError/sourceDomainMemberIsHypercubeInvalid.xsd",
+      "100-xbrldte/116-DomainMemberSourceError/sourceDomainMemberIsHypercubeInvalid-definition.xml"))
+
+    val domainMembers = taxo.findAllDomainMemberRelationships
+
+    assertResult(1) {
+      domainMembers.size
+    }
+
+    assertResult(domainMembers.map(_.sourceConceptEName)) {
+      domainMembers.map(_.domain)
+    }
+    assertResult(false) {
+      taxo.findPrimaryItemDeclaration(domainMembers.head.domain).nonEmpty
+    }
+    assertResult(true) {
+      taxo.findHypercubeDeclaration(domainMembers.head.domain).nonEmpty
+    }
+  }
+
+  test("testDimensionDefaultValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/122-DimensionDefaultSourceError/dimensionDefaultValid.xsd",
+      "100-xbrldte/122-DimensionDefaultSourceError/dimensionDefaultValid-definition.xml"))
+
+    val dimensionDefaults = taxo.findAllDimensionDefaultRelationships
+
+    assertResult(1) {
+      dimensionDefaults.size
+    }
+
+    assertResult(dimensionDefaults.map(_.sourceConceptEName)) {
+      dimensionDefaults.map(_.dimension)
+    }
+    assertResult(true) {
+      taxo.findDimensionDeclaration(dimensionDefaults.head.dimension).nonEmpty
+    }
+    assertResult(false) {
+      taxo.findPrimaryItemDeclaration(dimensionDefaults.head.dimension).nonEmpty
+    }
+    assertResult(false) {
+      taxo.findHypercubeDeclaration(dimensionDefaults.head.dimension).nonEmpty
+    }
+
+    assertResult(dimensionDefaults.map(_.dimension).toSet) {
+      dimensionDefaults.map(_.dimension).flatMap(dim => taxo.findAllOutgoingDimensionDefaultRelationships(dim)).map(_.dimension).toSet
+    }
+  }
+
+  test("testSourceDimensionDefaultNotDimensionInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/122-DimensionDefaultSourceError/sourceDimensionDefaultNotDimensionInvalid.xsd",
+      "100-xbrldte/122-DimensionDefaultSourceError/sourceDimensionDefaultNotDimensionInvalid-definition.xml"))
+
+    val dimensionDefaults = taxo.findAllDimensionDefaultRelationships
+
+    assertResult(1) {
+      dimensionDefaults.size
+    }
+
+    assertResult(dimensionDefaults.map(_.sourceConceptEName)) {
+      dimensionDefaults.map(_.dimension)
+    }
+    assertResult(false) {
+      taxo.findDimensionDeclaration(dimensionDefaults.head.dimension).nonEmpty
+    }
+    assertResult(true) {
+      taxo.findHypercubeDeclaration(dimensionDefaults.head.dimension).nonEmpty
+    }
+    assertResult(false) {
+      taxo.findPrimaryItemDeclaration(dimensionDefaults.head.dimension).nonEmpty
+    }
+  }
+
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
     val rootDir = new File(classOf[DimensionalRelationshipSourceTest].getResource("/conf-suite-dim").toURI)
     val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
