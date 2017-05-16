@@ -36,7 +36,7 @@ import net.sf.saxon.s9api.Processor
 @RunWith(classOf[JUnitRunner])
 class BackingElemTest extends AbstractBackingElemTest {
 
-  private val processor = new Processor(true)
+  private val processor = new Processor(false)
 
   val docElem: E = {
     val docUri = classOf[AbstractBackingElemTest].getResource("some-data.xsd").toURI
