@@ -1082,6 +1082,247 @@ class DimensionalQueryTest extends FunSuite {
     }
   }
 
+  test("testDimensionDefaultSameRoleValid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleValid.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleValid-definition.xml"))
+
+    val tns = "http://www.example.com/new"
+
+    // Two different dimensions
+    val dimension1 = taxo.getDimensionDeclaration(EName(tns, "Dimension1"))
+    val dimension2 = taxo.getDimensionDeclaration(EName(tns, "Dimension2"))
+
+    val dimensionDefaults1 = taxo.findAllOutgoingDimensionDefaultRelationships(dimension1.targetEName)
+
+    val dimensionDefaults2 = taxo.findAllOutgoingDimensionDefaultRelationships(dimension2.targetEName)
+
+    assertResult(1) {
+      dimensionDefaults1.size
+    }
+
+    assertResult(1) {
+      dimensionDefaults2.size
+    }
+
+    assertResult(dimensionDefaults1.map(_.elr).toSet) {
+      dimensionDefaults2.map(_.elr).toSet
+    }
+
+    assertResult((dimensionDefaults1 ++ dimensionDefaults2).toSet) {
+      taxo.findAllDimensionDefaultRelationships.toSet
+    }
+  }
+
+  test("testDimensionDefaultSameRoleInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleInvalid.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleInvalid-definition.xml"))
+
+    val tns = "http://www.example.com/new"
+
+    val dimension = taxo.getDimensionDeclaration(EName(tns, "DimensionDom"))
+
+    val dimensionDefaults = taxo.findAllOutgoingDimensionDefaultRelationships(dimension.targetEName)
+
+    assertResult(2) {
+      dimensionDefaults.size
+    }
+
+    assertResult(Set("http://www.xbrl.org/2003/role/link")) {
+      dimensionDefaults.map(_.elr).toSet
+    }
+
+    assertResult(2) {
+      dimensionDefaults.map(_.defaultOfDimension).toSet.size
+    }
+
+    assertResult(dimensionDefaults.toSet) {
+      taxo.findAllDimensionDefaultRelationships.toSet
+    }
+  }
+
+  test("testDimensionDefaultDifferentRolesInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "lib/base/products.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentRolesInvalid.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentRolesInvalid-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+    val prodTns = "http://www.xbrl.org/dim/conf/product"
+
+    val dimension = taxo.getDimensionDeclaration(EName(tns, "ProductDim"))
+
+    val dimensionDefaults = taxo.findAllOutgoingDimensionDefaultRelationships(dimension.targetEName)
+
+    assertResult(2) {
+      dimensionDefaults.size
+    }
+
+    assertResult(Set("http://www.xbrl.org/2003/role/link/H1", "http://www.xbrl.org/2003/role/link/H2")) {
+      dimensionDefaults.map(_.elr).toSet
+    }
+
+    assertResult(Set(EName(prodTns, "AllProducts"), EName(prodTns, "Cars"))) {
+      dimensionDefaults.map(_.defaultOfDimension).toSet
+    }
+
+    assertResult(dimensionDefaults.toSet) {
+      taxo.findAllDimensionDefaultRelationships.toSet
+    }
+
+    // For fun, let's query entire dimensional trees
+
+    val primaryTns = "http://www.xbrl.org/dim/conf/primary"
+
+    val primary1 = EName(primaryTns, "IncomeStatement")
+    val primary2 = EName(primaryTns, "Sales")
+
+    val hasHypercubes1 = taxo.findAllOutgoingHasHypercubeRelationships(primary1)
+    val hasHypercubes2 = taxo.findAllOutgoingHasHypercubeRelationships(primary2)
+
+    assertResult(1)(hasHypercubes1.size)
+    assertResult(1)(hasHypercubes2.size)
+
+    val dimMembers1 = taxo.findAllUsableDimensionMembers(hasHypercubes1.head)
+
+    assertResult(Set(dimension.targetEName)) {
+      dimMembers1.keySet
+    }
+    assertResult(Set(EName(prodTns, "AllProducts"))) {
+      dimMembers1.getOrElse(dimension.targetEName, Set())
+    }
+
+    val dimMembers2 = taxo.findAllUsableDimensionMembers(hasHypercubes2.head)
+
+    assertResult(Set(dimension.targetEName)) {
+      dimMembers2.keySet
+    }
+    assertResult(Set(EName(prodTns, "AllProducts"))) {
+      dimMembers2.getOrElse(dimension.targetEName, Set())
+    }
+
+    val hasHypercubeInheritanceOrSelf = taxo.computeHasHypercubeInheritanceOrSelf
+
+    assertResult((hasHypercubes1 ++ hasHypercubes2).toSet) {
+      hasHypercubeInheritanceOrSelf.getOrElse(EName(primaryTns, "Sales"), Set()).toSet
+    }
+
+    assertResult(hasHypercubes1.toSet) {
+      hasHypercubeInheritanceOrSelf.getOrElse(EName(primaryTns, "CostOfSales"), Set()).toSet
+    }
+  }
+
+  test("testDimensionDefaultOneArcWithTwoLocators") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultOneArcWithTwoLocators.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultOneArcWithTwoLocators-definition.xml"))
+
+    val tns = "http://www.example.com/new"
+
+    val dimension = taxo.getDimensionDeclaration(EName(tns, "DimensionDom"))
+
+    val dimensionDefaults = taxo.findAllOutgoingDimensionDefaultRelationships(dimension.targetEName)
+
+    // Two relationships
+
+    assertResult(2) {
+      dimensionDefaults.size
+    }
+    assertResult(1) {
+      dimensionDefaults.map(_.dimension).distinct.size
+    }
+    assertResult(2) {
+      dimensionDefaults.map(_.defaultOfDimension).distinct.size
+    }
+
+    // Two relationships, but one shared arc (and locator XLink label)
+
+    assertResult(1) {
+      dimensionDefaults.map(_.arc).distinct.size
+    }
+    assertResult(1) {
+      dimensionDefaults.map(_.arc.from).distinct.size
+    }
+    assertResult(1) {
+      dimensionDefaults.map(_.arc.to).distinct.size
+    }
+
+    // One source locator, and two target locators
+
+    assertResult(1) {
+      dimensionDefaults.map(_.resolvedFrom.xlinkLocatorOrResource).distinct.size
+    }
+    assertResult(2) {
+      dimensionDefaults.map(_.resolvedTo.xlinkLocatorOrResource).distinct.size
+    }
+  }
+
+  test("testMultipleArcsResolveToSameDefault") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/multipleArcsResolveToSameDefault.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/multipleArcsResolveToSameDefault-definition.xml"))
+
+    val tns = "http://www.example.com/new"
+
+    val dimension = taxo.getDimensionDeclaration(EName(tns, "DimensionDom"))
+
+    val dimensionDefaults = taxo.findAllOutgoingDimensionDefaultRelationships(dimension.targetEName)
+
+    // Two relationships, sharing the same dimension and default member
+
+    assertResult(2) {
+      dimensionDefaults.size
+    }
+    assertResult(1) {
+      dimensionDefaults.map(_.dimension).distinct.size
+    }
+    assertResult(1) {
+      dimensionDefaults.map(_.defaultOfDimension).distinct.size
+    }
+    assertResult(2) {
+      dimensionDefaults.map(_.elr).distinct.size
+    }
+  }
+
+  test("testDimensionDefaultDifferentDomainsInvalid") {
+    val taxo = makeTestTaxonomy(Vector(
+      "lib/base/primary.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentDomainsInvalid.xsd",
+      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentDomainsInvalid-definition.xml"))
+
+    val dimensionDefaults = taxo.findAllDimensionDefaultRelationships
+
+    assertResult(2) {
+      dimensionDefaults.size
+    }
+
+    assertResult(1) {
+      dimensionDefaults.map(_.dimension).distinct.size
+    }
+    assertResult(2) {
+      dimensionDefaults.map(_.defaultOfDimension).distinct.size
+    }
+    assertResult(1) {
+      dimensionDefaults.map(_.elr).distinct.size
+    }
+  }
+
+  test("testHypercubeDimensionUndirected") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
+      "100-xbrldte/125-DRSUndirectedCycleError/hypercubeDimensionUndirected-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    // TODO Implement
+  }
+
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
     val rootDir = new File(classOf[DimensionalQueryTest].getResource("/conf-suite-dim").toURI)
     val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
@@ -1092,7 +1333,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
     val richTaxo =
-      BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
+      BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.StrictInstance)
     richTaxo
   }
 
