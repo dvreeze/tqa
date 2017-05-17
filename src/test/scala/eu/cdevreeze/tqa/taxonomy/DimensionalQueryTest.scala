@@ -1320,7 +1320,384 @@ class DimensionalQueryTest extends FunSuite {
 
     val tns = "http://xbrl.org/dims/conformance"
 
-    // TODO Implement
+    val primary = EName(tns, "primaryItem")
+    val dimension = EName(tns, "dimension")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(primary).isDefined)
+    assertResult(true)(taxo.findDimensionDeclaration(dimension).isDefined)
+
+    // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
+
+    val outgoingPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+
+    assertResult(2)(outgoingPaths.size)
+
+    assertResult(Set(2))(outgoingPaths.map(_.relationships.size).toSet)
+
+    // Undirected cycle
+
+    assertResult(List(dimension, dimension)) {
+      outgoingPaths.map(_.lastRelationship.targetConceptEName)
+    }
+
+    // Not so if we follow consecutive relationships
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPaths.size)
+
+    assertResult(Set(2))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    // No undirected cycle
+
+    assertResult(List(dimension)) {
+      outgoingDimPaths.map(_.lastRelationship.targetConceptEName)
+    }
+  }
+
+  test("testDimensionDomainUndirected") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
+      "100-xbrldte/125-DRSUndirectedCycleError/dimensionDomainUndirected-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val hypercube = EName(tns, "hypercube")
+    val domain = EName(tns, "domain")
+
+    assertResult(true)(taxo.findHypercubeDeclaration(hypercube).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+
+    // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
+
+    val outgoingPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
+
+    assertResult(2)(outgoingPaths.size)
+
+    assertResult(Set(2))(outgoingPaths.map(_.relationships.size).toSet)
+
+    // Undirected cycle
+
+    assertResult(List(domain, domain)) {
+      outgoingPaths.map(_.lastRelationship.targetConceptEName)
+    }
+
+    // Not so if we follow consecutive relationships
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPaths.size)
+
+    assertResult(Set(2))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    // No undirected cycle
+
+    assertResult(List(domain)) {
+      outgoingDimPaths.map(_.lastRelationship.targetConceptEName)
+    }
+  }
+
+  test("testDomainMemberUndirected") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
+      "100-xbrldte/125-DRSUndirectedCycleError/domainMemberUndirected-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val primary = EName(tns, "primaryItem")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(primary).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPaths.size)
+
+    assertResult(Set(4))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    // No undirected cycle
+
+    assertResult(List(domainMember)) {
+      outgoingDimPaths.map(_.lastRelationship.targetConceptEName)
+    }
+  }
+
+  test("testDomainMemberDirected") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val primary = EName(tns, "primaryItem")
+    val domain = EName(tns, "domain")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(primary).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPaths.size)
+
+    assertResult(Set(5))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    // A directed cycle
+
+    assertResult(2) {
+      outgoingDimPaths.head.concepts.filter(Set(domain)).size
+    }
+  }
+
+  test("testDomainMemberDirected2") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected2-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val primary = EName(tns, "primaryItem")
+    val domain = EName(tns, "domain")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(primary).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
+        // The check isMinimalIfHavingCycle is essential as stopping condition
+        path.isMinimalIfHavingCycle && path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPaths.size)
+
+    assertResult(Set(5))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    // A directed cycle
+
+    assertResult(2) {
+      outgoingDimPaths.head.concepts.filter(Set(domain)).size
+    }
+    assertResult(true) {
+      outgoingDimPaths.head.hasCycle && outgoingDimPaths.head.isMinimalIfHavingCycle
+    }
+    assertResult(List(primary, EName(tns, "hypercube"), EName(tns, "dimension"), domain, domainMember, domain)) {
+      outgoingDimPaths.head.concepts
+    }
+  }
+
+  test("testDomainMemberDirectedWithoutHypercube") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirectedWithoutHypercube-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val domain = EName(tns, "domain")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPaths.size)
+
+    assertResult(Set(2))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    // A directed cycle
+
+    assertResult(2) {
+      outgoingDimPaths.head.concepts.filter(Set(domain)).size
+    }
+  }
+
+  test("testDomainMemberParallel") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+      "100-xbrldte/126-DRSDirectedCycleError/domainMemberParallel-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val primary = EName(tns, "primaryItem")
+    val hypercube = EName(tns, "hypercube")
+    val dimension = EName(tns, "dimension")
+    val domain = EName(tns, "domain")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(primary).isDefined)
+    assertResult(true)(taxo.findHypercubeDeclaration(hypercube).isDefined)
+    assertResult(true)(taxo.findDimensionDeclaration(dimension).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(2)(outgoingDimPaths.size)
+
+    assertResult(Set(4))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    // A directed cycle
+
+    assertResult(Set(
+      List(primary, hypercube, dimension, domain, domainMember),
+      List(primary, hypercube, dimension, domainMember, domain))) {
+
+      outgoingDimPaths.map(_.concepts).toSet
+    }
+  }
+
+  test("testDomainMemberParallelWithoutHypercube") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+      "100-xbrldte/126-DRSDirectedCycleError/domainMemberParallelWithoutHypercube-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val primary = EName(tns, "primaryItem")
+    val hypercube = EName(tns, "hypercube")
+    val dimension = EName(tns, "dimension")
+    val domain = EName(tns, "domain")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(primary).isDefined)
+    assertResult(true)(taxo.findHypercubeDeclaration(hypercube).isDefined)
+    assertResult(true)(taxo.findDimensionDeclaration(dimension).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPathsFromPrimary =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    val outgoingDimPathsFromDomain =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    val outgoingDimPathsFromDomainMember =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(domainMember, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(1) {
+      outgoingDimPathsFromPrimary.size
+    }
+    assertResult(Set(List(primary, hypercube, dimension))) {
+      outgoingDimPathsFromPrimary.map(_.concepts).toSet
+    }
+
+    assertResult(1) {
+      outgoingDimPathsFromDomain.size
+    }
+    assertResult(Set(List(domain, domainMember))) {
+      outgoingDimPathsFromDomain.map(_.concepts).toSet
+    }
+
+    assertResult(1) {
+      outgoingDimPathsFromDomainMember.size
+    }
+    assertResult(Set(List(domainMember, domain))) {
+      outgoingDimPathsFromDomainMember.map(_.concepts).toSet
+    }
+  }
+
+  test("testDomainMemberDirectedReverse") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirectedReverse-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val primary = EName(tns, "primaryItem")
+    val hypercube = EName(tns, "hypercube")
+    val dimension = EName(tns, "dimension")
+    val domain = EName(tns, "domain")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(primary).isDefined)
+    assertResult(true)(taxo.findHypercubeDeclaration(hypercube).isDefined)
+    assertResult(true)(taxo.findDimensionDeclaration(dimension).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPaths =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
+        path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPaths.size)
+
+    assertResult(Set(4))(outgoingDimPaths.map(_.relationships.size).toSet)
+
+    assertResult(Set(
+      List(primary, hypercube, dimension, domain, domainMember))) {
+
+      outgoingDimPaths.map(_.concepts).toSet
+    }
+
+    // The pseudo-cycle
+
+    assertResult(Set(domainMember -> domain)) {
+      taxo.findAllOutgoingDomainMemberRelationships(domainMember).
+        map(rel => (rel.sourceConceptEName -> rel.targetConceptEName)).toSet
+    }
+  }
+
+  test("testDomainMemberDirected2WithoutHypercube") {
+    val taxo = makeTestTaxonomy(Vector(
+      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected2WithoutHypercube-definition.xml"))
+
+    val tns = "http://xbrl.org/dims/conformance"
+
+    val domain = EName(tns, "domain")
+    val domainMember = EName(tns, "domainMember")
+
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domain).isDefined)
+    assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
+
+    val outgoingDimPathsFromDomain =
+      taxo.filterLongestOutgoingInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship]) { path =>
+        // The check isMinimalIfHavingCycle is essential as stopping condition
+        path.isMinimalIfHavingCycle && path.isElrValid
+      }
+
+    assertResult(1)(outgoingDimPathsFromDomain.size)
+
+    assertResult(Set(2))(outgoingDimPathsFromDomain.map(_.relationships.size).toSet)
+
+    // If there were a hypercube and dimension, we would have a directed cycle.
+
+    assertResult(Set(
+      List(domain, domainMember, domain))) {
+
+      outgoingDimPathsFromDomain.map(_.concepts).toSet
+    }
   }
 
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {

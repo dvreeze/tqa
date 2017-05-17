@@ -51,6 +51,10 @@ final case class InterConceptRelationshipPath[A <: InterConceptRelationship] pri
     concepts.distinct.size < concepts.size
   }
 
+  def isMinimalIfHavingCycle: Boolean = {
+    initOption.map(p => !p.hasCycle).getOrElse(true)
+  }
+
   def append(relationship: A): InterConceptRelationshipPath[A] = {
     require(canAppend(relationship), s"Could not append relationship $relationship")
     new InterConceptRelationshipPath(relationships :+ relationship)
@@ -75,6 +79,15 @@ final case class InterConceptRelationshipPath[A <: InterConceptRelationship] pri
 
   def tails: immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
     relationships.tails.filter(_.nonEmpty).toVector.map(rels => new InterConceptRelationshipPath[A](rels))
+  }
+
+  def initOption: Option[InterConceptRelationshipPath[A]] = {
+    if (relationships.size == 1) {
+      None
+    } else {
+      assert(relationships.size >= 2)
+      Some(new InterConceptRelationshipPath(relationships.init))
+    }
   }
 
   /**
