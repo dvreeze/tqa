@@ -303,7 +303,7 @@ class XPathTest extends FunSuite {
     val exprString = "3 instance of element()"
 
     val expr = xpathEvaluator.toXPathExpression(exprString)
-    val result = xpathEvaluator.evaluateAsBoolean(expr, Some(rootElem.wrappedNode))
+    val result = xpathEvaluator.evaluateAsBoolean(expr, None)
 
     assertResult(false) {
       result
@@ -318,6 +318,17 @@ class XPathTest extends FunSuite {
 
     assertResult(true) {
       result
+    }
+  }
+
+  test("testSumOfEmptySeq") {
+    val exprString = "sum(())"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsBigDecimal(expr, None)
+
+    assertResult(0) {
+      result.toInt
     }
   }
 
