@@ -288,6 +288,39 @@ class XPathTest extends FunSuite {
     }
   }
 
+  test("testInstanceOfElement") {
+    val exprString = ". instance of element()"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsBoolean(expr, Some(rootElem.wrappedNode))
+
+    assertResult(true) {
+      result
+    }
+  }
+
+  test("testNotInstanceOfElement") {
+    val exprString = "3 instance of element()"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsBoolean(expr, Some(rootElem.wrappedNode))
+
+    assertResult(false) {
+      result
+    }
+  }
+
+  test("testInstanceOfElementSeq") {
+    val exprString = "myfun:contexts(.) instance of element()+"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsBoolean(expr, Some(rootElem.wrappedNode))
+
+    assertResult(true) {
+      result
+    }
+  }
+
   private def uriToLocalUri(uri: URI, rootDir: File): URI = {
     // Not robust
     val relativePath = uri.getScheme match {
