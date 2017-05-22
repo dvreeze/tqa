@@ -389,7 +389,7 @@ final class SaxonElem(
   }
 
   def parentBaseUriOption: Option[URI] = {
-    parentOption.flatMap(_.baseUriOption)
+    parentOption.flatMap(_.baseUriOption).orElse(docUriOption)
   }
 
   def path: Path = {
