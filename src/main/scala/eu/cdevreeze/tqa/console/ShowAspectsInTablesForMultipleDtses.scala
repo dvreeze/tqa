@@ -46,10 +46,11 @@ object ShowAspectsInTablesForMultipleDtses {
 
     logger.info(s"Found ${entrypointUris.size} entrypoints")
 
-    entrypointUris foreach { uri =>
-      logger.info(s"Running program ShowAspectsInTables for entrypoint $uri")
+    entrypointUris.sortBy(_.toString).zipWithIndex foreach {
+      case (uri, idx) =>
+        logger.info(s"Running program ShowAspectsInTables for entrypoint $uri (${idx + 1} of ${entrypointUris.size})")
 
-      ShowAspectsInTables.main(Array(rootDir.toString, uri.toString))
+        ShowAspectsInTables.main(Array(rootDir.toString, uri.toString))
     }
 
     logger.info("Ready (for all entrypoints)")

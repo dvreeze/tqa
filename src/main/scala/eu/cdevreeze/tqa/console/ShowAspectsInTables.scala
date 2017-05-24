@@ -158,7 +158,7 @@ object ShowAspectsInTables {
     tables foreach { table =>
       val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, scope, rootDir)
 
-      logger.info(s"Created XPathEvaluator")
+      logger.info(s"Created XPathEvaluator. Entrypoint(s): ${entrypointUris.mkString(", ")}")
 
       showTableAspectInfo(table, tableTaxo, conceptHasHypercubeMap, xpathEvaluator)
     }
