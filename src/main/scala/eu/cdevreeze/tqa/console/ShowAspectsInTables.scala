@@ -121,11 +121,14 @@ object ShowAspectsInTables {
 
     // Disregarding arcs to parameters
     // Assuming all parameters to occur in one and the same document
+    val scope = parameterElems.headOption.map(_.scope).getOrElse(Scope.Empty) ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope
+    logger.info(s"Creating XPath evaluator with scope $scope")
+
     val xpathEvaluator =
       JaxpXPathEvaluatorUsingSaxon.newInstance(
         xpathEvaluatorFactory,
         parameterElems.headOption.map(_.docUri).getOrElse(URI.create("")),
-        parameterElems.headOption.map(_.scope).getOrElse(Scope.Empty) ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
+        scope,
         new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
 
     val paramValues: Map[EName, AnyRef] =
@@ -153,7 +156,7 @@ object ShowAspectsInTables {
       tableTaxo.underlyingTaxonomy.computeHasHypercubeInheritanceOrSelf
 
     tables foreach { table =>
-      val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, rootDir)
+      val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, scope, rootDir)
 
       logger.info(s"Created XPathEvaluator")
 
@@ -640,19 +643,11 @@ object ShowAspectsInTables {
       arcnameOption.forall(an => relationship.baseSetKey.arcEName == an)
   }
 
-  private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, table: Table, localRootDir: File): XPathEvaluator = {
-    makeXPathEvaluator(
-      factory,
-      table.underlyingResource.docUri,
-      table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
-      localRootDir)
-  }
-
-  private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, docUri: URI, scope: Scope, localRootDir: File): XPathEvaluator = {
+  private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, table: Table, startScope: Scope, localRootDir: File): XPathEvaluator = {
     JaxpXPathEvaluatorUsingSaxon.newInstance(
       factory,
-      docUri,
-      scope,
+      table.underlyingResource.docUri,
+      startScope ++ table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
       new SimpleUriResolver(u => uriToLocalUri(u, localRootDir)))
   }
 

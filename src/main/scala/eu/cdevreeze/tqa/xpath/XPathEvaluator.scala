@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.xpath
 import scala.collection.immutable
 
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
 
 /**
  * A very simple XPath evaluator abstraction. It has no knowledge about static and dynamic contexts (other than the
@@ -68,6 +69,13 @@ trait XPathEvaluator {
    * Make sure to pass only XPath strings for which all needed namespace bindings are known to the XPath evaluator.
    */
   def toXPathExpression(xPathString: String): XPathExpression
+
+  def toString(expr: XPathExpression): String
+
+  /**
+   * Returns the namespace context as yaidom Scope
+   */
+  def scope: Scope
 }
 
 object XPathEvaluator {

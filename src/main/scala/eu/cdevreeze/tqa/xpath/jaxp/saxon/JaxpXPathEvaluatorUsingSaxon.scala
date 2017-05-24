@@ -133,7 +133,11 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
         EName.parse(stringResult)
       } else {
         val qname = QName(stringResult)
-        scope.resolveQNameOption(qname).getOrElse(sys.error(s"Could not resolve QName $qname. Expression: '${expr}'"))
+
+        val msg = s"Could not resolve QName $qname. Expression: '${toString(expr)}'. Base URI: ${underlyingEvaluator.getStaticContext.getStaticBaseURI}.\n\tScope: $scope"
+        scope.resolveQNameOption(qname) getOrElse {
+          sys.error(msg)
+        }
       }
     }
   }
@@ -144,14 +148,27 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
+  def toString(expr: XPathExpression): String = expr match {
+    case expr: net.sf.saxon.xpath.XPathExpressionImpl =>
+      expr.getInternalExpression.toString
+    case expr =>
+      expr.toString
+  }
+
   def scope: Scope = {
-    val namespaceContext = underlyingEvaluator.getNamespaceContext
-    require(namespaceContext != null, "Expected non-null namespace context")
+    require(underlyingEvaluator.getNamespaceContext != null, "Expected non-null namespace context")
+    require(
+      underlyingEvaluator.getNamespaceContext.isInstanceOf[NamespaceContextImpl],
+      s"Expected the NamespaceContext to be a Saxon NamespaceContextImpl")
 
-    val staticContext = underlyingEvaluator.getStaticContext
+    val namespaceContext = underlyingEvaluator.getNamespaceContext.asInstanceOf[NamespaceContextImpl]
+    val scope = getScope(namespaceContext)
+    scope
+  }
 
+  private def getScope(namespaceContext: NamespaceContextImpl): Scope = {
     val unfilteredPrefixes: immutable.IndexedSeq[String] =
-      Try(staticContext.iteratePrefixes.asInstanceOf[java.util.Iterator[String]].asScala.toIndexedSeq).getOrElse(Vector())
+      Try(namespaceContext.iteratePrefixes.asInstanceOf[java.util.Iterator[String]].asScala.toIndexedSeq).getOrElse(Vector())
 
     val filteredPrefixes = unfilteredPrefixes.filterNot(Set("xml", "xmlns"))
 
@@ -196,13 +213,13 @@ object JaxpXPathEvaluatorUsingSaxon {
   }
 
   /**
-   * Creates an XPathEvaluator from the provided JaxpXPathEvaluatorFactoryUsingSaxon, document URI, scope and document builder.
+   * Creates an XPathEvaluator from the provided JaxpXPathEvaluatorFactoryUsingSaxon, document URI, scope and URI resolver.
    *
    * The scope is typically the scope of the root element of the document whose URI is provided, enhanced with the
    * minimal scope (for XPath evaluation).
    *
-   * The URIResolver should build Saxon tiny trees using the same Configuration as the one passed as the first
-   * parameter. Consider passing a SimpleUriResolver.
+   * The URIResolver should build Saxon tiny trees using the same Configuration as the one underlying the first parameter.
+   * Consider passing a SimpleUriResolver.
    */
   def newInstance(
     xpathEvaluatorFactory: JaxpXPathEvaluatorFactoryUsingSaxon,
