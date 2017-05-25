@@ -30,6 +30,10 @@ libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-10"
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
 
+libraryDependencies += "com.google.guava" % "guava" % "20.0"
+
+libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.1"
+
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
@@ -39,10 +43,6 @@ libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 libraryDependencies += ("joda-time" % "joda-time" % "2.9.5" % "test").intransitive()
 
 libraryDependencies += ("org.joda" % "joda-convert" % "1.8.1" % "test").intransitive()
-
-libraryDependencies += "com.google.guava" % "guava" % "20.0" % "test"
-
-libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.1" % "test"
 
 
 // resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"

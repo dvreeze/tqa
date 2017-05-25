@@ -23,6 +23,10 @@ import java.util.regex.Pattern
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import net.sf.saxon.s9api.Processor
+
 /**
  * Program that calls `ShowAspectsInTables` for multiple DTSes.
  *
@@ -31,6 +35,10 @@ import scala.collection.immutable
 object ShowAspectsInTablesForMultipleDtses {
 
   private val logger = Logger.getGlobal
+
+  private val processor = new Processor(false)
+
+  private val cacheSize = System.getProperty("cacheSize", "5000").toInt
 
   def main(args: Array[String]): Unit = {
     require(args.size == 2, s"Usage: ShowAspectsInTablesForMultipleDtses <taxo root dir> <entrypoint regex>")
@@ -46,11 +54,19 @@ object ShowAspectsInTablesForMultipleDtses {
 
     logger.info(s"Found ${entrypointUris.size} entrypoints")
 
+    val cachingDocBuilder: CachingDocumentBuilder[_] = {
+      val documentBuilder =
+        new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
+
+      new CachingDocumentBuilder(CachingDocumentBuilder.createCache(documentBuilder, cacheSize))
+    }
+
     entrypointUris.sortBy(_.toString).zipWithIndex foreach {
       case (uri, idx) =>
         logger.info(s"Running program ShowAspectsInTables for entrypoint $uri (${idx + 1} of ${entrypointUris.size})")
+        logger.info(s"Document cache stats: ${cachingDocBuilder.cache.stats}")
 
-        ShowAspectsInTables.main(Array(rootDir.toString, uri.toString))
+        ShowAspectsInTables.showAspectsInTables(rootDir, Set(uri), cachingDocBuilder)
     }
 
     logger.info("Ready (for all entrypoints)")
@@ -67,6 +83,18 @@ object ShowAspectsInTablesForMultipleDtses {
 
   private def isEntrypoint(f: File, entrypointPathRegex: Pattern): Boolean = {
     entrypointPathRegex.matcher(f.getAbsolutePath).matches
+  }
+
+  private def uriToLocalUri(uri: URI, rootDir: File): URI = {
+    // Not robust
+    val relativePath = uri.getScheme match {
+      case "http"  => uri.toString.drop("http://".size)
+      case "https" => uri.toString.drop("https://".size)
+      case _       => sys.error(s"Unexpected URI $uri")
+    }
+
+    val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
+    f.toURI
   }
 
   private def localUriToOriginalUri(localUri: URI, rootDir: URI, useHttp: Boolean): URI = {

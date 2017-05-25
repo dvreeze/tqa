@@ -25,7 +25,7 @@ import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.backingelem.DocumentBuilder
+import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.PeriodType
@@ -77,6 +77,8 @@ object ShowAspectsInTables {
 
   private val processor = new Processor(false)
 
+  private val cacheSize = System.getProperty("cacheSize", "5000").toInt
+
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: ShowAspectsInTables <taxo root dir> <entrypoint URI 1> ...")
     val rootDir = new File(args(0))
@@ -85,6 +87,15 @@ object ShowAspectsInTables {
     val entrypointUris = args.drop(1).map(u => URI.create(u)).toSet
 
     val documentBuilder = getDocumentBuilder(rootDir)
+    val cachingDocumentBuilder =
+      new CachingDocumentBuilder(CachingDocumentBuilder.createCache(documentBuilder, cacheSize))
+
+    showAspectsInTables(rootDir, entrypointUris, cachingDocumentBuilder)
+  }
+
+  def showAspectsInTables(rootDir: File, entrypointUris: Set[URI], documentBuilder: CachingDocumentBuilder[_]): Unit = {
+    require(rootDir.isDirectory, s"Not a directory: $rootDir")
+
     val documentCollector = DefaultDtsCollector(entrypointUris)
 
     val lenient = System.getProperty("lenient", "false").toBoolean
@@ -663,7 +674,7 @@ object ShowAspectsInTables {
     f.toURI
   }
 
-  private def getDocumentBuilder(rootDir: File): DocumentBuilder = {
+  private def getDocumentBuilder(rootDir: File): SaxonDocumentBuilder = {
     new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
   }
 

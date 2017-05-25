@@ -46,3 +46,8 @@ trait DocumentBuilder {
 
   def build(uri: URI): BackingElem
 }
+
+object DocumentBuilder {
+
+  type Aux[A] = DocumentBuilder { type BackingElem = A }
+}
