@@ -87,9 +87,9 @@ sealed abstract class SaxonNode(val wrappedNode: NodeInfo) extends ResolvedNodes
   final protected def filterElemsByAxisAndPredicate(axisNumber: Byte, p: SaxonElem => Boolean): immutable.IndexedSeq[SaxonElem] = {
     val it = wrappedNode.iterateAxis(axisNumber, NodeKindTest.ELEMENT)
 
-    val nodes = Stream.continually(it.next()).takeWhile(_ ne null).toIndexedSeq
+    val nodeStream = Stream.continually(it.next()).takeWhile(_ ne null)
 
-    nodes.map(nodeInfo => SaxonNode.wrapElement(nodeInfo)).filter(p)
+    nodeStream.map(nodeInfo => SaxonNode.wrapElement(nodeInfo)).filter(p).toIndexedSeq
   }
 
   final protected def findElemByAxisAndPredicate(axisNumber: Byte, p: SaxonElem => Boolean): Option[SaxonElem] = {

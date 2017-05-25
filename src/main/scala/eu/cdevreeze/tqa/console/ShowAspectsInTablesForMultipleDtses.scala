@@ -38,7 +38,7 @@ object ShowAspectsInTablesForMultipleDtses {
 
   private val processor = new Processor(false)
 
-  private val cacheSize = System.getProperty("cacheSize", "5000").toInt
+  private val cacheSize = System.getProperty("cacheSize", "10000").toInt
 
   def main(args: Array[String]): Unit = {
     require(args.size == 2, s"Usage: ShowAspectsInTablesForMultipleDtses <taxo root dir> <entrypoint regex>")
@@ -66,7 +66,7 @@ object ShowAspectsInTablesForMultipleDtses {
         logger.info(s"Running program ShowAspectsInTables for entrypoint $uri (${idx + 1} of ${entrypointUris.size})")
         logger.info(s"Document cache stats: ${cachingDocBuilder.cache.stats}")
 
-        ShowAspectsInTables.showAspectsInTables(rootDir, Set(uri), cachingDocBuilder)
+        ShowAspectsInTables.showAspectsInTables(rootDir, Set(uri), cachingDocBuilder, processor)
     }
 
     logger.info("Ready (for all entrypoints)")
