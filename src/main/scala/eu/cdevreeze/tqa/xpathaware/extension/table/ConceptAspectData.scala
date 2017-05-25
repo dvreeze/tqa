@@ -14,29 +14,24 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.richtaxonomy
+package eu.cdevreeze.tqa.xpathaware.extension.table
 
-import eu.cdevreeze.tqa.extension.table.dom.ExplicitDimensionAspect
+import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Wrapper around an ExplicitDimensionAspect, which can extract the relevant data by evaluating XPath where needed.
+ * Wrapper around a ConceptAspect, which can extract the relevant data by evaluating XPath where needed.
  *
  * @author Chris de Vreeze
  */
-final class ExplicitDimensionAspectData(val dimensionAspect: ExplicitDimensionAspect) {
-
-  /**
-   * Returns the dimension as EName, by calling `dimensionAspect.dimension`.
-   */
-  def dimensionName: EName = dimensionAspect.dimension
+final class ConceptAspectData(val conceptAspect: ConceptAspect) {
 
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
-  def memberOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
-    dimensionAspect.memberElemOption.flatMap(_.qnameElemOption).map(_.qnameValue) orElse {
-      dimensionAspect.memberElemOption.flatMap(_.qnameExpressionElemOption).map(_.qnameExpr) map { expr =>
+  def qnameValueOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
+    conceptAspect.qnameElemOption.map(_.qnameValue) orElse {
+      conceptAspect.qnameExpressionElemOption.map(_.qnameExpr) map { expr =>
         xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }

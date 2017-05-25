@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.richtaxonomy
+package eu.cdevreeze.tqa.xpathaware.extension.table
 
 import scala.collection.immutable
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.xpathaware.extension
 
 /**
- * Rich taxonomy querying support, where XPath evaluations (on formula/table link content) can be performed.
+ * XPath-aware table-aware taxonomy querying support.
  *
  * @author Chris de Vreeze
  */
-package object richtaxonomy
+package object table
