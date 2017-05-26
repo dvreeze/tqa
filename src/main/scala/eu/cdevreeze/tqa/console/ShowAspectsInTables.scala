@@ -90,18 +90,18 @@ object ShowAspectsInTables {
     val cachingDocumentBuilder =
       new CachingDocumentBuilder(CachingDocumentBuilder.createCache(documentBuilder, cacheSize))
 
-    showAspectsInTables(rootDir, entrypointUris, cachingDocumentBuilder, processor)
+    showAspectsInTables(entrypointUris, rootDir, cachingDocumentBuilder, processor)
   }
 
   def showAspectsInTables(
+    entrypointUrisOfDts: Set[URI],
     rootDir: File,
-    entrypointUris: Set[URI],
     documentBuilder: CachingDocumentBuilder[_],
     processor: Processor): Unit = {
 
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
 
-    val documentCollector = DefaultDtsCollector(entrypointUris)
+    val documentCollector = DefaultDtsCollector(entrypointUrisOfDts)
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
@@ -114,12 +114,12 @@ object ShowAspectsInTables {
         withDocumentCollector(documentCollector).
         withRelationshipFactory(relationshipFactory)
 
-    logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUris.mkString(", ")}")
+    logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUrisOfDts.mkString(", ")}")
 
     val basicTaxo = taxoBuilder.build()
 
     logger.info(s"Found ${basicTaxo.relationships.size} relationships in the DTS")
-    logger.info(s"Starting building the table-aware taxonomy with entrypoint(s) ${entrypointUris.mkString(", ")}")
+    logger.info(s"Starting building the table-aware taxonomy with entrypoint(s) ${entrypointUrisOfDts.mkString(", ")}")
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
@@ -171,12 +171,17 @@ object ShowAspectsInTables {
     val conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] =
       tableTaxo.underlyingTaxonomy.computeHasHypercubeInheritanceOrSelf
 
+    val hasHypercubes = conceptHasHypercubeMap.values.flatten.toIndexedSeq.distinct
+
+    val hasHypercubeDimMembers: Map[(EName, String), Map[EName, Set[EName]]] =
+      computeHasHypercubeDimensionMembers(hasHypercubes, tableTaxo)
+
     tables foreach { table =>
       val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, scope, rootDir)
 
-      logger.info(s"Created XPathEvaluator. Entrypoint(s): ${entrypointUris.mkString(", ")}")
+      logger.info(s"Created XPathEvaluator. Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
 
-      showTableAspectInfo(table, tableTaxo, conceptHasHypercubeMap, xpathEvaluator)
+      showTableAspectInfo(table, tableTaxo, conceptHasHypercubeMap, hasHypercubeDimMembers, xpathEvaluator)
     }
 
     logger.info("Ready")
@@ -186,6 +191,7 @@ object ShowAspectsInTables {
     table: Table,
     tableTaxo: BasicTableTaxonomy,
     conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
+    hasHypercubeDimMembers: Map[(EName, String), Map[EName, Set[EName]]],
     xpathEvaluator: XPathEvaluator): Unit = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
@@ -229,7 +235,7 @@ object ShowAspectsInTables {
       logger.info(msg)
     }
 
-    showDimensionalTableAspectInfo(table, concepts, tableTaxo, conceptHasHypercubeMap, xpathEvaluator)
+    showDimensionalTableAspectInfo(table, concepts, tableTaxo, conceptHasHypercubeMap, hasHypercubeDimMembers, xpathEvaluator)
   }
 
   def showDimensionalTableAspectInfo(
@@ -237,6 +243,7 @@ object ShowAspectsInTables {
     concepts: Set[EName],
     tableTaxo: BasicTableTaxonomy,
     conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
+    hasHypercubeDimMembers: Map[(EName, String), Map[EName, Set[EName]]],
     xpathEvaluator: XPathEvaluator): Unit = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
@@ -253,13 +260,7 @@ object ShowAspectsInTables {
 
     val hasHypercubes = conceptHasHypercubeMap.filterKeys(concepts).values.flatten.toIndexedSeq
 
-    // Usable and non-usable members in the taxonomy
-    val allDimMemPairs: immutable.IndexedSeq[(EName, EName)] =
-      hasHypercubes flatMap { hh =>
-        tableTaxo.underlyingTaxonomy.findAllDimensionMembers(hh).toSeq.flatMap(dimMems => dimMems._2.map(mem => (dimMems._1 -> mem)))
-      }
-
-    val allDimensionMembers: Map[EName, Set[EName]] = allDimMemPairs.groupBy(_._1).mapValues(_.map(_._2).toSet)
+    val allDimensionMembers: Map[EName, Set[EName]] = findCombinedDimensionMembers(hasHypercubes, hasHypercubeDimMembers)
 
     val unexpectedDimensionMembersInTable =
       dimensionMembersInTable map {
@@ -602,6 +603,36 @@ object ShowAspectsInTables {
   def findAllDimensionAspects(taxo: TaxonomyApi): Set[Aspect.DimensionAspect] = {
     // Are relationships and ELRs important here?
     taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
+  }
+
+  private def computeHasHypercubeDimensionMembers(
+    hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
+    tableTaxo: BasicTableTaxonomy): Map[(EName, String), Map[EName, Set[EName]]] = {
+
+    hasHypercubes.groupBy(hh => (hh.primary, hh.elr)) mapValues { hhGroup =>
+      val dimMems: immutable.IndexedSeq[(EName, EName)] =
+        hhGroup flatMap { hh =>
+          val dimMembersMap = tableTaxo.underlyingTaxonomy.findAllDimensionMembers(hh)
+          dimMembersMap.toSeq.flatMap(dimMems => dimMems._2.map(mem => (dimMems._1 -> mem)))
+        }
+
+      dimMems.groupBy(_._1).mapValues(_.map(_._2).toSet)
+    }
+  }
+
+  private def findCombinedDimensionMembers(
+    hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
+    allHasHypercubeDimensionMembers: Map[(EName, String), Map[EName, Set[EName]]]): Map[EName, Set[EName]] = {
+
+    val hasHypercubeKeys = hasHypercubes.map(hh => (hh.primary, hh.elr)).distinct
+
+    val dimMems: immutable.IndexedSeq[(EName, EName)] =
+      hasHypercubeKeys flatMap { hhKey =>
+        val dimMembersMap = allHasHypercubeDimensionMembers.getOrElse(hhKey, Map())
+        dimMembersMap.toSeq.flatMap(dimMems => dimMems._2.map(mem => (dimMems._1 -> mem)))
+      }
+
+    dimMems.groupBy(_._1).mapValues(_.map(_._2).toSet)
   }
 
   private def resolveXfiRoot(

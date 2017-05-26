@@ -66,7 +66,7 @@ object ShowAspectsInTablesForMultipleDtses {
         logger.info(s"Running program ShowAspectsInTables for entrypoint $uri (${idx + 1} of ${entrypointUris.size})")
         logger.info(s"Document cache stats: ${cachingDocBuilder.cache.stats}")
 
-        ShowAspectsInTables.showAspectsInTables(rootDir, Set(uri), cachingDocBuilder, processor)
+        ShowAspectsInTables.showAspectsInTables(Set(uri), rootDir, cachingDocBuilder, processor)
     }
 
     logger.info("Ready (for all entrypoints)")
