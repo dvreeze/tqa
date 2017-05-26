@@ -173,7 +173,7 @@ object ShowAspectsInTables {
 
     val hasHypercubes = conceptHasHypercubeMap.values.flatten.toIndexedSeq.distinct
 
-    val hasHypercubeDimMembers: Map[(EName, String), Map[EName, Set[EName]]] =
+    val hasHypercubeDimMembers: Map[(EName, String), Set[(EName, EName)]] =
       computeHasHypercubeDimensionMembers(hasHypercubes, tableTaxo)
 
     tables foreach { table =>
@@ -191,7 +191,7 @@ object ShowAspectsInTables {
     table: Table,
     tableTaxo: BasicTableTaxonomy,
     conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
-    hasHypercubeDimMembers: Map[(EName, String), Map[EName, Set[EName]]],
+    hasHypercubeDimMembers: Map[(EName, String), Set[(EName, EName)]],
     xpathEvaluator: XPathEvaluator): Unit = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
@@ -243,7 +243,7 @@ object ShowAspectsInTables {
     concepts: Set[EName],
     tableTaxo: BasicTableTaxonomy,
     conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
-    hasHypercubeDimMembers: Map[(EName, String), Map[EName, Set[EName]]],
+    hasHypercubeDimMembers: Map[(EName, String), Set[(EName, EName)]],
     xpathEvaluator: XPathEvaluator): Unit = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
@@ -265,7 +265,9 @@ object ShowAspectsInTables {
     val unexpectedDimensionMembersInTable =
       dimensionMembersInTable map {
         case (dim, members) =>
-          (dim -> members.filter(m => !allDimensionMembers.getOrElse(dim, Set()).contains(m)))
+          val expectedMembers = allDimensionMembers.getOrElse(dim, Set())
+          val unexpectedMembers = members.filterNot(expectedMembers)
+          (dim -> unexpectedMembers)
       } filter (_._2.nonEmpty)
 
     if (unexpectedDimensionMembersInTable.nonEmpty) {
@@ -607,32 +609,29 @@ object ShowAspectsInTables {
 
   private def computeHasHypercubeDimensionMembers(
     hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
-    tableTaxo: BasicTableTaxonomy): Map[(EName, String), Map[EName, Set[EName]]] = {
+    tableTaxo: BasicTableTaxonomy): Map[(EName, String), Set[(EName, EName)]] = {
 
     hasHypercubes.groupBy(hh => (hh.primary, hh.elr)) mapValues { hhGroup =>
-      val dimMems: immutable.IndexedSeq[(EName, EName)] =
-        hhGroup flatMap { hh =>
-          val dimMembersMap = tableTaxo.underlyingTaxonomy.findAllDimensionMembers(hh)
-          dimMembersMap.toSeq.flatMap(dimMems => dimMems._2.map(mem => (dimMems._1 -> mem)))
-        }
+      // Probably just one has-hypercube in the group
 
-      dimMems.groupBy(_._1).mapValues(_.map(_._2).toSet)
+      (hhGroup flatMap { hh =>
+        val dimMembersMap = tableTaxo.underlyingTaxonomy.findAllDimensionMembers(hh)
+
+        dimMembersMap.toSeq.flatMap(kv => kv._2.map(mem => kv._1 -> mem))
+      }).toSet
     }
   }
 
   private def findCombinedDimensionMembers(
     hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
-    allHasHypercubeDimensionMembers: Map[(EName, String), Map[EName, Set[EName]]]): Map[EName, Set[EName]] = {
+    allHasHypercubeDimensionMembers: Map[(EName, String), Set[(EName, EName)]]): Map[EName, Set[EName]] = {
 
-    val hasHypercubeKeys = hasHypercubes.map(hh => (hh.primary, hh.elr)).distinct
+    val hasHypercubeKeys = hasHypercubes.map(hh => (hh.primary, hh.elr)).toSet
 
-    val dimMems: immutable.IndexedSeq[(EName, EName)] =
-      hasHypercubeKeys flatMap { hhKey =>
-        val dimMembersMap = allHasHypercubeDimensionMembers.getOrElse(hhKey, Map())
-        dimMembersMap.toSeq.flatMap(dimMems => dimMems._2.map(mem => (dimMems._1 -> mem)))
-      }
+    val filteredDimMems: Set[(EName, EName)] =
+      allHasHypercubeDimensionMembers.filterKeys(hasHypercubeKeys).values.flatten.toSet
 
-    dimMems.groupBy(_._1).mapValues(_.map(_._2).toSet)
+    filteredDimMems.groupBy(_._1).mapValues(grp => grp.map(_._2))
   }
 
   private def resolveXfiRoot(
