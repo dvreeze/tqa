@@ -204,7 +204,7 @@ object ShowAspectsInTables {
     val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
     val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
 
-    val itemDecls = tableTaxo.underlyingTaxonomy.filterItemDeclarations(decl => concepts.contains(decl.targetEName))
+    val itemDecls = concepts.toIndexedSeq.flatMap(c => tableTaxo.underlyingTaxonomy.findItemDeclaration(c))
     val expectedPeriodTypes: Set[PeriodType] = itemDecls.map(_.periodType).toSet
 
     val periodTypes: Set[PeriodType] = findAllPeriodTypesInTable(table, tableTaxo)(xpathEvaluator)
