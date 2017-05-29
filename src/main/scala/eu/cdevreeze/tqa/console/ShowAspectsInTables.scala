@@ -289,7 +289,7 @@ object ShowAspectsInTables {
     val concepts: Seq[EName] =
       nodes flatMap {
         case node: ConceptRelationshipNode =>
-          findAllConceptsInConceptRelationshipNode(node, taxo)(xpathEvaluator)
+          ConceptRelationshipNodeData.findAllConceptsInConceptRelationshipNode(node, taxo)(xpathEvaluator)
         case node: RuleNode =>
           findAllConceptsInRuleNode(node, taxo)(xpathEvaluator)
         case node =>
@@ -312,98 +312,6 @@ object ShowAspectsInTables {
     concepts.toSet
   }
 
-  def findAllConceptsInConceptRelationshipNode(
-    conceptRelationshipNode: ConceptRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
-
-    val conceptRelationNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
-    val axis = conceptRelationNodeData.formulaAxis(xpathEvaluator)
-
-    val rawRelationshipSources: immutable.IndexedSeq[EName] =
-      conceptRelationNodeData.relationshipSources(xpathEvaluator)
-
-    val linkroleOption: Option[String] = conceptRelationNodeData.linkroleOption(xpathEvaluator)
-
-    val arcroleOption: Option[String] = conceptRelationNodeData.arcroleOption(xpathEvaluator)
-
-    val linknameOption: Option[String] = conceptRelationNodeData.linknameOption(xpathEvaluator)
-
-    val arcnameOption: Option[String] = conceptRelationNodeData.arcnameOption(xpathEvaluator)
-
-    val doResolveXfiRoot = rawRelationshipSources.isEmpty || rawRelationshipSources.contains(ENames.XfiRootEName)
-
-    val effectiveRelationshipSources: immutable.IndexedSeq[EName] = {
-      if (doResolveXfiRoot) {
-        val resolvedXfiRoot = resolveXfiRoot(linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo).toIndexedSeq
-
-        (resolvedXfiRoot ++ rawRelationshipSources.filterNot(Set(ENames.XfiRootEName))).sortBy(_.toString)
-      } else {
-        rawRelationshipSources.toIndexedSeq.sortBy(_.toString)
-      }
-    }
-
-    val includeSelf: Boolean = axis.includesSelf
-
-    // Number of generations (optional), from the perspective of finding the descendant-or-self
-    // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
-    val effectiveGenerationsOption: Option[Int] = {
-      val rawValue = conceptRelationNodeData.generations(xpathEvaluator)
-      val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
-      val resultOption = if (axis.includesChildrenButNotDeeperDescendants) Some(1) else optionalRawResult
-      resultOption
-    }
-
-    val conceptTreeWalkSpecs: immutable.IndexedSeq[ConceptTreeWalkSpec] =
-      effectiveRelationshipSources map { startConcept =>
-        new ConceptTreeWalkSpec(startConcept, includeSelf, effectiveGenerationsOption, linkroleOption, arcroleOption, linknameOption, arcnameOption)
-      }
-
-    // Find the descendant-or-self or descendant concepts for the given number of generations, if applicable.
-    val conceptsExcludingSiblings: Set[EName] =
-      if (axis.includesDescendantsOrChildren) {
-        (conceptTreeWalkSpecs.map(spec => filterDescendantOrSelfConcepts(spec, taxo)(xpathEvaluator))).flatten.toSet
-      } else {
-        if (axis.includesSelf) effectiveRelationshipSources.toSet else Set.empty
-      }
-
-    val includedSiblings: Set[EName] = {
-      if (axis.includesSiblings) {
-        rawRelationshipSources.filterNot(Set(ENames.XfiRootEName)).
-          flatMap(c => findAllSiblings(c, linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo)).toSet
-      } else {
-        Set()
-      }
-    }
-
-    conceptsExcludingSiblings.union(includedSiblings)
-  }
-
-  /**
-   * Returns the descendant-or-self concepts in a concept tree walk according to the parameter specification of the walk.
-   * If the start concept must not be included, the tree walk finds descendant concepts instead of descendant-or-self concepts.
-   *
-   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
-   */
-  def filterDescendantOrSelfConcepts(
-    treeWalkSpec: ConceptTreeWalkSpec,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
-
-    val relationshipPaths =
-      taxo.underlyingTaxonomy.filterLongestOutgoingNonCyclicInterConceptRelationshipPaths(
-        treeWalkSpec.startConcept,
-        classTag[InterConceptRelationship]) { path =>
-          path.isElrValid &&
-            treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
-            treeWalkSpec.linkroleOption.forall(lr => path.relationships.head.elr == lr) &&
-            treeWalkSpec.arcroleOption.forall(ar => path.relationships.head.arcrole == ar) &&
-            treeWalkSpec.linknameOption.forall(ln => path.relationships.map(_.baseSetKey.extLinkEName).forall(_ == ln)) &&
-            treeWalkSpec.arcnameOption.forall(an => path.relationships.map(_.baseSetKey.arcEName).forall(_ == an))
-        }
-
-    val resultIncludingStartConcept = relationshipPaths.flatMap(_.concepts).toSet
-    if (treeWalkSpec.includeSelf) resultIncludingStartConcept else resultIncludingStartConcept.diff(Set(treeWalkSpec.startConcept))
-  }
-
   /**
    * Returns all dimension members "touched" by the table. These are the dimension members in expanded dimension relationship nodes,
    * and the dimension members in rule nodes. Not only usable members are returned per specified dimension, but all the ones found.
@@ -414,7 +322,7 @@ object ShowAspectsInTables {
     val dimMemPairs: Seq[(EName, EName)] =
       nodes flatMap {
         case node: DimensionRelationshipNode =>
-          findAllMembersInDimensionRelationshipNode(node, taxo)(xpathEvaluator).toSeq.
+          DimensionRelationshipNodeData.findAllMembersInDimensionRelationshipNode(node, taxo)(xpathEvaluator).toSeq.
             map(mem => (node.dimensionName -> mem))
         case node: RuleNode =>
           findAllExplicitDimensionMembersInRuleNode(node, taxo)(xpathEvaluator).toSeq
@@ -448,84 +356,6 @@ object ShowAspectsInTables {
     val dimensionMembers =
       explicitDimensionAspectDataObjects.flatMap(da => da.memberOption(xpathEvaluator).map(m => da.dimensionName -> m))
     dimensionMembers.toMap
-  }
-
-  def findAllMembersInDimensionRelationshipNode(
-    dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
-
-    val dimension: EName = dimensionRelationshipNode.dimensionName
-
-    val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
-    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator)
-
-    val rawRelationshipSources: immutable.IndexedSeq[EName] =
-      dimensionRelationNodeData.relationshipSources(xpathEvaluator)
-
-    val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator)
-
-    val startMembers: immutable.IndexedSeq[DimensionMemberTreeWalkSpec.StartMember] = {
-      if (rawRelationshipSources.isEmpty) {
-        val dimDomRelationships =
-          taxo.underlyingTaxonomy.filterOutgoingDimensionDomainRelationships(dimension) { rel =>
-            linkroleOption.forall(_ == rel.elr)
-          }
-
-        dimDomRelationships.map(rel => new DimensionMemberTreeWalkSpec.DimensionDomainSource(rel))
-      } else {
-        rawRelationshipSources.map(member => new DimensionMemberTreeWalkSpec.MemberSource(member))
-      }
-    }
-
-    val includeSelf: Boolean = axis.includesSelf
-
-    // Number of generations (optional), from the perspective of finding the descendant-or-self
-    // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
-    val effectiveGenerationsOption: Option[Int] = {
-      val rawValue = dimensionRelationNodeData.generations(xpathEvaluator)
-      val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
-      val resultOption = if (axis.includesChildrenButNotDeeperDescendants) Some(1) else optionalRawResult
-      resultOption
-    }
-
-    val dimensionMemberTreeWalkSpecs: immutable.IndexedSeq[DimensionMemberTreeWalkSpec] =
-      startMembers map { startMember =>
-        new DimensionMemberTreeWalkSpec(dimension, startMember, includeSelf, effectiveGenerationsOption, linkroleOption)
-      }
-
-    // Find the descendant-or-self or descendant members for the given number of generations, if applicable.
-    val conceptsExcludingSiblings: Set[EName] =
-      (dimensionMemberTreeWalkSpecs.map(spec => filterDescendantOrSelfMembers(spec, taxo)(xpathEvaluator))).flatten.toSet
-
-    conceptsExcludingSiblings
-  }
-
-  /**
-   * Returns the descendant-or-self members in a dimension-member tree walk according to the parameter specification of the walk.
-   * If the start member must not be included, the tree walk finds descendant members instead of descendant-or-self members.
-   *
-   * It is assumed yet not checked that the tree walk can be made for the given dimension (so the dimension is indeed an ancestor
-   * in a sequence of consecutive "domain-aware" relationships).
-   *
-   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
-   */
-  def filterDescendantOrSelfMembers(
-    treeWalkSpec: DimensionMemberTreeWalkSpec,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
-
-    // Ignoring unusable members without any usable descendants
-
-    val relationshipPaths =
-      taxo.underlyingTaxonomy.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
-        treeWalkSpec.startMemberName) { path =>
-          treeWalkSpec.startMember.incomingRelationshipOption.forall(_.isFollowedBy(path.firstRelationship)) &&
-            path.isElrValid &&
-            treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
-            treeWalkSpec.linkroleOption.forall(lr => treeWalkSpec.elrToCheck(path) == lr)
-        }
-
-    val resultIncludingStartMember = relationshipPaths.flatMap(_.concepts).toSet
-    if (treeWalkSpec.includeSelf) resultIncludingStartMember else resultIncludingStartMember.diff(Set(treeWalkSpec.startMemberName))
   }
 
   /**
@@ -606,61 +436,6 @@ object ShowAspectsInTables {
     taxo.findAllDimensionDeclarations.map(dimDecl => Aspect.DimensionAspect(dimDecl.dimensionEName)).toSet
   }
 
-  private def resolveXfiRoot(
-    linkroleOption: Option[String],
-    arcroleOption: Option[String],
-    linknameOption: Option[String],
-    arcnameOption: Option[String],
-    taxo: BasicTableTaxonomy): Set[EName] = {
-
-    val relationships =
-      taxo.underlyingTaxonomy.filterInterConceptRelationshipsOfType(classTag[InterConceptRelationship]) { rel =>
-        relationshipMatchesCriteria(rel, linkroleOption, arcroleOption, linknameOption, arcnameOption)
-      }
-
-    val sources = relationships.map(_.sourceConceptEName).toSet
-    val targets = relationships.map(_.targetConceptEName).toSet
-    sources.diff(targets)
-  }
-
-  private def findAllSiblings(
-    concept: EName,
-    linkroleOption: Option[String],
-    arcroleOption: Option[String],
-    linknameOption: Option[String],
-    arcnameOption: Option[String],
-    taxo: BasicTableTaxonomy): Set[EName] = {
-
-    val incomingRelationships =
-      taxo.underlyingTaxonomy.filterIncomingInterConceptRelationshipsOfType(concept, classTag[InterConceptRelationship]) { rel =>
-        relationshipMatchesCriteria(rel, linkroleOption, arcroleOption, linknameOption, arcnameOption)
-      }
-
-    if (incomingRelationships.nonEmpty) {
-      (incomingRelationships flatMap { rel =>
-        taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationshipsOfType(rel.sourceConceptEName, classTag[InterConceptRelationship]) { r =>
-          relationshipMatchesCriteria(r, linkroleOption, arcroleOption, linknameOption, arcnameOption)
-        }
-      }).map(_.targetConceptEName).toSet.diff(Set(concept))
-    } else {
-      // Find roots
-      resolveXfiRoot(linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo).diff(Set(concept))
-    }
-  }
-
-  private def relationshipMatchesCriteria(
-    relationship: InterConceptRelationship,
-    linkroleOption: Option[String],
-    arcroleOption: Option[String],
-    linknameOption: Option[String],
-    arcnameOption: Option[String]): Boolean = {
-
-    linkroleOption.forall(lr => relationship.elr == lr) &&
-      arcroleOption.forall(ar => relationship.arcrole == ar) &&
-      linknameOption.forall(ln => relationship.baseSetKey.extLinkEName == ln) &&
-      arcnameOption.forall(an => relationship.baseSetKey.arcEName == an)
-  }
-
   private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, table: Table, startScope: Scope, localRootDir: File): XPathEvaluator = {
     JaxpXPathEvaluatorUsingSaxon.newInstance(
       factory,
@@ -683,64 +458,5 @@ object ShowAspectsInTables {
 
   private def getDocumentBuilder(rootDir: File, processor: Processor): SaxonDocumentBuilder = {
     new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
-  }
-
-  /**
-   * Specification of a concept tree walk starting with one concept (which must not be xfi:root but a real concept).
-   * The tree walk finds descendant-or-self concepts in the network, but if the start concept must
-   * be excluded the tree walk only finds descendant concepts.
-   *
-   * The optional generations cannot contain 0. None means unbounded.
-   */
-  final case class ConceptTreeWalkSpec(
-    val startConcept: EName,
-    val includeSelf: Boolean,
-    val generationsOption: Option[Int],
-    val linkroleOption: Option[String],
-    val arcroleOption: Option[String],
-    val linknameOption: Option[String],
-    val arcnameOption: Option[String])
-
-  /**
-   * Specification of a dimension member tree walk for some explicit dimension, starting with one member.
-   * The tree walk finds descendant-or-self members in the network, but if the start member must
-   * be excluded the tree walk only finds descendant members.
-   *
-   * The optional generations cannot contain 0. None means unbounded.
-   */
-  final case class DimensionMemberTreeWalkSpec(
-      val explicitDimension: EName,
-      val startMember: DimensionMemberTreeWalkSpec.StartMember,
-      val includeSelf: Boolean,
-      val generationsOption: Option[Int],
-      val linkroleOption: Option[String]) {
-
-    def startMemberName: EName = startMember.startMemberName
-
-    def elrToCheck(path: InterConceptRelationshipPath[DomainMemberRelationship]): String = {
-      startMember match {
-        case startMember: DimensionMemberTreeWalkSpec.DimensionDomainSource =>
-          startMember.dimensionDomainRelationship.elr
-        case startMember: DimensionMemberTreeWalkSpec.MemberSource =>
-          path.relationships.head.elr
-      }
-    }
-  }
-
-  object DimensionMemberTreeWalkSpec {
-
-    sealed trait StartMember {
-      def startMemberName: EName
-      def incomingRelationshipOption: Option[DomainAwareRelationship]
-    }
-
-    final class DimensionDomainSource(val dimensionDomainRelationship: DimensionDomainRelationship) extends StartMember {
-      def startMemberName: EName = dimensionDomainRelationship.targetConceptEName
-      def incomingRelationshipOption: Option[DomainAwareRelationship] = Some(dimensionDomainRelationship)
-    }
-
-    final class MemberSource(val startMemberName: EName) extends StartMember {
-      def incomingRelationshipOption: Option[DomainAwareRelationship] = None
-    }
   }
 }

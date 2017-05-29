@@ -20,6 +20,11 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNodeFormulaAxis
+import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
+import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
+import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
+import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
+import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
 
@@ -75,5 +80,132 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
       }
 
     resultAsStringOption.map(_.toInt).getOrElse(0)
+  }
+}
+
+object DimensionRelationshipNodeData {
+
+  /**
+   * Finds all dimension members referred to by the given dimension relationship node in the given taxonomy.
+   */
+  def findAllMembersInDimensionRelationshipNode(
+    dimensionRelationshipNode: DimensionRelationshipNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    val dimension: EName = dimensionRelationshipNode.dimensionName
+
+    val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator)
+
+    val rawRelationshipSources: immutable.IndexedSeq[EName] =
+      dimensionRelationNodeData.relationshipSources(xpathEvaluator)
+
+    val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator)
+
+    val startMembers: immutable.IndexedSeq[DimensionMemberTreeWalkSpec.StartMember] = {
+      if (rawRelationshipSources.isEmpty) {
+        val dimDomRelationships =
+          taxo.underlyingTaxonomy.filterOutgoingDimensionDomainRelationships(dimension) { rel =>
+            linkroleOption.forall(_ == rel.elr)
+          }
+
+        dimDomRelationships.map(rel => new DimensionMemberTreeWalkSpec.DimensionDomainSource(rel))
+      } else {
+        rawRelationshipSources.map(member => new DimensionMemberTreeWalkSpec.MemberSource(member))
+      }
+    }
+
+    val includeSelf: Boolean = axis.includesSelf
+
+    // Number of generations (optional), from the perspective of finding the descendant-or-self
+    // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
+    val effectiveGenerationsOption: Option[Int] = {
+      val rawValue = dimensionRelationNodeData.generations(xpathEvaluator)
+      val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
+      val resultOption = if (axis.includesChildrenButNotDeeperDescendants) Some(1) else optionalRawResult
+      resultOption
+    }
+
+    val dimensionMemberTreeWalkSpecs: immutable.IndexedSeq[DimensionMemberTreeWalkSpec] =
+      startMembers map { startMember =>
+        new DimensionMemberTreeWalkSpec(dimension, startMember, includeSelf, effectiveGenerationsOption, linkroleOption)
+      }
+
+    // Find the descendant-or-self or descendant members for the given number of generations, if applicable.
+    val conceptsExcludingSiblings: Set[EName] =
+      (dimensionMemberTreeWalkSpecs.map(spec => filterDescendantOrSelfMembers(spec, taxo)(xpathEvaluator))).flatten.toSet
+
+    conceptsExcludingSiblings
+  }
+
+  /**
+   * Returns the descendant-or-self members in a dimension-member tree walk according to the parameter specification of the walk.
+   * If the start member must not be included, the tree walk finds descendant members instead of descendant-or-self members.
+   *
+   * It is assumed yet not checked that the tree walk can be made for the given dimension (so the dimension is indeed an ancestor
+   * in a sequence of consecutive "domain-aware" relationships).
+   *
+   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
+   */
+  def filterDescendantOrSelfMembers(
+    treeWalkSpec: DimensionMemberTreeWalkSpec,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+
+    // Ignoring unusable members without any usable descendants
+
+    val relationshipPaths =
+      taxo.underlyingTaxonomy.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+        treeWalkSpec.startMemberName) { path =>
+          treeWalkSpec.startMember.incomingRelationshipOption.forall(_.isFollowedBy(path.firstRelationship)) &&
+            path.isElrValid &&
+            treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
+            treeWalkSpec.linkroleOption.forall(lr => treeWalkSpec.elrToCheck(path) == lr)
+        }
+
+    val resultIncludingStartMember = relationshipPaths.flatMap(_.concepts).toSet
+    if (treeWalkSpec.includeSelf) resultIncludingStartMember else resultIncludingStartMember.diff(Set(treeWalkSpec.startMemberName))
+  }
+
+  /**
+   * Specification of a dimension member tree walk for some explicit dimension, starting with one member.
+   * The tree walk finds descendant-or-self members in the network, but if the start member must
+   * be excluded the tree walk only finds descendant members.
+   *
+   * The optional generations cannot contain 0. None means unbounded.
+   */
+  final case class DimensionMemberTreeWalkSpec(
+      val explicitDimension: EName,
+      val startMember: DimensionMemberTreeWalkSpec.StartMember,
+      val includeSelf: Boolean,
+      val generationsOption: Option[Int],
+      val linkroleOption: Option[String]) {
+
+    def startMemberName: EName = startMember.startMemberName
+
+    def elrToCheck(path: InterConceptRelationshipPath[DomainMemberRelationship]): String = {
+      startMember match {
+        case startMember: DimensionMemberTreeWalkSpec.DimensionDomainSource =>
+          startMember.dimensionDomainRelationship.elr
+        case startMember: DimensionMemberTreeWalkSpec.MemberSource =>
+          path.relationships.head.elr
+      }
+    }
+  }
+
+  object DimensionMemberTreeWalkSpec {
+
+    sealed trait StartMember {
+      def startMemberName: EName
+      def incomingRelationshipOption: Option[DomainAwareRelationship]
+    }
+
+    final class DimensionDomainSource(val dimensionDomainRelationship: DimensionDomainRelationship) extends StartMember {
+      def startMemberName: EName = dimensionDomainRelationship.targetConceptEName
+      def incomingRelationshipOption: Option[DomainAwareRelationship] = Some(dimensionDomainRelationship)
+    }
+
+    final class MemberSource(val startMemberName: EName) extends StartMember {
+      def incomingRelationshipOption: Option[DomainAwareRelationship] = None
+    }
   }
 }
