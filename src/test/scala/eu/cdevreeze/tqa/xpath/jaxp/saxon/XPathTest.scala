@@ -210,6 +210,64 @@ class XPathTest extends FunSuite {
     }
   }
 
+  test("testSimpleBackingElemXPath") {
+    val exprString = "//xbrli:context[1]/xbrli:entity/xbrli:segment/xbrldi:explicitMember[1]"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val resultElem = xpathEvaluator.evaluateAsBackingElem(expr, Some(rootElem.wrappedNode))
+
+    assertResult("gaap:ABCCompanyDomain") {
+      resultElem.text.trim
+    }
+  }
+
+  test("testSimpleBackingElemSeqXPath") {
+    val exprString = "//xbrli:context/xbrli:entity/xbrli:segment/xbrldi:explicitMember"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val resultElems = xpathEvaluator.evaluateAsBackingElemSeq(expr, Some(rootElem.wrappedNode))
+
+    assertResult(true) {
+      resultElems.size > 100
+    }
+  }
+
+  test("testYaidomQueryOnXPathBackingElemResults") {
+    val exprString = "//xbrli:context/xbrli:entity/xbrli:segment/xbrldi:explicitMember"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val resultElems = xpathEvaluator.evaluateAsBackingElemSeq(expr, Some(rootElem.wrappedNode))
+
+    // Use yaidom query API on results
+
+    assertResult(true) {
+      val someDimQNames =
+        Set(QName("gaap:EntityAxis"), QName("gaap:VerificationAxis"), QName("gaap:PremiseAxis"), QName("gaap:ShareOwnershipPlanIdentifierAxis"))
+
+      val someDimENames = someDimQNames.map(qn => rootElem.scope.resolveQNameOption(qn).get)
+
+      val foundDimensions =
+        resultElems.flatMap(_.attributeAsResolvedQNameOption(ENames.DimensionEName)).toSet
+
+      someDimENames.subsetOf(foundDimensions)
+    }
+
+    // The Paths are not lost!
+
+    val resultElemPaths = resultElems.map(_.path)
+
+    assertResult(Set(List("context", "entity", "segment", "explicitMember"))) {
+      resultElemPaths.map(_.entries.map(_.elementName.localPart)).toSet
+    }
+    assertResult(Set(EName(Namespaces.XbrliNamespace, "xbrl"))) {
+      resultElems.map(_.rootElem.resolvedName).toSet
+    }
+
+    assertResult(resultElems) {
+      resultElems.map(e => e.rootElem.getElemOrSelfByPath(e.path))
+    }
+  }
+
   test("testBaseUri") {
     val exprString = "base-uri(/xbrli:xbrl)"
 

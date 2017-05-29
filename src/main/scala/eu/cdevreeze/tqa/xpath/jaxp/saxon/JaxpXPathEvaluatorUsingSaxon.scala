@@ -26,10 +26,12 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonNode
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import javax.xml.transform.URIResolver
 import javax.xml.xpath
 import javax.xml.xpath.XPathConstants
@@ -104,6 +106,21 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
           sys.error(s"Unsupported result type: ${result.getClass}. Only java.util.List is supported (we do not allow org.w3c.dom.NodeList).")
       }
     }
+  }
+
+  def evaluateAsBackingElem(expr: XPathExpression, contextItemOption: Option[ContextItem]): BackingElemApi = {
+    val nodeResult = evaluateAsNode(expr, contextItemOption)
+    // Assuming the result to be an element node
+    SaxonNode.wrapElement(nodeResult)
+  }
+
+  def evaluateAsBackingElemSeq(
+    expr: XPathExpression,
+    contextItemOption: Option[ContextItem]): immutable.IndexedSeq[BackingElemApi] = {
+
+    val nodeSeqResult = evaluateAsNodeSeq(expr, contextItemOption)
+    // Assuming all results to be element nodes
+    nodeSeqResult.map(n => SaxonNode.wrapElement(n))
   }
 
   def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[ContextItem]): BigDecimal = {
