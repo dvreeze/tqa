@@ -65,7 +65,14 @@ import net.sf.saxon.s9api.Processor
 
 /**
  * Table-aware taxonomy parser and analyser, showing modeled aspects in the tables of the table-aware taxonomy.
- * Potential problems with the tables are logged as warnings.
+ * Potential problems with the tables are logged as warnings. The following potential table problems are found:
+ * <ul>
+ * <li>Missing (period) aspect in the rule nodes of a table</li>
+ * <li>Given the concepts "implied" by the table (in relationship nodes and rule nodes) and the dimensional trees
+ * of those concepts, the dimension members occurring in the table do not occur in the DTS.</li>
+ * <li>Given the concepts "implied" by the table (in relationship nodes and rule nodes) and their period types,
+ * the period type mentioned in the table does not occur as period type of one of the "implied" concepts.</li>
+ * </ul>
  *
  * TODO Mind table filters.
  *
