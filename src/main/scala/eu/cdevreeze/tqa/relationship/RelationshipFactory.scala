@@ -34,6 +34,11 @@ import eu.cdevreeze.tqa.dom.XLinkArc
 trait RelationshipFactory {
 
   /**
+   * The configuration used by this RelationshipFactory.
+   */
+  def config: RelationshipFactory.Config
+
+  /**
    * Returns all relationships in the given `TaxonomyBase` passing the provided arc filter.
    */
   def extractRelationships(
@@ -60,6 +65,8 @@ trait RelationshipFactory {
    * Returns all relationships (typically one) having the given underlying XLink arc in the given `TaxonomyBase`.
    * For performance a mapping from XLink labels to XLink locators and resources must be provided, and this mapping
    * should be computed only once per extended link.
+   *
+   * This method must respect the configuration of this RelationshipFactory.
    */
   def extractRelationshipsFromArc(
     arc: XLinkArc,
@@ -84,29 +91,40 @@ object RelationshipFactory {
 
   val AnyArc: XLinkArc => Boolean = (_ => true)
 
+  /**
+   * Configuration object used by a RelationshipFactory. It says to what extent the RelationshipFactory
+   * using it allows syntax errors in XLink arcs and locators, as well as "dead" locator href URIs.
+   *
+   * @constructor create a new configuration from the passed boolean flags
+   * @param allowMissingArcrole if true, allows missing arcrole attribute in any arc
+   * @param allowWrongXPointer if true, allows (found) XPointer syntax error in any locator href URI fragment
+   * @param allowUnresolvedXLinkLabel if true, allows "dead" arc XLink "from" or "to" attributes within any extended link
+   * @param allowUnresolvedLocator if true, allows "dead" locator href URIs within the taxonomy
+   */
   final case class Config(
-    val allowUnresolvedXLinkLabel: Boolean,
+    val allowMissingArcrole: Boolean,
     val allowWrongXPointer: Boolean,
+    val allowUnresolvedXLinkLabel: Boolean,
     val allowUnresolvedLocator: Boolean)
 
   object Config {
 
     /**
-     * Accepts unresolved locators but also XPointer syntax errors and broken XLink labels (in XLink arcs).
+     * Accepts unresolved locators but also missing arcroles, XPointer syntax errors and broken XLink labels (in XLink arcs).
      * Such erroneous locators and arcs are silently skipped.
      */
-    val VeryLenient = Config(true, true, true)
+    val VeryLenient = Config(true, true, true, true)
 
     /**
-     * Accepts unresolved locators but does not accept any (found) XPointer syntax errors or broken XLink labels.
+     * Accepts unresolved locators but does not accept any (found) XPointer syntax errors or broken XLink labels or missing arcroles.
      * Such unresolved locators are silently skipped.
      */
-    val Lenient = Config(false, false, true)
+    val Lenient = Config(false, false, false, true)
 
     /**
-     * Does not accept any unresolved locators or syntax errors (in XPointer) or broken XLink labels.
+     * Does not accept any unresolved locators or syntax errors (in XPointer), missing arcroles or broken XLink labels.
      * Exceptions will be thrown instead.
      */
-    val Strict = Config(false, false, false)
+    val Strict = Config(false, false, false, false)
   }
 }
