@@ -31,6 +31,7 @@ import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
 import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
+import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.CalculationArc
@@ -58,7 +59,11 @@ import javax.xml.bind.DatatypeConverter
  * These objects must be very efficient to create.
  *
  * Like for the underlying taxonomy elements, relationship creation is designed not to fail, but the type may be
- * of an unexpected "catch-all relationship type". Instance methods on relationships may fail, however.
+ * of an unexpected "catch-all relationship type". There is an exception to this leniency, though, and that is
+ * that each arc must have an XLink arcole attribute, or else an exception is thrown. This can be circumvented
+ * in practice by using an arc filter when instantiating a taxonomy object.
+ *
+ * Unlike relationship creation (with the missing arcrol exception), instance methods on relationships may fail, however.
  *
  * This relationship type hierarchy knows about standard relationships, including dimensional relationships.
  * It also knows about a few specific generic relationships. It does not know about table and formula relationships,
@@ -513,6 +518,10 @@ object Relationship {
     resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
     resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Relationship = {
 
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+
     (arc, resolvedFrom.resolvedElem) match {
       case (arc: StandardArc, elemDecl: GlobalElementDeclaration) =>
         val from = resolvedFrom.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]]
@@ -539,6 +548,10 @@ object StandardRelationship {
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[StandardRelationship] = {
 
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+
     resolvedTo.resolvedElem match {
       case elemDecl: GlobalElementDeclaration =>
         InterConceptRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]])
@@ -562,6 +575,10 @@ object NonStandardRelationship {
     arc: NonStandardArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
     resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[NonStandardRelationship] = {
+
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
 
     (arc.arcrole, arc, resolvedTo.resolvedElem) match {
       case ("http://xbrl.org/arcrole/2008/element-label", arc: NonStandardArc, res: XLinkResource) =>
@@ -588,6 +605,10 @@ object InterConceptRelationship {
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): Option[InterConceptRelationship] = {
 
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+
     (arc.resolvedName, arc) match {
       case (LinkDefinitionArcEName, arc: DefinitionArc) => Some(DefinitionRelationship(arc, resolvedFrom, resolvedTo))
       case (LinkPresentationArcEName, arc: PresentationArc) => Some(PresentationRelationship(arc, resolvedFrom, resolvedTo))
@@ -611,6 +632,10 @@ object ConceptResourceRelationship {
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]): Option[ConceptResourceRelationship] = {
 
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+
     (arc.resolvedName, arc, resolvedTo.resolvedElem) match {
       case (LinkLabelArcEName, arc: LabelArc, lbl: ConceptLabelResource) =>
         Some(new ConceptLabelRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[ConceptLabelResource])))
@@ -631,6 +656,10 @@ object DefinitionRelationship {
     arc: DefinitionArc,
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): DefinitionRelationship = {
+
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
 
     arc.arcrole match {
       case "http://www.xbrl.org/2003/arcrole/general-special" => new GeneralSpecialRelationship(arc, resolvedFrom, resolvedTo)
@@ -653,6 +682,10 @@ object DimensionalRelationship {
     arc: DefinitionArc,
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): Option[DimensionalRelationship] = {
+
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
 
     arc.arcrole match {
       case "http://xbrl.org/int/dim/arcrole/hypercube-dimension" => Some(new HypercubeDimensionRelationship(arc, resolvedFrom, resolvedTo))
@@ -677,6 +710,10 @@ object PresentationRelationship {
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): PresentationRelationship = {
 
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+
     arc.arcrole match {
       case "http://www.xbrl.org/2003/arcrole/parent-child" => new ParentChildRelationship(arc, resolvedFrom, resolvedTo)
       case _ => new PresentationRelationship(arc, resolvedFrom, resolvedTo)
@@ -694,6 +731,10 @@ object CalculationRelationship {
     arc: CalculationArc,
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): CalculationRelationship = {
+
+    require(
+      arc.attributeOption(XLinkArcroleEName).isDefined,
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
 
     arc.arcrole match {
       case "http://www.xbrl.org/2003/arcrole/summation-item" => new SummationItemRelationship(arc, resolvedFrom, resolvedTo)
