@@ -23,6 +23,7 @@ import java.util.logging.Logger
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
+import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
@@ -154,25 +155,13 @@ object ShowDimensions {
     logger.info("Ready")
   }
 
-  private def uriToLocalUri(uri: URI, rootDir: File): URI = {
-    // Not robust
-    val relativePath = uri.getScheme match {
-      case "http"  => uri.toString.drop("http://".size)
-      case "https" => uri.toString.drop("https://".size)
-      case _       => sys.error(s"Unexpected URI $uri")
-    }
-
-    val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
-    f.toURI
-  }
-
   private def getDocumentBuilder(useSaxon: Boolean, rootDir: File): DocumentBuilder = {
     if (useSaxon) {
       val processor = new Processor(false)
 
-      new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
+      new SaxonDocumentBuilder(processor.newDocumentBuilder(), UriConverters.uriToLocalUri(_, rootDir))
     } else {
-      new IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriToLocalUri(_, rootDir))
+      new IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), UriConverters.uriToLocalUri(_, rootDir))
     }
   }
 }

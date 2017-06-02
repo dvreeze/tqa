@@ -65,6 +65,8 @@ final class TaxonomyBuilder(
 object TaxonomyBuilder {
 
   def withDocumentBuilder(documentBuilder: DocumentBuilder): HasDocumentBuilder = {
+    // Consider (re-)using a DocumentBuilder that is a CachingDocumentBuilder, for obvious reasons.
+
     new HasDocumentBuilder(documentBuilder)
   }
 
@@ -78,8 +80,6 @@ object TaxonomyBuilder {
   final class HasDocumentCollector(
       val documentBuilder: DocumentBuilder,
       val documentCollector: DocumentCollector) {
-
-    // TODO We miss caching of root elements now. DTS discovery may repeatedly parse the same documents.
 
     def withRelationshipFactory(relationshipFactory: RelationshipFactory): TaxonomyBuilder = {
       new TaxonomyBuilder(documentBuilder, documentCollector, SubstitutionGroupMap.Empty, relationshipFactory, (_ => true))

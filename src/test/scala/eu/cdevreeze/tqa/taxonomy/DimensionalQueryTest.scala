@@ -17,7 +17,6 @@
 package eu.cdevreeze.tqa.taxonomy
 
 import java.io.File
-import java.net.URI
 
 import scala.collection.immutable
 import scala.reflect.classTag
@@ -27,17 +26,13 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.dom.LocalElementDeclaration
 import eu.cdevreeze.tqa.dom.RoleRef
 import eu.cdevreeze.tqa.dom.RoleType
-import eu.cdevreeze.tqa.dom.TaxonomyBase
-import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
-import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
-import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.yaidom.core.EName
@@ -1824,22 +1819,10 @@ class DimensionalQueryTest extends FunSuite {
 
     new SaxonDocumentBuilder(processor.newDocumentBuilder(), { uri =>
       if (uri.getScheme == "http" || uri.getScheme == "https") {
-        uriToLocalUri(uri, otherRootDir)
+        UriConverters.uriToLocalUri(uri, otherRootDir)
       } else {
         uri
       }
     })
-  }
-
-  private def uriToLocalUri(uri: URI, rootDir: File): URI = {
-    // Not robust
-    val relativePath = uri.getScheme match {
-      case "http"  => uri.toString.drop("http://".size)
-      case "https" => uri.toString.drop("https://".size)
-      case _       => sys.error(s"Unexpected URI $uri")
-    }
-
-    val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
-    f.toURI
   }
 }

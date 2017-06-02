@@ -26,6 +26,7 @@ import scala.reflect.classTag
 import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.PeriodType
@@ -43,12 +44,7 @@ import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelati
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
-import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
-import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
-import eu.cdevreeze.tqa.relationship.InterConceptRelationship
-import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
@@ -159,7 +155,7 @@ object ShowAspectsInTables {
         xpathEvaluatorFactory,
         parameterElems.headOption.map(_.docUri).getOrElse(URI.create("")),
         scope,
-        new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
+        new SimpleUriResolver(u => UriConverters.uriToLocalUri(u, rootDir)))
 
     val paramValues: Map[EName, AnyRef] =
       (parameterElems map { e =>
@@ -455,22 +451,10 @@ object ShowAspectsInTables {
       factory,
       table.underlyingResource.docUri,
       startScope ++ table.underlyingResource.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope,
-      new SimpleUriResolver(u => uriToLocalUri(u, localRootDir)))
-  }
-
-  private def uriToLocalUri(uri: URI, rootDir: File): URI = {
-    // Not robust
-    val relativePath = uri.getScheme match {
-      case "http"  => uri.toString.drop("http://".size)
-      case "https" => uri.toString.drop("https://".size)
-      case _       => sys.error(s"Unexpected URI $uri")
-    }
-
-    val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
-    f.toURI
+      new SimpleUriResolver(u => UriConverters.uriToLocalUri(u, localRootDir)))
   }
 
   private def getDocumentBuilder(rootDir: File, processor: Processor): SaxonDocumentBuilder = {
-    new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
+    new SaxonDocumentBuilder(processor.newDocumentBuilder(), UriConverters.uriToLocalUri(_, rootDir))
   }
 }

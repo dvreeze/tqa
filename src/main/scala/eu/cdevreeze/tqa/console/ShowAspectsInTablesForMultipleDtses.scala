@@ -24,6 +24,7 @@ import java.util.regex.Pattern
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import net.sf.saxon.s9api.Processor
 
@@ -56,7 +57,7 @@ object ShowAspectsInTablesForMultipleDtses {
 
     val cachingDocBuilder: CachingDocumentBuilder[_] = {
       val documentBuilder =
-        new SaxonDocumentBuilder(processor.newDocumentBuilder(), uriToLocalUri(_, rootDir))
+        new SaxonDocumentBuilder(processor.newDocumentBuilder(), UriConverters.uriToLocalUri(_, rootDir))
 
       new CachingDocumentBuilder(CachingDocumentBuilder.createCache(documentBuilder, cacheSize))
     }
@@ -83,18 +84,6 @@ object ShowAspectsInTablesForMultipleDtses {
 
   private def isEntrypoint(f: File, entrypointPathRegex: Pattern): Boolean = {
     entrypointPathRegex.matcher(f.getAbsolutePath).matches
-  }
-
-  private def uriToLocalUri(uri: URI, rootDir: File): URI = {
-    // Not robust
-    val relativePath = uri.getScheme match {
-      case "http"  => uri.toString.drop("http://".size)
-      case "https" => uri.toString.drop("https://".size)
-      case _       => sys.error(s"Unexpected URI $uri")
-    }
-
-    val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
-    f.toURI
   }
 
   private def localUriToOriginalUri(localUri: URI, rootDir: URI, useHttp: Boolean): URI = {

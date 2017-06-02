@@ -25,7 +25,7 @@ import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
-import eu.cdevreeze.tqa.backingelem.DocumentBuilder
+import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonNode
@@ -93,7 +93,7 @@ class XPathTest extends FunSuite {
       rootElem.docUri,
       rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope ++
         Scope.from("myfun" -> MyFuncNamespace, "myvar" -> MyVarNamespace),
-      new SimpleUriResolver(u => uriToLocalUri(u, rootDir)))
+      new SimpleUriResolver(u => UriConverters.uriToLocalUri(u, rootDir)))
 
   test("testSimpleStringXPathWithoutContextItem") {
     val exprString = "string(count((1, 2, 3, 4, 5)))"
@@ -390,21 +390,9 @@ class XPathTest extends FunSuite {
     }
   }
 
-  private def uriToLocalUri(uri: URI, rootDir: File): URI = {
-    // Not robust
-    val relativePath = uri.getScheme match {
-      case "http"  => uri.toString.drop("http://".size)
-      case "https" => uri.toString.drop("https://".size)
-      case _       => sys.error(s"Unexpected URI $uri")
-    }
-
-    val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
-    f.toURI
-  }
-
   private def getDocumentBuilder(rootDir: File): SaxonDocumentBuilder = {
     new SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      { u => if (u.getScheme == "file") u else uriToLocalUri(u, rootDir) })
+      { u => if (u.getScheme == "file") u else UriConverters.uriToLocalUri(u, rootDir) })
   }
 }
