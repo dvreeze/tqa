@@ -90,8 +90,15 @@ trait RelationshipFactory {
 
 object RelationshipFactory {
 
+  /**
+   * Arc filter that returns true for each arc.
+   */
   val AnyArc: XLinkArc => Boolean = (_ => true)
 
+  /**
+   * Arc filter that returns false if the XLink arcrole attribute is missing, and true otherwise.
+   * Note that it is an error for an XLink arc (in XBRL) not to have an XLink arcrole attribute.
+   */
   val AnyArcHavingArcrole: XLinkArc => Boolean = (_.attributeOption(ENames.XLinkArcroleEName).nonEmpty)
 
   /**

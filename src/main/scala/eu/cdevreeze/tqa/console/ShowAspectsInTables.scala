@@ -29,6 +29,7 @@ import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.PeriodType
+import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
@@ -48,6 +49,7 @@ import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
+import eu.cdevreeze.tqa.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
@@ -115,11 +117,16 @@ object ShowAspectsInTables {
     val relationshipFactory =
       if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
 
+    def filterArc(arc: XLinkArc): Boolean = {
+      if (lenient) RelationshipFactory.AnyArcHavingArcrole(arc) else RelationshipFactory.AnyArc(arc)
+    }
+
     val taxoBuilder =
       TaxonomyBuilder.
         withDocumentBuilder(documentBuilder).
         withDocumentCollector(documentCollector).
-        withRelationshipFactory(relationshipFactory)
+        withRelationshipFactory(relationshipFactory).
+        withArcFilter(filterArc _)
 
     logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUrisOfDts.mkString(", ")}")
 

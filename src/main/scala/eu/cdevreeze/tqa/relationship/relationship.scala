@@ -81,6 +81,7 @@ sealed abstract class Relationship(
 
   require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
   require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
+  require(arc.attributeOption(XLinkArcroleEName).isDefined, s"Missing arcrole attribute in ${arc.resolvedName} element in $docUri")
 
   final def validated: Relationship = {
     require(resolvedFrom.elr == arc.elr, s"Arc and 'from' not in same ELR in $docUri")
