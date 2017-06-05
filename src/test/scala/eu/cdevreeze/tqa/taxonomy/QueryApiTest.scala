@@ -35,8 +35,6 @@ import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
-import eu.cdevreeze.tqa.relationship.InterConceptRelationship
-import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.relationship.PresentationRelationship
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed

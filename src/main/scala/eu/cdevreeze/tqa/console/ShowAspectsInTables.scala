@@ -217,7 +217,7 @@ object ShowAspectsInTables {
     val itemDecls = concepts.toIndexedSeq.flatMap(c => tableTaxo.underlyingTaxonomy.findItemDeclaration(c))
     val expectedPeriodTypes: Set[PeriodType] = itemDecls.map(_.periodType).toSet
 
-    val periodTypes: Set[PeriodType] = findAllPeriodTypesInTable(table, tableTaxo)(xpathEvaluator)
+    val periodTypes: Set[PeriodType] = findAllPeriodTypesInTable(table, tableTaxo)
 
     logger.info(s"Found period type(s) for the concepts 'touched' by the table with ID $tableId: ${periodTypes.mkString(", ")}")
     logger.info(s"Expected period type(s) for the concepts 'touched' by the table with ID $tableId: ${expectedPeriodTypes.mkString(", ")}")
@@ -345,7 +345,7 @@ object ShowAspectsInTables {
 
   def findAllExplicitDimensionsInRuleNode(
     ruleNode: RuleNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+    taxo: BasicTableTaxonomy): Set[EName] = {
 
     val explicitDimensionAspectElems =
       ruleNode.allAspects collect { case dimensionAspect: ExplicitDimensionAspect => dimensionAspect }
@@ -371,7 +371,7 @@ object ShowAspectsInTables {
   /**
    * Returns all period types in rule nodes in the table.
    */
-  def findAllPeriodTypesInTable(table: Table, taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[PeriodType] = {
+  def findAllPeriodTypesInTable(table: Table, taxo: BasicTableTaxonomy): Set[PeriodType] = {
     val nodes = findAllNodes(table, taxo)
 
     val periodTypes: Seq[PeriodType] =

@@ -20,16 +20,13 @@ import scala.collection.immutable
 import scala.reflect.ClassTag
 import scala.reflect.classTag
 
-import eu.cdevreeze.tqa.relationship.AllRelationship
-import eu.cdevreeze.tqa.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.relationship.DimensionDefaultRelationship
 import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
+import eu.cdevreeze.tqa.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
-import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
-import eu.cdevreeze.tqa.relationship.NotAllRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 /**

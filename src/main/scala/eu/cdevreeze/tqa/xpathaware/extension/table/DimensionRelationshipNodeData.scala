@@ -133,7 +133,7 @@ object DimensionRelationshipNodeData {
 
     // Find the descendant-or-self or descendant members for the given number of generations, if applicable.
     val conceptsExcludingSiblings: Set[EName] =
-      (dimensionMemberTreeWalkSpecs.map(spec => filterDescendantOrSelfMembers(spec, taxo)(xpathEvaluator))).flatten.toSet
+      (dimensionMemberTreeWalkSpecs.map(spec => filterDescendantOrSelfMembers(spec, taxo))).flatten.toSet
 
     conceptsExcludingSiblings
   }
@@ -149,7 +149,7 @@ object DimensionRelationshipNodeData {
    */
   def filterDescendantOrSelfMembers(
     treeWalkSpec: DimensionMemberTreeWalkSpec,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+    taxo: BasicTableTaxonomy): Set[EName] = {
 
     // Ignoring unusable members without any usable descendants
 

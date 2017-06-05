@@ -5,9 +5,9 @@ organization := "eu.cdevreeze.tqa"
 
 version := "0.4.6-SNAPSHOT"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 
-crossScalaVersions := Seq("2.11.8", "2.12.1")
+crossScalaVersions := Seq("2.11.11", "2.12.2")
 
 // See: Toward a safer Scala
 // http://downloads.typesafe.com/website/presentations/ScalaDaysSF2015/Toward%20a%20Safer%20Scala%20@%20Scala%20Days%20SF%202015.pdf
@@ -26,21 +26,21 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
 
 libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.6.2"
 
-libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-10"
+libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-18"
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.3"
 
-libraryDependencies += "com.google.guava" % "guava" % "20.0"
+libraryDependencies += "com.google.guava" % "guava" % "22.0"
 
-libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.1"
+libraryDependencies += "com.google.code.findbugs" % "jsr305" % "1.3.9"
 
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test"
 
-libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
+libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.5" % "test"
 
-libraryDependencies += ("joda-time" % "joda-time" % "2.9.5" % "test").intransitive()
+libraryDependencies += ("joda-time" % "joda-time" % "2.9.9" % "test").intransitive()
 
 libraryDependencies += ("org.joda" % "joda-convert" % "1.8.1" % "test").intransitive()
 

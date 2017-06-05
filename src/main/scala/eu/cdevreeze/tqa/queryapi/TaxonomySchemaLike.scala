@@ -20,7 +20,6 @@ import java.net.URI
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.ENames.XbrldtTypedDomainRefEName
 import eu.cdevreeze.tqa.dom.ConceptDeclaration
 import eu.cdevreeze.tqa.dom.DimensionDeclaration
 import eu.cdevreeze.tqa.dom.ExplicitDimensionDeclaration

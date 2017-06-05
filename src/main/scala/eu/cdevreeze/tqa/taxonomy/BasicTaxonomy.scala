@@ -141,8 +141,6 @@ final class BasicTaxonomy private (
    * to the subset BasicTaxonomy.
    */
   def filterDocumentUris(docUris: Set[URI]): BasicTaxonomy = {
-    val filteredTaxoBase = taxonomyBase.filterDocumentUris(docUris)
-
     new BasicTaxonomy(
       taxonomyBase.filterDocumentUris(docUris),
       netSubstitutionGroupMap,

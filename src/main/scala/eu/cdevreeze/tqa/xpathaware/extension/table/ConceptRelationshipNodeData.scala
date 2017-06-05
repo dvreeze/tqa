@@ -63,18 +63,18 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
     }
   }
 
-  def linknameOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    conceptRelationshipNode.linknameOption.map(_.underlyingElem.text) orElse {
+  def linknameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
+    conceptRelationshipNode.linknameOption.map(_.linkname) orElse {
       conceptRelationshipNode.linknameExpressionOption.map(_.scopedXPathString) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
+        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
   }
 
-  def arcnameOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    conceptRelationshipNode.arcnameOption.map(_.underlyingElem.text) orElse {
+  def arcnameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
+    conceptRelationshipNode.arcnameOption.map(_.arcname) orElse {
       conceptRelationshipNode.arcnameExpressionOption.map(_.scopedXPathString) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
+        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
   }
@@ -120,9 +120,9 @@ object ConceptRelationshipNodeData {
 
     val arcroleOption: Option[String] = conceptRelationNodeData.arcroleOption(xpathEvaluator)
 
-    val linknameOption: Option[String] = conceptRelationNodeData.linknameOption(xpathEvaluator)
+    val linknameOption: Option[EName] = conceptRelationNodeData.linknameOption(xpathEvaluator)
 
-    val arcnameOption: Option[String] = conceptRelationNodeData.arcnameOption(xpathEvaluator)
+    val arcnameOption: Option[EName] = conceptRelationNodeData.arcnameOption(xpathEvaluator)
 
     val doResolveXfiRoot = rawRelationshipSources.isEmpty || rawRelationshipSources.contains(ENames.XfiRootEName)
 
@@ -155,7 +155,7 @@ object ConceptRelationshipNodeData {
     // Find the descendant-or-self or descendant concepts for the given number of generations, if applicable.
     val conceptsExcludingSiblings: Set[EName] =
       if (axis.includesDescendantsOrChildren) {
-        (conceptTreeWalkSpecs.map(spec => filterDescendantOrSelfConcepts(spec, taxo)(xpathEvaluator))).flatten.toSet
+        (conceptTreeWalkSpecs.map(spec => filterDescendantOrSelfConcepts(spec, taxo))).flatten.toSet
       } else {
         if (axis.includesSelf) effectiveRelationshipSources.toSet else Set.empty
       }
@@ -180,7 +180,7 @@ object ConceptRelationshipNodeData {
    */
   def filterDescendantOrSelfConcepts(
     treeWalkSpec: ConceptTreeWalkSpec,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+    taxo: BasicTableTaxonomy): Set[EName] = {
 
     val relationshipPaths =
       taxo.underlyingTaxonomy.filterLongestOutgoingNonCyclicInterConceptRelationshipPaths(
@@ -201,8 +201,8 @@ object ConceptRelationshipNodeData {
   private def resolveXfiRoot(
     linkroleOption: Option[String],
     arcroleOption: Option[String],
-    linknameOption: Option[String],
-    arcnameOption: Option[String],
+    linknameOption: Option[EName],
+    arcnameOption: Option[EName],
     taxo: BasicTableTaxonomy): Set[EName] = {
 
     val relationships =
@@ -219,8 +219,8 @@ object ConceptRelationshipNodeData {
     concept: EName,
     linkroleOption: Option[String],
     arcroleOption: Option[String],
-    linknameOption: Option[String],
-    arcnameOption: Option[String],
+    linknameOption: Option[EName],
+    arcnameOption: Option[EName],
     taxo: BasicTableTaxonomy): Set[EName] = {
 
     val incomingRelationships =
@@ -244,8 +244,8 @@ object ConceptRelationshipNodeData {
     relationship: InterConceptRelationship,
     linkroleOption: Option[String],
     arcroleOption: Option[String],
-    linknameOption: Option[String],
-    arcnameOption: Option[String]): Boolean = {
+    linknameOption: Option[EName],
+    arcnameOption: Option[EName]): Boolean = {
 
     linkroleOption.forall(lr => relationship.elr == lr) &&
       arcroleOption.forall(ar => relationship.arcrole == ar) &&
@@ -266,6 +266,6 @@ object ConceptRelationshipNodeData {
     val generationsOption: Option[Int],
     val linkroleOption: Option[String],
     val arcroleOption: Option[String],
-    val linknameOption: Option[String],
-    val arcnameOption: Option[String])
+    val linknameOption: Option[EName],
+    val arcnameOption: Option[EName])
 }

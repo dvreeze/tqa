@@ -28,15 +28,10 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
-import eu.cdevreeze.tqa.dom.LocalElementDeclaration
-import eu.cdevreeze.tqa.dom.RoleRef
-import eu.cdevreeze.tqa.dom.RoleType
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.DimensionalRelationship
-import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
-import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
 

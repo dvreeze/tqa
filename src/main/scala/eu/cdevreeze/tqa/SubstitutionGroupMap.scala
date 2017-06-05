@@ -37,7 +37,6 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
     s"No standard substitution groups allowed as mapping keys")
 
   import ENames._
-  import SubstitutionGroupMap._
 
   /**
    * A map from substitution groups to other substitution groups directly derived from them.
