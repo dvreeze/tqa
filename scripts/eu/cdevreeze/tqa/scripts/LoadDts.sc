@@ -64,8 +64,10 @@ import yaidom.queryapi.HasENameApi._
 val processor = new Processor(false)
 
 def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
-  val documentBuilder =
+  val docBuilder =
     new backingelem.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), backingelem.UriConverters.uriToLocalUri(_, localRootDir))
+  val documentBuilder =
+    new backingelem.CachingDocumentBuilder(backingelem.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
 
   val documentCollector = taxonomybuilder.DefaultDtsCollector(entrypointUris)
 
