@@ -29,7 +29,6 @@ import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.PeriodType
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
@@ -205,9 +204,6 @@ object ShowTypedDimensionsInTables {
 
     val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
     val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
-
-    val itemDecls = concepts.toIndexedSeq.flatMap(c => tableTaxo.underlyingTaxonomy.findItemDeclaration(c))
-    val expectedPeriodTypes: Set[PeriodType] = itemDecls.map(_.periodType).toSet
 
     sortedConcepts foreach { concept =>
       val conceptDecl = tableTaxo.underlyingTaxonomy.getConceptDeclaration(concept)
