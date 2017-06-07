@@ -138,6 +138,14 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     filterOutgoingHypercubeDimensionRelationships(sourceConcept)(_.elr == elr)
   }
 
+  final def findAllConsecutiveHypercubeDimensionRelationships(
+    relationship: HasHypercubeRelationship): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
+
+    filterOutgoingHypercubeDimensionRelationships(relationship.hypercube) { rel =>
+      relationship.isFollowedBy(rel)
+    }
+  }
+
   final def findAllOutgoingDimensionDomainRelationships(
     sourceConcept: EName): immutable.IndexedSeq[DimensionDomainRelationship] = {
 
@@ -156,6 +164,14 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     filterOutgoingDimensionDomainRelationships(sourceConcept)(_.elr == elr)
   }
 
+  final def findAllConsecutiveDimensionDomainRelationships(
+    relationship: HypercubeDimensionRelationship): immutable.IndexedSeq[DimensionDomainRelationship] = {
+
+    filterOutgoingDimensionDomainRelationships(relationship.dimension) { rel =>
+      relationship.isFollowedBy(rel)
+    }
+  }
+
   final def findAllOutgoingDomainMemberRelationships(
     sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationship] = {
 
@@ -172,6 +188,14 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     sourceConcept: EName, elr: String): immutable.IndexedSeq[DomainMemberRelationship] = {
 
     filterOutgoingDomainMemberRelationships(sourceConcept)(_.elr == elr)
+  }
+
+  final def findAllConsecutiveDomainMemberRelationships(
+    relationship: DomainAwareRelationship): immutable.IndexedSeq[DomainMemberRelationship] = {
+
+    filterOutgoingDomainMemberRelationships(relationship.targetConceptEName) { rel =>
+      relationship.isFollowedBy(rel)
+    }
   }
 
   final def findAllOutgoingDimensionDefaultRelationships(

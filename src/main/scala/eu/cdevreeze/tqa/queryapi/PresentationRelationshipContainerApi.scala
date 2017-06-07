@@ -68,6 +68,12 @@ trait PresentationRelationshipContainerApi {
   def filterOutgoingParentChildRelationshipsOnElr(
     sourceConcept: EName, elr: String): immutable.IndexedSeq[ParentChildRelationship]
 
+  /**
+   * Finds all "following" ("consecutive") parent-child relationships.
+   */
+  def findAllConsecutiveParentChildRelationships(
+    relationship: ParentChildRelationship): immutable.IndexedSeq[ParentChildRelationship]
+
   // Finding and filtering incoming relationships
 
   /**

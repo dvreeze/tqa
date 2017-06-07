@@ -192,7 +192,8 @@ sealed abstract class InterConceptRelationship(
    * It is used by method followedBy.
    */
   protected def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
-    this.baseSetKey.arcEName == rel.baseSetKey.arcEName
+    (this.baseSetKey.arcEName == rel.baseSetKey.arcEName) &&
+      (this.baseSetKey.arcrole == rel.baseSetKey.arcrole)
   }
 }
 

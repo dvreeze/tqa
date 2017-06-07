@@ -114,6 +114,12 @@ trait DimensionalRelationshipContainerApi {
     sourceConcept: EName, elr: String): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
+   * Finds all consecutive hypercube-dimension relationships.
+   */
+  def findAllConsecutiveHypercubeDimensionRelationships(
+    relationship: HasHypercubeRelationship): immutable.IndexedSeq[HypercubeDimensionRelationship]
+
+  /**
    * Finds all dimension-domain relationships that are outgoing from the given concept.
    */
   def findAllOutgoingDimensionDomainRelationships(
@@ -132,6 +138,12 @@ trait DimensionalRelationshipContainerApi {
     sourceConcept: EName, elr: String): immutable.IndexedSeq[DimensionDomainRelationship]
 
   /**
+   * Finds all consecutive dimension-domain relationships.
+   */
+  def findAllConsecutiveDimensionDomainRelationships(
+    relationship: HypercubeDimensionRelationship): immutable.IndexedSeq[DimensionDomainRelationship]
+
+  /**
    * Finds all domain-member relationships that are outgoing from the given concept.
    */
   def findAllOutgoingDomainMemberRelationships(
@@ -148,6 +160,12 @@ trait DimensionalRelationshipContainerApi {
    */
   def filterOutgoingDomainMemberRelationshipsOnElr(
     sourceConcept: EName, elr: String): immutable.IndexedSeq[DomainMemberRelationship]
+
+  /**
+   * Finds all consecutive domain-member relationships.
+   */
+  def findAllConsecutiveDomainMemberRelationships(
+    relationship: DomainAwareRelationship): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
    * Finds all dimension-default relationships that are outgoing from the given concept.

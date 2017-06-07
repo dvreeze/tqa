@@ -75,6 +75,14 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
     filterOutgoingParentChildRelationships(sourceConcept)(_.elr == elr)
   }
 
+  final def findAllConsecutiveParentChildRelationships(
+    relationship: ParentChildRelationship): immutable.IndexedSeq[ParentChildRelationship] = {
+
+    filterOutgoingParentChildRelationships(relationship.targetConceptEName) { rel =>
+      relationship.isFollowedBy(rel)
+    }
+  }
+
   // Finding and filtering incoming relationships
 
   final def findAllIncomingParentChildRelationships(
