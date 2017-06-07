@@ -26,6 +26,7 @@ import eu.cdevreeze.tqa.ENames.XbrliTupleEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 
 /**
  * Concept declaration, wrapping a `GlobalElementDeclaration`. It must be in substitution group xbrli:item or xbrli:tuple,
@@ -58,6 +59,14 @@ sealed abstract class ConceptDeclaration private[dom] (val globalElementDeclarat
 
   final def isConcrete: Boolean = {
     globalElementDeclaration.isConcrete
+  }
+
+  final def substitutionGroupOption: Option[EName] = {
+    globalElementDeclaration.substitutionGroupOption
+  }
+
+  final def backingElem: BackingElemApi = {
+    globalElementDeclaration.backingElem
   }
 
   final override def equals(other: Any): Boolean = other match {
