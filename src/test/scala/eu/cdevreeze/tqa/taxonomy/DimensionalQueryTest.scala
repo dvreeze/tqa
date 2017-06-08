@@ -108,7 +108,7 @@ class DimensionalQueryTest extends FunSuite {
       otherHypercube.targetEName
     }
     assertResult(Some(hypercubeName)) {
-      otherHypercube.globalElementDeclaration.substitutionGroupOption
+      otherHypercube.substitutionGroupOption
     }
     assertResult(true) {
       hypercube.globalElementDeclaration.hasSubstitutionGroup(
@@ -495,7 +495,7 @@ class DimensionalQueryTest extends FunSuite {
     val dimDecl = taxo.getTypedDimensionDeclaration(dimension)
 
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
-      dimDecl.globalElementDeclaration.substitutionGroupOption
+      dimDecl.substitutionGroupOption
     }
     assertResult(dimDecl.globalElementDeclaration.baseUri.resolve("#duriv_phone")) {
       dimDecl.typedDomainRef
@@ -525,10 +525,10 @@ class DimensionalQueryTest extends FunSuite {
     val dimDecl = taxo.getTypedDimensionDeclaration(dimension)
 
     assertResult(Some(EName(tns, "headPhone"))) {
-      dimDecl.globalElementDeclaration.substitutionGroupOption
+      dimDecl.substitutionGroupOption
     }
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
-      taxo.getDimensionDeclaration(EName(tns, "headPhone")).globalElementDeclaration.substitutionGroupOption
+      taxo.getDimensionDeclaration(EName(tns, "headPhone")).substitutionGroupOption
     }
 
     assertResult(dimDecl.globalElementDeclaration.baseUri.resolve("#duriv_phone")) {
@@ -621,7 +621,7 @@ class DimensionalQueryTest extends FunSuite {
     val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
 
     assertResult(Some(EName(tns, "headPhone"))) {
-      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+      typedDimDecl.substitutionGroupOption
     }
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
       taxo.getDimensionDeclaration(EName(tns, "headPhone")).
@@ -642,7 +642,7 @@ class DimensionalQueryTest extends FunSuite {
     val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
 
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
-      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+      typedDimDecl.substitutionGroupOption
     }
 
     assertResult(false) {
@@ -659,7 +659,7 @@ class DimensionalQueryTest extends FunSuite {
     val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
 
     assertResult(Some(EName(tns, "headPhone"))) {
-      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+      typedDimDecl.substitutionGroupOption
     }
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
       taxo.getDimensionDeclaration(EName(tns, "headPhone")).
@@ -683,7 +683,7 @@ class DimensionalQueryTest extends FunSuite {
     val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
 
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
-      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+      typedDimDecl.substitutionGroupOption
     }
 
     assertResult(false) {
@@ -715,7 +715,7 @@ class DimensionalQueryTest extends FunSuite {
     val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns1, "dPhone"))
 
     assertResult(Some(EName(tns1, "headPhone"))) {
-      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+      typedDimDecl.substitutionGroupOption
     }
     assertResult(true) {
       typedDimDecl.globalElementDeclaration.hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
@@ -752,7 +752,7 @@ class DimensionalQueryTest extends FunSuite {
     val typedDimDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
 
     assertResult(Some(EName(tns, "headPhone"))) {
-      typedDimDecl.globalElementDeclaration.substitutionGroupOption
+      typedDimDecl.substitutionGroupOption
     }
     assertResult(true) {
       typedDimDecl.globalElementDeclaration.hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
@@ -1711,7 +1711,7 @@ class DimensionalQueryTest extends FunSuite {
     val dimensionDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
 
     assertResult(Some(EName(tns, "headPhone"))) {
-      dimensionDecl.globalElementDeclaration.substitutionGroupOption
+      dimensionDecl.substitutionGroupOption
     }
 
     val typedDomainRefUri = dimensionDecl.typedDomainRef
@@ -1745,7 +1745,7 @@ class DimensionalQueryTest extends FunSuite {
     val dimensionDecl = taxo.getTypedDimensionDeclaration(EName(tns, "dPhone"))
 
     assertResult(Some(EName(tns, "headPhone"))) {
-      dimensionDecl.globalElementDeclaration.substitutionGroupOption
+      dimensionDecl.substitutionGroupOption
     }
 
     val typedDomainRefUri = dimensionDecl.typedDomainRef

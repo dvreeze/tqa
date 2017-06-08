@@ -187,7 +187,7 @@ class DimensionalRelationshipTargetTest extends FunSuite {
       hasHypercubes.size
     }
     assertResult(Some(ENames.XbrliItemEName)) {
-      taxo.findConceptDeclaration(targetName).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+      taxo.findConceptDeclaration(targetName).flatMap(_.substitutionGroupOption)
     }
     assertResult(false) {
       taxo.findHypercubeDeclaration(targetName).isDefined

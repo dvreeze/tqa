@@ -106,7 +106,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     // The hypercube is indirectly a hypercube, via a substitution group indirection.
 
     assertResult(Some(EName("{http://www.xbrl.org/dim/conf}ParentOfCube"))) {
-      taxo.getHypercubeDeclaration(hypercubeDimensions.head.hypercube).globalElementDeclaration.substitutionGroupOption
+      taxo.getHypercubeDeclaration(hypercubeDimensions.head.hypercube).substitutionGroupOption
     }
     assertResult(true) {
       taxo.getHypercubeDeclaration(hypercubeDimensions.head.hypercube).globalElementDeclaration.hasSubstitutionGroup(
@@ -235,7 +235,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     // The invalid "hypercube" is indirectly a dimension, via a substitution group indirection.
 
     assertResult(Some(EName("{http://www.xbrl.org/dim/conf}ParentOfCube"))) {
-      taxo.getExplicitDimensionDeclaration(hypercubeDimensions.head.hypercube).globalElementDeclaration.substitutionGroupOption
+      taxo.getExplicitDimensionDeclaration(hypercubeDimensions.head.hypercube).substitutionGroupOption
     }
     assertResult(true) {
       taxo.getItemDeclaration(hypercubeDimensions.head.hypercube).globalElementDeclaration.hasSubstitutionGroup(
@@ -413,20 +413,20 @@ class DimensionalRelationshipSourceTest extends FunSuite {
       taxo.findPrimaryItemDeclaration(sourceName).map(_.targetEName)
     }
     assertResult(Some(EName("{http://www.example.com/new}PrimaryItemParent"))) {
-      taxo.findPrimaryItemDeclaration(sourceName).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+      taxo.findPrimaryItemDeclaration(sourceName).flatMap(_.substitutionGroupOption)
     }
     assertResult(Some(ENames.XbrliItemEName)) {
-      taxo.findPrimaryItemDeclaration(EName("{http://www.example.com/new}PrimaryItemParent")).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+      taxo.findPrimaryItemDeclaration(EName("{http://www.example.com/new}PrimaryItemParent")).flatMap(_.substitutionGroupOption)
     }
 
     assertResult(Some(targetName)) {
       taxo.findHypercubeDeclaration(targetName).map(_.targetEName)
     }
     assertResult(Some(EName("{http://www.example.com/new}HypercubeParent"))) {
-      taxo.findHypercubeDeclaration(targetName).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+      taxo.findHypercubeDeclaration(targetName).flatMap(_.substitutionGroupOption)
     }
     assertResult(Some(ENames.XbrldtHypercubeItemEName)) {
-      taxo.findHypercubeDeclaration(EName("{http://www.example.com/new}HypercubeParent")).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+      taxo.findHypercubeDeclaration(EName("{http://www.example.com/new}HypercubeParent")).flatMap(_.substitutionGroupOption)
     }
   }
 
@@ -445,7 +445,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     }
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
       taxo.findDimensionDeclaration(hasHypercubes.head.sourceConceptEName).
-        flatMap(_.globalElementDeclaration.substitutionGroupOption)
+        flatMap(_.substitutionGroupOption)
     }
   }
 
@@ -464,7 +464,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     }
     assertResult(Some(EName("{http://www.example.com/new}PrimaryItemParent"))) {
       taxo.findDimensionDeclaration(hasHypercubes.head.sourceConceptEName).
-        flatMap(_.globalElementDeclaration.substitutionGroupOption)
+        flatMap(_.substitutionGroupOption)
     }
     assertResult(false) {
       taxo.findPrimaryItemDeclaration(hasHypercubes.head.sourceConceptEName).isDefined
@@ -570,7 +570,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
       taxo.findPrimaryItemDeclaration(primary).isDefined
     }
     assertResult(Some(EName(tns, "PrimaryItemParent"))) {
-      taxo.findPrimaryItemDeclaration(primary).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+      taxo.findPrimaryItemDeclaration(primary).flatMap(_.substitutionGroupOption)
     }
     assertResult(true) {
       taxo.getPrimaryItemDeclaration(primary).globalElementDeclaration.hasSubstitutionGroup(
@@ -584,7 +584,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
       taxo.findPrimaryItemDeclaration(domainMember).isDefined
     }
     assertResult(Some(EName(tns, "PrimaryItemParent"))) {
-      taxo.findPrimaryItemDeclaration(domainMember).flatMap(_.globalElementDeclaration.substitutionGroupOption)
+      taxo.findPrimaryItemDeclaration(domainMember).flatMap(_.substitutionGroupOption)
     }
     assertResult(true) {
       taxo.getPrimaryItemDeclaration(domainMember).globalElementDeclaration.hasSubstitutionGroup(
