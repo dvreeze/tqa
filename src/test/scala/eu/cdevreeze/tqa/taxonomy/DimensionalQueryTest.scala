@@ -1730,7 +1730,7 @@ class DimensionalQueryTest extends FunSuite {
     }
 
     assertResult(false) {
-      taxo.findTypedDimensionMemberDeclaration(dimensionDecl.targetEName).nonEmpty
+      taxo.findMemberDeclarationOfTypedDimension(dimensionDecl.targetEName).nonEmpty
     }
   }
 
@@ -1764,10 +1764,10 @@ class DimensionalQueryTest extends FunSuite {
     }
 
     assertResult(true) {
-      taxo.findTypedDimensionMemberDeclaration(dimensionDecl.targetEName).nonEmpty
+      taxo.findMemberDeclarationOfTypedDimension(dimensionDecl.targetEName).nonEmpty
     }
     assertResult(EName("{http://www.xbrl.org/dim/conf/190/dimensionURIvalid_File2}phone")) {
-      taxo.getTypedDimensionMemberDeclaration(dimensionDecl.targetEName).targetEName
+      taxo.getMemberDeclarationOfTypedDimension(dimensionDecl.targetEName).targetEName
     }
   }
 
@@ -1786,7 +1786,7 @@ class DimensionalQueryTest extends FunSuite {
     }
 
     assertResult(false) {
-      taxo.findTypedDimensionMemberDeclaration(dimensionDecl.targetEName).nonEmpty
+      taxo.findMemberDeclarationOfTypedDimension(dimensionDecl.targetEName).nonEmpty
     }
   }
 

@@ -139,7 +139,7 @@ trait TaxonomySchemaApi extends SchemaApi {
 
   // Typed dimension member declarations
 
-  def findTypedDimensionMemberDeclaration(typedDimension: EName): Option[GlobalElementDeclaration]
+  def findMemberDeclarationOfTypedDimension(typedDimension: EName): Option[GlobalElementDeclaration]
 
-  def getTypedDimensionMemberDeclaration(typedDimension: EName): GlobalElementDeclaration
+  def getMemberDeclarationOfTypedDimension(typedDimension: EName): GlobalElementDeclaration
 }

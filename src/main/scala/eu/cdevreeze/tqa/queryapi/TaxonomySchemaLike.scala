@@ -223,7 +223,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
   // Typed dimension member declarations
 
-  final def findTypedDimensionMemberDeclaration(typedDimension: EName): Option[GlobalElementDeclaration] = {
+  final def findMemberDeclarationOfTypedDimension(typedDimension: EName): Option[GlobalElementDeclaration] = {
     val typedDimensionDeclOption = findTypedDimensionDeclaration(typedDimension)
 
     val typedDomainRefOption: Option[URI] = typedDimensionDeclOption.map(e => e.typedDomainRef)
@@ -231,7 +231,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
     typedDomainRefOption.flatMap(uri => findGlobalElementDeclarationByUri(uri))
   }
 
-  final def getTypedDimensionMemberDeclaration(typedDimension: EName): GlobalElementDeclaration = {
-    findTypedDimensionMemberDeclaration(typedDimension).getOrElse(sys.error(s"Missing member declaration for typed dimension $typedDimension"))
+  final def getMemberDeclarationOfTypedDimension(typedDimension: EName): GlobalElementDeclaration = {
+    findMemberDeclarationOfTypedDimension(typedDimension).getOrElse(sys.error(s"Missing member declaration for typed dimension $typedDimension"))
   }
 }
