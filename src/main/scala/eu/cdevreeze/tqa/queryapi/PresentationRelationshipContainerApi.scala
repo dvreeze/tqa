@@ -70,6 +70,13 @@ trait PresentationRelationshipContainerApi {
 
   /**
    * Finds all "following" ("consecutive") parent-child relationships.
+   *
+   * This method is shorthand for:
+   * {{{
+   * filterOutgoingParentChildRelationships(relationship.targetConceptEName) { rel =>
+   *   relationship.isFollowedBy(rel)
+   * }
+   * }}}
    */
   def findAllConsecutiveParentChildRelationships(
     relationship: ParentChildRelationship): immutable.IndexedSeq[ParentChildRelationship]

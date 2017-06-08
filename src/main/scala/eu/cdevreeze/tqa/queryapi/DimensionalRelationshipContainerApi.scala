@@ -115,6 +115,13 @@ trait DimensionalRelationshipContainerApi {
 
   /**
    * Finds all consecutive hypercube-dimension relationships.
+   *
+   * This method is shorthand for:
+   * {{{
+   * filterOutgoingHypercubeDimensionRelationships(relationship.targetConceptEName) { rel =>
+   *   relationship.isFollowedBy(rel)
+   * }
+   * }}}
    */
   def findAllConsecutiveHypercubeDimensionRelationships(
     relationship: HasHypercubeRelationship): immutable.IndexedSeq[HypercubeDimensionRelationship]
@@ -139,6 +146,13 @@ trait DimensionalRelationshipContainerApi {
 
   /**
    * Finds all consecutive dimension-domain relationships.
+   *
+   * This method is shorthand for:
+   * {{{
+   * filterOutgoingDimensionDomainRelationships(relationship.targetConceptEName) { rel =>
+   *   relationship.isFollowedBy(rel)
+   * }
+   * }}}
    */
   def findAllConsecutiveDimensionDomainRelationships(
     relationship: HypercubeDimensionRelationship): immutable.IndexedSeq[DimensionDomainRelationship]
@@ -163,6 +177,13 @@ trait DimensionalRelationshipContainerApi {
 
   /**
    * Finds all consecutive domain-member relationships.
+   *
+   * This method is shorthand for:
+   * {{{
+   * filterOutgoingDomainMemberRelationships(relationship.targetConceptEName) { rel =>
+   *   relationship.isFollowedBy(rel)
+   * }
+   * }}}
    */
   def findAllConsecutiveDomainMemberRelationships(
     relationship: DomainAwareRelationship): immutable.IndexedSeq[DomainMemberRelationship]

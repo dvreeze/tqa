@@ -57,6 +57,25 @@ trait InterConceptRelationshipContainerApi {
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
+   * Finds all "following" ("consecutive") inter-concept relationships of the given result type.
+   *
+   * Two relationships "follow" each other if method `InterConceptRelationship.isFollowedBy` says so.
+   *
+   * Note that for non-dimensional relationships this implies that the parameter and result relationship
+   * types must be the same, or else no relationships are returned.
+   *
+   * This method is shorthand for:
+   * {{{
+   * filterOutgoingInterConceptRelationshipsOfType(relationship.targetConceptEName, resultRelationshipType) { rel =>
+   *   relationship.isFollowedBy(rel)
+   * }
+   * }}}
+   */
+  def findAllConsecutiveInterConceptRelationships[A <: InterConceptRelationship, B <: InterConceptRelationship](
+    relationship: A,
+    resultRelationshipType: ClassTag[B]): immutable.IndexedSeq[B]
+
+  /**
    * Finds all inter-concept relationships of the given type that are incoming to the given concept.
    */
   def findAllIncomingInterConceptRelationshipsOfType[A <: InterConceptRelationship](
