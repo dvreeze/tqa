@@ -255,9 +255,7 @@ class QueryApiTest extends FunSuite {
 
     val hhRel = hhRelsForElr.head
 
-    val hdRelsForElr = richTaxo.filterOutgoingHypercubeDimensionRelationships(hhRel.targetConceptEName) { rel =>
-      hhRel.isFollowedBy(rel)
-    }
+    val hdRelsForElr = richTaxo.findAllConsecutiveHypercubeDimensionRelationships(hhRel)
 
     assertResult(hdRelsForElr) {
       richTaxo.findAllOutgoingStandardRelationshipsOfType(hhRel.targetConceptEName, classTag[HypercubeDimensionRelationship]) collect {

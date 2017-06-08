@@ -346,12 +346,12 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     val salesHasHypercubes = taxo.findAllOutgoingHasHypercubeRelationships(salesEName)
 
     val salesHypercubeDimensions =
-      salesHasHypercubes.flatMap(hh => taxo.filterOutgoingHypercubeDimensionRelationships(hh.hypercube)(hh.isFollowedBy(_)))
+      salesHasHypercubes.flatMap(hh => taxo.findAllConsecutiveHypercubeDimensionRelationships(hh))
 
     val incomeStatementHasHypercubes = taxo.findAllOutgoingHasHypercubeRelationships(incomeStatementEName)
 
     val incomeStatementHypercubeDimensions =
-      incomeStatementHasHypercubes.flatMap(hh => taxo.filterOutgoingHypercubeDimensionRelationships(hh.hypercube)(hh.isFollowedBy(_)))
+      incomeStatementHasHypercubes.flatMap(hh => taxo.findAllConsecutiveHypercubeDimensionRelationships(hh))
 
     assertResult(1) {
       salesHasHypercubes.size
