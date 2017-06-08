@@ -169,62 +169,44 @@ object ShowTypedDimensionsInTables {
     val conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] =
       tableTaxo.underlyingTaxonomy.computeHasHypercubeInheritanceOrSelf
 
-    val tableKeyTypedDimPairs: immutable.IndexedSeq[(XmlFragmentKey, EName)] =
+    val conceptTypedDimensionsMap: Map[EName, Set[EName]] =
+      getConceptTypedDimensionsMap(tableTaxo, conceptHasHypercubeMap)
+
+    val tableKeyConceptTypedDimPairs: immutable.IndexedSeq[(XmlFragmentKey, (EName, EName))] =
       tables flatMap { table =>
         val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, scope, rootDir)
 
-        logger.info(s"Created XPathEvaluator. Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
+        val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
+        logger.info(s"Created XPathEvaluator for table $tableId. Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
 
-        getUsedTypedDimensions(table, tableTaxo, conceptHasHypercubeMap, xpathEvaluator).
-          toIndexedSeq.map(dim => (table.key, dim))
+        getUsedConceptTypedDimensionPairs(table, tableTaxo, conceptTypedDimensionsMap, xpathEvaluator).
+          toIndexedSeq.map(conceptDimPair => (table.key, conceptDimPair))
       }
 
-    val typedDimTableKeys: Map[EName, Set[XmlFragmentKey]] =
-      tableKeyTypedDimPairs.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
+    val conceptTypedDimTableKeys: Map[(EName, EName), Set[XmlFragmentKey]] =
+      tableKeyConceptTypedDimPairs.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
 
-    typedDimTableKeys.filter(_._2.size >= 2) foreach {
-      case (typedDim, tableKeys) =>
+    conceptTypedDimTableKeys.filter(_._2.size >= 2) foreach {
+      case ((concept, typedDim), tableKeys) =>
         logger.warning(
-          s"Typed dimension $typedDim occurs in more than 1 table. Table linkbases: ${tableKeys.map(_.docUri).toSeq.sortBy(_.toString).mkString(", ")}")
+          s"The pair of concept $concept and typed dimension $typedDim occurs in more than 1 table. " +
+            s"Table linkbases:\n\t${tableKeys.map(_.docUri).toSeq.sortBy(_.toString).mkString("\n\t")}")
     }
 
     logger.info("Ready")
   }
 
-  def getUsedTypedDimensions(
+  def getUsedConceptTypedDimensionPairs(
     table: Table,
     tableTaxo: BasicTableTaxonomy,
-    conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
-    xpathEvaluator: XPathEvaluator): Set[EName] = {
+    conceptTypedDimensionsMap: Map[EName, Set[EName]],
+    xpathEvaluator: XPathEvaluator): Set[(EName, EName)] = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
-    val elr = table.elr
 
     logger.info(s"Analysing table with ID $tableId (${table.underlyingResource.docUri})")
 
-    val concepts = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
-    val sortedConcepts = concepts.toIndexedSeq.sortBy(_.toString)
-
-    sortedConcepts foreach { concept =>
-      val conceptDecl = tableTaxo.underlyingTaxonomy.getConceptDeclaration(concept)
-      val periodTypeOption = conceptDecl.globalElementDeclaration.periodTypeOption
-
-      val rawMsg = s"Table with ID $tableId in ELR $elr (${table.underlyingResource.docUri}).\n\tConcept in table: $concept"
-      val msg = if (periodTypeOption.isEmpty) rawMsg else rawMsg + s" (periodType: ${periodTypeOption.get})"
-      logger.info(msg)
-    }
-
-    getUsedTypedDimensions(table, concepts, tableTaxo, conceptHasHypercubeMap, xpathEvaluator)
-  }
-
-  def getUsedTypedDimensions(
-    table: Table,
-    concepts: Set[EName],
-    tableTaxo: BasicTableTaxonomy,
-    conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
-    xpathEvaluator: XPathEvaluator): Set[EName] = {
-
-    val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
+    val conceptsInTable = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
 
     val typedDimensionsInTable: Set[EName] = findAllTypedDimensionsInTable(table, tableTaxo)
 
@@ -235,15 +217,11 @@ object ShowTypedDimensionsInTables {
       logger.warning(s"Table $tableId erroneously claims the following to be an typed dimension: $ename")
     }
 
-    val hasHypercubes = conceptHasHypercubeMap.filterKeys(concepts).values.flatten.toIndexedSeq
+    val conceptDimPairsInTable: Set[(EName, EName)] =
+      conceptTypedDimensionsMap.filterKeys(conceptsInTable).toSeq.
+        flatMap({ case (concept, typedDims) => typedDims.filter(typedDimensionsInTable).map(dim => (concept, dim)) }).toSet
 
-    val allTypedDims: Set[EName] =
-      (hasHypercubes flatMap { hh =>
-        val hds = tableTaxo.underlyingTaxonomy.filterOutgoingHypercubeDimensionRelationships(hh.hypercube)(hd => hh.isFollowedBy(hd))
-        hds.map(_.dimension).filter(dim => tableTaxo.underlyingTaxonomy.findTypedDimensionDeclaration(dim).nonEmpty)
-      }).toSet
-
-    allTypedDims
+    conceptDimPairsInTable
   }
 
   /**
@@ -360,6 +338,33 @@ object ShowTypedDimensionsInTables {
     relationship +: (nextRelationships.flatMap(rel => findAllDefinitionNodeSubtreeRelationships(rel, taxo)))
   }
 
+  private def getConceptTypedDimensionsMap(
+    tableTaxo: BasicTableTaxonomy,
+    conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]): Map[EName, Set[EName]] = {
+
+    val hasHypercubes = tableTaxo.underlyingTaxonomy.findAllHasHypercubeRelationships
+
+    val hasHypercubeTypedDimPairs: immutable.IndexedSeq[(HasHypercubeRelationship, EName)] =
+      hasHypercubes flatMap { hh =>
+        val hds = tableTaxo.underlyingTaxonomy.findAllConsecutiveHypercubeDimensionRelationships(hh)
+        val dims = hds.map(_.dimension).distinct
+        val typedDims = dims.filter(dim => tableTaxo.underlyingTaxonomy.findTypedDimensionDeclaration(dim).nonEmpty)
+        typedDims.map(dim => (hh, dim))
+      }
+
+    val hypercubeDimensionsByHasHypercubeKey: Map[HasHypercubeKey, Set[EName]] =
+      hasHypercubeTypedDimPairs groupBy {
+        case (hh, typedDim) =>
+          getKey(hh)
+      } mapValues { grp =>
+        grp.map(_._2).toSet
+      }
+
+    conceptHasHypercubeMap mapValues { hhGroup =>
+      hhGroup.map(hh => getKey(hh)).flatMap(hhKey => hypercubeDimensionsByHasHypercubeKey.getOrElse(hhKey, Set())).toSet
+    }
+  }
+
   private def makeXPathEvaluator(factory: JaxpXPathEvaluatorFactoryUsingSaxon, table: Table, startScope: Scope, localRootDir: File): XPathEvaluator = {
     JaxpXPathEvaluatorUsingSaxon.newInstance(
       factory,
@@ -371,4 +376,10 @@ object ShowTypedDimensionsInTables {
   private def getDocumentBuilder(rootDir: File, processor: Processor): SaxonDocumentBuilder = {
     new SaxonDocumentBuilder(processor.newDocumentBuilder(), UriConverters.uriToLocalUri(_, rootDir))
   }
+
+  private def getKey(hh: HasHypercubeRelationship): HasHypercubeKey = {
+    HasHypercubeKey(hh.primary, hh.hypercube, hh.elr, hh.effectiveTargetRole)
+  }
+
+  private final case class HasHypercubeKey(primary: EName, hypercube: EName, elr: String, targetElr: String)
 }
