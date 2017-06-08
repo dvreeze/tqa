@@ -63,7 +63,7 @@ import javax.xml.bind.DatatypeConverter
  * that each arc must have an XLink arcole attribute, or else an exception is thrown. This can be circumvented
  * in practice by using an arc filter when instantiating a taxonomy object.
  *
- * Unlike relationship creation (with the missing arcrol exception), instance methods on relationships may fail, however.
+ * Unlike relationship creation (with the missing arcrole exception), instance methods on relationships may fail, however.
  *
  * This relationship type hierarchy knows about standard relationships, including dimensional relationships.
  * It also knows about a few specific generic relationships. It does not know about table and formula relationships,
@@ -172,13 +172,18 @@ sealed abstract class InterConceptRelationship(
 
   /**
    * For non-dimensional relationships, returns true if the target concept of this relationship matches the source
-   * concept of the parameter relationship and the "types of relationships" are the same and the ELRs are the same.
+   * concept of the parameter relationship and both relationships are in the same base set.
    *
-   * For dimensional relationships, returns true if this and the parameter relationships form a pair of consecutive
+   * For dimensional relationships, returns true if this and the parameter relationship form a pair of consecutive
    * relationships.
+   *
+   * This method does not check for the target relationship type, although for non-dimensional inter-concept relationships
+   * the relationship type remains the same, and for dimensional relationships the target relationship type is as expected
+   * for consecutive relationships.
    */
   final def isFollowedBy(rel: InterConceptRelationship): Boolean = {
-    (this.targetConceptEName == rel.sourceConceptEName) && isFollowedByTypeOf(rel) && (effectiveTargetRole == rel.elr)
+    (this.targetConceptEName == rel.sourceConceptEName) &&
+      (this.effectiveTargetBaseSetKey == rel.baseSetKey)
   }
 
   /**
@@ -188,12 +193,12 @@ sealed abstract class InterConceptRelationship(
   def effectiveTargetRole: String = elr
 
   /**
-   * Overridable method returning true if this and the other relationship are of "the same type".
-   * It is used by method followedBy.
+   * Overridable method returning the effective target BaseSetKey, which is the same BaseSetKey for non-dimensional relationships,
+   * but respects the rules concerning consecutive relationships for dimensional relationships.
+   * This method is used by method followedBy.
    */
-  protected def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
-    // TODO Refactor method isFollowedBy, and rename this method
-    this.baseSetKey == rel.baseSetKey
+  def effectiveTargetBaseSetKey: BaseSetKey = {
+    this.baseSetKey.ensuring(_.extLinkRole == effectiveTargetRole)
   }
 }
 
@@ -325,14 +330,9 @@ final class RequiresElementRelationship(
  * Dimensional definition relationship.
  */
 sealed abstract class DimensionalRelationship(
-    arc: DefinitionArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo) {
-
-  override def effectiveTargetRole: String = {
-    arc.attributeOption(XbrldtTargetRoleEName).getOrElse(elr)
-  }
-}
+  arc: DefinitionArc,
+  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * Either an [[eu.cdevreeze.tqa.relationship.AllRelationship]] or a [[eu.cdevreeze.tqa.relationship.NotAllRelationship]].
@@ -359,8 +359,12 @@ sealed abstract class HasHypercubeRelationship(
       sys.error(s"Missing attribute @xbrldt:contextElement on has-hypercube arc in $docUri."))
   }
 
-  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
-    rel.isInstanceOf[HypercubeDimensionRelationship]
+  final override def effectiveTargetRole: String = {
+    arc.attributeOption(XbrldtTargetRoleEName).getOrElse(elr)
+  }
+
+  final override def effectiveTargetBaseSetKey: BaseSetKey = {
+    BaseSetKey.forHypercubeDimensionArc(effectiveTargetRole).ensuring(_.extLinkRole == effectiveTargetRole)
   }
 }
 
@@ -398,8 +402,12 @@ final class HypercubeDimensionRelationship(
 
   def dimension: EName = targetConceptEName
 
-  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
-    rel.isInstanceOf[DimensionDomainRelationship]
+  override def effectiveTargetRole: String = {
+    arc.attributeOption(XbrldtTargetRoleEName).getOrElse(elr)
+  }
+
+  override def effectiveTargetBaseSetKey: BaseSetKey = {
+    BaseSetKey.forDimensionDomainArc(effectiveTargetRole).ensuring(_.extLinkRole == effectiveTargetRole)
   }
 }
 
@@ -414,6 +422,14 @@ sealed abstract class DomainAwareRelationship(
   final def usable: Boolean = {
     arc.attributeOption(XbrldtUsableEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(true)
   }
+
+  final override def effectiveTargetRole: String = {
+    arc.attributeOption(XbrldtTargetRoleEName).getOrElse(elr)
+  }
+
+  final override def effectiveTargetBaseSetKey: BaseSetKey = {
+    BaseSetKey.forDomainMemberArc(effectiveTargetRole).ensuring(_.extLinkRole == effectiveTargetRole)
+  }
 }
 
 /**
@@ -427,10 +443,6 @@ final class DimensionDomainRelationship(
   def dimension: EName = sourceConceptEName
 
   def domain: EName = targetConceptEName
-
-  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
-    rel.isInstanceOf[DomainMemberRelationship]
-  }
 }
 
 /**
@@ -444,10 +456,6 @@ final class DomainMemberRelationship(
   def domain: EName = sourceConceptEName
 
   def member: EName = targetConceptEName
-
-  protected override def isFollowedByTypeOf(rel: InterConceptRelationship): Boolean = {
-    rel.isInstanceOf[DomainMemberRelationship]
-  }
 }
 
 /**
@@ -461,8 +469,6 @@ final class DimensionDefaultRelationship(
   def dimension: EName = sourceConceptEName
 
   def defaultOfDimension: EName = targetConceptEName
-
-  override def effectiveTargetRole: String = elr
 }
 
 // Generic relationships

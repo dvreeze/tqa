@@ -48,6 +48,10 @@ final case class BaseSetKey(
   def isStandard: Boolean = {
     arcEName.namespaceUriOption.contains(LinkNamespace) && extLinkEName.namespaceUriOption.contains(LinkNamespace)
   }
+
+  def withArcrole(newArcrole: String): BaseSetKey = this.copy(arcrole = newArcrole)
+
+  def withExtLinkRole(newExtLinkRole: String): BaseSetKey = this.copy(extLinkRole = newExtLinkRole)
 }
 
 object BaseSetKey {
