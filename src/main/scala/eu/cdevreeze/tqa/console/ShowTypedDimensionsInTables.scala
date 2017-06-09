@@ -35,11 +35,14 @@ import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DimensionAspectSpec
+import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
+import eu.cdevreeze.tqa.extension.table.dom.ExplicitDimensionAspect
 import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.dom.TypedDimensionAspect
 import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelationship
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
+import eu.cdevreeze.tqa.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.relationship.RelationshipFactory
@@ -58,7 +61,7 @@ import net.sf.saxon.s9api.Processor
 
 /**
  * Table-aware taxonomy parser and analyser, showing typed dimensions in the tables of the table-aware taxonomy.
- * Overlapping implied concepts with the same typed dimension across tables are logged as warnings.
+ * Overlapping implied concepts with the same combinations of typed dimension plus explicit dimensions across tables are logged as warnings.
  *
  * TODO Mind table filters.
  *
@@ -169,38 +172,38 @@ object ShowTypedDimensionsInTables {
     val conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] =
       tableTaxo.underlyingTaxonomy.computeHasHypercubeInheritanceOrSelf
 
-    val conceptTypedDimensionsMap: Map[EName, Set[EName]] =
-      getConceptTypedDimensionsMap(tableTaxo, conceptHasHypercubeMap)
+    val conceptDimensionInfoMap: Map[EName, Set[TypedAndExplicitDimensionInfo]] =
+      getConceptDimensionInfoMap(tableTaxo.underlyingTaxonomy, conceptHasHypercubeMap)
 
-    val tableKeyConceptTypedDimPairs: immutable.IndexedSeq[(XmlFragmentKey, (EName, EName))] =
+    val tableKeyConceptDimInfoPairs: immutable.IndexedSeq[(XmlFragmentKey, ConceptTypedAndExplicitDimensionInfo)] =
       tables flatMap { table =>
         val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, scope, rootDir)
 
         val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
         logger.info(s"Created XPathEvaluator for table $tableId. Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
 
-        getUsedConceptTypedDimensionPairs(table, tableTaxo, conceptTypedDimensionsMap, xpathEvaluator).
-          toIndexedSeq.map(conceptDimPair => (table.key, conceptDimPair))
+        getUsedConceptDimInfoPairs(table, tableTaxo, conceptDimensionInfoMap, xpathEvaluator).
+          toIndexedSeq.map(kv => (table.key, ConceptTypedAndExplicitDimensionInfo(kv._1, kv._2.typedDim, kv._2.explicitDims)))
       }
 
-    val conceptTypedDimTableKeys: Map[(EName, EName), Set[XmlFragmentKey]] =
-      tableKeyConceptTypedDimPairs.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
+    val conceptTypedDimTableKeys: Map[ConceptTypedAndExplicitDimensionInfo, Set[XmlFragmentKey]] =
+      tableKeyConceptDimInfoPairs.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
 
     conceptTypedDimTableKeys.filter(_._2.size >= 2) foreach {
-      case ((concept, typedDim), tableKeys) =>
+      case (ConceptTypedAndExplicitDimensionInfo(concept, typedDim, explicitDims), tableKeys) =>
         logger.warning(
-          s"The pair of concept $concept and typed dimension $typedDim occurs in more than 1 table. " +
+          s"The pair of concept $concept and typed dimension $typedDim and explicit dimensions ${explicitDims.mkString("[", ", ", "]")} occurs in more than 1 table. " +
             s"Table linkbases:\n\t${tableKeys.map(_.docUri).toSeq.sortBy(_.toString).mkString("\n\t")}")
     }
 
     logger.info("Ready")
   }
 
-  def getUsedConceptTypedDimensionPairs(
+  def getUsedConceptDimInfoPairs(
     table: Table,
     tableTaxo: BasicTableTaxonomy,
-    conceptTypedDimensionsMap: Map[EName, Set[EName]],
-    xpathEvaluator: XPathEvaluator): Set[(EName, EName)] = {
+    conceptDimInfoMap: Map[EName, Set[TypedAndExplicitDimensionInfo]],
+    xpathEvaluator: XPathEvaluator): Set[(EName, TypedAndExplicitDimensionInfo)] = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
 
@@ -208,20 +211,33 @@ object ShowTypedDimensionsInTables {
 
     val conceptsInTable = findAllConceptsInTable(table, tableTaxo)(xpathEvaluator)
 
-    val typedDimensionsInTable: Set[EName] = findAllTypedDimensionsInTable(table, tableTaxo)
+    val dimInfosInTable: Set[TypedAndExplicitDimensionInfo] = findAllDimInfosInTable(table, tableTaxo)
 
     val nonTypedDimensionENames: Set[EName] =
-      typedDimensionsInTable.filter(en => tableTaxo.underlyingTaxonomy.findTypedDimensionDeclaration(en).isEmpty)
+      dimInfosInTable.map(_.typedDim).toSet.filter(en => tableTaxo.underlyingTaxonomy.findTypedDimensionDeclaration(en).isEmpty)
 
     for (ename <- nonTypedDimensionENames.toSeq.sortBy(_.toString)) {
       logger.warning(s"Table $tableId erroneously claims the following to be an typed dimension: $ename")
     }
 
-    val conceptDimPairsInTable: Set[(EName, EName)] =
-      conceptTypedDimensionsMap.filterKeys(conceptsInTable).toSeq.
-        flatMap({ case (concept, typedDims) => typedDims.filter(typedDimensionsInTable).map(dim => (concept, dim)) }).toSet
+    // TODO Similar check on explicit dimensions as well
 
-    conceptDimPairsInTable
+    val conceptDimInfoPairsInTable: Set[(EName, TypedAndExplicitDimensionInfo)] =
+      conceptDimInfoMap.filterKeys(conceptsInTable).toSeq.
+        flatMap({ case (concept, dimInfos) => dimInfos.filter(dimInfosInTable).map(dimInfo => (concept, dimInfo)) }).toSet
+
+    conceptDimInfoPairsInTable
+  }
+
+  /**
+   * Returns all combinations of typed dimensions plus explicit dimensions "touched" by the table. These are the dimensions in rule nodes and aspect nodes.
+   */
+  def findAllDimInfosInTable(table: Table, taxo: BasicTableTaxonomy): Set[TypedAndExplicitDimensionInfo] = {
+    val typedDims = findAllTypedDimensionsInTable(table, taxo)
+
+    val explicitDims = findAllExplicitDimensionsInTable(table, taxo)
+
+    typedDims.map(typedDim => TypedAndExplicitDimensionInfo(typedDim, explicitDims))
   }
 
   /**
@@ -288,6 +304,36 @@ object ShowTypedDimensionsInTables {
     concepts.toSet
   }
 
+  /**
+   * Returns all explicit dimensions "touched" by the table. These are the explicit dimensions in rule and
+   * dimension relationship nodes, and aspect in nodes.
+   */
+  def findAllExplicitDimensionsInTable(table: Table, taxo: BasicTableTaxonomy): Set[EName] = {
+    val nodes = findAllNodes(table, taxo)
+
+    val dims: Seq[EName] =
+      nodes flatMap {
+        case node: DimensionRelationshipNode =>
+          Seq(node.dimensionName)
+        case node: RuleNode =>
+          findAllExplicitDimensionsInRuleNode(node, taxo).toSeq
+        case node =>
+          Seq.empty // TODO Aspect node
+      }
+
+    dims.toSet
+  }
+
+  def findAllExplicitDimensionsInRuleNode(
+    ruleNode: RuleNode,
+    taxo: BasicTableTaxonomy): Set[EName] = {
+
+    val explicitDimensionAspectElems =
+      ruleNode.allAspects collect { case dimensionAspect: ExplicitDimensionAspect => dimensionAspect }
+
+    explicitDimensionAspectElems.map(_.dimension).toSet
+  }
+
   def findAllConceptsInRuleNode(
     ruleNode: RuleNode,
     taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
@@ -338,30 +384,31 @@ object ShowTypedDimensionsInTables {
     relationship +: (nextRelationships.flatMap(rel => findAllDefinitionNodeSubtreeRelationships(rel, taxo)))
   }
 
-  private def getConceptTypedDimensionsMap(
-    tableTaxo: BasicTableTaxonomy,
-    conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]): Map[EName, Set[EName]] = {
+  private def getConceptDimensionInfoMap(
+    taxo: TaxonomyApi,
+    conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]): Map[EName, Set[TypedAndExplicitDimensionInfo]] = {
 
-    val hasHypercubes = tableTaxo.underlyingTaxonomy.findAllHasHypercubeRelationships
+    val hasHypercubes = taxo.findAllHasHypercubeRelationships
 
-    val hasHypercubeTypedDimPairs: immutable.IndexedSeq[(HasHypercubeRelationship, EName)] =
+    val hasHypercubeDimInfoPairs: immutable.IndexedSeq[(HasHypercubeRelationship, TypedAndExplicitDimensionInfo)] =
       hasHypercubes flatMap { hh =>
-        val hds = tableTaxo.underlyingTaxonomy.findAllConsecutiveHypercubeDimensionRelationships(hh)
-        val dims = hds.map(_.dimension).distinct
-        val typedDims = dims.filter(dim => tableTaxo.underlyingTaxonomy.findTypedDimensionDeclaration(dim).nonEmpty)
-        typedDims.map(dim => (hh, dim))
+        val hds = taxo.findAllConsecutiveHypercubeDimensionRelationships(hh)
+        val dims = hds.map(_.dimension).toSet
+        val explicitDims = dims.filter(dim => taxo.findExplicitDimensionDeclaration(dim).nonEmpty)
+        val typedDims = dims.filter(dim => taxo.findTypedDimensionDeclaration(dim).nonEmpty)
+        typedDims.map(typedDim => (hh, TypedAndExplicitDimensionInfo(typedDim, explicitDims)))
       }
 
-    val hypercubeDimensionsByHasHypercubeKey: Map[HasHypercubeKey, Set[EName]] =
-      hasHypercubeTypedDimPairs groupBy {
-        case (hh, typedDim) =>
+    val hypercubeDimInfosByHasHypercubeKey: Map[HasHypercubeKey, Set[TypedAndExplicitDimensionInfo]] =
+      hasHypercubeDimInfoPairs groupBy {
+        case (hh, typedAndExplicitDimInfo) =>
           getKey(hh)
       } mapValues { grp =>
         grp.map(_._2).toSet
       }
 
     conceptHasHypercubeMap mapValues { hhGroup =>
-      hhGroup.map(hh => getKey(hh)).flatMap(hhKey => hypercubeDimensionsByHasHypercubeKey.getOrElse(hhKey, Set())).toSet
+      hhGroup.map(hh => getKey(hh)).flatMap(hhKey => hypercubeDimInfosByHasHypercubeKey.getOrElse(hhKey, Set())).toSet
     }
   }
 
@@ -382,4 +429,8 @@ object ShowTypedDimensionsInTables {
   }
 
   private final case class HasHypercubeKey(primary: EName, hypercube: EName, elr: String, targetElr: String)
+
+  final case class ConceptTypedAndExplicitDimensionInfo(concept: EName, typedDim: EName, explicitDims: Set[EName])
+
+  final case class TypedAndExplicitDimensionInfo(typedDim: EName, explicitDims: Set[EName])
 }
