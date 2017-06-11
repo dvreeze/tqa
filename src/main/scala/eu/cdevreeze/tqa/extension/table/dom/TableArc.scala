@@ -134,10 +134,12 @@ final class AspectNodeFilterArc(val underlyingArc: tqa.dom.NonStandardArc) exten
   }
 }
 
+// Companion objects
+
 object TableArc {
 
   /**
-   * Lenient method to optionally create a TableArc from an underlying tqa.dom.StandardArc.
+   * Lenient method to optionally create a TableArc from an underlying tqa.dom.NonStandardArc.
    */
   def opt(underlyingArc: tqa.dom.NonStandardArc): Option[TableArc] = {
     if (underlyingArc.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
