@@ -197,7 +197,7 @@ final class TupleFilterAncestor(underlyingElem: tqa.dom.OtherElem) extends Tuple
 }
 
 /**
- * A cf:qname descendant element of a tuple filter.
+ * A tf:qname descendant element of a tuple filter.
  */
 final class TupleFilterQName(underlyingElem: tqa.dom.OtherElem) extends TupleFilterContentElem(underlyingElem) {
 
@@ -210,7 +210,7 @@ final class TupleFilterQName(underlyingElem: tqa.dom.OtherElem) extends TupleFil
 }
 
 /**
- * A cf:qnameExpression descendant element of a tuple filter.
+ * A tf:qnameExpression descendant element of a tuple filter.
  */
 final class TupleFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends TupleFilterContentElem(underlyingElem) {
 

@@ -86,7 +86,7 @@ final class VariableFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def complement: Boolean = {
-    underlyingArc.attributeOption(ENames.ComplementEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
+    DatatypeConverter.parseBoolean(underlyingArc.attribute(ENames.ComplementEName))
   }
 
   /**
@@ -94,7 +94,7 @@ final class VariableFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def cover: Boolean = {
-    underlyingArc.attributeOption(ENames.CoverEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
+    DatatypeConverter.parseBoolean(underlyingArc.attribute(ENames.CoverEName))
   }
 }
 
@@ -109,7 +109,7 @@ final class VariableSetFilterArc(val underlyingArc: tqa.dom.NonStandardArc) exte
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def complement: Boolean = {
-    underlyingArc.attributeOption(ENames.ComplementEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
+    DatatypeConverter.parseBoolean(underlyingArc.attribute(ENames.ComplementEName))
   }
 }
 
