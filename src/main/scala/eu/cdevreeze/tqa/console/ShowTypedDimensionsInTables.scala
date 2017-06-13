@@ -174,6 +174,18 @@ object ShowTypedDimensionsInTables {
     val conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] =
       tableTaxo.underlyingTaxonomy.computeHasHypercubeInheritanceOrSelf
 
+    logger.info("Computing mappings from has-hypercubes to typed dimensions and to explicit dimension members ...")
+
+    val hasHypercubes = tableTaxo.underlyingTaxonomy.findAllHasHypercubeRelationships
+
+    val hasHypercubeTypedDimMap: Map[HasHypercubeKey, Set[EName]] =
+      computeMappingFromHasHypercubeToTypedDimensions(hasHypercubes, tableTaxo.underlyingTaxonomy)
+
+    val hasHypercubeExplicitDimMemberMap: Map[HasHypercubeKey, Map[EName, Set[EName]]] =
+      computeMappingFromHasHypercubeToExplicitDimensionMembers(hasHypercubes, tableTaxo.underlyingTaxonomy)
+
+    logger.info("Analysing the tables ...")
+
     val typedDimensionUsagesInTables: immutable.IndexedSeq[TypedDimensionUsageInTable] = {
       (tables flatMap { table =>
         val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, scope, rootDir)
@@ -181,10 +193,19 @@ object ShowTypedDimensionsInTables {
         val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
         logger.info(s"Created XPathEvaluator for table $tableId. Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
 
-        findAllTypedDimensionUsagesInTable(table, tableTaxo, conceptHasHypercubeMap, xpathEvaluator).toIndexedSeq.
+        findAllTypedDimensionUsagesInTable(
+          table,
+          tableTaxo,
+          conceptHasHypercubeMap,
+          hasHypercubeTypedDimMap,
+          hasHypercubeExplicitDimMemberMap,
+          xpathEvaluator).toIndexedSeq.
           map(typedDimUsage => TypedDimensionUsageInTable(table.key, typedDimUsage))
       }).distinct
     }
+
+    logger.info(s"Ready analysing tables. Now looking for duplicate typed dimension usage across tables. " +
+      s"Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
 
     val typedDimensionUsageToTableKeyMap: Map[TypedDimensionUsage, Set[XmlFragmentKey]] =
       typedDimensionUsagesInTables.groupBy(_.typedDimensionUsage).mapValues(grp => grp.map(_.tableKey).toSet)
@@ -204,6 +225,8 @@ object ShowTypedDimensionsInTables {
     table: Table,
     tableTaxo: BasicTableTaxonomy,
     conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
+    hasHypercubeTypedDimMap: Map[HasHypercubeKey, Set[EName]],
+    hasHypercubeExplicitDimMemberMap: Map[HasHypercubeKey, Map[EName, Set[EName]]],
     xpathEvaluator: XPathEvaluator): Set[TypedDimensionUsage] = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
@@ -219,14 +242,6 @@ object ShowTypedDimensionsInTables {
 
     val hasHypercubesInTable =
       conceptHasHypercubeMap.filterKeys(conceptsInTable).values.flatten.toIndexedSeq.distinct
-
-    // Some mappings with has-hypercube keys, finding dimensions (and members) in the taxonomy (no in the tables)
-
-    val hasHypercubeTypedDimMap: Map[HasHypercubeKey, Set[EName]] =
-      computeMappingFromHasHypercubeToTypedDimensions(hasHypercubesInTable, tableTaxo.underlyingTaxonomy)
-
-    val hasHypercubeExplicitDimMemberMap: Map[HasHypercubeKey, Map[EName, Set[EName]]] =
-      computeMappingFromHasHypercubeToExplicitDimensionMembers(hasHypercubesInTable, tableTaxo.underlyingTaxonomy)
 
     // Dimensions (and members) found in the tables, not limited to certain concepts
 
