@@ -274,12 +274,12 @@ object ShowTypedDimensionsInTables {
                 (dim -> filteredMembers)
             }).toMap filter (_._2.nonEmpty)
 
-          val explicitDimsForConceptInTable: Set[Map[EName, EName]] =
-            toDimensionMemberMaps(explicitDimMembersForConceptInTable)
+          val explicitDimsForConceptInTable: immutable.IndexedSeq[Map[EName, EName]] =
+            toDimensionMemberMaps(explicitDimMembersForConceptInTable).distinct
 
           for {
             typedDim <- typedDimsForConceptInTable.toIndexedSeq
-            explicitDims <- explicitDimsForConceptInTable.toIndexedSeq
+            explicitDims <- explicitDimsForConceptInTable
           } yield {
             TypedDimensionUsage(typedDim, concept, explicitDims)
           }
@@ -288,29 +288,29 @@ object ShowTypedDimensionsInTables {
     typedDimensionUsages.toSet
   }
 
-  private def toDimensionMemberMaps(dimMembers: Map[EName, Set[EName]]): Set[Map[EName, EName]] = {
+  private def toDimensionMemberMaps(dimMembers: Map[EName, Set[EName]]): immutable.IndexedSeq[Map[EName, EName]] = {
     val dims = dimMembers.keySet
 
     if (dimMembers.isEmpty) {
-      Set()
+      immutable.IndexedSeq()
     } else {
       val dim = dims.head
 
       if (dims.size == 1) {
         assert(dimMembers.size == 1)
-        dimMembers(dim).toSeq.map(m => Map(dim -> m)).toSet
+        dimMembers(dim).toIndexedSeq.map(m => Map(dim -> m))
       } else {
         val remainingDims = dims - dim
 
         // Recursive call
-        val remainingDimsResult = toDimensionMemberMaps(dimMembers.filterKeys(remainingDims)).toSeq
+        val remainingDimsResult = toDimensionMemberMaps(dimMembers.filterKeys(remainingDims))
 
-        (for {
+        for {
           remainingDimsRecord <- remainingDimsResult
           mem <- dimMembers(dim)
         } yield {
           remainingDimsRecord + (dim -> mem)
-        }).toSet
+        }
       }
     }
   }
