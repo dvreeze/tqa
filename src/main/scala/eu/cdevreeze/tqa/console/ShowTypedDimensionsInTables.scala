@@ -240,9 +240,6 @@ object ShowTypedDimensionsInTables {
     val hasHypercubeMapForTable: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] =
       conceptHasHypercubeMap.filterKeys(conceptsInTable)
 
-    val hasHypercubesInTable =
-      conceptHasHypercubeMap.filterKeys(conceptsInTable).values.flatten.toIndexedSeq.distinct
-
     // Dimensions (and members) found in the tables, not limited to certain concepts
 
     val allFoundTypedDimensionsInTable: Set[EName] = findAllTypedDimensionsInTable(table, tableTaxo)
