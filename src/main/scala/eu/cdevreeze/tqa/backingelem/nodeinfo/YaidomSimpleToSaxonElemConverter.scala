@@ -26,8 +26,11 @@ import net.sf.saxon.tree.tiny.TinyBuilder
  * Converter from yaidom simple elements and documents to Saxon wrapper elements and documents.
  *
  * We exploit the fact that yaidom simple elements and documents can be excellent builders for
- * Saxon wrapper elements and documents (or builders for other element implementations), especially
- * if they are relatively small.
+ * Saxon wrapper elements and documents (or builders for other element implementations).
+ *
+ * Performance of this SAX-based solution is also pretty good. The implementation uses the fact
+ * that yaidom can convert a simple Document or Elem to a stream of SAX events on any SAX handler,
+ * and Saxon can provide such a SAX handler that happens to create a Saxon tiny tree.
  *
  * @author Chris de Vreeze
  */
@@ -52,11 +55,17 @@ final class YaidomSimpleToSaxonElemConverter(val processor: Processor) {
     saxConversions.convertDocument(doc)(receivingContentHandler)
 
     val tree = builder.getTree
+
+    if (doc.uriOption.isDefined) {
+      tree.setSystemId(doc.uriOption.get.toString)
+      tree.getRootNode.setSystemId(doc.uriOption.get.toString) // ??
+    }
+
     val saxonDoc = SaxonDocument.wrapDocument(tree)
     saxonDoc
   }
 
   def convertSimpleElem(elem: simple.Elem): SaxonElem = {
-    convertSimpleDocument(simple.Document(elem)).documentElement
+    convertSimpleDocument(simple.Document(None, elem)).documentElement
   }
 }

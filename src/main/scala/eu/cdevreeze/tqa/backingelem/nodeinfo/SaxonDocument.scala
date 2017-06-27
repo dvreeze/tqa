@@ -41,7 +41,7 @@ final class SaxonDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
 
   def wrappedNode: NodeInfo = wrappedTreeInfo.getRootNode
 
-  def uriOption: Option[URI] = Option(wrappedNode.getSystemId).map(s => URI.create(s))
+  def uriOption: Option[URI] = Option(wrappedNode.getSystemId).map(s => URI.create(s)) // ??
 
   def documentElement: SaxonElem =
     (children collectFirst { case e: SaxonElem => e }).getOrElse(sys.error(s"Missing document element"))

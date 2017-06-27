@@ -25,7 +25,7 @@ import net.jcip.annotations.NotThreadSafe
 
 /**
  * Converter from yaidom Saxon wrapper elements and documents to yaidom simple elements and documents.
- * It outputs SAX events to a yaidom DefaultElemProducingSaxHandler.
+ * It is implemented by outputting SAX events to a yaidom DefaultElemProducingSaxHandler.
  *
  * @author Chris de Vreeze
  */
@@ -40,7 +40,7 @@ final class YaidomSaxonToSimpleElemConverter(val transformer: Transformer) {
 
     transformer.transform(saxonSource, new SAXResult(elemProducingContentHandler))
 
-    val resultDoc = elemProducingContentHandler.resultingDocument
+    val resultDoc = elemProducingContentHandler.resultingDocument.withUriOption(doc.uriOption)
     resultDoc
   }
 
