@@ -22,8 +22,11 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingSax
 import eu.cdevreeze.yaidom.resolved
+import eu.cdevreeze.yaidom.simple
 import javax.xml.transform.stream.StreamSource
 import net.sf.saxon.s9api.Processor
 
@@ -98,6 +101,41 @@ class ConversionTest extends FunSuite {
     }
     assertResult(saxonDoc.uriOption) {
       simpleDoc2.uriOption
+    }
+  }
+
+  test("testTransformViaConvertedElem") {
+    val simpleDoc =
+      saxonToSimpleElemConverter.convertSaxonDocument(doc) ensuring { d =>
+        d.documentElement.filterElems(_.qname == QName("link:linkbaseRef")).nonEmpty
+      }
+
+    val scope = simpleDoc.documentElement.scope
+
+    val newScope = scope ++ Scope.from("linkbase" -> scope.prefixNamespaceMap("link"))
+
+    val editedRootElem =
+      simpleDoc.documentElement transformElems { e =>
+        if (e.qname == QName("link:linkbaseRef")) {
+          simple.Node.elem(QName("linkbase:linkbaseRef"), e.attributes, newScope ++ e.scope, e.children)
+        } else {
+          e
+        }
+      }
+
+    val saxonDoc =
+      simpleToSaxonElemConverter.convertSimpleDocument(simpleDoc.withDocumentElement(editedRootElem))
+
+    assertResult(true) {
+      saxonDoc.documentElement.filterElems(_.qname == QName("link:linkbaseRef")).isEmpty
+    }
+
+    assertResult(resolved.Elem(editedRootElem)) {
+      resolved.Elem(saxonDoc.documentElement)
+    }
+
+    assertResult(resolved.Elem(doc.documentElement)) {
+      resolved.Elem(saxonDoc.documentElement)
     }
   }
 }
