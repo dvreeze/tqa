@@ -54,7 +54,7 @@ object YaidomSaxonToSimpleElemConverter {
   }
 
   /**
-   * Given a parent scope, converts a `SaxonNode` to an optional [[eu.cdevreeze.yaidom.simple.Node]].
+   * Given a parent scope, converts a `SaxonNode` to an optional yaidom simple Node.
    */
   def optionallyConvertSaxonNode(node: SaxonNode): Option[simple.Node] = {
     node match {
