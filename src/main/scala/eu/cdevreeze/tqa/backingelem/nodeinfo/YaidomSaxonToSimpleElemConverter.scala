@@ -16,42 +16,70 @@
 
 package eu.cdevreeze.tqa.backingelem.nodeinfo
 
-import eu.cdevreeze.yaidom.parse.DefaultElemProducingSaxHandler
 import eu.cdevreeze.yaidom.simple
-import javax.xml.transform.Source
-import javax.xml.transform.Transformer
-import javax.xml.transform.sax.SAXResult
-import net.jcip.annotations.NotThreadSafe
 
 /**
  * Converter from yaidom Saxon wrapper elements and documents to yaidom simple elements and documents.
- * It is implemented by outputting SAX events to a yaidom DefaultElemProducingSaxHandler.
+ * It is implemented by directly building simple Nodes from Saxon wrapper nodes.
  *
  * @author Chris de Vreeze
  */
-@NotThreadSafe
-final class YaidomSaxonToSimpleElemConverter(val transformer: Transformer) {
-  require(transformer ne null)
+object YaidomSaxonToSimpleElemConverter {
 
   def convertSaxonDocument(doc: SaxonDocument): simple.Document = {
-    val saxonSource: Source = doc.wrappedTreeInfo
+    // No XML declaration, probably?
 
-    val elemProducingContentHandler = new DefaultElemProducingSaxHandler {}
-
-    transformer.transform(saxonSource, new SAXResult(elemProducingContentHandler))
-
-    val resultDoc = elemProducingContentHandler.resultingDocument.withUriOption(doc.uriOption)
-    resultDoc
+    simple.Document(
+      uriOption = doc.uriOption,
+      xmlDeclarationOption = None,
+      children = doc.children flatMap {
+        case e: SaxonElem                   => Some(convertSaxonElem(doc.documentElement))
+        case pi: SaxonProcessingInstruction => Some(convertSaxonProcessingInstruction(pi))
+        case c: SaxonComment                => Some(convertSaxonComment(c))
+        case _                              => None
+      })
   }
 
   def convertSaxonElem(elem: SaxonElem): simple.Elem = {
-    val saxonSource: Source = elem.wrappedNode
+    val children = elem.children.flatMap(ch => optionallyConvertSaxonNode(ch))
 
-    val elemProducingContentHandler = new DefaultElemProducingSaxHandler {}
+    val resultElem =
+      simple.Node.elem(
+        elem.qname,
+        elem.attributes,
+        elem.scope,
+        children)
 
-    transformer.transform(saxonSource, new SAXResult(elemProducingContentHandler))
-
-    val resultElem = elemProducingContentHandler.resultingElem
     resultElem
+  }
+
+  /**
+   * Given a parent scope, converts a `SaxonNode` to an optional [[eu.cdevreeze.yaidom.simple.Node]].
+   */
+  def optionallyConvertSaxonNode(node: SaxonNode): Option[simple.Node] = {
+    node match {
+      case e: SaxonElem =>
+        Some(convertSaxonElem(e))
+      case t: SaxonText =>
+        Some(convertSaxonText(t))
+      case pi: SaxonProcessingInstruction =>
+        Some(convertSaxonProcessingInstruction(pi))
+      case c: SaxonComment =>
+        Some(convertSaxonComment(c))
+      case _ => None
+    }
+  }
+
+  def convertSaxonText(text: SaxonText): simple.Text = {
+    // Never CData?
+    simple.Node.text(text.text)
+  }
+
+  def convertSaxonComment(comment: SaxonComment): simple.Comment = {
+    simple.Node.comment(comment.text)
+  }
+
+  def convertSaxonProcessingInstruction(processingInstruction: SaxonProcessingInstruction): simple.ProcessingInstruction = {
+    simple.Node.processingInstruction(processingInstruction.target, processingInstruction.data)
   }
 }

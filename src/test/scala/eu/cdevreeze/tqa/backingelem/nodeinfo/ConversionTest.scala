@@ -24,7 +24,6 @@ import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingSax
 import eu.cdevreeze.yaidom.resolved
-import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamSource
 import net.sf.saxon.s9api.Processor
 
@@ -38,8 +37,7 @@ class ConversionTest extends FunSuite {
 
   private val processor = new Processor(false)
 
-  private val saxonToSimpleElemConverter =
-    new YaidomSaxonToSimpleElemConverter(TransformerFactory.newInstance().newTransformer())
+  private val saxonToSimpleElemConverter = YaidomSaxonToSimpleElemConverter
 
   private val simpleToSaxonElemConverter = new YaidomSimpleToSaxonElemConverter(processor)
 
