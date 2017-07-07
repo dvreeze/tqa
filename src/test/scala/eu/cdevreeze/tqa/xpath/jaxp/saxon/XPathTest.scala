@@ -68,6 +68,8 @@ class XPathTest extends FunSuite {
     def resolveFunction(functionName: javax.xml.namespace.QName, arity: Int): XPathFunction = {
       if (arity == 1 && (functionName == EName(MyFuncNamespace, "contexts").toJavaQName(None))) {
         new FindAllXbrliContexts
+      } else if (arity == 2 && (functionName == EName(MyFuncNamespace, "transform").toJavaQName(None))) {
+        new TransformElem
       } else {
         sys.error(s"Unknown function with name $functionName and arity $arity")
       }
@@ -81,6 +83,8 @@ class XPathTest extends FunSuite {
         java.lang.Integer.valueOf(4)
       } else if (variableName == EName(MyVarNamespace, "contextPosition").toJavaQName(None)) {
         java.lang.Integer.valueOf(4)
+      } else if (variableName == EName(MyVarNamespace, "identity").toJavaQName(None)) {
+        { e: SaxonElem => e }
       } else {
         sys.error(s"Unknown variable with name $variableName")
       }
@@ -343,6 +347,22 @@ class XPathTest extends FunSuite {
     }
     assertResult(Some("I-2005")) {
       resultElem.attributeOption(ENames.IdEName)
+    }
+  }
+
+  test("testIdentityTransformation") {
+    val exprString = "myfun:transform(., $myvar:identity)"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsNode(expr, Some(rootElem.wrappedNode))
+
+    val resultElem = SaxonNode.wrapElement(result.asInstanceOf[NodeInfo])
+
+    assertResult(EName(Namespaces.XbrliNamespace, "xbrl")) {
+      resultElem.resolvedName
+    }
+    assertResult(rootElem.findAllElemsOrSelf.size) {
+      resultElem.findAllElemsOrSelf.size
     }
   }
 
