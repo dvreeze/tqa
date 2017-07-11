@@ -29,9 +29,14 @@ import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonNode
+import eu.cdevreeze.tqa.backingelem.nodeinfo.YaidomSaxonToSimpleElemConverter
+import eu.cdevreeze.tqa.backingelem.nodeinfo.YaidomSimpleToSaxonElemConverter
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.resolved
+import eu.cdevreeze.yaidom.simple
 import javax.xml.xpath.XPathFunction
 import javax.xml.xpath.XPathFunctionResolver
 import javax.xml.xpath.XPathVariableResolver
@@ -60,6 +65,22 @@ class XPathTest extends FunSuite {
 
   private val rootElem: SaxonElem = docBuilder.build(docUri)
 
+  private def useXbrliPrefix(e: SaxonElem): SaxonElem = {
+    require(
+      e.scope.filterNamespaces(Set(Namespaces.XbrliNamespace)).keySet == Set("", "xbrli"),
+      s"Expected namespace ${Namespaces.XbrliNamespace} as default namespace and having prefix 'xbrli' as well")
+
+    def convert(elm: simple.Elem): simple.Elem = {
+      if (elm.qname.prefixOption.isEmpty) elm.copy(qname = QName("xbrli", elm.qname.localPart)) else elm
+    }
+
+    val converterToSaxon = new YaidomSimpleToSaxonElemConverter(processor)
+
+    val simpleRootElem = YaidomSaxonToSimpleElemConverter.convertSaxonElem(e.rootElem)
+    val simpleResultRootElem = simpleRootElem.updateElemOrSelf(e.path)(_.transformElemsOrSelf(convert))
+    converterToSaxon.convertSimpleElem(simpleResultRootElem).getElemOrSelfByPath(e.path).ensuring(_.path == e.path)
+  }
+
   private val xpathEvaluatorFactory =
     JaxpXPathEvaluatorFactoryUsingSaxon.newInstance(processor.getUnderlyingConfiguration)
 
@@ -85,6 +106,8 @@ class XPathTest extends FunSuite {
         java.lang.Integer.valueOf(4)
       } else if (variableName == EName(MyVarNamespace, "identity").toJavaQName(None)) {
         { e: SaxonElem => e }
+      } else if (variableName == EName(MyVarNamespace, "useXbrliPrefix").toJavaQName(None)) {
+        { e: SaxonElem => useXbrliPrefix(e) }
       } else {
         sys.error(s"Unknown variable with name $variableName")
       }
@@ -363,6 +386,61 @@ class XPathTest extends FunSuite {
     }
     assertResult(rootElem.findAllElemsOrSelf.size) {
       resultElem.findAllElemsOrSelf.size
+    }
+  }
+
+  test("testUseXbrliPrefixTransformation") {
+    val exprString = "myfun:transform(., $myvar:useXbrliPrefix)"
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsNode(expr, Some(rootElem.wrappedNode))
+
+    val resultElem = SaxonNode.wrapElement(result.asInstanceOf[NodeInfo])
+
+    assertResult(EName(Namespaces.XbrliNamespace, "xbrl")) {
+      resultElem.resolvedName
+    }
+    assertResult(rootElem.findAllElemsOrSelf.size) {
+      resultElem.findAllElemsOrSelf.size
+    }
+    assertResult(List.empty) {
+      resultElem.filterElemsOrSelf(_.qname.prefixOption.isEmpty)
+    }
+    assertResult(resolved.Elem(rootElem)) {
+      resolved.Elem(resultElem)
+    }
+  }
+
+  test("testUseXbrliPrefixLocalTransformation") {
+    val exprString = "myfun:transform(., $myvar:useXbrliPrefix)"
+
+    val firstContext =
+      rootElem.findElem(e => e.resolvedName == EName(Namespaces.XbrliNamespace, "context") &&
+        e.attributeOption(ENames.IdEName).contains("I-2007")).head
+
+    val expr = xpathEvaluator.toXPathExpression(exprString)
+    val result = xpathEvaluator.evaluateAsNode(expr, Some(firstContext.wrappedNode))
+
+    val resultContextElem = SaxonNode.wrapElement(result.asInstanceOf[NodeInfo])
+    val resultRootElem = resultContextElem.rootElem
+
+    assertResult(EName(Namespaces.XbrliNamespace, "xbrl")) {
+      resultRootElem.resolvedName
+    }
+    assertResult(rootElem.findAllElemsOrSelf.size) {
+      resultRootElem.findAllElemsOrSelf.size
+    }
+    assertResult(List.empty) {
+      resultContextElem.filterElemsOrSelf(_.qname.prefixOption.isEmpty)
+    }
+    assertResult(false) {
+      resultRootElem.filterElemsOrSelf(_.qname.prefixOption.isEmpty).isEmpty
+    }
+    assertResult(resolved.Elem(firstContext)) {
+      resolved.Elem(resultContextElem)
+    }
+    assertResult(resolved.Elem(rootElem)) {
+      resolved.Elem(resultRootElem)
     }
   }
 
