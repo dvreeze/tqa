@@ -78,7 +78,7 @@ class XPathTest extends FunSuite {
 
     val simpleRootElem = YaidomSaxonToSimpleElemConverter.convertSaxonElem(e.rootElem)
     val simpleResultRootElem = simpleRootElem.updateElemOrSelf(e.path)(_.transformElemsOrSelf(convert))
-    // This conversion leaves the Path to the resulting element the same!
+    // The conversion above happens to leave the Path to the resulting element the same!
     converterToSaxon.convertSimpleElem(simpleResultRootElem).getElemOrSelfByPath(e.path).ensuring(_.path == e.path)
   }
 
