@@ -2,6 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.MergeExtensionSchemas"
 
+// This script merges at most extension schemas into one, in NT extension taxonomies (obeying the NT extension best practices).
+// It is assumed that there are either 1 or 2 extension schemas beforehand, and that only global element declarations must be moved.
+
 // Taking TQA version 0.4.6
 
 import $ivy.`eu.cdevreeze.tqa::tqa:0.4.6`
@@ -65,7 +68,7 @@ def optExtensionFileName(uri: URI): Option[String] = {
   // Copied from TACT code
 
   val possiblyRelativeUri = commonExtensionUri.relativize(uri)
-  
+
   if (possiblyRelativeUri.isAbsolute) {
     if (uri.toString.startsWith(commonExtensionUri.toString)) {
       // This is bad, but makes a corner case work.
@@ -89,11 +92,11 @@ def loadExtensionDts(extensionLocalRootDir: File, coreLocalRootDir: File, docCac
   require(
     extTaxoFiles.filter(_.getName.endsWith(".xsd")).size >= 1, 
     s"Expected at least 1 XSD in $extensionLocalRootDir, but found ${extTaxoFiles.filter(_.getName.endsWith(".xsd")).size} ones")
-    
+
   val extDocUris = extTaxoFiles.map(f => URI.create(commonExtensionUri.toString + f.getName)).toSet
 
   val docParser = yaidom.parse.DocumentParserUsingDom.newInstance()
-  
+
   def uriToLocalUri(uri: URI): URI = {
     if (uri.toString.startsWith("http://www.ebpi.nl/")) {
       (new File(extensionLocalRootDir, (new File(uri.getPath)).getName)).toURI
@@ -168,65 +171,68 @@ def findAllExtensionLinkbases(inputTaxo: BasicTaxonomy): immutable.IndexedSeq[Li
   findAllExtensionRootElems(inputTaxo) collect { case e: Linkbase => e }
 }
 
+// The following function is very sensitive and opinionated about how to recognize entrypoint extension schemas!
+
 def findEntrypointExtensionSchema(inputTaxo: BasicTaxonomy): Option[XsdSchema] = {
   val extensionSchemas = findAllExtensionSchemas(inputTaxo)
 
   // Very sensitive, of course
-  val resultSchemas = extensionSchemas.filter(e => e.docUri.toString.contains("entrypoint") || e.docUri.toString.contains("rpt"))
+  val resultSchemas = extensionSchemas.filter(e => e.docUri.toString.contains("-entrypoint") || e.docUri.toString.contains("-rpt"))
   resultSchemas.headOption
 }
 
 def updateSchema(inputXsdSchema: XsdSchema, mapElem: yaidom.simple.Elem => yaidom.simple.Elem): XsdSchema = {
   val simpleRootElem = inputXsdSchema.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem
-  
+
   val resultSimpleRootElem = simpleRootElem.transformElemsOrSelf(mapElem)
-  
+
   XsdSchema.build(yaidom.indexed.Elem(inputXsdSchema.backingElem.docUriOption, resultSimpleRootElem))
 }
 
 def updateLinkbase(inputLinkbase: Linkbase, mapElem: yaidom.simple.Elem => yaidom.simple.Elem): Linkbase = {
   val simpleRootElem = inputLinkbase.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem
-  
+
   val resultSimpleRootElem = simpleRootElem.transformElemsOrSelf(mapElem)
-  
+
   Linkbase.build(yaidom.indexed.Elem(inputLinkbase.backingElem.docUriOption, resultSimpleRootElem))
 }
 
 def updateLinkbase(inputLinkbase: Linkbase, paths: Set[Path], mapElem: (yaidom.simple.Elem, Path) => yaidom.simple.Elem): Linkbase = {
   val simpleRootElem = inputLinkbase.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem
-  
+
   val resultSimpleRootElem = simpleRootElem.updateElemsOrSelf(paths)(mapElem)
-  
+
   Linkbase.build(yaidom.indexed.Elem(inputLinkbase.backingElem.docUriOption, resultSimpleRootElem))
 }
 
 // Editing extension taxonomies
 
-def removeNonEntrypointExtensionSchemas(inputTaxo: BasicTaxonomy, originalTaxo: BasicTaxonomy): BasicTaxonomy = {
+def removeNonEntrypointExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
   // Breaks DTS
-  
+
   val extensionSchemas = findAllExtensionSchemas(inputTaxo)
   require(extensionSchemas.size >= 1, s"Expected at least one extension schema but found none")
-  
+  require(extensionSchemas.size <= 2, s"Expected at most 2 extension schemas but found ${extensionSchemas.size} ones")
+
   val entrypointExtensionSchemaOption = findEntrypointExtensionSchema(inputTaxo)
   require(entrypointExtensionSchemaOption.nonEmpty, s"Expected one entrypoint extension schema but found none")
-  
+
   val nonEntrypointExtensionSchemas = extensionSchemas.filterNot(entrypointExtensionSchemaOption.toSet)
-  
+
   val resultTaxo = removeDocuments(inputTaxo, nonEntrypointExtensionSchemas.map(_.docUri).toSet)
   resultTaxo
 }
 
-def setTargetNamespaceInExtensionSchema(tns: String, tnsPrefix: String, inputTaxo: BasicTaxonomy, originalTaxo: BasicTaxonomy): BasicTaxonomy = {
+def setTargetNamespaceInExtensionSchema(tns: String, tnsPrefixOption: Option[String], inputTaxo: BasicTaxonomy): BasicTaxonomy = {
   // Breaks DTS
-  
+
   val entrypointExtensionSchemaOption = findEntrypointExtensionSchema(inputTaxo)
   require(entrypointExtensionSchemaOption.nonEmpty, s"Expected one entrypoint extension schema but found none")
-  
+
   val extensionSchema: XsdSchema = entrypointExtensionSchemaOption.get
-  
-  val newScope = extensionSchema.backingElem.scope ++ Scope.from(tnsPrefix -> tns)
-  
+
+  val newScope = extensionSchema.backingElem.scope ++ tnsPrefixOption.map(pref => Scope.from(pref -> tns)).getOrElse(Scope.Empty)
+
   def mapElem(elem: yaidom.simple.Elem): yaidom.simple.Elem = {
     if (elem.resolvedName == ENames.XsSchemaEName) {
       elem.copy(scope = newScope ++ elem.scope).plusAttribute(QName("targetNamespace"), tns)
@@ -234,29 +240,30 @@ def setTargetNamespaceInExtensionSchema(tns: String, tnsPrefix: String, inputTax
       elem.copy(scope = newScope ++ elem.scope)
     }
   }
-  
+
   val resultSchema = updateSchema(extensionSchema, mapElem)
-  
+
   val resultTaxo = addOrUpdateDocuments(inputTaxo, Map(extensionSchema.docUri -> resultSchema))
   resultTaxo
 }
 
 def addGlobalElementDeclarationsToExtensionSchema(
   elemDecls: immutable.IndexedSeq[GlobalElementDeclaration],
-  inputTaxo: BasicTaxonomy,
-  originalTaxo: BasicTaxonomy): BasicTaxonomy = {
+  inputTaxo: BasicTaxonomy): BasicTaxonomy = {
 
   // Breaks DTS
-  
+
   val entrypointExtensionSchemaOption = findEntrypointExtensionSchema(inputTaxo)
   require(entrypointExtensionSchemaOption.nonEmpty, s"Expected one entrypoint extension schema but found none")
-  
+
   val extensionSchema: XsdSchema = entrypointExtensionSchemaOption.get
-  
+
   val tns = extensionSchema.targetNamespaceOption.getOrElse(sys.error(s"Missing target namespace in ${extensionSchema.docUri}"))
-  
-  require(elemDecls.forall(e => e.targetEName.namespaceUriOption.contains(tns)))
-  
+
+  require(
+    elemDecls.forall(e => e.targetEName.namespaceUriOption.contains(tns)),
+    s"Unexpected target namespaces: ${elemDecls.flatMap(_.targetEName.namespaceUriOption).toSet.diff(Set(tns))}")
+
   def mapElem(elem: yaidom.simple.Elem): yaidom.simple.Elem = {
     if (elem.resolvedName == ENames.XsSchemaEName) {
       elem.plusChildren(elemDecls.map(_.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem))
@@ -264,9 +271,9 @@ def addGlobalElementDeclarationsToExtensionSchema(
       elem
     }
   }
-  
+
   val resultSchema = updateSchema(extensionSchema, mapElem)
-  
+
   val resultTaxo = addOrUpdateDocuments(inputTaxo, Map(extensionSchema.docUri -> resultSchema))
   resultTaxo
 }
@@ -277,78 +284,92 @@ def fixReferencesToGlobalElementDeclarationsInExtension(
   originalTaxo: BasicTaxonomy): BasicTaxonomy = {
 
   // Should repair the DTS
-  
+
   require(
     elemDecls.forall(e => isExtensionUri(e.docUri)),
     s"Expected only extension element declarations, but found them in ${elemDecls.map(_.docUri).toSet}")
-  
+
   val elemDeclENames = elemDecls.map(_.targetEName).toSet
-  
-  // TODO Test that the original and input taxonomy contain all these concepts
-  
-  // TODO Test that locators are not reused
-  
+
+  require(
+    elemDeclENames.forall(en => inputTaxo.findGlobalElementDeclaration(en).nonEmpty),
+    s"Not all global element declarations found in input taxonomy: ${elemDeclENames.filter(en => inputTaxo.findGlobalElementDeclaration(en).isEmpty)}")
+
+  require(
+    elemDeclENames.forall(en => originalTaxo.findGlobalElementDeclaration(en).nonEmpty),
+    s"Not all global element declarations found in original taxonomy: ${elemDeclENames.filter(en => originalTaxo.findGlobalElementDeclaration(en).isEmpty)}")
+
+  require(
+    findAllExtensionLinkbases(inputTaxo).flatMap(_.findAllChildElemsOfType(classTag[ExtendedLink])).forall(el => el.labeledXlinkMap.values.forall(_.size == 1)),
+    s"Unexpected reuse of XLink labels in extension extended links (in input taxonomy)")
+
+  require(
+    findAllExtensionLinkbases(originalTaxo).flatMap(_.findAllChildElemsOfType(classTag[ExtendedLink])).forall(el => el.labeledXlinkMap.values.forall(_.size == 1)),
+    s"Unexpected reuse of XLink labels in extension extended links (in original taxonomy)")
+
+  // Querying for affected (extension taxonomy) standard relationships and their locators in the original taxonomy
+
   val origStandardRels =
     elemDeclENames.toIndexedSeq.flatMap(en => originalTaxo.findAllOutgoingStandardRelationshipsOfType(en, classTag[StandardRelationship]))
-  
+
   require(
     origStandardRels.forall(rel => isExtensionUri(rel.arc.docUri)),
     s"Expected only extension relationships, but found them in ${origStandardRels.map(_.arc.docUri).toSet}")
-  
+
   val origInterConceptRels =
     elemDeclENames.toIndexedSeq.flatMap(en => originalTaxo.findAllIncomingInterConceptRelationshipsOfType(en, classTag[InterConceptRelationship]))
-  
+
   require(
     origInterConceptRels.forall(rel => isExtensionUri(rel.arc.docUri)),
     s"Expected only extension relationships, but found them in ${origInterConceptRels.map(_.arc.docUri).toSet}")
-  
-  val conceptHrefFixSeq: immutable.IndexedSeq[(EName, XmlFragmentKey)] =
-    origStandardRels.flatMap(rel => inputTaxo.findGlobalElementDeclaration(rel.sourceConceptEName).map(e => (e.targetEName -> e.key))) ++
-      origInterConceptRels.flatMap(rel => inputTaxo.findGlobalElementDeclaration(rel.targetConceptEName).map(e => (e.targetEName -> e.key)))
-  
-  val conceptHrefFixes: Map[EName, XmlFragmentKey] = conceptHrefFixSeq.groupBy(_._1).mapValues(_.head._2)
-  
+
   val origLocKeyConceptENameSeq: immutable.IndexedSeq[(XmlFragmentKey, EName)] =
     (origStandardRels.map(rel => (rel.resolvedFrom.xlinkLocatorOrResource.asInstanceOf[XLinkLocator].key -> rel.sourceConceptEName)) ++
       origInterConceptRels.map(rel => (rel.resolvedTo.xlinkLocatorOrResource.asInstanceOf[XLinkLocator].key -> rel.targetConceptEName))).distinct
-  
-  // TODO Test that these locator keys still exist
-  
+
+  // Now turning to the input taxonomy, to collect the fixes to apply
+
+  val extFragmentKeys: Set[XmlFragmentKey] = inputTaxo.rootElems.flatMap(_.findAllElemsOrSelf).map(_.key).toSet
+
   val locKeyConceptHrefSeq: immutable.IndexedSeq[(XmlFragmentKey, URI)] =
     origLocKeyConceptENameSeq map { case (locatorKey, conceptEName) =>
-      val conceptDecl = inputTaxo.getGlobalElementDeclaration(conceptEName)
-      
+      require(extFragmentKeys.contains(locatorKey), s"Locator key $locatorKey not found in extension taxonomy")
+
+      val conceptDecl = inputTaxo.findGlobalElementDeclaration(conceptEName).getOrElse(sys.error(s"Missing global element declaration for $conceptEName"))
+
       require(conceptDecl.idOption.nonEmpty, s"Missing ID attribute for concept $conceptEName")
-      
+
       // TODO Make relative if applicable
       val conceptUri: URI = new URI(conceptDecl.docUri.getScheme, conceptDecl.docUri.getSchemeSpecificPart, conceptDecl.idOption.get)
       (locatorKey -> conceptUri)
     }
-    
+
   val locKeyConceptHrefs: Map[XmlFragmentKey, URI] = locKeyConceptHrefSeq.groupBy(_._1).mapValues(_.head._2)
-    
+
   val keysOfLocatorsToFix = locKeyConceptHrefs.keySet
-  
+
   def mapElem(docUri: URI)(elem: yaidom.simple.Elem, path: Path): yaidom.simple.Elem = {
     val key = XmlFragmentKey(docUri, path)
-  
+
     if (keysOfLocatorsToFix.contains(key)) {
-      // TODO Check xlink prefix
+      require(Scope.from("xlink" -> Namespaces.XLinkNamespace).subScopeOf(elem.scope), s"Missing prefix 'xlink' for XLink namespace")
+
       elem.plusAttribute(QName("xlink:href"), locKeyConceptHrefs(key).toString)
     } else {
       elem
     }
   }
-  
+
   val resultLinkbases =
     findAllExtensionLinkbases(inputTaxo).map(lkb =>
       updateLinkbase(lkb, keysOfLocatorsToFix.filter(_.docUri == lkb.docUri).map(_.path).toSet, mapElem(lkb.docUri)))
-  
+
   val resultTaxo = addOrUpdateDocuments(inputTaxo, resultLinkbases.map(lkb => (lkb.docUri -> lkb)).toMap)
   resultTaxo
 }
 
 def cleanUpExtensionDocuments(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
+  // TODO
   val simpleExtRootElems = ???
   ???
 }
@@ -362,7 +383,38 @@ def validatingTaxonomy(taxo: BasicTaxonomy, originalTaxo: BasicTaxonomy): BasicT
 
 def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
   // Must not break DTS
-  ???
+
+  val originalTaxo = inputTaxo
+
+  var currTaxo = originalTaxo
+
+  currTaxo = removeNonEntrypointExtensionSchemas(inputTaxo)
+
+  val extensionGlobalElemDecls = originalTaxo.filterGlobalElementDeclarations(e => isExtensionUri(e.docUri))
+
+  // TODO Validate assumption that only global element declarations must be moved.
+
+  val tnsSet = extensionGlobalElemDecls.flatMap(_.targetEName.namespaceUriOption).toSet
+
+  require(tnsSet.size <= 1, s"Expected at most one extension global element declaration target namespace but found $tnsSet")
+
+  val tnsOption = tnsSet.headOption
+  val tnsPrefixOption =
+    tnsOption.toSeq.flatMap(tns => extensionGlobalElemDecls.flatMap(_.scope.withoutDefaultNamespace.prefixesForNamespace(tns))).headOption
+
+  if (tnsOption.nonEmpty) {
+    setTargetNamespaceInExtensionSchema(tnsOption.get, tnsPrefixOption, currTaxo)
+  }
+
+  val elemDecls = originalTaxo.filterGlobalElementDeclarations(e => isExtensionUri(e.docUri))
+
+  currTaxo = addGlobalElementDeclarationsToExtensionSchema(elemDecls, currTaxo)
+
+  currTaxo = fixReferencesToGlobalElementDeclarationsInExtension(elemDecls, currTaxo, originalTaxo)
+
+  // TODO Clean up and validate
+
+  currTaxo
 }
 
 def saveExtensionTaxonomy(taxo: BasicTaxonomy, rootDir: File): Unit = {
