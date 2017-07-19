@@ -85,6 +85,14 @@ def isExtensionUri(uri: URI): Boolean = {
   optExtensionFileName(uri).isDefined
 }
 
+def uriToLocalUri(uri: URI, coreLocalRootDir: File, extensionLocalRootDir: File): URI = {
+  if (uri.toString.startsWith("http://www.ebpi.nl/")) {
+    (new File(extensionLocalRootDir, (new File(uri.getPath)).getName)).toURI
+  } else {
+    backingelem.UriConverters.uriToLocalUri(uri, coreLocalRootDir)
+  }
+}
+
 def loadExtensionDts(extensionLocalRootDir: File, coreLocalRootDir: File, docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
   // Only XML files in this directory are seen. Sub-directories are neither expected nor processed.
 
@@ -97,17 +105,9 @@ def loadExtensionDts(extensionLocalRootDir: File, coreLocalRootDir: File, docCac
 
   val docParser = yaidom.parse.DocumentParserUsingDom.newInstance()
 
-  def uriToLocalUri(uri: URI): URI = {
-    if (uri.toString.startsWith("http://www.ebpi.nl/")) {
-      (new File(extensionLocalRootDir, (new File(uri.getPath)).getName)).toURI
-    } else {
-      backingelem.UriConverters.uriToLocalUri(uri, coreLocalRootDir)
-    }
-  }
-
   val entrypointUris: Set[URI] = extDocUris.filter(_.toString.endsWith(".xsd"))
 
-  val docBuilder = new backingelem.indexed.IndexedDocumentBuilder(docParser, uriToLocalUri)
+  val docBuilder = new backingelem.indexed.IndexedDocumentBuilder(docParser, (uri => uriToLocalUri(uri, coreLocalRootDir, extensionLocalRootDir)))
 
   val documentBuilder =
     new backingelem.CachingDocumentBuilder(backingelem.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
@@ -369,14 +369,38 @@ def fixReferencesToGlobalElementDeclarationsInExtension(
 }
 
 def cleanUpExtensionDocuments(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
-  // TODO
-  val simpleExtRootElems = ???
-  ???
+  var simpleExtRootElemsByUri: Map[URI, yaidom.simple.Elem] =
+    inputTaxo.rootElems.map(e => (e.docUri -> e.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem)).toMap
+
+  simpleExtRootElemsByUri = simpleExtRootElemsByUri.mapValues(_.prettify(2)) // TODO More cleanup actions
+
+  def toTaxonomyRootElem(docUri: URI, e: yaidom.simple.Elem): TaxonomyElem = {
+    if (e.resolvedName == ENames.XsSchemaEName) {
+      XsdSchema.build(yaidom.indexed.Elem(docUri, e))
+    } else {
+      Linkbase.build(yaidom.indexed.Elem(docUri, e))
+    }
+  }
+
+  val resultRootElemsByUri: Map[URI, TaxonomyElem] =
+    simpleExtRootElemsByUri.map(kv => (kv._1 -> toTaxonomyRootElem(kv._1, kv._2))).toMap
+
+  val resultTaxo = addOrUpdateDocuments(inputTaxo, resultRootElemsByUri)
+  resultTaxo
 }
 
 def validatingTaxonomy(taxo: BasicTaxonomy, originalTaxo: BasicTaxonomy): BasicTaxonomy = {
-  // TODO
-  taxo
+  val resultTaxo = BasicTaxonomy.build(taxo.taxonomyBase, taxo.extraSubstitutionGroupMap, DefaultRelationshipFactory.StrictInstance)
+
+  require(
+    resultTaxo.findAllGlobalElementDeclarations.map(_.targetEName).toSet == originalTaxo.findAllGlobalElementDeclarations.map(_.targetEName).toSet,
+    s"Mismatch in global element declarations before and after the merge")
+
+  require(
+    resultTaxo.findAllNamedTypeDefinitions.map(_.targetEName).toSet == originalTaxo.findAllNamedTypeDefinitions.map(_.targetEName).toSet,
+    s"Mismatch in named type definitions before and after the merge")
+
+  resultTaxo
 }
 
 // The "main" method
@@ -412,13 +436,30 @@ def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
 
   currTaxo = fixReferencesToGlobalElementDeclarationsInExtension(elemDecls, currTaxo, originalTaxo)
 
-  // TODO Clean up and validate
+  // Fortunately no DTS discovery fixes needed
+
+  currTaxo = cleanUpExtensionDocuments(currTaxo)
+
+  currTaxo = validatingTaxonomy(currTaxo, originalTaxo)
 
   currTaxo
 }
 
-def saveExtensionTaxonomy(taxo: BasicTaxonomy, rootDir: File): Unit = {
-  ???
+def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File, coreLocalRootDir: File, extensionLocalRootDir: File): Unit = {
+  outputRootDir.mkdirs()
+
+  val extRootElems = taxo.rootElems.filter(e => isExtensionUri(e.docUri))
+
+  extRootElems foreach { rootElem =>
+    val localUri: URI = uriToLocalUri(rootElem.docUri, coreLocalRootDir, extensionLocalRootDir)
+
+    val f = new File(localUri)
+    f.getParentFile.mkdirs()
+
+    val doc = yaidom.simple.Document(Some(rootElem.docUri), rootElem.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem)
+
+    docPrinter.print(doc, "UTF-8", new FileOutputStream(f))
+  }
 }
 
 
