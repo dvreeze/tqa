@@ -273,7 +273,7 @@ object TaxonomyBase {
 
   private def getElemUriMap(rootElem: TaxonomyElem): Map[URI, TaxonomyElem] = {
     val docUri = rootElem.docUri
-    assert(docUri.isAbsolute)
+    require(docUri.isAbsolute, s"Expected absolute URI but found '$docUri'")
 
     // The schema type of the ID attributes is not checked! That would be very expensive without any real advantage.
 
