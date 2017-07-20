@@ -62,6 +62,8 @@ import yaidom.queryapi.HasENameApi._
 
 // TQA: DTS bootstrapping function
 
+final case class LocalRootDirs(coreLocalRootDir: File, extensionLocalRootDir: File)
+
 val commonExtensionUri = URI.create("http://www.ebpi.nl/extensions/processing/")
 
 def optExtensionFileName(uri: URI): Option[String] = {
@@ -85,21 +87,21 @@ def isExtensionUri(uri: URI): Boolean = {
   optExtensionFileName(uri).isDefined
 }
 
-def uriToLocalUri(uri: URI)(implicit coreLocalRootDir: File, extensionLocalRootDir: File): URI = {
+def uriToLocalUri(uri: URI)(implicit localRootDirs: LocalRootDirs): URI = {
   if (uri.toString.startsWith("http://www.ebpi.nl/")) {
-    (new File(extensionLocalRootDir, (new File(uri.getPath)).getName)).toURI
+    (new File(localRootDirs.extensionLocalRootDir, (new File(uri.getPath)).getName)).toURI
   } else {
-    backingelem.UriConverters.uriToLocalUri(uri, coreLocalRootDir)
+    backingelem.UriConverters.uriToLocalUri(uri, localRootDirs.coreLocalRootDir)
   }
 }
 
-def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit coreLocalRootDir: File, extensionLocalRootDir: File): BasicTaxonomy = {
+def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit localRootDirs: LocalRootDirs): BasicTaxonomy = {
   // Only XML files in this directory are seen. Sub-directories are neither expected nor processed.
 
-  val extTaxoFiles = extensionLocalRootDir.listFiles.toVector.filter(f => f.getName.endsWith(".xsd") || f.getName.endsWith(".xml"))
+  val extTaxoFiles = localRootDirs.extensionLocalRootDir.listFiles.toVector.filter(f => f.getName.endsWith(".xsd") || f.getName.endsWith(".xml"))
   require(
     extTaxoFiles.filter(_.getName.endsWith(".xsd")).size >= 1, 
-    s"Expected at least 1 XSD in $extensionLocalRootDir, but found ${extTaxoFiles.filter(_.getName.endsWith(".xsd")).size} ones")
+    s"Expected at least 1 XSD in ${localRootDirs.extensionLocalRootDir}, but found ${extTaxoFiles.filter(_.getName.endsWith(".xsd")).size} ones")
 
   val extDocUris = extTaxoFiles.map(f => URI.create(commonExtensionUri.toString + f.getName)).toSet
 
@@ -107,7 +109,10 @@ def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit coreLocalRoot
 
   val entrypointUris: Set[URI] = extDocUris.filter(_.toString.endsWith(".xsd"))
 
-  val docBuilder = new backingelem.indexed.IndexedDocumentBuilder(docParser, (uri => uriToLocalUri(uri)(coreLocalRootDir, extensionLocalRootDir)))
+  val docBuilder =
+    new backingelem.indexed.IndexedDocumentBuilder(
+      docParser,
+      (uri => uriToLocalUri(uri)(localRootDirs)))
 
   val documentBuilder =
     new backingelem.CachingDocumentBuilder(backingelem.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
@@ -132,8 +137,8 @@ def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit coreLocalRoot
   basicTaxo
 }
 
-def loadExtensionDts(implicit coreLocalRootDir: File, extensionLocalRootDir: File): BasicTaxonomy = {
-  loadExtensionDts(10000, false)(coreLocalRootDir, extensionLocalRootDir)
+def loadExtensionDts(implicit localRootDirs: LocalRootDirs): BasicTaxonomy = {
+  loadExtensionDts(10000, false)(localRootDirs)
 }
 
 def guessedScope(taxonomy: BasicTaxonomy): Scope = {
@@ -144,7 +149,7 @@ def guessedScope(taxonomy: BasicTaxonomy): Scope = {
 
 val docParser = yaidom.parse.DocumentParserUsingDom.newInstance()
 
-val docPrinter = yaidom.print.DocumentPrinterUsingDom.newInstance()
+val docPrinter = yaidom.print.DocumentPrinterUsingStax.newInstance()
 
 // Helper functions for editing extension taxonomies
 
@@ -283,6 +288,8 @@ def fixReferencesToGlobalElementDeclarationsInExtension(
   inputTaxo: BasicTaxonomy,
   originalTaxo: BasicTaxonomy): BasicTaxonomy = {
 
+  // TODO Mind generic links as well!!!
+
   // Should repair the DTS
 
   require(
@@ -410,7 +417,7 @@ def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
 
   val originalTaxo = inputTaxo
 
-  var currTaxo = originalTaxo
+  var currTaxo: BasicTaxonomy = originalTaxo
 
   currTaxo = removeNonEntrypointExtensionSchemas(inputTaxo)
 
@@ -422,19 +429,15 @@ def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
 
   require(tnsSet.size <= 1, s"Expected at most one extension global element declaration target namespace but found $tnsSet")
 
-  val tnsOption = tnsSet.headOption
+  val tnsOption = tnsSet.headOption.ensuring(_.nonEmpty)
   val tnsPrefixOption =
     tnsOption.toSeq.flatMap(tns => extensionGlobalElemDecls.flatMap(_.scope.withoutDefaultNamespace.prefixesForNamespace(tns))).headOption
 
-  if (tnsOption.nonEmpty) {
-    setTargetNamespaceInExtensionSchema(tnsOption.get, tnsPrefixOption, currTaxo)
-  }
+  currTaxo = setTargetNamespaceInExtensionSchema(tnsOption.get, tnsPrefixOption, currTaxo)
 
-  val elemDecls = originalTaxo.filterGlobalElementDeclarations(e => isExtensionUri(e.docUri))
+  currTaxo = addGlobalElementDeclarationsToExtensionSchema(extensionGlobalElemDecls, currTaxo)
 
-  currTaxo = addGlobalElementDeclarationsToExtensionSchema(elemDecls, currTaxo)
-
-  currTaxo = fixReferencesToGlobalElementDeclarationsInExtension(elemDecls, currTaxo, originalTaxo)
+  currTaxo = fixReferencesToGlobalElementDeclarationsInExtension(extensionGlobalElemDecls, currTaxo, originalTaxo)
 
   // Fortunately no DTS discovery fixes needed
 
@@ -445,13 +448,13 @@ def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
   currTaxo
 }
 
-def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File)(implicit coreLocalRootDir: File, extensionLocalRootDir: File): Unit = {
+def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File)(implicit localRootDirs: LocalRootDirs): Unit = {
   outputRootDir.mkdirs()
 
   val extRootElems = taxo.rootElems.filter(e => isExtensionUri(e.docUri))
 
   extRootElems foreach { rootElem =>
-    val localUri: URI = uriToLocalUri(rootElem.docUri)(coreLocalRootDir, extensionLocalRootDir)
+    val localUri: URI = uriToLocalUri(rootElem.docUri)(localRootDirs.copy(extensionLocalRootDir = outputRootDir))
 
     val f = new File(localUri)
     f.getParentFile.mkdirs()
@@ -466,6 +469,7 @@ def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File)(implicit cor
 // Now the REPL has been set up for DTS schema merging, as well as ad-hoc DTS querying (combined with ad-hoc yaidom usage)
 // Do not forget to provide an implicit Scope if we want to create ENames with the "en" or "an" postfix operator!
 
+println(s"First create an implicit val localRootDirs typed LocalRootDirs.")
 println(s"Use loadExtensionDts to get a DTS as BasicTaxonomy")
 println(s"If needed, use loadExtensionDts(docCacheSize, lenient) instead")
 println(s"For ad-hoc taxonomy querying, store the result in val taxo, and import taxo._")
