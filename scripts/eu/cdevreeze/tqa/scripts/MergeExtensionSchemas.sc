@@ -95,7 +95,7 @@ def uriToLocalUri(uri: URI)(implicit localRootDirs: LocalRootDirs): URI = {
   }
 }
 
-def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit localRootDirs: LocalRootDirs): BasicTaxonomy = {
+def loadExtensionDts(lenient: Boolean)(implicit localRootDirs: LocalRootDirs): BasicTaxonomy = {
   // Only XML files in this directory are seen. Sub-directories are neither expected nor processed.
 
   val extTaxoFiles = localRootDirs.extensionLocalRootDir.listFiles.toVector.filter(f => f.getName.endsWith(".xsd") || f.getName.endsWith(".xml"))
@@ -105,7 +105,8 @@ def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit localRootDirs
 
   val extDocUris = extTaxoFiles.map(f => URI.create(commonExtensionUri.toString + f.getName)).toSet
 
-  val docParser = yaidom.parse.DocumentParserUsingDom.newInstance()
+  // No DOM implementation wanted, especially when looping over extension taxonomies!
+  val docParser = yaidom.parse.DocumentParserUsingStax.newInstance()
 
   val entrypointUris: Set[URI] = extDocUris.filter(_.toString.endsWith(".xsd"))
 
@@ -114,8 +115,7 @@ def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit localRootDirs
       docParser,
       (uri => uriToLocalUri(uri)(localRootDirs)))
 
-  val documentBuilder =
-    new backingelem.CachingDocumentBuilder(backingelem.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
+  val documentBuilder = docBuilder // No caching!
 
   val documentCollector = taxonomybuilder.DefaultDtsCollector(entrypointUris)
 
@@ -138,7 +138,7 @@ def loadExtensionDts(docCacheSize: Int, lenient: Boolean)(implicit localRootDirs
 }
 
 def loadExtensionDts(implicit localRootDirs: LocalRootDirs): BasicTaxonomy = {
-  loadExtensionDts(10000, false)(localRootDirs)
+  loadExtensionDts(false)(localRootDirs)
 }
 
 def guessedScope(taxonomy: BasicTaxonomy): Scope = {
@@ -158,7 +158,7 @@ def findTopmostOrSelfDirectories(d: File, p: File => Boolean): immutable.Indexed
   }
 }
 
-val docParser = yaidom.parse.DocumentParserUsingDom.newInstance()
+val docParser = yaidom.parse.DocumentParserUsingStax.newInstance()
 
 val docPrinter = yaidom.print.DocumentPrinterUsingSax.newInstance()
 
@@ -561,16 +561,19 @@ def doMerge(coreLocalRootDir: File, extensionLocalRootDir: File): Unit = {
 }
 
 // The "main" method that merges schemas in multiple extension taxonomies in one call.
+// This is currently an extremely expensive and inefficient method! By all means, keep the batches of extension taxonomies small!
 
-def doMergeForAllExtensionTaxonomies(coreLocalRootDir: File, commonExtRootDir: File): Unit = {
+def doMergeForSomeExtensionTaxonomies(coreLocalRootDir: File, commonExtRootDir: File, from: Int, to: Int): Unit = {
   def isExtDir(d: File): Boolean = {
     d.isDirectory && (d != commonExtRootDir) && d.listFiles.exists(f => f.getName.endsWith(".xsd") || f.getName.endsWith(".xml"))
   }
 
   val extTaxoDirs = findTopmostOrSelfDirectories(commonExtRootDir, isExtDir).sortBy(_.toString)
 
-  extTaxoDirs foreach { extRootDir =>
-    scala.util.Try(doMerge(coreLocalRootDir, extRootDir)) match {
+  extTaxoDirs.drop(from).take(to - from) foreach { extRootDir =>
+    scala.util.Try {
+      doMerge(coreLocalRootDir, extRootDir)
+    } match {
       case scala.util.Success(_) =>
         println(s"Successful run for extension taxonomy $extRootDir")
       case scala.util.Failure(t) =>
@@ -586,10 +589,10 @@ def doMergeForAllExtensionTaxonomies(coreLocalRootDir: File, commonExtRootDir: F
 
 println(s"First create an implicit val localRootDirs typed LocalRootDirs.")
 println(s"Use loadExtensionDts to get a DTS as BasicTaxonomy.")
-println(s"If needed, use loadExtensionDts(docCacheSize, lenient) instead.")
+println(s"If needed, use loadExtensionDts(lenient) instead.")
 println(s"For ad-hoc taxonomy querying, store the result in val taxo, and import taxo._")
 println(s"Use method mergeExtensionSchemas(inputTaxo) to merge the extension schemas.")
 println(s"Save the resulting taxonomy with method saveExtensionTaxonomy(taxo, rootDir).")
 println()
 println(s"Alternatively, just use method doMerge(coreLocalRootDir, extensionLocalRootDir).")
-println(s"Or even use method doMergeForAllExtensionTaxonomies(coreLocalRootDir, commonExtRootDir) once.")
+println(s"Or even use method doMergeForSomeExtensionTaxonomies(coreLocalRootDir, commonExtRootDir, from, to).")
