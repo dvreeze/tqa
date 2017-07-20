@@ -147,6 +147,17 @@ def guessedScope(taxonomy: BasicTaxonomy): Scope = {
   }
 }
 
+def findTopmostOrSelfDirectories(d: File, p: File => Boolean): immutable.IndexedSeq[File] = {
+  require(d.isDirectory, s"Not a directory: $d")
+
+  if (p(d)) {
+    immutable.IndexedSeq(d)
+  } else {
+    // Recursive
+    d.listFiles.toIndexedSeq.filter(_.isDirectory).flatMap(sd => findTopmostOrSelfDirectories(sd, p))
+  }
+}
+
 val docParser = yaidom.parse.DocumentParserUsingDom.newInstance()
 
 val docPrinter = yaidom.print.DocumentPrinterUsingSax.newInstance()
@@ -442,9 +453,9 @@ def validatingTaxonomy(taxo: BasicTaxonomy, originalTaxo: BasicTaxonomy): BasicT
   resultTaxo
 }
 
-// The "main" method
+// The mergeExtensionSchemas method, which does the real work (in memory)
 
-def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
+def mergeExtensionSchemas(originalTaxo: BasicTaxonomy): BasicTaxonomy = {
   // Must not break DTS
 
   // TODO Move linkbaseRefs (to label/reference linkbases) as well!
@@ -453,19 +464,21 @@ def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
 
   // TODO Mind generic links as well!!!
 
-  val originalTaxo = inputTaxo
-
   require(
     originalTaxo.filterNamedTypeDefinitions(e => isExtensionUri(e.docUri)).isEmpty,
-    s"Cannot move named type definitions around at this moment")
+    s"Cannot move named type definitions around at the moment")
+
+  require(
+    originalTaxo.rootElems.map(_.docUri).filter(isExtensionUri).map(_.getPath).map(p => (new File(p)).getParentFile).toSet.size <= 1,
+    s"All extension taxonomy documents must be in the same directory, but they are not")
 
   var currTaxo: BasicTaxonomy = originalTaxo
 
-  currTaxo = removeNonEntrypointExtensionSchemas(inputTaxo)
+  currTaxo = removeNonEntrypointExtensionSchemas(originalTaxo)
 
   val extensionGlobalElemDecls = originalTaxo.filterGlobalElementDeclarations(e => isExtensionUri(e.docUri))
 
-  val entrypointExtensionSchemaOption = findEntrypointExtensionSchema(inputTaxo)
+  val entrypointExtensionSchemaOption = findEntrypointExtensionSchema(originalTaxo)
   require(entrypointExtensionSchemaOption.nonEmpty, s"Expected one entrypoint extension schema but found none")
   val entrypointExtensionSchema = entrypointExtensionSchemaOption.get
 
@@ -529,13 +542,54 @@ def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File)(implicit loc
   }
 }
 
+// The "main" method
+
+def doMergeSavingToOutputDir(coreLocalRootDir: File, extensionLocalRootDir: File, outputDir: File): Unit = {
+  implicit val localRootDirs = LocalRootDirs(coreLocalRootDir, extensionLocalRootDir)
+
+  val taxo = loadExtensionDts
+
+  val taxo2 = mergeExtensionSchemas(taxo)
+
+  saveExtensionTaxonomy(taxo2, outputDir)
+}
+
+// The alternative "main" method, that creates an output directory called "new", as a sub-directory of the extension taxonomy directory.
+
+def doMerge(coreLocalRootDir: File, extensionLocalRootDir: File): Unit = {
+  doMergeSavingToOutputDir(coreLocalRootDir, extensionLocalRootDir, new File(extensionLocalRootDir, "new"))
+}
+
+// The "main" method that merges schemas in multiple extension taxonomies in one call.
+
+def doMergeForAllExtensionTaxonomies(coreLocalRootDir: File, commonExtRootDir: File): Unit = {
+  def isExtDir(d: File): Boolean = {
+    d.isDirectory && (d != commonExtRootDir) && d.listFiles.exists(f => f.getName.endsWith(".xsd") || f.getName.endsWith(".xml"))
+  }
+
+  val extTaxoDirs = findTopmostOrSelfDirectories(commonExtRootDir, isExtDir).sortBy(_.toString)
+
+  extTaxoDirs foreach { extRootDir =>
+    scala.util.Try(doMerge(coreLocalRootDir, extRootDir)) match {
+      case scala.util.Success(_) =>
+        println(s"Successful run for extension taxonomy $extRootDir")
+      case scala.util.Failure(t) =>
+        println(s"Unsuccessful run for extension taxonomy $extRootDir")
+        println("\t" + t)
+    }
+  }
+}
+
 
 // Now the REPL has been set up for DTS schema merging, as well as ad-hoc DTS querying (combined with ad-hoc yaidom usage)
 // Do not forget to provide an implicit Scope if we want to create ENames with the "en" or "an" postfix operator!
 
 println(s"First create an implicit val localRootDirs typed LocalRootDirs.")
-println(s"Use loadExtensionDts to get a DTS as BasicTaxonomy")
-println(s"If needed, use loadExtensionDts(docCacheSize, lenient) instead")
+println(s"Use loadExtensionDts to get a DTS as BasicTaxonomy.")
+println(s"If needed, use loadExtensionDts(docCacheSize, lenient) instead.")
 println(s"For ad-hoc taxonomy querying, store the result in val taxo, and import taxo._")
 println(s"Use method mergeExtensionSchemas(inputTaxo) to merge the extension schemas.")
-println(s"Save the resulting taxonomy with method saveExtensionTaxonomy(taxo, rootDir)")
+println(s"Save the resulting taxonomy with method saveExtensionTaxonomy(taxo, rootDir).")
+println()
+println(s"Alternatively, just use method doMerge(coreLocalRootDir, extensionLocalRootDir).")
+println(s"Or even use method doMergeForAllExtensionTaxonomies(coreLocalRootDir, commonExtRootDir) once.")
