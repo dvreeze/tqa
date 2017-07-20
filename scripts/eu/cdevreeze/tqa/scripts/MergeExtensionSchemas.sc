@@ -217,7 +217,11 @@ def removeNonEntrypointExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy
 
   val extensionSchemas = findAllExtensionSchemas(inputTaxo)
   require(extensionSchemas.size >= 1, s"Expected at least one extension schema but found none")
-  require(extensionSchemas.size <= 2, s"Expected at most 2 extension schemas but found ${extensionSchemas.size} ones")
+
+  val globalElemDeclTnsSet: Set[String] =
+    inputTaxo.filterGlobalElementDeclarations(e => isExtensionUri(e.docUri)).flatMap(_.targetEName.namespaceUriOption).toSet
+
+  require(globalElemDeclTnsSet.size <= 1, s"Expected at most 1 extension global element declaration TNS but found ${globalElemDeclTnsSet.size} ones")
 
   val entrypointExtensionSchemaOption = findEntrypointExtensionSchema(inputTaxo)
   require(entrypointExtensionSchemaOption.nonEmpty, s"Expected one entrypoint extension schema but found none")
@@ -390,8 +394,12 @@ def cleanUpExtensionDocuments(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
   var simpleExtRootElemsByUri: Map[URI, yaidom.simple.Elem] =
     inputTaxo.rootElems.map(e => (e.docUri -> e.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem)).toMap
 
+  // TODO More cleanup actions
+
   simpleExtRootElemsByUri =
-    simpleExtRootElemsByUri.mapValues(e => e.notUndeclaringPrefixes(Scope.Empty).prettify(2)) // TODO More cleanup actions
+    simpleExtRootElemsByUri mapValues { e => 
+      yaidom.utils.NamespaceUtils.pushUpPrefixedNamespaces(e.notUndeclaringPrefixes(Scope.Empty)).prettify(2)
+    }
 
   def toTaxonomyRootElem(docUri: URI, e: yaidom.simple.Elem): TaxonomyElem = {
     if (e.resolvedName == ENames.XsSchemaEName) {
@@ -439,7 +447,17 @@ def validatingTaxonomy(taxo: BasicTaxonomy, originalTaxo: BasicTaxonomy): BasicT
 def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
   // Must not break DTS
 
+  // TODO Move linkbaseRefs (to label/reference linkbases) as well!
+
+  // TODO Move named type definitions as well!
+
+  // TODO Mind generic links as well!!!
+
   val originalTaxo = inputTaxo
+
+  require(
+    originalTaxo.filterNamedTypeDefinitions(e => isExtensionUri(e.docUri)).isEmpty,
+    s"Cannot move named type definitions around at this moment")
 
   var currTaxo: BasicTaxonomy = originalTaxo
 
@@ -447,29 +465,43 @@ def mergeExtensionSchemas(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
 
   val extensionGlobalElemDecls = originalTaxo.filterGlobalElementDeclarations(e => isExtensionUri(e.docUri))
 
+  val entrypointExtensionSchemaOption = findEntrypointExtensionSchema(inputTaxo)
+  require(entrypointExtensionSchemaOption.nonEmpty, s"Expected one entrypoint extension schema but found none")
+  val entrypointExtensionSchema = entrypointExtensionSchemaOption.get
+
+  val globalElemDeclsToMove = extensionGlobalElemDecls.filterNot(_.docUri == entrypointExtensionSchema.docUri)
+
   // TODO Validate assumption that only global element declarations must be moved.
 
-  val tnsSet = extensionGlobalElemDecls.flatMap(_.targetEName.namespaceUriOption).toSet
+  val tnsSet = globalElemDeclsToMove.flatMap(_.targetEName.namespaceUriOption).toSet
 
   require(tnsSet.size <= 1, s"Expected at most one extension global element declaration target namespace but found $tnsSet")
 
-  val tnsOption = tnsSet.headOption.ensuring(_.nonEmpty)
-  val tnsPrefixOption =
-    tnsOption.toSeq.flatMap(tns => extensionGlobalElemDecls.flatMap(_.scope.withoutDefaultNamespace.prefixesForNamespace(tns))).headOption
+  val tnsOption = tnsSet.headOption
 
-  currTaxo = setTargetNamespaceInExtensionSchema(tnsOption.get, tnsPrefixOption, currTaxo)
+  if (tnsOption.isEmpty) {
+    // No real changes to the taxonomy
+    currTaxo = cleanUpExtensionDocuments(currTaxo)
+    currTaxo = validatingTaxonomy(currTaxo, originalTaxo)
+    currTaxo
+  } else {
+    val tnsPrefixOption =
+      tnsOption.toSeq.flatMap(tns => globalElemDeclsToMove.flatMap(_.scope.withoutDefaultNamespace.prefixesForNamespace(tns))).headOption
 
-  currTaxo = addGlobalElementDeclarationsToExtensionSchema(extensionGlobalElemDecls, currTaxo)
+    currTaxo = setTargetNamespaceInExtensionSchema(tnsOption.get, tnsPrefixOption, currTaxo)
 
-  currTaxo = fixReferencesToGlobalElementDeclarationsInExtension(extensionGlobalElemDecls, currTaxo, originalTaxo)
+    currTaxo = addGlobalElementDeclarationsToExtensionSchema(globalElemDeclsToMove, currTaxo)
 
-  // Fortunately no DTS discovery fixes needed
+    currTaxo = fixReferencesToGlobalElementDeclarationsInExtension(globalElemDeclsToMove, currTaxo, originalTaxo)
 
-  currTaxo = cleanUpExtensionDocuments(currTaxo)
+    // Fortunately no DTS discovery fixes needed
 
-  currTaxo = validatingTaxonomy(currTaxo, originalTaxo)
+    currTaxo = cleanUpExtensionDocuments(currTaxo)
 
-  currTaxo
+    currTaxo = validatingTaxonomy(currTaxo, originalTaxo)
+
+    currTaxo
+  }
 }
 
 def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File)(implicit localRootDirs: LocalRootDirs): Unit = {
@@ -486,7 +518,7 @@ def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File)(implicit loc
 
     val rawXmlString = docPrinter.print(doc.documentElement)
     // Using Unix newline
-    val xmlString = """<?xml version="1.0" encoding="UTF-8"?>""" + "\n" + rawXmlString
+    val xmlString = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>""" + "\n" + rawXmlString
 
     val f = new File(localUri)
     f.getParentFile.mkdirs()
