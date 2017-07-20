@@ -149,7 +149,7 @@ def guessedScope(taxonomy: BasicTaxonomy): Scope = {
 
 val docParser = yaidom.parse.DocumentParserUsingDom.newInstance()
 
-val docPrinter = yaidom.print.DocumentPrinterUsingStax.newInstance()
+val docPrinter = yaidom.print.DocumentPrinterUsingSax.newInstance()
 
 // Helper functions for editing extension taxonomies
 
@@ -346,8 +346,19 @@ def fixReferencesToGlobalElementDeclarationsInExtension(
 
       require(conceptDecl.idOption.nonEmpty, s"Missing ID attribute for concept $conceptEName")
 
-      // TODO Make relative if applicable
-      val conceptUri: URI = new URI(conceptDecl.docUri.getScheme, conceptDecl.docUri.getSchemeSpecificPart, conceptDecl.idOption.get)
+      val rawConceptUri: URI = new URI(conceptDecl.docUri.getScheme, conceptDecl.docUri.getSchemeSpecificPart, conceptDecl.idOption.get)
+
+      // In extension taxonomies, all files are in one and the same directory. We use this assumption here without checking it.
+      val conceptUri: URI =
+        if (isExtensionUri(rawConceptUri)) {
+          val path = rawConceptUri.getPath
+          val fileName = (new File(path)).getName
+          require(rawConceptUri.getFragment != null, s"Unexpected missing fragment in URI $rawConceptUri")
+          new URI(s"$fileName#${rawConceptUri.getFragment}")
+        } else {
+          rawConceptUri
+        }
+
       (locatorKey -> conceptUri)
     }
 
@@ -379,7 +390,8 @@ def cleanUpExtensionDocuments(inputTaxo: BasicTaxonomy): BasicTaxonomy = {
   var simpleExtRootElemsByUri: Map[URI, yaidom.simple.Elem] =
     inputTaxo.rootElems.map(e => (e.docUri -> e.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem)).toMap
 
-  simpleExtRootElemsByUri = simpleExtRootElemsByUri.mapValues(_.prettify(2)) // TODO More cleanup actions
+  simpleExtRootElemsByUri =
+    simpleExtRootElemsByUri.mapValues(e => e.notUndeclaringPrefixes(Scope.Empty).prettify(2)) // TODO More cleanup actions
 
   def toTaxonomyRootElem(docUri: URI, e: yaidom.simple.Elem): TaxonomyElem = {
     if (e.resolvedName == ENames.XsSchemaEName) {
@@ -406,6 +418,18 @@ def validatingTaxonomy(taxo: BasicTaxonomy, originalTaxo: BasicTaxonomy): BasicT
   require(
     resultTaxo.findAllNamedTypeDefinitions.map(_.targetEName).toSet == originalTaxo.findAllNamedTypeDefinitions.map(_.targetEName).toSet,
     s"Mismatch in named type definitions before and after the merge")
+
+  require(
+    resultTaxo.findAllStandardRelationshipsOfType(classTag[StandardRelationship]).map(rel => (rel.baseSetKey, rel.sourceConceptEName)).toSet ==
+      originalTaxo.findAllStandardRelationshipsOfType(classTag[StandardRelationship]).map(rel => (rel.baseSetKey, rel.sourceConceptEName)).toSet,
+    s"Mismatch between standard relationships before and after the merge")
+
+  require(
+    resultTaxo.findAllInterConceptRelationshipsOfType(classTag[InterConceptRelationship]).
+      map(rel => (rel.baseSetKey, rel.sourceConceptEName, rel.targetConceptEName)).toSet ==
+      originalTaxo.findAllInterConceptRelationshipsOfType(classTag[InterConceptRelationship]).
+        map(rel => (rel.baseSetKey, rel.sourceConceptEName, rel.targetConceptEName)).toSet,
+    s"Mismatch between inter-concept relationships before and after the merge")
 
   resultTaxo
 }
@@ -456,12 +480,20 @@ def saveExtensionTaxonomy(taxo: BasicTaxonomy, outputRootDir: File)(implicit loc
   extRootElems foreach { rootElem =>
     val localUri: URI = uriToLocalUri(rootElem.docUri)(localRootDirs.copy(extensionLocalRootDir = outputRootDir))
 
+    val doc = yaidom.simple.Document(Some(rootElem.docUri), rootElem.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem)
+
+    // Working around DocumentPrinterUsingSax newline issue (no newline after XML declaration)
+
+    val rawXmlString = docPrinter.print(doc.documentElement)
+    // Using Unix newline
+    val xmlString = """<?xml version="1.0" encoding="UTF-8"?>""" + "\n" + rawXmlString
+
     val f = new File(localUri)
     f.getParentFile.mkdirs()
 
-    val doc = yaidom.simple.Document(Some(rootElem.docUri), rootElem.backingElem.asInstanceOf[yaidom.indexed.Elem].underlyingElem)
-
-    docPrinter.print(doc, "UTF-8", new FileOutputStream(f))
+    val fos = new FileOutputStream(f)
+    fos.write(xmlString.getBytes("UTF-8"))
+    fos.close()
   }
 }
 
