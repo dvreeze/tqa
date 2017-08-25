@@ -34,7 +34,6 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.YaidomSimpleToSaxonElemConverter
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.resolved
 import eu.cdevreeze.yaidom.simple
 import javax.xml.xpath.XPathFunction
