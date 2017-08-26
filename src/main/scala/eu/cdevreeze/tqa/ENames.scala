@@ -297,6 +297,65 @@ object ENames {
 
   val XfiRootEName = EName(XfiNamespace, "root")
 
+  val CfConceptNameEName = EName(CfNamespace, "conceptName")
+  val CfConceptPeriodTypeEName = EName(CfNamespace, "conceptPeriodType")
+  val CfConceptBalanceEName = EName(CfNamespace, "conceptBalance")
+  val CfConceptCustomAttributeEName = EName(CfNamespace, "conceptCustomAttribute")
+  val CfConceptDataTypeEName = EName(CfNamespace, "conceptDataType")
+  val CfConceptSubstitutionGroupEName = EName(CfNamespace, "conceptSubstitutionGroup")
+
+  val BfAndFilterEName = EName(BfNamespace, "andFilter")
+  val BfOrFilterEName = EName(BfNamespace, "orFilter")
+
+  val DfExplicitDimensionEName = EName(DfNamespace, "explicitDimension")
+  val DfTypedDimensionEName = EName(DfNamespace, "typedDimension")
+
+  val EfIdentifierEName = EName(EfNamespace, "identifier")
+  val EfSpecificSchemeEName = EName(EfNamespace, "specificScheme")
+  val EfRegexpSchemeEName = EName(EfNamespace, "regexpScheme")
+  val EfSpecificIdentifierEName = EName(EfNamespace, "specificIdentifier")
+  val EfRegexpIdentifierEName = EName(EfNamespace, "regexpIdentifier")
+
+  val GfGeneralEName = EName(GfNamespace, "general")
+
+  val MfMatchConceptEName = EName(MfNamespace, "matchConcept")
+  val MfMatchLocationEName = EName(MfNamespace, "matchLocation")
+  val MfMatchUnitEName = EName(MfNamespace, "matchUnit")
+  val MfMatchEntityIdentifierEName = EName(MfNamespace, "matchEntityIdentifier")
+  val MfMatchPeriodEName = EName(MfNamespace, "matchPeriod")
+  val MfMatchSegmentEName = EName(MfNamespace, "matchSegment")
+  val MfMatchScenarioEName = EName(MfNamespace, "matchScenario")
+  val MfMatchNonXDTSegmentEName = EName(MfNamespace, "matchNonXDTSegment")
+  val MfMatchNonXDTScenarioEName = EName(MfNamespace, "matchNonXDTScenario")
+  val MfMatchDimensionEName = EName(MfNamespace, "matchDimension")
+
+  val PfPeriodEName = EName(PfNamespace, "period")
+  val PfPeriodStartEName = EName(PfNamespace, "periodStart")
+  val PfPeriodEndEName = EName(PfNamespace, "periodEnd")
+  val PfPeriodInstantEName = EName(PfNamespace, "periodInstant")
+  val PfForeverEName = EName(PfNamespace, "forever")
+  val PfInstantDurationEName = EName(PfNamespace, "instantDuration")
+
+  val RfRelativeFilterEName = EName(RfNamespace, "relativeFilter")
+
+  val SsfSegmentEName = EName(SsfNamespace, "segment")
+  val SsfScenarioEName = EName(SsfNamespace, "scenario")
+
+  val TfParentFilterEName = EName(TfNamespace, "parentFilter")
+  val TfAncestorFilterEName = EName(TfNamespace, "ancestorFilter")
+  val TfSiblingFilterEName = EName(TfNamespace, "siblingFilter")
+  val TfLocationFilterEName = EName(TfNamespace, "locationFilter")
+
+  val UfSingleMeasureEName = EName(UfNamespace, "singleMeasure")
+  val UfGeneralMeasuresEName = EName(UfNamespace, "generalMeasures")
+
+  val VfNilEName = EName(VfNamespace, "nil")
+  val VfPrecisionEName = EName(VfNamespace, "precision")
+
+  val AcfAspectCoverEName = EName(AcfNamespace, "aspectCover")
+
+  val CrfConceptRelationEName = EName(CrfNamespace, "conceptRelation")
+
   val NameEName = EName("name")
   val IdEName = EName("id")
   val FormEName = EName("form")
