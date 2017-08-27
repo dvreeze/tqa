@@ -146,7 +146,38 @@ final class ValueAssertion(underlyingResource: tqa.dom.NonStandardResource) exte
 final class Formula(underlyingResource: tqa.dom.NonStandardResource) extends VariableSet(underlyingResource) {
   requireResolvedName(ENames.FormulaFormulaEName)
 
-  // ...
+  def precisionElemOption: Option[PrecisionElem] = {
+    findAllNonXLinkChildElemsOfType(classTag[PrecisionElem]).headOption
+  }
+
+  def decimalsElemOption: Option[DecimalsElem] = {
+    findAllNonXLinkChildElemsOfType(classTag[DecimalsElem]).headOption
+  }
+
+  def formulaAspectsElems: immutable.IndexedSeq[FormulaAspectsElem] = {
+    findAllNonXLinkChildElemsOfType(classTag[FormulaAspectsElem])
+  }
+
+  def findAllAspectChildElems: immutable.IndexedSeq[FormulaAspect] = {
+    findAllNonXLinkChildElemsOfType(classTag[FormulaAspect])
+  }
+
+  /**
+   * Returns the mandatory value attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def valueExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.ValueEName), underlyingResource.scope)
+  }
+
+  /**
+   * Returns the source attribute as optional EName. The default namespace is not used to resolve the QName.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def sourceOption: Option[EName] = {
+    val qnameOption = underlyingResource.attributeAsQNameOption(ENames.SourceEName)
+    qnameOption.map(qn => underlyingResource.scope.withoutDefaultNamespace.resolveQNameOption(qn).get)
+  }
 }
 
 /**
@@ -169,6 +200,22 @@ final class ExistenceAssertion(underlyingResource: tqa.dom.NonStandardResource) 
  */
 final class ConsistencyAssertion(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource with Assertion {
   requireResolvedName(ENames.CaConsistencyAssertionEName)
+
+  /**
+   * Returns the mandatory strict attribute as Boolean.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def strict: Boolean = {
+    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
+  }
+
+  def absoluteAcceptanceRadiusAsStringOption: Option[String] = {
+    underlyingResource.attributeOption(ENames.AbsoluteAcceptanceRadiusEName)
+  }
+
+  def proportionalAcceptanceRadiusAsStringOption: Option[String] = {
+    underlyingResource.attributeOption(ENames.ProportionalAcceptanceRadiusEName)
+  }
 }
 
 /**
@@ -196,6 +243,38 @@ sealed class Parameter(underlyingResource: tqa.dom.NonStandardResource) extends 
  */
 final class FactVariable(underlyingResource: tqa.dom.NonStandardResource) extends Variable(underlyingResource) {
   requireResolvedName(ENames.VariableFactVariableEName)
+
+  /**
+   * Returns the optional nils attribute as optional Boolean.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def nilsOption: Option[Boolean] = {
+    underlyingResource.attributeOption(ENames.NilsEName).map(v => DatatypeConverter.parseBoolean(v))
+  }
+
+  /**
+   * Returns the optional matches attribute as optional Boolean.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def matchesOption: Option[Boolean] = {
+    underlyingResource.attributeOption(ENames.MatchesEName).map(v => DatatypeConverter.parseBoolean(v))
+  }
+
+  /**
+   * Returns the optional fallbackValue attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def fallbackValueExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.FallbackValueEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
+
+  /**
+   * Returns the mandatory bindAsSequence attribute as Boolean.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def bindAsSequence: Boolean = {
+    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.BindAsSequenceEName))
+  }
 }
 
 /**
@@ -203,6 +282,22 @@ final class FactVariable(underlyingResource: tqa.dom.NonStandardResource) extend
  */
 final class GeneralVariable(underlyingResource: tqa.dom.NonStandardResource) extends Variable(underlyingResource) {
   requireResolvedName(ENames.VariableFactVariableEName)
+
+  /**
+   * Returns the mandatory select attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def selectExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.SelectEName), underlyingResource.scope)
+  }
+
+  /**
+   * Returns the mandatory bindAsSequence attribute as Boolean.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def bindAsSequence: Boolean = {
+    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.BindAsSequenceEName))
+  }
 }
 
 /**
@@ -217,6 +312,26 @@ final class Instance(underlyingResource: tqa.dom.NonStandardResource) extends Pa
  */
 final class Function(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.VariableFunctionEName)
+
+  /**
+   * Returns the mandatory name attribute as EName.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def name: EName = {
+    underlyingResource.attributeAsResolvedQName(ENames.NameEName)
+  }
+
+  def functionInputs: immutable.IndexedSeq[FunctionInput] = {
+    findAllNonXLinkChildElemsOfType(classTag[FunctionInput])
+  }
+
+  /**
+   * Returns the mandatory output attribute.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def output: String = {
+    underlyingResource.attribute(ENames.OutputEName)
+  }
 }
 
 /**
@@ -224,6 +339,14 @@ final class Function(val underlyingResource: tqa.dom.NonStandardResource) extend
  */
 final class EqualityDefinition(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.VariableEqualityDefinitionEName)
+
+  /**
+   * Returns the mandatory test attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.TestEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -243,6 +366,10 @@ sealed abstract class ConceptFilter(underlyingResource: tqa.dom.NonStandardResou
  */
 final class ConceptNameFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptNameEName)
+
+  def concepts: immutable.IndexedSeq[ConceptFilterConcept] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptFilterConcept])
+  }
 }
 
 /**
@@ -250,6 +377,10 @@ final class ConceptNameFilter(underlyingResource: tqa.dom.NonStandardResource) e
  */
 final class ConceptPeriodTypeFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptPeriodTypeEName)
+
+  def periodType: String = {
+    underlyingResource.attribute(ENames.PeriodTypeEName)
+  }
 }
 
 /**
@@ -257,6 +388,10 @@ final class ConceptPeriodTypeFilter(underlyingResource: tqa.dom.NonStandardResou
  */
 final class ConceptBalanceFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptBalanceEName)
+
+  def balance: String = {
+    underlyingResource.attribute(ENames.BalanceEName)
+  }
 }
 
 /**
@@ -264,6 +399,18 @@ final class ConceptBalanceFilter(underlyingResource: tqa.dom.NonStandardResource
  */
 final class ConceptCustomAttributeFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptCustomAttributeEName)
+
+  def customAttribute: ConceptFilterAttribute = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptFilterAttribute]).head
+  }
+
+  /**
+   * Returns the optional value attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def valueExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.ValueEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
 }
 
 /**
@@ -271,6 +418,14 @@ final class ConceptCustomAttributeFilter(underlyingResource: tqa.dom.NonStandard
  */
 final class ConceptDataTypeFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptDataTypeEName)
+
+  def conceptDataType: ConceptFilterType = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptFilterType]).head
+  }
+
+  def strict: Boolean = {
+    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
+  }
 }
 
 /**
@@ -278,6 +433,14 @@ final class ConceptDataTypeFilter(underlyingResource: tqa.dom.NonStandardResourc
  */
 final class ConceptSubstitutionGroupFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptSubstitutionGroupEName)
+
+  def conceptSubstitutionGroup: ConceptFilterSubstitutionGroup = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptFilterSubstitutionGroup]).head
+  }
+
+  def strict: Boolean = {
+    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
+  }
 }
 
 /**
@@ -302,7 +465,12 @@ final class OrFilter(underlyingResource: tqa.dom.NonStandardResource) extends Bo
 /**
  * A dimension filter.
  */
-sealed abstract class DimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class DimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+
+  final def dimension: DimensionFilterDimension = {
+    findAllNonXLinkChildElemsOfType(classTag[DimensionFilterDimension]).head
+  }
+}
 
 /**
  * A df:explicitDimension filter.
@@ -316,6 +484,14 @@ final class ExplicitDimensionFilter(underlyingResource: tqa.dom.NonStandardResou
  */
 final class TypedDimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends DimensionFilter(underlyingResource) {
   requireResolvedName(ENames.DfTypedDimensionEName)
+
+  /**
+   * Returns the optional test attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TestEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
 }
 
 /**
@@ -328,6 +504,14 @@ sealed abstract class EntityFilter(underlyingResource: tqa.dom.NonStandardResour
  */
 final class IdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfIdentifierEName)
+
+  /**
+   * Returns the mandatory test attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.TestEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -335,6 +519,14 @@ final class IdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) ex
  */
 final class SpecificSchemeFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfSpecificSchemeEName)
+
+  /**
+   * Returns the mandatory scheme attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def schemeExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.SchemeEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -342,6 +534,10 @@ final class SpecificSchemeFilter(underlyingResource: tqa.dom.NonStandardResource
  */
 final class RegexpSchemeFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfRegexpSchemeEName)
+
+  def pattern: String = {
+    underlyingResource.attribute(ENames.PatternEName)
+  }
 }
 
 /**
@@ -349,6 +545,22 @@ final class RegexpSchemeFilter(underlyingResource: tqa.dom.NonStandardResource) 
  */
 final class SpecificIdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfSpecificIdentifierEName)
+
+  /**
+   * Returns the mandatory scheme attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def schemeExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.SchemeEName), underlyingResource.scope)
+  }
+
+  /**
+   * Returns the mandatory value attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def valueExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.ValueEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -356,6 +568,10 @@ final class SpecificIdentifierFilter(underlyingResource: tqa.dom.NonStandardReso
  */
 final class RegexpIdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfRegexpIdentifierEName)
+
+  def pattern: String = {
+    underlyingResource.attribute(ENames.PatternEName)
+  }
 }
 
 /**
@@ -363,12 +579,33 @@ final class RegexpIdentifierFilter(underlyingResource: tqa.dom.NonStandardResour
  */
 final class GeneralFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.GfGeneralEName)
+
+  /**
+   * Returns the optional test attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TestEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
 }
 
 /**
  * A match filter.
  */
-sealed abstract class MatchFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class MatchFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+
+  /**
+   * Returns the variable attribute, as expanded name.
+   */
+  final def variable: EName = {
+    val qn = underlyingResource.attributeAsQName(ENames.VariableEName)
+    underlyingResource.scope.withoutDefaultNamespace.resolveQNameOption(qn).get
+  }
+
+  final def matchAny: Boolean = {
+    underlyingResource.attributeOption(ENames.MatchAnyEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
+  }
+}
 
 /**
  * An mf:matchConcept filter.
@@ -438,6 +675,10 @@ final class MatchNonXDTScenarioFilter(underlyingResource: tqa.dom.NonStandardRes
  */
 final class MatchDimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchDimensionEName)
+
+  def dimension: EName = {
+    underlyingResource.attributeAsResolvedQName(ENames.DimensionEName)
+  }
 }
 
 /**
@@ -450,6 +691,14 @@ sealed abstract class PeriodAspectFilter(underlyingResource: tqa.dom.NonStandard
  */
 final class PeriodFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodEName)
+
+  /**
+   * Returns the mandatory test attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.TestEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -457,6 +706,22 @@ final class PeriodFilter(underlyingResource: tqa.dom.NonStandardResource) extend
  */
 final class PeriodStartFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodStartEName)
+
+  /**
+   * Returns the mandatory date attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def dateExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.DateEName), underlyingResource.scope)
+  }
+
+  /**
+   * Returns the optional time attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def timeExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TimeEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
 }
 
 /**
@@ -464,6 +729,22 @@ final class PeriodStartFilter(underlyingResource: tqa.dom.NonStandardResource) e
  */
 final class PeriodEndFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodEndEName)
+
+  /**
+   * Returns the mandatory date attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def dateExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.DateEName), underlyingResource.scope)
+  }
+
+  /**
+   * Returns the optional time attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def timeExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TimeEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
 }
 
 /**
@@ -471,6 +752,22 @@ final class PeriodEndFilter(underlyingResource: tqa.dom.NonStandardResource) ext
  */
 final class PeriodInstantFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodInstantEName)
+
+  /**
+   * Returns the mandatory date attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def dateExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.DateEName), underlyingResource.scope)
+  }
+
+  /**
+   * Returns the optional time attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def timeExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TimeEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
 }
 
 /**
@@ -485,6 +782,18 @@ final class ForeverFilter(underlyingResource: tqa.dom.NonStandardResource) exten
  */
 final class InstantDurationFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfInstantDurationEName)
+
+  /**
+   * Returns the variable attribute, as expanded name.
+   */
+  def variable: EName = {
+    val qn = underlyingResource.attributeAsQName(ENames.VariableEName)
+    underlyingResource.scope.withoutDefaultNamespace.resolveQNameOption(qn).get
+  }
+
+  def boundary: String = {
+    underlyingResource.attribute(ENames.BoundaryEName)
+  }
 }
 
 /**
@@ -492,12 +801,29 @@ final class InstantDurationFilter(underlyingResource: tqa.dom.NonStandardResourc
  */
 final class RelativeFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.RfRelativeFilterEName)
+
+  /**
+   * Returns the variable attribute, as expanded name.
+   */
+  def variable: EName = {
+    val qn = underlyingResource.attributeAsQName(ENames.VariableEName)
+    underlyingResource.scope.withoutDefaultNamespace.resolveQNameOption(qn).get
+  }
 }
 
 /**
  * A segment scenario filter.
  */
-sealed abstract class SegmentScenarioFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class SegmentScenarioFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+
+  /**
+   * Returns the optional test attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TestEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
+}
 
 /**
  * An ssf:segment filter.
@@ -523,6 +849,10 @@ sealed abstract class TupleFilter(underlyingResource: tqa.dom.NonStandardResourc
  */
 final class ParentFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfParentFilterEName)
+
+  def parent: TupleFilterParent = {
+    findAllNonXLinkChildElemsOfType(classTag[TupleFilterParent]).head
+  }
 }
 
 /**
@@ -530,6 +860,10 @@ final class ParentFilter(underlyingResource: tqa.dom.NonStandardResource) extend
  */
 final class AncestorFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfAncestorFilterEName)
+
+  def ancestor: TupleFilterAncestor = {
+    findAllNonXLinkChildElemsOfType(classTag[TupleFilterAncestor]).head
+  }
 }
 
 /**
@@ -537,6 +871,14 @@ final class AncestorFilter(underlyingResource: tqa.dom.NonStandardResource) exte
  */
 final class SiblingFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfSiblingFilterEName)
+
+  /**
+   * Returns the variable attribute, as expanded name.
+   */
+  def variable: EName = {
+    val qn = underlyingResource.attributeAsQName(ENames.VariableEName)
+    underlyingResource.scope.withoutDefaultNamespace.resolveQNameOption(qn).get
+  }
 }
 
 /**
@@ -544,6 +886,22 @@ final class SiblingFilter(underlyingResource: tqa.dom.NonStandardResource) exten
  */
 final class LocationFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfLocationFilterEName)
+
+  /**
+   * Returns the variable attribute, as expanded name.
+   */
+  def variable: EName = {
+    val qn = underlyingResource.attributeAsQName(ENames.VariableEName)
+    underlyingResource.scope.withoutDefaultNamespace.resolveQNameOption(qn).get
+  }
+
+  /**
+   * Returns the mandatory location attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def locationExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.LocationEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -556,6 +914,10 @@ sealed abstract class UnitFilter(underlyingResource: tqa.dom.NonStandardResource
  */
 final class SingleMeasureFilter(underlyingResource: tqa.dom.NonStandardResource) extends UnitFilter(underlyingResource) {
   requireResolvedName(ENames.UfSingleMeasureEName)
+
+  def measure: UnitFilterMeasure = {
+    findAllNonXLinkChildElemsOfType(classTag[UnitFilterMeasure]).head
+  }
 }
 
 /**
@@ -563,6 +925,14 @@ final class SingleMeasureFilter(underlyingResource: tqa.dom.NonStandardResource)
  */
 final class GeneralMeasuresFilter(underlyingResource: tqa.dom.NonStandardResource) extends UnitFilter(underlyingResource) {
   requireResolvedName(ENames.UfGeneralMeasuresEName)
+
+  /**
+   * Returns the mandatory test attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.TestEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -582,6 +952,14 @@ final class NilFilter(underlyingResource: tqa.dom.NonStandardResource) extends V
  */
 final class PrecisionFilter(underlyingResource: tqa.dom.NonStandardResource) extends ValueFilter(underlyingResource) {
   requireResolvedName(ENames.VfPrecisionEName)
+
+  /**
+   * Returns the mandatory minimum attribute as ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def minimumExpr: ScopedXPathString = {
+    ScopedXPathString(underlyingResource.attribute(ENames.MinimumEName), underlyingResource.scope)
+  }
 }
 
 /**
@@ -589,6 +967,18 @@ final class PrecisionFilter(underlyingResource: tqa.dom.NonStandardResource) ext
  */
 final class AspectCoverFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.AcfAspectCoverEName)
+
+  def aspects: immutable.IndexedSeq[AspectCoverFilterAspect] = {
+    findAllNonXLinkChildElemsOfType(classTag[AspectCoverFilterAspect])
+  }
+
+  def dimensions: immutable.IndexedSeq[AspectCoverFilterDimension] = {
+    findAllNonXLinkChildElemsOfType(classTag[AspectCoverFilterDimension])
+  }
+
+  def excludeDimensions: immutable.IndexedSeq[AspectCoverFilterExcludeDimension] = {
+    findAllNonXLinkChildElemsOfType(classTag[AspectCoverFilterExcludeDimension])
+  }
 }
 
 /**
@@ -596,6 +986,101 @@ final class AspectCoverFilter(underlyingResource: tqa.dom.NonStandardResource) e
  */
 final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.CrfConceptRelationEName)
+
+  /**
+   * Returns `variableOption.orElse(qnameOption).orElse(qnameExpressionOption).get`.
+   */
+  def source: ConceptRelationFilterContentElem = {
+    variableOption.orElse(qnameOption).orElse(qnameExpressionOption).getOrElse(sys.error(s"Missing variable, qname and qnameExpression"))
+  }
+
+  def variableOption: Option[ConceptRelationFilterVariable] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterVariable]).headOption
+  }
+
+  def qnameOption: Option[ConceptRelationFilterQName] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterQName]).headOption
+  }
+
+  def qnameExpressionOption: Option[ConceptRelationFilterQNameExpression] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterQNameExpression]).headOption
+  }
+
+  /**
+   * Returns `linkroleOption.orElse(linkroleExpressionOption).get`.
+   */
+  def linkroleOrLinkroleExpression: ConceptRelationFilterContentElem = {
+    linkroleOption.orElse(linkroleExpressionOption).getOrElse(sys.error(s"Missing linkrole or linkroleExpression"))
+  }
+
+  def linkroleOption: Option[ConceptRelationFilterLinkrole] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterLinkrole]).headOption
+  }
+
+  def linkroleExpressionOption: Option[ConceptRelationFilterLinkroleExpression] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterLinkroleExpression]).headOption
+  }
+
+  /**
+   * Returns `linknameOption.orElse(linknameExpressionOption)`.
+   */
+  def linknameOrLinknameExpressionOption: Option[ConceptRelationFilterContentElem] = {
+    linknameOption.orElse(linknameExpressionOption)
+  }
+
+  def linknameOption: Option[ConceptRelationFilterLinkname] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterLinkname]).headOption
+  }
+
+  def linknameExpressionOption: Option[ConceptRelationFilterLinknameExpression] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterLinknameExpression]).headOption
+  }
+
+  /**
+   * Returns `arcroleOption.orElse(arcroleExpressionOption).get`.
+   */
+  def arcroleOrArcroleExpression: ConceptRelationFilterContentElem = {
+    arcroleOption.orElse(arcroleExpressionOption).getOrElse(sys.error(s"Missing arcrole or arcroleExpression"))
+  }
+
+  def arcroleOption: Option[ConceptRelationFilterArcrole] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterArcrole]).headOption
+  }
+
+  def arcroleExpressionOption: Option[ConceptRelationFilterArcroleExpression] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterArcroleExpression]).headOption
+  }
+
+  /**
+   * Returns `arcnameOption.orElse(arcnameExpressionOption)`.
+   */
+  def arcnameOrArcnameExpressionOption: Option[ConceptRelationFilterContentElem] = {
+    arcnameOption.orElse(arcnameExpressionOption)
+  }
+
+  def arcnameOption: Option[ConceptRelationFilterArcname] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterArcname]).headOption
+  }
+
+  def arcnameExpressionOption: Option[ConceptRelationFilterArcnameExpression] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterArcnameExpression]).headOption
+  }
+
+  def axis: ConceptRelationFilterAxis = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterAxis]).head
+  }
+
+  def generationsOption: Option[ConceptRelationFilterGenerations] = {
+    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterGenerations]).headOption
+  }
+
+  /**
+   * Returns the optional test attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def testExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TestEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
 }
 
 // Companion objects

@@ -304,11 +304,27 @@ object ENames {
   val CfConceptDataTypeEName = EName(CfNamespace, "conceptDataType")
   val CfConceptSubstitutionGroupEName = EName(CfNamespace, "conceptSubstitutionGroup")
 
+  val CfConceptEName = EName(CfNamespace, "concept")
+  val CfAttributeEName = EName(CfNamespace, "attribute")
+  val CfTypeEName = EName(CfNamespace, "type")
+  val CfSubstitutionGroupEName = EName(CfNamespace, "substitutionGroup")
+  val CfQnameEName = EName(CfNamespace, "qname")
+  val CfQnameExpressionEName = EName(CfNamespace, "qnameExpression")
+
   val BfAndFilterEName = EName(BfNamespace, "andFilter")
   val BfOrFilterEName = EName(BfNamespace, "orFilter")
 
   val DfExplicitDimensionEName = EName(DfNamespace, "explicitDimension")
   val DfTypedDimensionEName = EName(DfNamespace, "typedDimension")
+
+  val DfDimensionEName = EName(DfNamespace, "dimension")
+  val DfMemberEName = EName(DfNamespace, "member")
+  val DfLinkroleEName = EName(DfNamespace, "linkrole")
+  val DfArcroleEName = EName(DfNamespace, "arcrole")
+  val DfAxisEName = EName(DfNamespace, "axis")
+  val DfVariableEName = EName(DfNamespace, "variable")
+  val DfQnameEName = EName(DfNamespace, "qname")
+  val DfQnameExpressionEName = EName(DfNamespace, "qnameExpression")
 
   val EfIdentifierEName = EName(EfNamespace, "identifier")
   val EfSpecificSchemeEName = EName(EfNamespace, "specificScheme")
@@ -346,15 +362,44 @@ object ENames {
   val TfSiblingFilterEName = EName(TfNamespace, "siblingFilter")
   val TfLocationFilterEName = EName(TfNamespace, "locationFilter")
 
+  val TfParentEName = EName(TfNamespace, "parent")
+  val TfAncestorEName = EName(TfNamespace, "ancestor")
+  val TfQnameEName = EName(TfNamespace, "qname")
+  val TfQnameExpressionEName = EName(TfNamespace, "qnameExpression")
+
   val UfSingleMeasureEName = EName(UfNamespace, "singleMeasure")
   val UfGeneralMeasuresEName = EName(UfNamespace, "generalMeasures")
+
+  val UfMeasureEName = EName(UfNamespace, "measure")
+  val UfQnameEName = EName(UfNamespace, "qname")
+  val UfQnameExpressionEName = EName(UfNamespace, "qnameExpression")
 
   val VfNilEName = EName(VfNamespace, "nil")
   val VfPrecisionEName = EName(VfNamespace, "precision")
 
   val AcfAspectCoverEName = EName(AcfNamespace, "aspectCover")
 
+  val AcfAspectEName = EName(AcfNamespace, "aspect")
+  val AcfDimensionEName = EName(AcfNamespace, "dimension")
+  val AcfExcludeDimensionEName = EName(AcfNamespace, "excludeDimension")
+  val AcfQnameEName = EName(AcfNamespace, "qname")
+  val AcfQnameExpressionEName = EName(AcfNamespace, "qnameExpression")
+
   val CrfConceptRelationEName = EName(CrfNamespace, "conceptRelation")
+
+  val CrfAxisEName = EName(CrfNamespace, "axis")
+  val CrfGenerationsEName = EName(CrfNamespace, "generations")
+  val CrfVariableEName = EName(CrfNamespace, "variable")
+  val CrfQnameEName = EName(CrfNamespace, "qname")
+  val CrfQnameExpressionEName = EName(CrfNamespace, "qnameExpression")
+  val CrfLinkroleEName = EName(CrfNamespace, "linkrole")
+  val CrfLinkroleExpressionEName = EName(CrfNamespace, "linkroleExpression")
+  val CrfLinknameEName = EName(CrfNamespace, "linkname")
+  val CrfLinknameExpressionEName = EName(CrfNamespace, "linknameExpression")
+  val CrfArcroleEName = EName(CrfNamespace, "arcrole")
+  val CrfArcroleExpressionEName = EName(CrfNamespace, "arcroleExpression")
+  val CrfArcnameEName = EName(CrfNamespace, "arcname")
+  val CrfArcnameExpressionEName = EName(CrfNamespace, "arcnameExpression")
 
   val NameEName = EName("name")
   val IdEName = EName("id")
@@ -428,4 +473,6 @@ object ENames {
   val StartEName = EName("start")
   val EndEName = EName("end")
   val MeasureEName = EName("measure")
+  val PeriodTypeEName = EName("periodType")
+  val BalanceEName = EName("balance")
 }
