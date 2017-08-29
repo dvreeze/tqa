@@ -28,6 +28,7 @@ import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.extension.formula.dom.Assertion
 import eu.cdevreeze.tqa.extension.formula.dom.AssertionSet
+import eu.cdevreeze.tqa.extension.formula.dom.BooleanFilter
 import eu.cdevreeze.tqa.extension.formula.dom.ConsistencyAssertion
 import eu.cdevreeze.tqa.extension.formula.dom.FactVariable
 import eu.cdevreeze.tqa.extension.formula.dom.Filter
@@ -37,6 +38,7 @@ import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
 import eu.cdevreeze.tqa.extension.formula.dom.Instance
 import eu.cdevreeze.tqa.extension.formula.dom.Message
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaArc
+import eu.cdevreeze.tqa.extension.formula.dom.Parameter
 import eu.cdevreeze.tqa.extension.formula.dom.Precondition
 import eu.cdevreeze.tqa.extension.formula.dom.Severity
 import eu.cdevreeze.tqa.extension.formula.dom.Variable
@@ -182,12 +184,65 @@ final class VariableSetFilterRelationship(
 }
 
 /**
+ * A variable-filter relationship.
+ */
+final class BooleanFilterRelationship(
+    arc: VariableFilterArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: BooleanFilter],
+    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+
+  requireArcrole("http://xbrl.org/arcrole/2008/boolean-filter")
+
+  def booleanFilter: BooleanFilter = resolvedFrom.resolvedElem
+
+  def targetFilter: Filter = resolvedTo.resolvedElem
+
+  /**
+   * Returns the boolean complement attribute of the underlying arc.
+   */
+  def complement: Boolean = arc.complement
+
+  /**
+   * Returns the boolean cover attribute off the underlying arc.
+   */
+  def cover: Boolean = arc.cover
+}
+
+/**
+ * A consistency-assertion-parameter relationship. Note that it is backed by a VariableArc.
+ */
+final class ConsistencyAssertionParameterRelationship(
+    arc: VariableArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: ConsistencyAssertion],
+    resolvedTo: ResolvedLocatorOrResource[_ <: Parameter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+
+  requireArcrole("http://xbrl.org/arcrole/2008/consistency-assertion-parameter")
+
+  def consistencyAssertion: ConsistencyAssertion = resolvedFrom.resolvedElem
+
+  def parameter: Parameter = resolvedTo.resolvedElem
+
+  /**
+   * Returns the name as EName. The default namespace of the arc is not used to resolve the QName.
+   */
+  def name: EName = arc.name
+}
+
+/**
+ * Another formula-related relationship, backed by an OtherFormulaArc.
+ */
+sealed abstract class OtherFormulaRelationship(
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource],
+  resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo)
+
+/**
  * A variable-set-precondition relationship.
  */
 final class VariableSetPreconditionRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: VariableSet],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Precondition]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Precondition]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/variable-set-precondition")
 
@@ -202,7 +257,7 @@ final class VariableSetPreconditionRelationship(
 final class ConsistencyAssertionFormulaRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: ConsistencyAssertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Formula]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Formula]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/consistency-assertion-formula")
 
@@ -211,15 +266,13 @@ final class ConsistencyAssertionFormulaRelationship(
   def formula: Formula = resolvedTo.resolvedElem
 }
 
-// TODO Consistency-assertion-parameter relationships.
-
 /**
  * An assertion-set relationship.
  */
 final class AssertionSetRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: AssertionSet],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Assertion]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Assertion]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/assertion-set")
 
@@ -234,7 +287,7 @@ final class AssertionSetRelationship(
 sealed abstract class ElementMessageRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   final def referredElement: AnyTaxonomyElem with XLinkResource = resolvedFrom.resolvedElem
 
@@ -273,7 +326,7 @@ final class AssertionUnsatisfiedMessageRelationship(
 final class InstanceVariableRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: Instance],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Variable]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Variable]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/instance-variable")
 
@@ -288,7 +341,7 @@ final class InstanceVariableRelationship(
 final class FormulaInstanceRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: Formula],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Instance]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Instance]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/formula-instance")
 
@@ -303,7 +356,7 @@ final class FormulaInstanceRelationship(
 final class AssertionUnsatisfiedSeverityRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Severity]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Severity]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2016/assertion-unsatisfied-severity")
 
@@ -329,6 +382,8 @@ object FormulaRelationship {
       orElse(VariableFilterRelationship.opt(arc, resolvedFrom, resolvedTo)).
       orElse(VariableSetFilterRelationship.opt(arc, resolvedFrom, resolvedTo)).
       orElse(VariableSetPreconditionRelationship.opt(arc, resolvedFrom, resolvedTo)).
+      orElse(BooleanFilterRelationship.opt(arc, resolvedFrom, resolvedTo)).
+      orElse(ConsistencyAssertionParameterRelationship.opt(arc, resolvedFrom, resolvedTo)).
       orElse(ConsistencyAssertionFormulaRelationship.opt(arc, resolvedFrom, resolvedTo)).
       orElse(AssertionSetRelationship.opt(arc, resolvedFrom, resolvedTo)).
       orElse(AssertionSatisfiedMessageRelationship.opt(arc, resolvedFrom, resolvedTo)).
@@ -453,6 +508,60 @@ object VariableSetFilterRelationship {
         case ("http://xbrl.org/arcrole/2008/variable-set-filter", arc: VariableSetFilterArc, source: VariableSet, target: Filter) =>
           Some(new VariableSetFilterRelationship(
             arc, unsafeCastResource(resolvedFrom, classTag[VariableSet]), unsafeCastResource(resolvedTo, classTag[Filter])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
+    }
+  }
+}
+
+object BooleanFilterRelationship {
+
+  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+
+  /**
+   * Optionally builds a `BooleanFilterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: FormulaArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[BooleanFilterRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.VariableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2008/boolean-filter", arc: VariableFilterArc, source: BooleanFilter, target: Filter) =>
+          Some(new BooleanFilterRelationship(
+            arc, unsafeCastResource(resolvedFrom, classTag[BooleanFilter]), unsafeCastResource(resolvedTo, classTag[Filter])))
+        case (_, _, _, _) =>
+          None
+      }
+    } else {
+      None
+    }
+  }
+}
+
+object ConsistencyAssertionParameterRelationship {
+
+  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+
+  /**
+   * Optionally builds a `ConsistencyAssertionParameterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   */
+  def opt(
+    arc: FormulaArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem]): Option[ConsistencyAssertionParameterRelationship] = {
+
+    if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.VariableNamespace)) {
+      (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+        case ("http://xbrl.org/arcrole/2008/consistency-assertion-parameter", arc: VariableArc, source: ConsistencyAssertion, target: Parameter) =>
+          Some(new ConsistencyAssertionParameterRelationship(
+            arc, unsafeCastResource(resolvedFrom, classTag[ConsistencyAssertion]), unsafeCastResource(resolvedTo, classTag[Parameter])))
         case (_, _, _, _) =>
           None
       }
