@@ -113,15 +113,10 @@ final class VariableSetFilterArc(val underlyingArc: tqa.dom.NonStandardArc) exte
   }
 }
 
-// TODO What to do with the following arcroles?
-// http://xbrl.org/arcrole/2008/variable-set-precondition
-// http://xbrl.org/arcrole/2008/consistency-assertion-formula
-// http://xbrl.org/arcrole/2008/assertion-set
-// http://xbrl.org/arcrole/2010/assertion-satisfied-message
-// http://xbrl.org/arcrole/2010/assertion-unsatisfied-message
-// http://xbrl.org/arcrole/2010/instance-variable
-// http://xbrl.org/arcrole/2010/formula-instance
-// http://xbrl.org/arcrole/2016/assertion-unsatisfied-severity
+/**
+ * Another FormulaArc, with unknown arc name but with a known formula-related arcrole.
+ */
+final class OtherFormulaArc(val underlyingArc: tqa.dom.NonStandardArc) extends FormulaArc
 
 // Companion objects
 
@@ -129,6 +124,8 @@ object FormulaArc {
 
   /**
    * Lenient method to optionally create a FormulaArc from an underlying tqa.dom.NonStandardArc.
+   *
+   * TODO Consistency-assertion-parameter arcs.
    */
   def opt(underlyingArc: tqa.dom.NonStandardArc): Option[FormulaArc] = {
     if (underlyingArc.resolvedName.namespaceUriOption.contains(Namespaces.VariableNamespace)) {
@@ -139,7 +136,17 @@ object FormulaArc {
         case _                                        => None
       }
     } else {
-      None
+      underlyingArc.arcrole match {
+        case "http://xbrl.org/arcrole/2008/variable-set-precondition" => Some(new OtherFormulaArc(underlyingArc))
+        case "http://xbrl.org/arcrole/2008/consistency-assertion-formula" => Some(new OtherFormulaArc(underlyingArc))
+        case "http://xbrl.org/arcrole/2008/assertion-set" => Some(new OtherFormulaArc(underlyingArc))
+        case "http://xbrl.org/arcrole/2010/assertion-satisfied-message" => Some(new OtherFormulaArc(underlyingArc))
+        case "http://xbrl.org/arcrole/2010/assertion-unsatisfied-message" => Some(new OtherFormulaArc(underlyingArc))
+        case "http://xbrl.org/arcrole/2010/instance-variable" => Some(new OtherFormulaArc(underlyingArc))
+        case "http://xbrl.org/arcrole/2010/formula-instance" => Some(new OtherFormulaArc(underlyingArc))
+        case "http://xbrl.org/arcrole/2016/assertion-unsatisfied-severity" => Some(new OtherFormulaArc(underlyingArc))
+        case _ => None
+      }
     }
   }
 }

@@ -350,6 +350,48 @@ final class EqualityDefinition(val underlyingResource: tqa.dom.NonStandardResour
 }
 
 /**
+ * A msg:message, as used in a formula-related context. Strictly speaking messages are not just related
+ * to formulas, but they are introduced here to avoid sub-classing the core DOM type NonStandardResource.
+ */
+final class Message(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+  requireResolvedName(ENames.MsgMessageEName)
+
+  /**
+   * Returns the mandatory lang attribute.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def lang: String = {
+    underlyingResource.attribute(ENames.XmlLangEName)
+  }
+}
+
+/**
+ * A severity.
+ */
+sealed abstract class Severity(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource
+
+/**
+ * A sev:ok.
+ */
+final class OkSeverity(underlyingResource: tqa.dom.NonStandardResource) extends Severity(underlyingResource) {
+  requireResolvedName(ENames.SevOkEName)
+}
+
+/**
+ * A sev:warning.
+ */
+final class WarningSeverity(underlyingResource: tqa.dom.NonStandardResource) extends Severity(underlyingResource) {
+  requireResolvedName(ENames.SevWarningEName)
+}
+
+/**
+ * A sev:error.
+ */
+final class ErrorSeverity(underlyingResource: tqa.dom.NonStandardResource) extends Severity(underlyingResource) {
+  requireResolvedName(ENames.SevErrorEName)
+}
+
+/**
  * A filter.
  */
 sealed abstract class Filter(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource
@@ -1104,6 +1146,10 @@ object FormulaResource {
       case ENames.VariableFunctionEName           => Some(new Function(underlyingResource))
       case ENames.VariableEqualityDefinitionEName => Some(new EqualityDefinition(underlyingResource))
       case ENames.InstancesInstanceEName          => Some(new Instance(underlyingResource))
+      case ENames.MsgMessageEName                 => Some(new Message(underlyingResource))
+      case ENames.SevOkEName                      => Some(new OkSeverity(underlyingResource))
+      case ENames.SevWarningEName                 => Some(new WarningSeverity(underlyingResource))
+      case ENames.SevErrorEName                   => Some(new ErrorSeverity(underlyingResource))
       case en if Namespaces.FormulaFilterNamespaces.contains(en.namespaceUriOption.getOrElse("")) =>
         Filter.opt(underlyingResource)
       case _ => None
