@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.tqa.xpathaware.extension.table
 
-import eu.cdevreeze.tqa.extension.table.dom.ExplicitDimensionAspect
+import eu.cdevreeze.tqa.extension.formula.dom.ExplicitDimensionAspect
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
 

@@ -26,6 +26,8 @@ import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
+import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.yaidom.core.EName
 import javax.xml.bind.DatatypeConverter
 
@@ -34,7 +36,7 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait OtherTableElem extends OtherTableOrFormulaElem {
+sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
 
   def underlyingElem: tqa.dom.OtherElem
 
@@ -46,19 +48,19 @@ sealed trait OtherTableElem extends OtherTableOrFormulaElem {
       s"Expected $ename but found ${underlyingElem.resolvedName} in ${underlyingElem.docUri}")
   }
 
-  protected[dom] def filterNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
+  protected[dom] def filterNonXLinkChildElemsOfFormulaElemType[A <: OtherFormulaElem](
     cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = cls
 
     underlyingElem.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
-      flatMap(e => OtherTableElem.opt(e).orElse(OtherFormulaElem.opt(e))) collect { case e: A if p(e) => e }
+      flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
-  protected[dom] def findAllNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
+  protected[dom] def findAllNonXLinkChildElemsOfFormulaElemType[A <: OtherFormulaElem](
     cls: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    filterNonXLinkChildElemsOfType(cls)(_ => true)
+    filterNonXLinkChildElemsOfFormulaElemType(cls)(_ => true)
   }
 }
 
@@ -138,7 +140,7 @@ final class RuleSet(val underlyingElem: tqa.dom.OtherElem) extends OtherTableEle
   requireResolvedName(ENames.TableRuleSetEName)
 
   def aspects: immutable.IndexedSeq[FormulaAspect] = {
-    findAllNonXLinkChildElemsOfType(classTag[FormulaAspect])
+    findAllNonXLinkChildElemsOfFormulaElemType(classTag[FormulaAspect])
   }
 
   def findAllAspectsOfType[A <: FormulaAspect](cls: ClassTag[A]): immutable.IndexedSeq[A] = {

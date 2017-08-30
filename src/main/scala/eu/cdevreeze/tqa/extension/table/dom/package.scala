@@ -24,6 +24,8 @@ package eu.cdevreeze.tqa.extension.table
  * even if the table linkbase content is not schema-valid, but the less forgiving query methods should be used defensively
  * on potentially non-schema-valid table linkbase content.
  *
+ * This package depends on the formula DOM package.
+ *
  * @author Chris de Vreeze
  */
 package object dom

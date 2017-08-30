@@ -31,13 +31,13 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.PeriodType
 import eu.cdevreeze.tqa.dom.XLinkArc
+import eu.cdevreeze.tqa.extension.formula.dom.ConceptAspect
+import eu.cdevreeze.tqa.extension.formula.dom.ExplicitDimensionAspect
+import eu.cdevreeze.tqa.extension.formula.dom.PeriodAspect
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
-import eu.cdevreeze.tqa.extension.table.dom.ConceptAspect
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
-import eu.cdevreeze.tqa.extension.table.dom.ExplicitDimensionAspect
-import eu.cdevreeze.tqa.extension.table.dom.PeriodAspect
 import eu.cdevreeze.tqa.extension.table.dom.RuleNode
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.relationship.DefinitionNodeSubtreeRelationship

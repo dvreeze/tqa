@@ -24,6 +24,8 @@ import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
+import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
@@ -60,19 +62,34 @@ sealed trait TableResource extends tqa.dom.AnyTaxonomyElem with XLinkResource {
       s"Expected $ename but found ${underlyingResource.resolvedName} in ${underlyingResource.docUri}")
   }
 
-  protected[dom] def filterNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
+  protected[dom] def filterNonXLinkChildElemsOfTableElemType[A <: OtherTableElem](
     cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = cls
 
     underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
-      flatMap(e => OtherTableElem.opt(e).orElse(OtherFormulaElem.opt(e))) collect { case e: A if p(e) => e }
+      flatMap(e => OtherTableElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
-  protected[dom] def findAllNonXLinkChildElemsOfType[A <: OtherTableOrFormulaElem](
+  protected[dom] def findAllNonXLinkChildElemsOfTableElemType[A <: OtherTableElem](
     cls: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    filterNonXLinkChildElemsOfType(cls)(_ => true)
+    filterNonXLinkChildElemsOfTableElemType(cls)(_ => true)
+  }
+
+  protected[dom] def filterNonXLinkChildElemsOfFormulaElemType[A <: OtherFormulaElem](
+    cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+
+    implicit val clsTag = cls
+
+    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
+      flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
+  }
+
+  protected[dom] def findAllNonXLinkChildElemsOfFormulaElemType[A <: OtherFormulaElem](
+    cls: ClassTag[A]): immutable.IndexedSeq[A] = {
+
+    filterNonXLinkChildElemsOfFormulaElemType(cls)(_ => true)
   }
 }
 
@@ -143,7 +160,7 @@ final class RuleNode(underlyingResource: tqa.dom.NonStandardResource) extends Cl
   requireResolvedName(ENames.TableRuleNodeEName)
 
   def untaggedAspects: immutable.IndexedSeq[FormulaAspect] = {
-    findAllNonXLinkChildElemsOfType(classTag[FormulaAspect])
+    findAllNonXLinkChildElemsOfFormulaElemType(classTag[FormulaAspect])
   }
 
   def allAspects: immutable.IndexedSeq[FormulaAspect] = {
@@ -164,7 +181,7 @@ final class RuleNode(underlyingResource: tqa.dom.NonStandardResource) extends Cl
   }
 
   def ruleSets: immutable.IndexedSeq[RuleSet] = {
-    findAllNonXLinkChildElemsOfType(classTag[RuleSet])
+    findAllNonXLinkChildElemsOfTableElemType(classTag[RuleSet])
   }
 
   /**
@@ -196,59 +213,59 @@ final class ConceptRelationshipNode(underlyingResource: tqa.dom.NonStandardResou
   requireResolvedName(ENames.TableConceptRelationshipNodeEName)
 
   def relationshipSources: immutable.IndexedSeq[RelationshipSource] = {
-    findAllNonXLinkChildElemsOfType(classTag[RelationshipSource])
+    findAllNonXLinkChildElemsOfTableElemType(classTag[RelationshipSource])
   }
 
   def relationshipSourceExpressions: immutable.IndexedSeq[RelationshipSourceExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[RelationshipSourceExpression])
+    findAllNonXLinkChildElemsOfTableElemType(classTag[RelationshipSourceExpression])
   }
 
   def linkroleOption: Option[Linkrole] = {
-    findAllNonXLinkChildElemsOfType(classTag[Linkrole]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[Linkrole]).headOption
   }
 
   def linkroleExpressionOption: Option[LinkroleExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[LinkroleExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[LinkroleExpression]).headOption
   }
 
   def arcroleOption: Option[Arcrole] = {
-    findAllNonXLinkChildElemsOfType(classTag[Arcrole]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[Arcrole]).headOption
   }
 
   def arcroleExpressionOption: Option[ArcroleExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[ArcroleExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[ArcroleExpression]).headOption
   }
 
   def formulaAxisOption: Option[ConceptRelationshipNodeFormulaAxis] = {
-    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationshipNodeFormulaAxis]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[ConceptRelationshipNodeFormulaAxis]).headOption
   }
 
   def formulaAxisExpressionOption: Option[ConceptRelationshipNodeFormulaAxisExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[ConceptRelationshipNodeFormulaAxisExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[ConceptRelationshipNodeFormulaAxisExpression]).headOption
   }
 
   def generationsOption: Option[Generations] = {
-    findAllNonXLinkChildElemsOfType(classTag[Generations]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[Generations]).headOption
   }
 
   def generationsExpressionOption: Option[GenerationsExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[GenerationsExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[GenerationsExpression]).headOption
   }
 
   def linknameOption: Option[Linkname] = {
-    findAllNonXLinkChildElemsOfType(classTag[Linkname]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[Linkname]).headOption
   }
 
   def linknameExpressionOption: Option[LinknameExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[LinknameExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[LinknameExpression]).headOption
   }
 
   def arcnameOption: Option[Arcname] = {
-    findAllNonXLinkChildElemsOfType(classTag[Arcname]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[Arcname]).headOption
   }
 
   def arcnameExpressionOption: Option[ArcnameExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[ArcnameExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[ArcnameExpression]).headOption
   }
 }
 
@@ -262,39 +279,39 @@ final class DimensionRelationshipNode(underlyingResource: tqa.dom.NonStandardRes
    * Returns the single table:dimension child element. This may fail with an exception if the taxonomy is not schema-valid.
    */
   def dimension: TableDimension = {
-    findAllNonXLinkChildElemsOfType(classTag[TableDimension]).head
+    findAllNonXLinkChildElemsOfTableElemType(classTag[TableDimension]).head
   }
 
   def relationshipSources: immutable.IndexedSeq[RelationshipSource] = {
-    findAllNonXLinkChildElemsOfType(classTag[RelationshipSource])
+    findAllNonXLinkChildElemsOfTableElemType(classTag[RelationshipSource])
   }
 
   def relationshipSourceExpressions: immutable.IndexedSeq[RelationshipSourceExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[RelationshipSourceExpression])
+    findAllNonXLinkChildElemsOfTableElemType(classTag[RelationshipSourceExpression])
   }
 
   def linkroleOption: Option[Linkrole] = {
-    findAllNonXLinkChildElemsOfType(classTag[Linkrole]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[Linkrole]).headOption
   }
 
   def linkroleExpressionOption: Option[LinkroleExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[LinkroleExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[LinkroleExpression]).headOption
   }
 
   def formulaAxisOption: Option[DimensionRelationshipNodeFormulaAxis] = {
-    findAllNonXLinkChildElemsOfType(classTag[DimensionRelationshipNodeFormulaAxis]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[DimensionRelationshipNodeFormulaAxis]).headOption
   }
 
   def formulaAxisExpressionOption: Option[DimensionRelationshipNodeFormulaAxisExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[DimensionRelationshipNodeFormulaAxisExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[DimensionRelationshipNodeFormulaAxisExpression]).headOption
   }
 
   def generationsOption: Option[Generations] = {
-    findAllNonXLinkChildElemsOfType(classTag[Generations]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[Generations]).headOption
   }
 
   def generationsExpressionOption: Option[GenerationsExpression] = {
-    findAllNonXLinkChildElemsOfType(classTag[GenerationsExpression]).headOption
+    findAllNonXLinkChildElemsOfTableElemType(classTag[GenerationsExpression]).headOption
   }
 
   /**
@@ -310,7 +327,7 @@ final class AspectNode(underlyingResource: tqa.dom.NonStandardResource) extends 
   requireResolvedName(ENames.TableAspectNodeEName)
 
   final def aspectSpec: AspectSpec = {
-    findAllNonXLinkChildElemsOfType(classTag[AspectSpec]).head
+    findAllNonXLinkChildElemsOfTableElemType(classTag[AspectSpec]).head
   }
 }
 
