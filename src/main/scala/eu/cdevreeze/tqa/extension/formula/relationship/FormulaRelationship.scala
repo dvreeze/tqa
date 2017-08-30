@@ -295,16 +295,25 @@ sealed abstract class ElementMessageRelationship(
 }
 
 /**
+ * An AssertionSatisfiedMessageRelationship or AssertionUnsatisfiedMessageRelationship.
+ */
+sealed abstract class AssertionMessageRelationship(
+    arc: OtherFormulaArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
+    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends ElementMessageRelationship(arc, resolvedFrom, resolvedTo) {
+
+  final def assertion: Assertion = resolvedFrom.resolvedElem
+}
+
+/**
  * An assertion-satisfied-message relationship.
  */
 final class AssertionSatisfiedMessageRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends ElementMessageRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends AssertionMessageRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/assertion-satisfied-message")
-
-  def assertion: Assertion = resolvedFrom.resolvedElem
 }
 
 /**
@@ -313,11 +322,9 @@ final class AssertionSatisfiedMessageRelationship(
 final class AssertionUnsatisfiedMessageRelationship(
     arc: OtherFormulaArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends ElementMessageRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends AssertionMessageRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/assertion-unsatisfied-message")
-
-  def assertion: Assertion = resolvedFrom.resolvedElem
 }
 
 /**
