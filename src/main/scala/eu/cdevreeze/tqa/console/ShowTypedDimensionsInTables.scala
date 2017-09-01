@@ -216,7 +216,7 @@ object ShowTypedDimensionsInTables {
         if (typedDims.nonEmpty) {
           logger.warning(
             s"Typed dimension(s) ${typedDims.mkString("[", ", ", "]")} used with concept $concept and " +
-              s"explicit dimension members ${explicitDimMembers.mkString("[", ", ", "]")} occurs in more than 1 table. " +
+              s"explicit dimension members\n\t${explicitDimMembers.mkString("", ",\n\t", "\n")} occurs in more than 1 table. " +
               s"Table linkbases:\n\t${tableKeys.map(_.docUri).toSeq.sortBy(_.toString).mkString("\n\t")}")
         }
     }
