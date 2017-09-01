@@ -88,10 +88,10 @@ object ShowTypedDimensionsInTables {
     val cachingDocumentBuilder =
       new CachingDocumentBuilder(CachingDocumentBuilder.createCache(documentBuilder, cacheSize))
 
-    showTypedDimensionUsageInTables(entrypointUris, rootDir, cachingDocumentBuilder, processor)
+    showDimensionUsageInTables(entrypointUris, rootDir, cachingDocumentBuilder, processor)
   }
 
-  def showTypedDimensionUsageInTables(
+  def showDimensionUsageInTables(
     entrypointUrisOfDts: Set[URI],
     rootDir: File,
     documentBuilder: CachingDocumentBuilder[_],
@@ -186,34 +186,35 @@ object ShowTypedDimensionsInTables {
 
     logger.info("Analysing the tables ...")
 
-    val typedDimensionUsagesInTables: immutable.IndexedSeq[TypedDimensionUsageInTable] = {
+    val dimensionUsagesInTables: immutable.IndexedSeq[DimensionUsageInTable] = {
       (tables flatMap { table =>
         val xpathEvaluator = makeXPathEvaluator(xpathEvaluatorFactory, table, scope, rootDir)
 
         val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
         logger.info(s"Created XPathEvaluator for table $tableId. Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
 
-        findAllTypedDimensionUsagesInTable(
+        findAllDimensionUsagesInTable(
           table,
           tableTaxo,
           conceptHasHypercubeMap,
           hasHypercubeTypedDimMap,
           hasHypercubeExplicitDimMemberMap,
-          xpathEvaluator).toIndexedSeq.
-          map(typedDimUsage => TypedDimensionUsageInTable(table.key, typedDimUsage))
+          xpathEvaluator).toIndexedSeq map { dimUsage =>
+            DimensionUsageInTable(table.key, dimUsage.ignoringElr)
+          }
       }).distinct
     }
 
     logger.info(s"Ready analysing tables. Now looking for duplicate typed dimension usage across tables. " +
       s"Entrypoint(s): ${entrypointUrisOfDts.mkString(", ")}")
 
-    val typedDimensionUsageToTableKeyMap: Map[TypedDimensionUsage, Set[XmlFragmentKey]] =
-      typedDimensionUsagesInTables.groupBy(_.typedDimensionUsage).mapValues(grp => grp.map(_.tableKey).toSet)
+    val dimensionUsageToTableKeyMap: Map[DimensionUsageIgnoringElr, Set[XmlFragmentKey]] =
+      dimensionUsagesInTables.groupBy(_.dimensionUsageIgnoringElr).mapValues(grp => grp.map(_.tableKey).toSet)
 
-    typedDimensionUsageToTableKeyMap.filter(_._2.size >= 2) foreach {
-      case (TypedDimensionUsage(typedDim, concept, explicitDimMembers), tableKeys) =>
+    dimensionUsageToTableKeyMap.filter(_._2.size >= 2) foreach {
+      case (DimensionUsageIgnoringElr(concept, explicitDimMembers, typedDims), tableKeys) =>
         logger.warning(
-          s"Typed dimension $typedDim used with concept $concept and " +
+          s"Typed dimension(s) ${typedDims.mkString("[", ", ", "]")} used with concept $concept and " +
             s"explicit dimension members ${explicitDimMembers.mkString("[", ", ", "]")} occurs in more than 1 table. " +
             s"Table linkbases:\n\t${tableKeys.map(_.docUri).toSeq.sortBy(_.toString).mkString("\n\t")}")
     }
@@ -221,13 +222,13 @@ object ShowTypedDimensionsInTables {
     logger.info("Ready")
   }
 
-  def findAllTypedDimensionUsagesInTable(
+  def findAllDimensionUsagesInTable(
     table: Table,
     tableTaxo: BasicTableTaxonomy,
     conceptHasHypercubeMap: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]],
     hasHypercubeTypedDimMap: Map[HasHypercubeKey, Set[EName]],
     hasHypercubeExplicitDimMemberMap: Map[HasHypercubeKey, Map[EName, Set[EName]]],
-    xpathEvaluator: XPathEvaluator): Set[TypedDimensionUsage] = {
+    xpathEvaluator: XPathEvaluator): Set[DimensionUsage] = {
 
     val tableId = table.underlyingResource.attributeOption(ENames.IdEName).getOrElse("<no ID>")
 
@@ -247,42 +248,46 @@ object ShowTypedDimensionsInTables {
     val allFoundExplicitDimensionMembersInTable: Map[EName, Set[EName]] =
       findAllExplicitDimensionMembersInTable(table, tableTaxo)(xpathEvaluator)
 
-    val typedDimensionUsages: immutable.IndexedSeq[TypedDimensionUsage] =
+    // TODO Check the dimensions mentioned in the table against those found in the taxonomy (for the given concept).
+
+    val dimensionUsages: immutable.IndexedSeq[DimensionUsage] =
       hasHypercubeMapForTable.toIndexedSeq flatMap {
-        case (concept, hasHypercubes) =>
-          val hasHypercubeKeys = hasHypercubes.map(hh => getKey(hh)).toSet
+        case (concept, hasHypercubesAcrossElrs) =>
+          val hasHypercubesByElr: Map[String, immutable.IndexedSeq[HasHypercubeRelationship]] =
+            hasHypercubesAcrossElrs.filter(_.isAllRelationship).groupBy(_.elr)
 
-          val typedDimsForConceptInTaxo: Set[EName] =
-            hasHypercubeTypedDimMap.filterKeys(hasHypercubeKeys).values.flatten.toSet
+          hasHypercubesByElr.toIndexedSeq flatMap {
+            case (elr, hasHypercubesForElr) =>
+              // For this concept, ELR and the typed dimensions in this ELR, return all DimensionUsage objects,
+              // one DimensionUsage object per mapping of dimensions to members for all explicit dimensions of this ELR.
+              // Here we do not look at the table for the dimensions and members, but only at the taxonomy.
+              // If there is no explicit dimension, no DimensionUsage object is returned.
 
-          val explicitDimMembersForConceptInTaxo: Map[EName, Set[EName]] =
-            combineExplicitDimensionMembers(
-              hasHypercubeExplicitDimMemberMap.filterKeys(hasHypercubeKeys).values.toIndexedSeq)
+              if (hasHypercubesForElr.filter(rel => !rel.closed).nonEmpty) {
+                logger.warning(s"Not all hypercubes are closed for concept $concept. This may compromise the detection of dimension 'conflicts' across tables.")
+              }
 
-          val typedDimsForConceptInTable: Set[EName] =
-            allFoundTypedDimensionsInTable.filter(typedDimsForConceptInTaxo)
+              val hasHypercubeKeysForElr = hasHypercubesForElr.map(hh => getKey(hh)).toSet
 
-          // TODO Warning if allFoundTypedDimensionsInTable.diff(typedDimsForConceptInTaxo).nonEmpty
+              val typedDimsForConceptInTaxo: Set[EName] =
+                hasHypercubeTypedDimMap.filterKeys(hasHypercubeKeysForElr).values.flatten.toSet
 
-          val explicitDimMembersForConceptInTable: Map[EName, Set[EName]] =
-            (allFoundExplicitDimensionMembersInTable.toSeq map {
-              case (dim, members) =>
-                val filteredMembers = members.filter(explicitDimMembersForConceptInTaxo.getOrElse(dim, Set()))
-                (dim -> filteredMembers)
-            }).toMap filter (_._2.nonEmpty)
+              val explicitDimMembersForConceptInTaxo: Map[EName, Set[EName]] =
+                combineExplicitDimensionMembers(
+                  hasHypercubeExplicitDimMemberMap.filterKeys(hasHypercubeKeysForElr).values.toIndexedSeq)
 
-          val explicitDimsForConceptInTable: immutable.IndexedSeq[Map[EName, EName]] =
-            toDimensionMemberMaps(explicitDimMembersForConceptInTable).distinct
+              val explicitDimsForConceptInTaxo: immutable.IndexedSeq[Map[EName, EName]] =
+                toDimensionMemberMaps(explicitDimMembersForConceptInTaxo).distinct
 
-          for {
-            typedDim <- typedDimsForConceptInTable.toIndexedSeq
-            explicitDims <- explicitDimsForConceptInTable
-          } yield {
-            TypedDimensionUsage(typedDim, concept, explicitDims)
+              for {
+                explicitDims <- explicitDimsForConceptInTaxo
+              } yield {
+                DimensionUsage(concept, elr, explicitDims, typedDimsForConceptInTaxo)
+              }
           }
       }
 
-    typedDimensionUsages.toSet
+    dimensionUsages.toSet
   }
 
   private def toDimensionMemberMaps(dimMembers: Map[EName, Set[EName]]): immutable.IndexedSeq[Map[EName, EName]] = {
@@ -342,7 +347,7 @@ object ShowTypedDimensionsInTables {
 
   private def combineExplicitDimensionMembers(dimensionMemberGroups: immutable.IndexedSeq[Map[EName, Set[EName]]]): Map[EName, Set[EName]] = {
     val dimMems: immutable.IndexedSeq[(EName, EName)] =
-      dimensionMemberGroups.toIndexedSeq.flatMap(dimMemMap => dimMemMap.toSeq.flatMap({ case (dim, mems) => mems.map(m => (dim -> m)) }))
+      dimensionMemberGroups.flatMap(dimMemMap => dimMemMap.toSeq.flatMap({ case (dim, mems) => mems.map(m => (dim -> m)) }))
 
     dimMems.groupBy({ case (dim, mem) => dim }).mapValues(grp => grp.map(_._2).toSet)
   }
@@ -513,9 +518,29 @@ object ShowTypedDimensionsInTables {
     HasHypercubeKey(hh.arc.key, hh.primary, hh.hypercube)
   }
 
+  /**
+   * Unique key of a has-hypercube relationship. The key contains the underlying arc, as well as the
+   * ENames of the primary and hypercube. The latter 2 are needed because one arc may represent multiple
+   * relationships.
+   */
   private final case class HasHypercubeKey(arcKey: XmlFragmentKey, primary: EName, hypercube: EName)
 
-  final case class TypedDimensionUsage(typedDim: EName, concept: EName, explicitDimMembers: Map[EName, EName])
+  /**
+   * A concept along with its inherited has-hypercubes as HasHypercubeKey objects, for one dimensional ELR.
+   * All has-hypercube relationships referred to by the passed keys must have the given ELR.
+   * This type is used only for "all" relationships, not for "notAll" relationships.
+   */
+  private final case class HasHypercubeUsage(concept: EName, elr: String, hasHypercubeKeys: Set[HasHypercubeKey])
 
-  final case class TypedDimensionUsageInTable(tableKey: XmlFragmentKey, typedDimensionUsage: TypedDimensionUsage)
+  /**
+   * One possible combination of explicit dimension members and typed dimensions in the hypercube(s) for the given ELR, inherited by the given concept.
+   */
+  final case class DimensionUsage(concept: EName, elr: String, explicitDimMembers: Map[EName, EName], typedDims: Set[EName]) {
+
+    def ignoringElr: DimensionUsageIgnoringElr = DimensionUsageIgnoringElr(concept, explicitDimMembers, typedDims)
+  }
+
+  final case class DimensionUsageIgnoringElr(concept: EName, explicitDimMembers: Map[EName, EName], typedDims: Set[EName])
+
+  final case class DimensionUsageInTable(tableKey: XmlFragmentKey, dimensionUsageIgnoringElr: DimensionUsageIgnoringElr)
 }

@@ -67,7 +67,7 @@ object ShowTypedDimensionsInTablesForMultipleDtses {
         logger.info(s"Running program ShowTypedDimensionsInTables for entrypoint $uri (${idx + 1} of ${entrypointUris.size})")
         logger.info(s"Document cache stats: ${cachingDocBuilder.cache.stats}")
 
-        ShowTypedDimensionsInTables.showTypedDimensionUsageInTables(Set(uri), rootDir, cachingDocBuilder, processor)
+        ShowTypedDimensionsInTables.showDimensionUsageInTables(Set(uri), rootDir, cachingDocBuilder, processor)
     }
 
     logger.info("Ready (for all entrypoints)")
