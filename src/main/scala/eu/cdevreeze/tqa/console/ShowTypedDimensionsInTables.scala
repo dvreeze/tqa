@@ -213,10 +213,12 @@ object ShowTypedDimensionsInTables {
 
     dimensionUsageToTableKeyMap.filter(_._2.size >= 2) foreach {
       case (DimensionUsageIgnoringElr(concept, explicitDimMembers, typedDims), tableKeys) =>
-        logger.warning(
-          s"Typed dimension(s) ${typedDims.mkString("[", ", ", "]")} used with concept $concept and " +
-            s"explicit dimension members ${explicitDimMembers.mkString("[", ", ", "]")} occurs in more than 1 table. " +
-            s"Table linkbases:\n\t${tableKeys.map(_.docUri).toSeq.sortBy(_.toString).mkString("\n\t")}")
+        if (typedDims.nonEmpty) {
+          logger.warning(
+            s"Typed dimension(s) ${typedDims.mkString("[", ", ", "]")} used with concept $concept and " +
+              s"explicit dimension members ${explicitDimMembers.mkString("[", ", ", "]")} occurs in more than 1 table. " +
+              s"Table linkbases:\n\t${tableKeys.map(_.docUri).toSeq.sortBy(_.toString).mkString("\n\t")}")
+        }
     }
 
     logger.info("Ready")
