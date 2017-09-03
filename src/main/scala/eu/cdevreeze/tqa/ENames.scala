@@ -297,6 +297,11 @@ object ENames {
 
   val XfiRootEName = EName(XfiNamespace, "root")
 
+  val CfiImplementationEName = EName(CfiNamespace, "implementation")
+  val CfiInputEName = EName(CfiNamespace, "input")
+  val CfiStepEName = EName(CfiNamespace, "step")
+  val CfiOutputEName = EName(CfiNamespace, "output")
+
   val CfConceptNameEName = EName(CfNamespace, "conceptName")
   val CfConceptPeriodTypeEName = EName(CfNamespace, "conceptPeriodType")
   val CfConceptBalanceEName = EName(CfNamespace, "conceptBalance")

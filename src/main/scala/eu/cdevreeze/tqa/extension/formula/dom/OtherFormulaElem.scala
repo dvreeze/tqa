@@ -656,6 +656,8 @@ sealed abstract class FormulaAspect(underlyingElem: tqa.dom.OtherElem) extends F
 
   /**
    * Returns the aspect value.
+   *
+   * TODO Mind the aspect model!
    */
   def aspect: Aspect
 }
@@ -995,7 +997,7 @@ final class ValueElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormul
 final class PrecisionElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaPrecisionEName)
 
-  def qnameExpr: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -1006,7 +1008,7 @@ final class PrecisionElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFo
 final class DecimalsElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaDecimalsEName)
 
-  def qnameExpr: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }

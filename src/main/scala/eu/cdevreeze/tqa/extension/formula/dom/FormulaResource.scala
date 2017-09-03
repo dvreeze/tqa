@@ -158,10 +158,6 @@ final class Formula(underlyingResource: tqa.dom.NonStandardResource) extends Var
     findAllNonXLinkChildElemsOfType(classTag[FormulaAspectsElem])
   }
 
-  def findAllAspectChildElems: immutable.IndexedSeq[FormulaAspect] = {
-    findAllNonXLinkChildElemsOfType(classTag[FormulaAspect])
-  }
-
   /**
    * Returns the mandatory value attribute as ScopedXPathString.
    * This may fail with an exception if the taxonomy is not schema-valid.
@@ -187,11 +183,11 @@ final class ExistenceAssertion(underlyingResource: tqa.dom.NonStandardResource) 
   requireResolvedName(ENames.EaExistenceAssertionEName)
 
   /**
-   * Returns the mandatory test attribute as ScopedXPathString.
+   * Returns the optional test attribute as optional ScopedXPathString.
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def testExpr: ScopedXPathString = {
-    ScopedXPathString(underlyingResource.attribute(ENames.TestEName), underlyingResource.scope)
+  def testExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.TestEName).map(v => ScopedXPathString(v, underlyingResource.scope))
   }
 }
 
@@ -208,6 +204,8 @@ final class ConsistencyAssertion(val underlyingResource: tqa.dom.NonStandardReso
   def strict: Boolean = {
     DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
   }
+
+  // TODO The following attributes are XPath attributes!
 
   def absoluteAcceptanceRadiusAsStringOption: Option[String] = {
     underlyingResource.attributeOption(ENames.AbsoluteAcceptanceRadiusEName)
@@ -236,7 +234,40 @@ final class Precondition(val underlyingResource: tqa.dom.NonStandardResource) ex
 /**
  * A variable:parameter. Not final, because an instance:instance is also a parameter.
  */
-sealed class Parameter(underlyingResource: tqa.dom.NonStandardResource) extends VariableOrParameter(underlyingResource)
+sealed class Parameter(underlyingResource: tqa.dom.NonStandardResource) extends VariableOrParameter(underlyingResource) {
+
+  /**
+   * Returns the mandatory name attribute as EName.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  final def name: EName = {
+    underlyingResource.attributeAsResolvedQName(ENames.NameEName)
+  }
+
+  /**
+   * Returns the optional select attribute as optional ScopedXPathString.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  final def selectExprOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.SelectEName).map(v => ScopedXPathString(v, underlyingResource.scope))
+  }
+
+  /**
+   * Returns the optional "required" attribute as optional Boolean.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  final def requiredOption: Option[Boolean] = {
+    underlyingResource.attributeOption(ENames.RequiredEName).map(v => DatatypeConverter.parseBoolean(v))
+  }
+
+  /**
+   * Returns the "as" attribute as optional EName.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  final def asOption: Option[EName] = {
+    underlyingResource.attributeAsResolvedQNameOption(ENames.AsEName)
+  }
+}
 
 /**
  * A variable:factVariable.
@@ -281,7 +312,7 @@ final class FactVariable(underlyingResource: tqa.dom.NonStandardResource) extend
  * A variable:generalVariable.
  */
 final class GeneralVariable(underlyingResource: tqa.dom.NonStandardResource) extends Variable(underlyingResource) {
-  requireResolvedName(ENames.VariableFactVariableEName)
+  requireResolvedName(ENames.VariableGeneralVariableEName)
 
   /**
    * Returns the mandatory select attribute as ScopedXPathString.
@@ -347,6 +378,15 @@ final class EqualityDefinition(val underlyingResource: tqa.dom.NonStandardResour
   def testExpr: ScopedXPathString = {
     ScopedXPathString(underlyingResource.attribute(ENames.TestEName), underlyingResource.scope)
   }
+}
+
+/**
+ * A cfi:implementation.
+ */
+final class FunctionImplementation(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+  requireResolvedName(ENames.CfiImplementationEName)
+
+  // TODO Input, step and output child elements.
 }
 
 /**
@@ -519,6 +559,10 @@ sealed abstract class DimensionFilter(underlyingResource: tqa.dom.NonStandardRes
  */
 final class ExplicitDimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends DimensionFilter(underlyingResource) {
   requireResolvedName(ENames.DfExplicitDimensionEName)
+
+  def members: immutable.IndexedSeq[DimensionFilterMember] = {
+    findAllNonXLinkChildElemsOfType(classTag[DimensionFilterMember])
+  }
 }
 
 /**
@@ -1150,6 +1194,7 @@ object FormulaResource {
       case ENames.SevOkEName                      => Some(new OkSeverity(underlyingResource))
       case ENames.SevWarningEName                 => Some(new WarningSeverity(underlyingResource))
       case ENames.SevErrorEName                   => Some(new ErrorSeverity(underlyingResource))
+      case ENames.CfiImplementationEName          => Some(new FunctionImplementation(underlyingResource))
       case en if Namespaces.FormulaFilterNamespaces.contains(en.namespaceUriOption.getOrElse("")) =>
         Filter.opt(underlyingResource)
       case _ => None

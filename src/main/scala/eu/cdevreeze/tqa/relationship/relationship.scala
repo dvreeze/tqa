@@ -27,6 +27,7 @@ import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
 import eu.cdevreeze.tqa.ENames.MsgMessageEName
+import eu.cdevreeze.tqa.ENames.PreferredLabelEName
 import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
 import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
@@ -71,6 +72,8 @@ import javax.xml.bind.DatatypeConverter
  *
  * Each relationship is either a [[eu.cdevreeze.tqa.relationship.StandardRelationship]], a [[eu.cdevreeze.tqa.relationship.NonStandardRelationship]],
  * or an [[eu.cdevreeze.tqa.relationship.UnknownRelationship]].
+ *
+ * TODO gpl:preferredLabel
  *
  * @author Chris de Vreeze
  */
@@ -254,9 +257,14 @@ final class ConceptReferenceRelationship(
  * Presentation relationship. Its underlying arc is of type [[eu.cdevreeze.tqa.dom.PresentationArc]].
  */
 sealed class PresentationRelationship(
-  arc: PresentationArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo)
+    arc: PresentationArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo) {
+
+  final def preferredLabelOption: Option[String] = {
+    arc.attributeOption(PreferredLabelEName)
+  }
+}
 
 /**
  * A [[eu.cdevreeze.tqa.relationship.PresentationRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/parent-child".

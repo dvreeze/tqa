@@ -195,7 +195,7 @@ final class BooleanFilterRelationship(
 
   def booleanFilter: BooleanFilter = resolvedFrom.resolvedElem
 
-  def targetFilter: Filter = resolvedTo.resolvedElem
+  def subFilter: Filter = resolvedTo.resolvedElem
 
   /**
    * Returns the boolean complement attribute of the underlying arc.

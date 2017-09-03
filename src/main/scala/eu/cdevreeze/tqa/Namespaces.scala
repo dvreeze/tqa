@@ -63,6 +63,7 @@ object Namespaces {
   val CrfNamespace = "http://xbrl.org/2010/filter/concept-relation"
   val GplNamespace = "http://xbrl.org/2013/preferred-label"
   val XfiNamespace = "http://www.xbrl.org/2008/function/instance"
+  val CfiNamespace = "http://xbrl.org/2010/custom-function"
 
   val FormulaFilterNamespaces =
     Set(
