@@ -612,8 +612,24 @@ final class XsdSchema private[dom] (
  * The link:linkbase root element of a linkbase. It may be embedded within a taxonomy schema document.
  */
 final class Linkbase private[dom] (
-  backingElem: BackingElemApi,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with TaxonomyRootElem
+    backingElem: BackingElemApi,
+    childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem with TaxonomyRootElem {
+
+  /**
+   * Returns all extended link child elements. Only "taxonomy DOM" extended links are returned.
+   */
+  def findAllExtendedLinks: immutable.IndexedSeq[ExtendedLink] = {
+    findAllChildElemsOfType(classTag[ExtendedLink])
+  }
+
+  def findAllRoleRefs: immutable.IndexedSeq[RoleRef] = {
+    findAllChildElemsOfType(classTag[RoleRef])
+  }
+
+  def findAllArcroleRefs: immutable.IndexedSeq[ArcroleRef] = {
+    findAllChildElemsOfType(classTag[ArcroleRef])
+  }
+}
 
 // The remaining classes. First for schema content, then for linkbase content.
 

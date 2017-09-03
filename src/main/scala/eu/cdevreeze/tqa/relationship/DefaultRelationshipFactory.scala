@@ -40,6 +40,7 @@ import eu.cdevreeze.tqa.ENames.XbrldtTypedDomainRefEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XbrliBalanceEName
 import eu.cdevreeze.tqa.ENames.XbrliPeriodTypeEName
+import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
@@ -111,30 +112,32 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
     taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship] = {
 
-    val fromXLinkLabel = arc.from
-    val toXLinkLabel = arc.to
+    if (config.allowMissingArcrole && arc.attributeOption(XLinkArcroleEName).isEmpty) {
+      immutable.IndexedSeq()
+    } else {
+      val fromXLinkLabel = arc.from
+      val toXLinkLabel = arc.to
 
-    val lenient = config.allowUnresolvedXLinkLabel
+      val fromXLinks = labeledXlinkMap.getOrElse(
+        fromXLinkLabel,
+        if (config.allowUnresolvedXLinkLabel) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $fromXLinkLabel. Document: ${arc.docUri}"))
 
-    val fromXLinks = labeledXlinkMap.getOrElse(
-      fromXLinkLabel,
-      if (lenient) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $fromXLinkLabel. Document: ${arc.docUri}"))
+      val toXLinks = labeledXlinkMap.getOrElse(
+        toXLinkLabel,
+        if (config.allowUnresolvedXLinkLabel) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $toXLinkLabel. Document: ${arc.docUri}"))
 
-    val toXLinks = labeledXlinkMap.getOrElse(
-      toXLinkLabel,
-      if (lenient) immutable.IndexedSeq() else sys.error(s"No locator/resource with XLink label $toXLinkLabel. Document: ${arc.docUri}"))
+      val relationships =
+        for {
+          fromXLink <- fromXLinks.toIndexedSeq
+          resolvedFrom <- optionallyResolve(fromXLink, taxonomyBase).toIndexedSeq
+          toXLink <- toXLinks.toIndexedSeq
+          resolvedTo <- optionallyResolve(toXLink, taxonomyBase).toIndexedSeq
+        } yield {
+          Relationship(arc, resolvedFrom, resolvedTo)
+        }
 
-    val relationships =
-      for {
-        fromXLink <- fromXLinks.toIndexedSeq
-        resolvedFrom <- optionallyResolve(fromXLink, taxonomyBase).toIndexedSeq
-        toXLink <- toXLinks.toIndexedSeq
-        resolvedTo <- optionallyResolve(toXLink, taxonomyBase).toIndexedSeq
-      } yield {
-        Relationship(arc, resolvedFrom, resolvedTo)
-      }
-
-    relationships
+      relationships
+    }
   }
 
   def computeNetworks(

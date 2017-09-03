@@ -109,14 +109,25 @@ object RelationshipFactory {
    * the use of an appropriate arc filter, though.
    *
    * @constructor create a new configuration from the passed boolean flags
-   * @param allowWrongXPointer if true, allows (found) XPointer syntax error in any locator href URI fragment
+   * @param allowSyntaxError if true, allows syntax errors such as XPointer syntax errors or missing arcrole attributes
    * @param allowUnresolvedXLinkLabel if true, allows "dead" arc XLink "from" or "to" attributes within any extended link
    * @param allowUnresolvedLocator if true, allows "dead" locator href URIs within the taxonomy
    */
   final case class Config(
-    val allowWrongXPointer: Boolean,
-    val allowUnresolvedXLinkLabel: Boolean,
-    val allowUnresolvedLocator: Boolean)
+      val allowSyntaxError: Boolean,
+      val allowUnresolvedXLinkLabel: Boolean,
+      val allowUnresolvedLocator: Boolean) {
+
+    /**
+     * Returns true if XPointer syntax errors in any locator href URI fragment are allowed
+     */
+    def allowWrongXPointer: Boolean = allowSyntaxError
+
+    /**
+     * Returns true if missing arcrole attributes in arcs are allowed
+     */
+    def allowMissingArcrole: Boolean = allowSyntaxError
+  }
 
   object Config {
 

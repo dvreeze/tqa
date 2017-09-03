@@ -20,6 +20,12 @@ package eu.cdevreeze.tqa
  * Purely abstract API of XLink content, as used in XBRL. Different type-safe DOM abstractions share
  * this API for XLink content.
  *
+ * See the schema xl-2003-12-31.xsd (and the imported xlink-2003-12-31.xsd). For the relevant part of
+ * the Core XBRL Specification, see http://www.xbrl.org/Specification/XBRL-2.1/REC-2003-12-31/XBRL-2.1-REC-2003-12-31+corrected-errata-2013-02-20.html#_3.5.
+ *
+ * Note that this package contains no linkbase type. Linkbases are only supported by the "taxonomy DOM"
+ * package.
+ *
  * @author Chris de Vreeze
  */
 package object xlink
