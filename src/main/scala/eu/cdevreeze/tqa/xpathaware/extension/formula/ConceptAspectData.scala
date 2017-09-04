@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.xpathaware.extension.table
+package eu.cdevreeze.tqa.xpathaware.extension.formula
 
 import eu.cdevreeze.tqa.extension.formula.dom.ConceptAspect
 import eu.cdevreeze.tqa.xpath.XPathEvaluator

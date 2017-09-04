@@ -52,10 +52,10 @@ import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.tqa.xpath.jaxp.saxon.JaxpXPathEvaluatorFactoryUsingSaxon
 import eu.cdevreeze.tqa.xpath.jaxp.saxon.JaxpXPathEvaluatorUsingSaxon
 import eu.cdevreeze.tqa.xpath.jaxp.saxon.SimpleUriResolver
-import eu.cdevreeze.tqa.xpathaware.extension.table.ConceptAspectData
+import eu.cdevreeze.tqa.xpathaware.extension.formula.ConceptAspectData
+import eu.cdevreeze.tqa.xpathaware.extension.formula.ExplicitDimensionAspectData
 import eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData
 import eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData
-import eu.cdevreeze.tqa.xpathaware.extension.table.ExplicitDimensionAspectData
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
 import javax.xml.xpath.XPathVariableResolver

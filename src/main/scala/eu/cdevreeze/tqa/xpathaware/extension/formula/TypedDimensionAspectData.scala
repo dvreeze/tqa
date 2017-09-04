@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.xpathaware.extension.table
+package eu.cdevreeze.tqa.xpathaware.extension.formula
 
-import eu.cdevreeze.tqa.extension.formula.dom.ExplicitDimensionAspect
+import eu.cdevreeze.tqa.extension.formula.dom.TypedDimensionAspect
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 
 /**
- * Wrapper around an ExplicitDimensionAspect, which can extract the relevant data by evaluating XPath where needed.
+ * Wrapper around an TypedDimensionAspect, which can extract the relevant data by evaluating XPath where needed.
  *
  * @author Chris de Vreeze
  */
-final class ExplicitDimensionAspectData(val dimensionAspect: ExplicitDimensionAspect) {
+final class TypedDimensionAspectData(val dimensionAspect: TypedDimensionAspect) {
 
   /**
    * Returns the dimension as EName, by calling `dimensionAspect.dimension`.
@@ -34,10 +35,10 @@ final class ExplicitDimensionAspectData(val dimensionAspect: ExplicitDimensionAs
 
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
-  def memberOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
-    dimensionAspect.memberElemOption.flatMap(_.qnameElemOption).map(_.qnameValue) orElse {
-      dimensionAspect.memberElemOption.flatMap(_.qnameExpressionElemOption).map(_.qnameExpr) map { expr =>
-        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
+  def valueOption(implicit xpathEvaluator: XPathEvaluator): Option[BackingElemApi] = {
+    dimensionAspect.valueElemOption.map(_.underlyingElem.backingElem.findAllChildElems.head) orElse {
+      dimensionAspect.xpathElemOption.map(_.expr) map { expr =>
+        xpathEvaluator.evaluateAsBackingElem(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
   }
