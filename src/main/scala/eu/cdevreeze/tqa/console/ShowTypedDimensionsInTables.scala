@@ -273,7 +273,7 @@ object ShowTypedDimensionsInTables {
               // For this concept, ELR and the typed dimensions in this ELR, return all DimensionUsage objects,
               // one DimensionUsage object per mapping of dimensions to members for all explicit dimensions of this ELR.
               // At first we do not look at the table for the dimensions and members, but only at the taxonomy.
-              // Next we filter those dimensions and members on those implied by the table.
+              // Next we filter the members for those explicit dimensions participating in the table.
               // If there is no explicit dimension, no DimensionUsage object is returned.
 
               if (hasHypercubesForElr.filter(rel => !rel.closed).nonEmpty) {
@@ -303,20 +303,24 @@ object ShowTypedDimensionsInTables {
                 combineExplicitDimensionMembers(
                   hasHypercubeExplicitDimMemberMap.filterKeys(hasHypercubeKeysForElr).values.toIndexedSeq)
 
-              val explicitDimMembersForConceptInTableAndTaxo: Map[EName, Set[EName]] =
-                (allFoundExplicitDimensionMembersInTable.toSeq map {
+              val explicitDimMembersForConceptInTaxoFilteredByTable: Map[EName, Set[EName]] =
+                (explicitDimMembersForConceptInTaxo.toSeq map {
                   case (dim, members) =>
-                    val filteredMembers = members.filter(explicitDimMembersForConceptInTaxo.getOrElse(dim, Set()))
+                    val membersInTable: Set[EName] = allFoundExplicitDimensionMembersInTable.getOrElse(dim, Set())
+                    val rawFilteredMembersInTable = members.intersect(membersInTable)
+                    val filteredMembers: Set[EName] =
+                      if (rawFilteredMembersInTable.isEmpty) members else rawFilteredMembersInTable
                     (dim -> filteredMembers)
                 }).toMap filter (_._2.nonEmpty)
 
-              val explicitDimsForConceptInTableAndTaxo: immutable.IndexedSeq[Map[EName, EName]] =
-                toDimensionMemberMaps(explicitDimMembersForConceptInTableAndTaxo).distinct
+              val explicitDimsForConceptInTaxoFilteredByTable: immutable.IndexedSeq[Map[EName, EName]] =
+                toDimensionMemberMaps(explicitDimMembersForConceptInTaxoFilteredByTable).distinct
 
               for {
-                explicitDims <- explicitDimsForConceptInTableAndTaxo
+                explicitDims <- explicitDimsForConceptInTaxoFilteredByTable
               } yield {
-                DimensionUsage(concept, elr, explicitDims, typedDimsForConceptInTableAndTaxo)
+                // The taxonomy is leading for the typed dimensions, because some typed dimensions may not participate in the table.
+                DimensionUsage(concept, elr, explicitDims, typedDimsForConceptInTaxo)
               }
           }
       }
