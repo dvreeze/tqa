@@ -46,7 +46,7 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
     val directlyMentionedSources = dimensionRelationshipNode.relationshipSources.map(_.source)
 
     val xpathResultSources =
-      dimensionRelationshipNode.relationshipSourceExpressions.map(_.scopedXPathString) map { expr =>
+      dimensionRelationshipNode.relationshipSourceExpressions.map(_.expr) map { expr =>
         xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
 
@@ -55,7 +55,7 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
 
   def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     dimensionRelationshipNode.linkroleOption.map(_.underlyingElem.text) orElse {
-      dimensionRelationshipNode.linkroleExpressionOption.map(_.scopedXPathString) map { expr =>
+      dimensionRelationshipNode.linkroleExpressionOption.map(_.expr) map { expr =>
         xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
       }
     }
@@ -63,7 +63,7 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
 
   def formulaAxis(implicit xpathEvaluator: XPathEvaluator): DimensionRelationshipNodeFormulaAxis.FormulaAxis = {
     dimensionRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
-      dimensionRelationshipNode.formulaAxisExpressionOption.map(_.scopedXPathString) map { expr =>
+      dimensionRelationshipNode.formulaAxisExpressionOption.map(_.expr) map { expr =>
         val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
 
         DimensionRelationshipNodeFormulaAxis.FormulaAxis.fromString(resultAsString)
@@ -74,7 +74,7 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
   def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
     val resultAsStringOption =
       dimensionRelationshipNode.generationsOption.map(_.underlyingElem.text) orElse {
-        dimensionRelationshipNode.generationsExpressionOption.map(_.scopedXPathString) map { expr =>
+        dimensionRelationshipNode.generationsExpressionOption.map(_.expr) map { expr =>
           xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
         }
       }

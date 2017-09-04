@@ -21,34 +21,55 @@ import eu.cdevreeze.yaidom.core.EName
 /**
  * Aspect (of a fact in an XBRL instance).
  *
+ * See http://www.xbrl.org/specification/variables/REC-2009-06-22/variables-REC-2009-06-22.html#sec-aspects.
+ *
  * @author Chris de Vreeze
  */
 sealed trait Aspect
 
 object Aspect {
 
-  case object ConceptAspect extends Aspect
+  // First the required aspects, for both aspect models (dimensional and non-dimensional)
 
-  case object PeriodAspect extends Aspect
+  case object LocationAspect extends Aspect
+
+  case object ConceptAspect extends Aspect
 
   case object EntityIdentifierAspect extends Aspect
 
+  case object PeriodAspect extends Aspect
+
   case object UnitAspect extends Aspect
 
+  // Next the aspects that belong to one of the aspect models
+
+  /**
+   * Open context component aspect, so a segment or a scenario.
+   */
   sealed trait OccAspect extends Aspect
 
-  case object SegmentOccAspect extends OccAspect
+  /**
+   * NonXDTSegmentAspect, in the dimensional aspect model
+   */
+  case object NonXDTSegmentAspect extends OccAspect
 
-  case object ScenarioOccAspect extends OccAspect
+  /**
+   * CompleteSegmentAspect, in the non-dimensional aspect model
+   */
+  case object CompleteSegmentAspect extends OccAspect
 
+  /**
+   * NonXDTScenarioAspect, in the dimensional aspect model
+   */
+  case object NonXDTScenarioAspect extends OccAspect
+
+  /**
+   * CompleteScenarioAspect, in the non-dimensional aspect model
+   */
+  case object CompleteScenarioAspect extends OccAspect
+
+  /**
+   * A dimensional aspect (for either an explicit or typed dimension), in the dimensional aspect model
+   */
   final case class DimensionAspect(dimension: EName) extends Aspect
-
-  val WellKnownAspects: Set[Aspect] =
-    Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, SegmentOccAspect, ScenarioOccAspect)
-
-  val RequiredItemAspects: Set[Aspect] =
-    Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect)
-
-  val RequiredNumericItemAspects: Set[Aspect] =
-    RequiredItemAspects.union(Set(UnitAspect))
 }

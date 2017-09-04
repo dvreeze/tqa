@@ -97,9 +97,11 @@ final class TableFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends Ta
   /**
    * Returns the boolean complement attribute.
    * This may fail with an exception if the taxonomy is not schema-valid.
+   *
+   * TODO Is the complement attribute mandatory? In that case, why has a TableFilterRelationship a default complement value (false)?
    */
   def complement: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingArc.attribute(ENames.ComplementEName))
+    underlyingArc.attributeOption(ENames.ComplementEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
   }
 }
 

@@ -24,6 +24,7 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.Aspect
+import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.UriConverters
@@ -207,7 +208,7 @@ object ShowAspectsInTables {
 
     logger.info(s"Aspects in table with ID $tableId\n\t ${aspectsInTable.toSeq.sortBy(_.toString).mkString(", ")}")
 
-    Aspect.RequiredItemAspects.diff(Set(Aspect.EntityIdentifierAspect)).diff(aspectsInTable) foreach { aspect =>
+    AspectModel.DimensionalAspectModel.requiredItemAspects.diff(Set(Aspect.EntityIdentifierAspect)).diff(aspectsInTable) foreach { aspect =>
       logger.warning(s"Table with ID $tableId misses required item aspect (other than EntityIdentifierAspect): $aspect")
     }
 
@@ -431,7 +432,7 @@ object ShowAspectsInTables {
   def findAllAspects(node: DefinitionNode): Set[Aspect] = {
     node match {
       case node: RuleNode =>
-        node.allAspects.map(_.aspect).toSet
+        node.allAspects.map(_.aspect(AspectModel.DimensionalAspectModel)).toSet
       case node: ConceptRelationshipNode =>
         Set(Aspect.ConceptAspect)
       case node: DimensionRelationshipNode =>

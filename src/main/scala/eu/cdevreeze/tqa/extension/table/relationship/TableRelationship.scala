@@ -26,6 +26,9 @@ import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.Use
+import eu.cdevreeze.tqa.extension.formula.dom.Filter
+import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
+import eu.cdevreeze.tqa.extension.formula.dom.Parameter
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.AspectNodeFilterArc
 import eu.cdevreeze.tqa.extension.table.dom.BreakdownTreeArc
@@ -33,6 +36,7 @@ import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNodeSubtreeArc
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.dom.TableArc
+import eu.cdevreeze.tqa.extension.table.dom.TableAxis
 import eu.cdevreeze.tqa.extension.table.dom.TableBreakdown
 import eu.cdevreeze.tqa.extension.table.dom.TableBreakdownArc
 import eu.cdevreeze.tqa.extension.table.dom.TableFilterArc
@@ -42,6 +46,7 @@ import eu.cdevreeze.tqa.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource
 import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.tqa.xlink.XLinkResource
+import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Path
 
 /**
@@ -121,6 +126,11 @@ final class TableBreakdownRelationship(
   def table: Table = resolvedFrom.resolvedElem
 
   def breakdown: TableBreakdown = resolvedTo.resolvedElem
+
+  /**
+   * Returns the axis attribute of the underlying arc.
+   */
+  def axis: TableAxis = arc.axis
 }
 
 /**
@@ -155,54 +165,65 @@ final class DefinitionNodeSubtreeRelationship(
 
 /**
  * A table-filter relationship.
- *
- * TODO Filter in formula DOM.
  */
 final class TableFilterRelationship(
     arc: TableFilterArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
-    resolvedTo: ResolvedLocatorOrResource[_ <: NonStandardResource]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-filter")
 
   def table: Table = resolvedFrom.resolvedElem
 
-  def filter: NonStandardResource = resolvedTo.resolvedElem
+  def filter: Filter = resolvedTo.resolvedElem
+
+  /**
+   * Returns the boolean complement attribute of the underlying arc.
+   */
+  def complement: Boolean = arc.complement
 }
 
 /**
  * A table-parameter relationship.
- *
- * TODO Parameter in formula DOM.
  */
 final class TableParameterRelationship(
     arc: TableParameterArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
-    resolvedTo: ResolvedLocatorOrResource[_ <: NonStandardResource]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Parameter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-parameter")
 
   def table: Table = resolvedFrom.resolvedElem
 
-  def parameter: NonStandardResource = resolvedTo.resolvedElem
+  def parameter: Parameter = resolvedTo.resolvedElem
+
+  /**
+   * Returns the name as EName. The default namespace of the arc is not used to resolve the QName.
+   */
+  def name: EName = arc.name
 }
 
 /**
  * An aspect-node-filter relationship.
- *
- * TODO Filter in formula DOM.
  */
 final class AspectNodeFilterRelationship(
     arc: AspectNodeFilterArc,
     resolvedFrom: ResolvedLocatorOrResource[_ <: AspectNode],
-    resolvedTo: ResolvedLocatorOrResource[_ <: NonStandardResource]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/aspect-node-filter")
 
   def aspectNode: AspectNode = resolvedFrom.resolvedElem
 
-  def filter: NonStandardResource = resolvedTo.resolvedElem
+  def filter: Filter = resolvedTo.resolvedElem
+
+  /**
+   * Returns the boolean complement attribute of the underlying arc.
+   */
+  def complement: Boolean = arc.complement
 }
+
+// Companion objects
 
 object TableRelationship {
 
@@ -240,15 +261,21 @@ object TableRelationship {
       val tableArcOption: Option[TableArc] = toOptionalTableArc(underlyingRelationship.arc)
 
       tableArcOption flatMap { tableArc =>
+        // The resolvedFrom is expected to be a TableResource
         val resolvedFrom =
           ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](
             underlyingRelationship.resolvedFrom,
-            { e => toOptionalTableResource(e).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource]) })
+            { e =>
+              toOptionalTableResource(e).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource])
+            })
 
+        // The resolvedTo is expected to be a TableResource or a FormulaResource (Filter or Parameter)
         val resolvedTo =
           ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](
             underlyingRelationship.resolvedTo,
-            { e => toOptionalTableResource(e).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource]) })
+            { e =>
+              toOptionalTableResource(e).orElse(toOptionalFormulaResource(e)).getOrElse(e.asInstanceOf[AnyTaxonomyElem with XLinkResource])
+            })
 
         opt(tableArc, resolvedFrom, resolvedTo)
       }
@@ -265,6 +292,13 @@ object TableRelationship {
   private def toOptionalTableResource(taxoElem: AnyTaxonomyElem): Option[TableResource] = {
     taxoElem match {
       case res: NonStandardResource => TableResource.opt(res)
+      case _                        => None
+    }
+  }
+
+  private def toOptionalFormulaResource(taxoElem: AnyTaxonomyElem): Option[FormulaResource] = {
+    taxoElem match {
+      case res: NonStandardResource => FormulaResource.opt(res)
       case _                        => None
     }
   }
@@ -363,8 +397,8 @@ object TableFilterRelationship {
 
     if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
       (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
-        case ("http://xbrl.org/arcrole/2014/table-filter", arc: TableFilterArc, source: Table, target: NonStandardResource) =>
-          Some(new TableFilterRelationship(arc, unsafeCastResource(resolvedFrom, classTag[Table]), unsafeCastResource(resolvedTo, classTag[NonStandardResource])))
+        case ("http://xbrl.org/arcrole/2014/table-filter", arc: TableFilterArc, source: Table, target: Filter) =>
+          Some(new TableFilterRelationship(arc, unsafeCastResource(resolvedFrom, classTag[Table]), unsafeCastResource(resolvedTo, classTag[Filter])))
         case (_, _, _, _) =>
           None
       }
@@ -389,8 +423,8 @@ object TableParameterRelationship {
 
     if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
       (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
-        case ("http://xbrl.org/arcrole/2014/table-parameter", arc: TableParameterArc, source: Table, target: NonStandardResource) =>
-          Some(new TableParameterRelationship(arc, unsafeCastResource(resolvedFrom, classTag[Table]), unsafeCastResource(resolvedTo, classTag[NonStandardResource])))
+        case ("http://xbrl.org/arcrole/2014/table-parameter", arc: TableParameterArc, source: Table, target: Parameter) =>
+          Some(new TableParameterRelationship(arc, unsafeCastResource(resolvedFrom, classTag[Table]), unsafeCastResource(resolvedTo, classTag[Parameter])))
         case (_, _, _, _) =>
           None
       }
@@ -415,8 +449,8 @@ object AspectNodeFilterRelationship {
 
     if (arc.backingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
       (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
-        case ("http://xbrl.org/arcrole/2014/aspect-node-filter", arc: AspectNodeFilterArc, source: AspectNode, target: NonStandardResource) =>
-          Some(new AspectNodeFilterRelationship(arc, unsafeCastResource(resolvedFrom, classTag[AspectNode]), unsafeCastResource(resolvedTo, classTag[NonStandardResource])))
+        case ("http://xbrl.org/arcrole/2014/aspect-node-filter", arc: AspectNodeFilterArc, source: AspectNode, target: Filter) =>
+          Some(new AspectNodeFilterRelationship(arc, unsafeCastResource(resolvedFrom, classTag[AspectNode]), unsafeCastResource(resolvedTo, classTag[Filter])))
         case (_, _, _, _) =>
           None
       }

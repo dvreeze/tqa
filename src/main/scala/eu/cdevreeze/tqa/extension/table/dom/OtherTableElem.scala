@@ -69,6 +69,9 @@ sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
  */
 sealed abstract class AspectSpec(val underlyingElem: tqa.dom.OtherElem) extends OtherTableElem {
 
+  /**
+   * Returns the aspect, using the dimensional aspect model.
+   */
   def aspect: Aspect
 }
 
@@ -179,7 +182,7 @@ final class RelationshipSourceExpression(val underlyingElem: tqa.dom.OtherElem) 
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -202,7 +205,7 @@ final class LinkroleExpression(val underlyingElem: tqa.dom.OtherElem) extends Ot
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -225,7 +228,7 @@ final class ArcroleExpression(val underlyingElem: tqa.dom.OtherElem) extends Oth
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -253,7 +256,7 @@ final class ConceptRelationshipNodeFormulaAxisExpression(val underlyingElem: tqa
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -281,7 +284,7 @@ final class DimensionRelationshipNodeFormulaAxisExpression(val underlyingElem: t
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -307,7 +310,7 @@ final class GenerationsExpression(val underlyingElem: tqa.dom.OtherElem) extends
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -333,7 +336,7 @@ final class LinknameExpression(val underlyingElem: tqa.dom.OtherElem) extends Ot
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }
@@ -359,7 +362,7 @@ final class ArcnameExpression(val underlyingElem: tqa.dom.OtherElem) extends Oth
   /**
    * Returns the value as ScopedXPathString. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def scopedXPathString: ScopedXPathString = {
+  def expr: ScopedXPathString = {
     ScopedXPathString(underlyingElem.text, underlyingElem.scope)
   }
 }

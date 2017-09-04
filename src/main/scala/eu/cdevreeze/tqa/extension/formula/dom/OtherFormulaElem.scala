@@ -22,6 +22,7 @@ import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.Aspect
+import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
@@ -655,11 +656,9 @@ sealed abstract class FormulaAspect(underlyingElem: tqa.dom.OtherElem) extends F
   }
 
   /**
-   * Returns the aspect value.
-   *
-   * TODO Mind the aspect model!
+   * Returns the aspect value, depending on the aspect model used.
    */
-  def aspect: Aspect
+  def aspect(aspectModel: AspectModel): Aspect
 }
 
 /**
@@ -668,7 +667,7 @@ sealed abstract class FormulaAspect(underlyingElem: tqa.dom.OtherElem) extends F
 final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaConceptEName)
 
-  def aspect: Aspect = Aspect.ConceptAspect
+  def aspect(aspectModel: AspectModel): Aspect = Aspect.ConceptAspect
 
   def qnameElemOption: Option[QNameElem] = {
     findAllNonXLinkChildElemsOfType(classTag[QNameElem]).headOption
@@ -685,7 +684,7 @@ final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspe
 final class EntityIdentifierAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaEntityIdentifierEName)
 
-  def aspect: Aspect = Aspect.EntityIdentifierAspect
+  def aspect(aspectModel: AspectModel): Aspect = Aspect.EntityIdentifierAspect
 
   def schemeExprOption: Option[ScopedXPathString] = {
     underlyingElem.attributeOption(ENames.SchemeEName).map(v => ScopedXPathString(v, underlyingElem.scope))
@@ -702,7 +701,7 @@ final class EntityIdentifierAspect(underlyingElem: tqa.dom.OtherElem) extends Fo
 final class PeriodAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaPeriodEName)
 
-  def aspect: Aspect = Aspect.PeriodAspect
+  def aspect(aspectModel: AspectModel): Aspect = Aspect.PeriodAspect
 
   def foreverElemOption: Option[ForeverElem] = {
     findAllNonXLinkChildElemsOfType(classTag[ForeverElem]).headOption
@@ -727,7 +726,7 @@ final class PeriodAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspec
 final class UnitAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaUnitEName)
 
-  def aspect: Aspect = Aspect.UnitAspect
+  def aspect(aspectModel: AspectModel): Aspect = Aspect.UnitAspect
 
   def multiplyByElems: immutable.IndexedSeq[MultiplyByElem] = {
     findAllNonXLinkChildElemsOfType(classTag[MultiplyByElem])
@@ -750,9 +749,11 @@ final class UnitAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(
  */
 sealed abstract class OccAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
 
-  final def aspect: Aspect.OccAspect = occ match {
-    case Occ.Segment  => Aspect.SegmentOccAspect
-    case Occ.Scenario => Aspect.ScenarioOccAspect
+  final def aspect(aspectModel: AspectModel): Aspect.OccAspect = (occ, aspectModel) match {
+    case (Occ.Segment, AspectModel.DimensionalAspectModel)     => Aspect.NonXDTSegmentAspect
+    case (Occ.Segment, AspectModel.NonDimensionalAspectModel)  => Aspect.CompleteSegmentAspect
+    case (Occ.Scenario, AspectModel.DimensionalAspectModel)    => Aspect.NonXDTScenarioAspect
+    case (Occ.Scenario, AspectModel.NonDimensionalAspectModel) => Aspect.CompleteScenarioAspect
   }
 
   /**
@@ -793,7 +794,13 @@ final class OccXpathAspect(underlyingElem: tqa.dom.OtherElem) extends OccAspect(
  */
 sealed abstract class DimensionAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
 
-  final def aspect: Aspect.DimensionAspect = Aspect.DimensionAspect(dimension)
+  final def aspect(aspectModel: AspectModel): Aspect.DimensionAspect = {
+    require(
+      aspectModel == AspectModel.DimensionalAspectModel,
+      s"Only the dimensional aspect model supports dimension aspects")
+
+    Aspect.DimensionAspect(dimension)
+  }
 
   /**
    * Returns the dimension attribute as EName. This may fail with an exception if the taxonomy is not schema-valid.
