@@ -47,10 +47,10 @@ object AspectModel {
   case object NonDimensionalAspectModel extends AspectModel {
 
     val wellKnownAspects: Set[Aspect] =
-      Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, CompleteSegmentAspect, CompleteScenarioAspect)
+      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, CompleteSegmentAspect, CompleteScenarioAspect)
 
     val requiredItemAspects: Set[Aspect] =
-      Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect)
+      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect)
 
     val requiredNumericItemAspects: Set[Aspect] =
       requiredItemAspects.union(Set(UnitAspect))
@@ -59,10 +59,10 @@ object AspectModel {
   case object DimensionalAspectModel extends AspectModel {
 
     val wellKnownAspects: Set[Aspect] =
-      Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, NonXDTSegmentAspect, NonXDTScenarioAspect)
+      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, NonXDTSegmentAspect, NonXDTScenarioAspect)
 
     val requiredItemAspects: Set[Aspect] =
-      Set(ConceptAspect, PeriodAspect, EntityIdentifierAspect)
+      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect)
 
     val requiredNumericItemAspects: Set[Aspect] =
       requiredItemAspects.union(Set(UnitAspect))
