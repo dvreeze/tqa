@@ -287,9 +287,6 @@ object ShowTypedDimensionsInTables {
               val typedDimsForConceptInTaxo: Set[EName] =
                 hasHypercubeTypedDimMap.filterKeys(hasHypercubeKeysForElr).values.flatten.toSet
 
-              val typedDimsForConceptInTableAndTaxo: Set[EName] =
-                allFoundTypedDimensionsInTable.filter(typedDimsForConceptInTaxo)
-
               if (allFoundTypedDimensionsInTable.diff(typedDimsForConceptInTaxo).nonEmpty) {
                 // Only info, not a warning, because we process one specific ELR here.
                 logger.info(
