@@ -244,11 +244,21 @@ object ShowTypedDimensionsInTables {
       conceptHasHypercubeMap.filterKeys(conceptsInTable)
 
     // Dimensions (and members) found in the tables, not limited to certain concepts
+    // If one of these sets is empty (if no dimensions participate in the table), this affects the processing below
+    // in the DimensionUsage objects returned.
 
     val allFoundTypedDimensionsInTable: Set[EName] = findAllTypedDimensionsInTable(table, tableTaxo)
 
+    if (allFoundTypedDimensionsInTable.isEmpty) {
+      logger.info(s"No typed dimensions participate in table $tableId")
+    }
+
     val allFoundExplicitDimensionMembersInTable: Map[EName, Set[EName]] =
       findAllExplicitDimensionMembersInTable(table, tableTaxo)(xpathEvaluator)
+
+    if (allFoundExplicitDimensionMembersInTable.isEmpty) {
+      logger.info(s"No explicit dimensions participate in table $tableId, or no members are specified for a dimension")
+    }
 
     // TODO Check the dimensions mentioned in the table against those found in the taxonomy (for the given concept).
 
@@ -262,29 +272,51 @@ object ShowTypedDimensionsInTables {
             case (elr, hasHypercubesForElr) =>
               // For this concept, ELR and the typed dimensions in this ELR, return all DimensionUsage objects,
               // one DimensionUsage object per mapping of dimensions to members for all explicit dimensions of this ELR.
-              // Here we do not look at the table for the dimensions and members, but only at the taxonomy.
+              // At first we do not look at the table for the dimensions and members, but only at the taxonomy.
+              // Next we filter those dimensions and members on those implied by the table.
               // If there is no explicit dimension, no DimensionUsage object is returned.
 
               if (hasHypercubesForElr.filter(rel => !rel.closed).nonEmpty) {
-                logger.warning(s"Not all hypercubes are closed for concept $concept. This may compromise the detection of dimension 'conflicts' across tables.")
+                logger.warning(s"Not all hypercubes are closed for concept $concept (dim. ELR $elr). This may compromise the detection of dimension 'conflicts' across tables.")
               }
 
               val hasHypercubeKeysForElr = hasHypercubesForElr.map(hh => getKey(hh)).toSet
 
+              // Typed dimensions
+
               val typedDimsForConceptInTaxo: Set[EName] =
                 hasHypercubeTypedDimMap.filterKeys(hasHypercubeKeysForElr).values.flatten.toSet
+
+              val typedDimsForConceptInTableAndTaxo: Set[EName] =
+                allFoundTypedDimensionsInTable.filter(typedDimsForConceptInTaxo)
+
+              if (allFoundTypedDimensionsInTable.diff(typedDimsForConceptInTaxo).nonEmpty) {
+                // Only info, not a warning, because we process one specific ELR here.
+                logger.info(
+                  s"Typed dimensions (participating in table $tableId) not found in the taxonomy for concept $concept (dim. ELR: $elr): " +
+                    allFoundTypedDimensionsInTable.diff(typedDimsForConceptInTaxo).mkString(", "))
+              }
+
+              // Explicit dimensions and their members
 
               val explicitDimMembersForConceptInTaxo: Map[EName, Set[EName]] =
                 combineExplicitDimensionMembers(
                   hasHypercubeExplicitDimMemberMap.filterKeys(hasHypercubeKeysForElr).values.toIndexedSeq)
 
-              val explicitDimsForConceptInTaxo: immutable.IndexedSeq[Map[EName, EName]] =
-                toDimensionMemberMaps(explicitDimMembersForConceptInTaxo).distinct
+              val explicitDimMembersForConceptInTableAndTaxo: Map[EName, Set[EName]] =
+                (allFoundExplicitDimensionMembersInTable.toSeq map {
+                  case (dim, members) =>
+                    val filteredMembers = members.filter(explicitDimMembersForConceptInTaxo.getOrElse(dim, Set()))
+                    (dim -> filteredMembers)
+                }).toMap filter (_._2.nonEmpty)
+
+              val explicitDimsForConceptInTableAndTaxo: immutable.IndexedSeq[Map[EName, EName]] =
+                toDimensionMemberMaps(explicitDimMembersForConceptInTableAndTaxo).distinct
 
               for {
-                explicitDims <- explicitDimsForConceptInTaxo
+                explicitDims <- explicitDimsForConceptInTableAndTaxo
               } yield {
-                DimensionUsage(concept, elr, explicitDims, typedDimsForConceptInTaxo)
+                DimensionUsage(concept, elr, explicitDims, typedDimsForConceptInTableAndTaxo)
               }
           }
       }
