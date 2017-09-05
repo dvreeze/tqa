@@ -5,9 +5,9 @@
 // This script merges at most extension schemas into one, in NT extension taxonomies (obeying the NT extension best practices).
 // It is assumed that there are either 1 or 2 extension schemas beforehand, and that only global element declarations must be moved.
 
-// Taking TQA version 0.4.6
+// Taking TQA version 0.4.7-M1
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.4.6`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.4.7-M1`
 
 // Imports that (must) remain available after this initialization script
 
