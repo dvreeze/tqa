@@ -82,6 +82,58 @@ final class FunctionInput(underlyingElem: tqa.dom.OtherElem) extends FunctionCon
 }
 
 /**
+ * A child element of a cfi:implementation.
+ */
+sealed abstract class FunctionImplementationContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+
+/**
+ * A cfi:input child element of a cfi:implementation.
+ */
+final class FunctionImplementationInput(underlyingElem: tqa.dom.OtherElem) extends FunctionImplementationContentElem(underlyingElem) {
+  requireResolvedName(ENames.CfiInputEName)
+
+  /**
+   * Returns the mandatory name attribute as EName. The default namespace is not used to resolve the QName.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def name: EName = {
+    val qn = underlyingElem.attributeAsQName(ENames.NameEName)
+    underlyingElem.scope.withoutDefaultNamespace.resolveQNameOption(qn).get
+  }
+}
+
+/**
+ * A cfi:step child element of a cfi:implementation.
+ */
+final class FunctionImplementationStep(underlyingElem: tqa.dom.OtherElem) extends FunctionImplementationContentElem(underlyingElem) {
+  requireResolvedName(ENames.CfiStepEName)
+
+  /**
+   * Returns the mandatory name attribute as EName. The default namespace is not used to resolve the QName.
+   * This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def name: EName = {
+    val qn = underlyingElem.attributeAsQName(ENames.NameEName)
+    underlyingElem.scope.withoutDefaultNamespace.resolveQNameOption(qn).get
+  }
+
+  def expr: ScopedXPathString = {
+    ScopedXPathString(underlyingElem.text, underlyingElem.scope)
+  }
+}
+
+/**
+ * A cfi:output child element of a cfi:implementation.
+ */
+final class FunctionImplementationOutput(underlyingElem: tqa.dom.OtherElem) extends FunctionImplementationContentElem(underlyingElem) {
+  requireResolvedName(ENames.CfiOutputEName)
+
+  def expr: ScopedXPathString = {
+    ScopedXPathString(underlyingElem.text, underlyingElem.scope)
+  }
+}
+
+/**
  * A descendant element of a concept filter.
  */
 sealed abstract class ConceptFilterContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
@@ -400,8 +452,9 @@ sealed abstract class AspectCoverFilterContentElem(val underlyingElem: tqa.dom.O
 final class AspectCoverFilterAspect(underlyingElem: tqa.dom.OtherElem) extends AspectCoverFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.AcfAspectEName)
 
-  // TODO Parse Aspect
-  def aspectStringValue: String = underlyingElem.text
+  def aspectValue: AspectCoverFilterAspect.Aspect = {
+    AspectCoverFilterAspect.Aspect.fromString(underlyingElem.text)
+  }
 }
 
 /**
@@ -470,7 +523,9 @@ sealed abstract class ConceptRelationFilterContentElem(val underlyingElem: tqa.d
 final class ConceptRelationFilterAxis(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfAxisEName)
 
-  // TODO def axisValue, returning type-safe value
+  def axisValue: ConceptRelationFilterAxis.Axis = {
+    ConceptRelationFilterAxis.Axis.fromString(underlyingElem.text)
+  }
 }
 
 /**
@@ -1063,6 +1118,13 @@ object OtherFormulaElem {
         AspectCoverFilterContentElem.opt(underlyingElem)
       case Namespaces.CrfNamespace =>
         ConceptRelationFilterContentElem.opt(underlyingElem)
+      case Namespaces.CfiNamespace =>
+        underlyingElem.resolvedName match {
+          case ENames.CfiInputEName  => Some(new FunctionImplementationInput(underlyingElem))
+          case ENames.CfiStepEName   => Some(new FunctionImplementationStep(underlyingElem))
+          case ENames.CfiOutputEName => Some(new FunctionImplementationOutput(underlyingElem))
+          case _                     => None
+        }
       case _ =>
         None
     }
@@ -1226,6 +1288,106 @@ object ConceptRelationFilterContentElem {
       }
     } else {
       None
+    }
+  }
+}
+
+object AspectCoverFilterAspect {
+
+  sealed trait Aspect {
+
+    final override def toString: String = this match {
+      case All              => "all"
+      case Concept          => "concept"
+      case EntityIdentifier => "entity-identifier"
+      case Location         => "location"
+      case Period           => "period"
+      case UnitAspect       => "unit"
+      case CompleteSegment  => "complete-segment"
+      case CompleteScenario => "complete-scenario"
+      case NonXDTSegment    => "non-XDT-segment"
+      case NonXDTScenario   => "non-XDT-scenario"
+      case Dimensions       => "dimensions"
+    }
+  }
+
+  case object All extends Aspect
+  case object Concept extends Aspect
+  case object EntityIdentifier extends Aspect
+  case object Location extends Aspect
+  case object Period extends Aspect
+  case object UnitAspect extends Aspect
+  case object CompleteSegment extends Aspect
+  case object CompleteScenario extends Aspect
+  case object NonXDTSegment extends Aspect
+  case object NonXDTScenario extends Aspect
+  case object Dimensions extends Aspect
+
+  object Aspect {
+
+    def fromString(s: String): Aspect = s match {
+      case "all"               => All
+      case "concept"           => Concept
+      case "entity-identifier" => EntityIdentifier
+      case "location"          => Location
+      case "period"            => Period
+      case "unit"              => UnitAspect
+      case "complete-segment"  => CompleteSegment
+      case "complete-scenario" => CompleteScenario
+      case "non-XDT-segment"   => NonXDTSegment
+      case "non-XDT-scenario"  => NonXDTScenario
+      case "dimensions"        => Dimensions
+      case _                   => sys.error(s"Not a valid aspect: $s")
+    }
+  }
+}
+
+object ConceptRelationFilterAxis {
+
+  sealed trait Axis {
+
+    final override def toString: String = this match {
+      case ChildAxis               => "child"
+      case ChildOrSelfAxis         => "child-or-self"
+      case DescendantAxis          => "descendant"
+      case DescendantOrSelfAxis    => "descendant-or-self"
+      case ParentAxis              => "parent"
+      case ParentOrSelfAxis        => "parent-or-self"
+      case AncestorAxis            => "ancestor"
+      case AncestorOrSelfAxis      => "ancestor-or-self"
+      case SiblingAxis             => "sibling"
+      case SiblingOrSelfAxis       => "sibling-or-self"
+      case SiblingOrDescendantAxis => "sibling-or-descendant"
+    }
+  }
+
+  case object ChildAxis extends Axis
+  case object ChildOrSelfAxis extends Axis
+  case object DescendantAxis extends Axis
+  case object DescendantOrSelfAxis extends Axis
+  case object ParentAxis extends Axis
+  case object ParentOrSelfAxis extends Axis
+  case object AncestorAxis extends Axis
+  case object AncestorOrSelfAxis extends Axis
+  case object SiblingAxis extends Axis
+  case object SiblingOrSelfAxis extends Axis
+  case object SiblingOrDescendantAxis extends Axis
+
+  object Axis {
+
+    def fromString(s: String): Axis = s match {
+      case "child"                 => ChildAxis
+      case "child-or-self"         => ChildOrSelfAxis
+      case "descendant"            => DescendantAxis
+      case "descendant-or-self"    => DescendantOrSelfAxis
+      case "parent"                => ParentAxis
+      case "parent-or-self"        => ParentOrSelfAxis
+      case "ancestor"              => AncestorAxis
+      case "ancestor-or-self"      => AncestorOrSelfAxis
+      case "sibling"               => SiblingAxis
+      case "sibling-or-self"       => SiblingOrSelfAxis
+      case "sibling-or-descendant" => SiblingOrDescendantAxis
+      case _                       => sys.error(s"Not a valid axis: $s")
     }
   }
 }

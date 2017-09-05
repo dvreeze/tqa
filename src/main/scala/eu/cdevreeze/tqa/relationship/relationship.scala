@@ -21,6 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 import scala.reflect.classTag
 
+import eu.cdevreeze.tqa.ENames.GplPreferredLabelEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
 import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
@@ -72,8 +73,6 @@ import javax.xml.bind.DatatypeConverter
  *
  * Each relationship is either a [[eu.cdevreeze.tqa.relationship.StandardRelationship]], a [[eu.cdevreeze.tqa.relationship.NonStandardRelationship]],
  * or an [[eu.cdevreeze.tqa.relationship.UnknownRelationship]].
- *
- * TODO gpl:preferredLabel
  *
  * @author Chris de Vreeze
  */
@@ -147,9 +146,17 @@ sealed abstract class StandardRelationship(
  * Non-standard relationship. Typically a generic relationship.
  */
 sealed abstract class NonStandardRelationship(
-  arc: NonStandardArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo)
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo) {
+
+  /**
+   * Returns the optional gpl:preferredLabel attribute on the underlying arc.
+   */
+  def genericPreferredLabelOption: Option[String] = {
+    arc.attributeOption(GplPreferredLabelEName)
+  }
+}
 
 /**
  * Unknown relationship, so a relationship that is neither a standard nor a non-standard relationship. It may be
@@ -202,6 +209,13 @@ sealed abstract class InterConceptRelationship(
    */
   def effectiveTargetBaseSetKey: BaseSetKey = {
     this.baseSetKey.ensuring(_.extLinkRole == effectiveTargetRole)
+  }
+
+  /**
+   * Returns the optional gpl:preferredLabel attribute on the underlying arc.
+   */
+  def genericPreferredLabelOption: Option[String] = {
+    arc.attributeOption(GplPreferredLabelEName)
   }
 }
 
@@ -261,6 +275,9 @@ sealed class PresentationRelationship(
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
     resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo) {
 
+  /**
+   * Returns the optional preferredLabel attribute on the underlying arc.
+   */
   final def preferredLabelOption: Option[String] = {
     arc.attributeOption(PreferredLabelEName)
   }

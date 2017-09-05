@@ -205,14 +205,14 @@ final class ConsistencyAssertion(val underlyingResource: tqa.dom.NonStandardReso
     DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
   }
 
-  // TODO The following attributes are XPath attributes!
-
-  def absoluteAcceptanceRadiusAsStringOption: Option[String] = {
-    underlyingResource.attributeOption(ENames.AbsoluteAcceptanceRadiusEName)
+  def absoluteAcceptanceRadiusOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.AbsoluteAcceptanceRadiusEName).
+      map(v => ScopedXPathString(v, underlyingResource.scope))
   }
 
-  def proportionalAcceptanceRadiusAsStringOption: Option[String] = {
-    underlyingResource.attributeOption(ENames.ProportionalAcceptanceRadiusEName)
+  def proportionalAcceptanceRadiusOption: Option[ScopedXPathString] = {
+    underlyingResource.attributeOption(ENames.ProportionalAcceptanceRadiusEName).
+      map(v => ScopedXPathString(v, underlyingResource.scope))
   }
 }
 
@@ -386,7 +386,17 @@ final class EqualityDefinition(val underlyingResource: tqa.dom.NonStandardResour
 final class FunctionImplementation(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.CfiImplementationEName)
 
-  // TODO Input, step and output child elements.
+  def inputs: immutable.IndexedSeq[FunctionImplementationInput] = {
+    findAllNonXLinkChildElemsOfType(classTag[FunctionImplementationInput])
+  }
+
+  def steps: immutable.IndexedSeq[FunctionImplementationStep] = {
+    findAllNonXLinkChildElemsOfType(classTag[FunctionImplementationStep])
+  }
+
+  def output: FunctionImplementationOutput = {
+    findAllNonXLinkChildElemsOfType(classTag[FunctionImplementationOutput]).head
+  }
 }
 
 /**

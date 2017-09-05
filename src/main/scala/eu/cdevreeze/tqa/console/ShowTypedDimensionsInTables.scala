@@ -260,8 +260,6 @@ object ShowTypedDimensionsInTables {
       logger.info(s"No explicit dimensions participate in table $tableId, or no members are specified for a dimension")
     }
 
-    // TODO Check the dimensions mentioned in the table against those found in the taxonomy (for the given concept).
-
     val dimensionUsages: immutable.IndexedSeq[DimensionUsage] =
       hasHypercubeMapForTable.toIndexedSeq flatMap {
         case (concept, hasHypercubesAcrossElrs) =>
