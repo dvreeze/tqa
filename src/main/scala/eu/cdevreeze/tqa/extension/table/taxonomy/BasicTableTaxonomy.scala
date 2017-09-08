@@ -24,6 +24,7 @@ import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.OtherElem
 import eu.cdevreeze.tqa.extension.table.dom.OtherTableElem
+import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.dom.TableArc
 import eu.cdevreeze.tqa.extension.table.dom.TableResource
 import eu.cdevreeze.tqa.extension.table.queryapi.TableRelationshipContainerLike
@@ -38,12 +39,17 @@ import eu.cdevreeze.tqa.relationship.NonStandardRelationship
  * @author Chris de Vreeze
  */
 final class BasicTableTaxonomy private (
-  val underlyingTaxonomy: TaxonomyApi,
-  val tableRelationships: immutable.IndexedSeq[TableRelationship],
-  val tableRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[TableRelationship]],
-  val tableArcs: immutable.IndexedSeq[TableArc],
-  val tableResources: immutable.IndexedSeq[TableResource],
-  val otherTableElems: immutable.IndexedSeq[OtherTableElem]) extends TableRelationshipContainerLike
+    val underlyingTaxonomy: TaxonomyApi,
+    val tableRelationships: immutable.IndexedSeq[TableRelationship],
+    val tableRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[TableRelationship]],
+    val tableArcs: immutable.IndexedSeq[TableArc],
+    val tableResources: immutable.IndexedSeq[TableResource],
+    val otherTableElems: immutable.IndexedSeq[OtherTableElem]) extends TableRelationshipContainerLike {
+
+  def findAllTables: immutable.IndexedSeq[Table] = {
+    tableResources collect { case t: Table => t }
+  }
+}
 
 object BasicTableTaxonomy {
 

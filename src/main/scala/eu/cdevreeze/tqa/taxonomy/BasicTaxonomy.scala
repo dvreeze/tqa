@@ -39,6 +39,7 @@ import eu.cdevreeze.tqa.relationship.Relationship
 import eu.cdevreeze.tqa.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
 
 /**
  * Basic implementation of a taxonomy that offers the TaxonomyApi query API. It does not enforce closure
@@ -170,6 +171,15 @@ final class BasicTaxonomy private (
       interConceptRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
       interConceptRelationshipsByTarget.mapValues(_.filter(p)).filter(_._2.nonEmpty))
   }
+
+  /**
+   * Returns the "guessed Scope" from the documents in the taxonomy. This can be handy for finding
+   * prefixes for namespace names, or for generating ENames from QNames.
+   *
+   * The resulting Scope is taken from the Scopes of the root elements, ignoring the default namespace,
+   * if any. If different root element Scopes are conflicting, it is undetermined which one wins.
+   */
+  def guessedScope: Scope = taxonomyBase.guessedScope
 }
 
 object BasicTaxonomy {

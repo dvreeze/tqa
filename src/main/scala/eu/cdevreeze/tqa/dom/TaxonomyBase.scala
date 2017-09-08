@@ -24,6 +24,7 @@ import scala.reflect.classTag
 import eu.cdevreeze.tqa.ENames.IdEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
 
 /**
  * Very limited notion of a taxonomy, as a collection of taxonomy root elements. It contains a map from URIs
@@ -212,6 +213,20 @@ final class TaxonomyBase private (
     val namedTypeDefinitionsGroupedByEName = namedTypeDefinitions.groupBy(_.targetEName)
 
     namedTypeDefinitionsGroupedByEName.filter(kv => kv._2.size >= 2).keySet
+  }
+
+  /**
+   * Returns the "guessed Scope" from the documents in the taxonomy. This can be handy for finding
+   * prefixes for namespace names, or for generating ENames from QNames.
+   *
+   * The resulting Scope is taken from the Scopes of the root elements, ignoring the default namespace,
+   * if any. If different root element Scopes are conflicting, it is undetermined which one wins.
+   */
+  def guessedScope: Scope = {
+    rootElems.map(_.scope.withoutDefaultNamespace).foldLeft(Scope.Empty) {
+      case (accScope, currScope) =>
+        (accScope ++ currScope).ensuring(_.retainingDefaultNamespace.isEmpty)
+    }
   }
 
   private def removeFragment(uri: URI): URI = {

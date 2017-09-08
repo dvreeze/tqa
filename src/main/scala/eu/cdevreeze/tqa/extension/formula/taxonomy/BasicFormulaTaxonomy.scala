@@ -23,9 +23,12 @@ import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.dom.OtherElem
+import eu.cdevreeze.tqa.extension.formula.dom.ExistenceAssertion
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaArc
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
+import eu.cdevreeze.tqa.extension.formula.dom.ValueAssertion
+import eu.cdevreeze.tqa.extension.formula.dom.VariableSet
 import eu.cdevreeze.tqa.extension.formula.queryapi.FormulaRelationshipContainerLike
 import eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship
 import eu.cdevreeze.tqa.queryapi.TaxonomyApi
@@ -38,12 +41,25 @@ import eu.cdevreeze.tqa.relationship.NonStandardRelationship
  * @author Chris de Vreeze
  */
 final class BasicFormulaTaxonomy private (
-  val underlyingTaxonomy: TaxonomyApi,
-  val formulaRelationships: immutable.IndexedSeq[FormulaRelationship],
-  val formulaRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[FormulaRelationship]],
-  val formulaArcs: immutable.IndexedSeq[FormulaArc],
-  val formulaResources: immutable.IndexedSeq[FormulaResource],
-  val otherFormulaElems: immutable.IndexedSeq[OtherFormulaElem]) extends FormulaRelationshipContainerLike
+    val underlyingTaxonomy: TaxonomyApi,
+    val formulaRelationships: immutable.IndexedSeq[FormulaRelationship],
+    val formulaRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[FormulaRelationship]],
+    val formulaArcs: immutable.IndexedSeq[FormulaArc],
+    val formulaResources: immutable.IndexedSeq[FormulaResource],
+    val otherFormulaElems: immutable.IndexedSeq[OtherFormulaElem]) extends FormulaRelationshipContainerLike {
+
+  def findAllVariableSets: immutable.IndexedSeq[VariableSet] = {
+    formulaResources collect { case vs: VariableSet => vs }
+  }
+
+  def findAllValueAssertions: immutable.IndexedSeq[ValueAssertion] = {
+    findAllVariableSets collect { case vs: ValueAssertion => vs }
+  }
+
+  def findAllExistenceAssertions: immutable.IndexedSeq[ExistenceAssertion] = {
+    findAllVariableSets collect { case vs: ExistenceAssertion => vs }
+  }
+}
 
 object BasicFormulaTaxonomy {
 
