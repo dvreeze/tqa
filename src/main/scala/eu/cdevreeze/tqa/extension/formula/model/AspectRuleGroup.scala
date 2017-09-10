@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.dom
+package eu.cdevreeze.tqa.extension.formula.model
+
+import scala.collection.immutable
+
+import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Use attribute value, so either optional or prohibited.
+ * Combination of aspect rules, corresponding to a formula:aspects element.
  *
  * @author Chris de Vreeze
  */
-sealed trait Use
-
-object Use {
-
-  case object Optional extends Use
-  case object Prohibited extends Use
-
-  def fromString(s: String): Use = s match {
-    case "optional"   => Optional
-    case "prohibited" => Prohibited
-    case _            => sys.error(s"Not a valid 'use': $s")
-  }
-}
+final case class AspectRuleGroup(
+  sourceOption: Option[EName],
+  aspectRules: immutable.IndexedSeq[AspectRule])

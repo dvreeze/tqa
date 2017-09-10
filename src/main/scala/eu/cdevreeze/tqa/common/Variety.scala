@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.ENameValueOrExpr
+package eu.cdevreeze.tqa.common
 
 /**
- * Dimension filter member "specification".
+ * Variety, so either List, Union or Atomic.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
+sealed trait Variety
 
-object DimensionFilterMember {
+object Variety {
 
-  // TODO Axis (using that type for the axisOption property)
+  case object List extends Variety
+  case object Union extends Variety
+  case object Atomic extends Variety
 }

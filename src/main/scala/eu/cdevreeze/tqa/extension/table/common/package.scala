@@ -14,25 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.dom
+package eu.cdevreeze.tqa.extension.table
 
 /**
- * CyclesAllowed attribute value, so either "any", "undirected" or "none".
+ * Classes that are common to the DOM and model packages, typically "enumerations".
  *
  * @author Chris de Vreeze
  */
-sealed trait CyclesAllowed
-
-object CyclesAllowed {
-
-  case object AnyCycles extends CyclesAllowed
-  case object UndirectedCycles extends CyclesAllowed
-  case object NoCycles extends CyclesAllowed
-
-  def fromString(s: String): CyclesAllowed = s match {
-    case "any"        => AnyCycles
-    case "undirected" => UndirectedCycles
-    case "none"       => NoCycles
-    case _            => sys.error(s"Not a valid 'cyclesAllowed': $s")
-  }
-}
+package object common

@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.dom
+package eu.cdevreeze.tqa.extension.formula.model
+
+import eu.cdevreeze.tqa.ScopedXPathString
+import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Value of (item declaration) attribute xbrli:periodType, so either instant or duration.
+ * Divide-by, in a unit aspect rule.
  *
  * @author Chris de Vreeze
  */
-sealed trait PeriodType
-
-object PeriodType {
-
-  case object Instant extends PeriodType
-  case object Duration extends PeriodType
-
-  def fromString(s: String): PeriodType = s match {
-    case "instant"  => Instant
-    case "duration" => Duration
-    case _          => sys.error(s"Not a valid 'xbrli:periodType': $s")
-  }
-}
+final case class DivideBy(
+  sourceOption: Option[EName],
+  measureExprOption: Option[ScopedXPathString])

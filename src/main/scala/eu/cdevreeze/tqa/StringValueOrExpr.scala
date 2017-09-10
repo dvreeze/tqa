@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.ENameValueOrExpr
+package eu.cdevreeze.tqa
 
 /**
- * Dimension filter member "specification".
+ * String value or XPath expression.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
+sealed trait StringValueOrExpr extends ValueOrExpr[String]
 
-object DimensionFilterMember {
+final case class StringValue(value: String) extends StringValueOrExpr with Value[String]
 
-  // TODO Axis (using that type for the axisOption property)
-}
+final case class StringExpr(expr: ScopedXPathString) extends StringValueOrExpr with Expr[String]

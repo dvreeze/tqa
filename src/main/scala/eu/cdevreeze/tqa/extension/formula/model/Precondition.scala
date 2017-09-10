@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.dom
+package eu.cdevreeze.tqa.extension.formula.model
+
+import eu.cdevreeze.tqa.ScopedXPathString
 
 /**
- * OCC, so segment or scenario.
+ * Precondition.
  *
  * @author Chris de Vreeze
  */
-sealed trait Occ
-
-object Occ {
-
-  case object Segment extends Occ
-  case object Scenario extends Occ
-
-  def fromString(s: String): Occ = s match {
-    case "segment"  => Segment
-    case "scenario" => Scenario
-    case _          => sys.error(s"Not a valid 'occ': $s")
-  }
-}
+final case class Precondition(testExpr: ScopedXPathString)

@@ -28,6 +28,10 @@ import eu.cdevreeze.tqa.Namespaces.XsNamespace
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
+import eu.cdevreeze.tqa.common.CyclesAllowed
+import eu.cdevreeze.tqa.common.PeriodType
+import eu.cdevreeze.tqa.common.Use
+import eu.cdevreeze.tqa.common.Variety
 import eu.cdevreeze.tqa.xlink
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName

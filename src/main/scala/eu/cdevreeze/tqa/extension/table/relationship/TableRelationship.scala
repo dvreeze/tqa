@@ -21,11 +21,11 @@ import java.net.URI
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.Namespaces
+import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.dom.AnyTaxonomyElem
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.extension.formula.dom.Filter
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
 import eu.cdevreeze.tqa.extension.formula.dom.Parameter

@@ -29,12 +29,13 @@ import eu.cdevreeze.tqa.ENames.LinkPresentationArcEName
 import eu.cdevreeze.tqa.ENames.LinkReferenceArcEName
 import eu.cdevreeze.tqa.ENames.MsgMessageEName
 import eu.cdevreeze.tqa.ENames.PreferredLabelEName
+import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
 import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
 import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
-import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
+import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.CalculationArc
 import eu.cdevreeze.tqa.dom.ConceptLabelResource
@@ -47,7 +48,6 @@ import eu.cdevreeze.tqa.dom.PresentationArc
 import eu.cdevreeze.tqa.dom.ReferenceArc
 import eu.cdevreeze.tqa.dom.StandardArc
 import eu.cdevreeze.tqa.dom.TaxonomyElem
-import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XLinkResource
 import eu.cdevreeze.yaidom.core.EName

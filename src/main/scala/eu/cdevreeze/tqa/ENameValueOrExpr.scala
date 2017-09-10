@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
+package eu.cdevreeze.tqa
 
-import eu.cdevreeze.tqa.ENameValueOrExpr
+import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Dimension filter member "specification".
+ * EName value or XPath expression.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
+sealed trait ENameValueOrExpr extends ValueOrExpr[EName]
 
-object DimensionFilterMember {
+final case class ENameValue(value: EName) extends ENameValueOrExpr with Value[EName]
 
-  // TODO Axis (using that type for the axisOption property)
-}
+final case class ENameExpr(expr: ScopedXPathString) extends ENameValueOrExpr with Expr[EName]

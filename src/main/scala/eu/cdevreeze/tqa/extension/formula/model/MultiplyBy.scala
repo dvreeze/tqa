@@ -16,20 +16,14 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.ENameValueOrExpr
+import eu.cdevreeze.tqa.ScopedXPathString
+import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Dimension filter member "specification".
+ * Multiply-by, in a unit aspect rule.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
-
-object DimensionFilterMember {
-
-  // TODO Axis (using that type for the axisOption property)
-}
+final case class MultiplyBy(
+  sourceOption: Option[EName],
+  measureExprOption: Option[ScopedXPathString])

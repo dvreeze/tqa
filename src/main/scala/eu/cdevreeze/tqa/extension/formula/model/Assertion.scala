@@ -16,20 +16,9 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.ENameValueOrExpr
-
 /**
- * Dimension filter member "specification".
+ * Assertion, such as a value assertion.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
-
-object DimensionFilterMember {
-
-  // TODO Axis (using that type for the axisOption property)
-}
+trait Assertion

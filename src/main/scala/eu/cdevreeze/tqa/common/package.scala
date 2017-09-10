@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.dom
+package eu.cdevreeze.tqa
 
 /**
- * Variety, so either List, Union or Atomic.
+ * Classes that are common to the DOM and model packages, typically "enumerations".
  *
  * @author Chris de Vreeze
  */
-sealed trait Variety
-
-object Variety {
-
-  case object List extends Variety
-  case object Union extends Variety
-  case object Atomic extends Variety
-}
+package object common

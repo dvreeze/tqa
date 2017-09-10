@@ -16,12 +16,44 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
+import scala.collection.immutable
+
+import eu.cdevreeze.tqa.AspectModel
+import eu.cdevreeze.tqa.BigDecimalValueOrExpr
+import eu.cdevreeze.tqa.ScopedXPathString
+import eu.cdevreeze.yaidom.core.EName
+
 /**
- * Variable set, such as a value assertion or formula.
+ * Variable set, such as a value assertion or formula. The variable set does not know its ELR.
  *
  * @author Chris de Vreeze
  */
 sealed trait VariableSet {
 
-  // TODO Implement sub-classes
+  def implicitFiltering: Boolean
+
+  def aspectModel: AspectModel
 }
+
+sealed trait VariableSetAssertion extends VariableSet with Assertion
+
+final case class ValueAssertion(
+  implicitFiltering: Boolean,
+  aspectModel: AspectModel,
+  testExpr: ScopedXPathString) extends VariableSetAssertion
+
+final case class ExistenceAssertion(
+  implicitFiltering: Boolean,
+  aspectModel: AspectModel,
+  testExprOption: Option[ScopedXPathString]) extends VariableSetAssertion
+
+final case class Formula(
+  implicitFiltering: Boolean,
+  aspectModel: AspectModel,
+  sourceOption: Option[EName],
+  valueExpr: ScopedXPathString,
+  aspectRuleGroups: immutable.IndexedSeq[AspectRuleGroup],
+  precisionValueOrExprOption: Option[BigDecimalValueOrExpr],
+  decimalsValueOrExprOption: Option[BigDecimalValueOrExpr]) extends VariableSet
+
+// TODO ConsistencyAssertion, but not in this file, because it is not a VariableSet

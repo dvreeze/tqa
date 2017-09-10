@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.ENameValueOrExpr
+package eu.cdevreeze.tqa.common
 
 /**
- * Dimension filter member "specification".
+ * Use attribute value, so either optional or prohibited.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
+sealed trait Use
 
-object DimensionFilterMember {
+object Use {
 
-  // TODO Axis (using that type for the axisOption property)
+  case object Optional extends Use
+  case object Prohibited extends Use
+
+  def fromString(s: String): Use = s match {
+    case "optional"   => Optional
+    case "prohibited" => Prohibited
+    case _            => sys.error(s"Not a valid 'use': $s")
+  }
 }

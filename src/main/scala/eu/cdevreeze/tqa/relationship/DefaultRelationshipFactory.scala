@@ -33,6 +33,7 @@ import eu.cdevreeze.tqa.ENames.PriorityEName
 import eu.cdevreeze.tqa.ENames.RoleURIEName
 import eu.cdevreeze.tqa.ENames.UseEName
 import eu.cdevreeze.tqa.ENames.WeightEName
+import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
 import eu.cdevreeze.tqa.ENames.XbrldtClosedEName
 import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
@@ -40,14 +41,13 @@ import eu.cdevreeze.tqa.ENames.XbrldtTypedDomainRefEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XbrliBalanceEName
 import eu.cdevreeze.tqa.ENames.XbrliPeriodTypeEName
-import eu.cdevreeze.tqa.ENames.XLinkArcroleEName
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
+import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.ExtendedLink
 import eu.cdevreeze.tqa.dom.LabeledXLink
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
-import eu.cdevreeze.tqa.dom.Use
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.dom.XLinkLocator
 import eu.cdevreeze.tqa.dom.XLinkResource

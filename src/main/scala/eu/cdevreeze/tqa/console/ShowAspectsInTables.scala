@@ -29,8 +29,8 @@ import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.backingelem.CachingDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.common.PeriodType
 import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.PeriodType
 import eu.cdevreeze.tqa.dom.XLinkArc
 import eu.cdevreeze.tqa.extension.formula.dom.ConceptAspect
 import eu.cdevreeze.tqa.extension.formula.dom.ExplicitDimensionAspect

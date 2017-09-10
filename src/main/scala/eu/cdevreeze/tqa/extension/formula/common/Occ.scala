@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.ENameValueOrExpr
+package eu.cdevreeze.tqa.extension.formula.common
 
 /**
- * Dimension filter member "specification".
+ * OCC, so segment or scenario.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
+sealed trait Occ
 
-object DimensionFilterMember {
+object Occ {
 
-  // TODO Axis (using that type for the axisOption property)
+  case object Segment extends Occ
+  case object Scenario extends Occ
+
+  def fromString(s: String): Occ = s match {
+    case "segment"  => Segment
+    case "scenario" => Scenario
+    case _          => sys.error(s"Not a valid 'occ': $s")
+  }
 }

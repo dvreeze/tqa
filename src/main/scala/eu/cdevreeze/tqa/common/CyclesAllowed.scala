@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.Expr
-import eu.cdevreeze.tqa.ScopedXPathString
-import eu.cdevreeze.tqa.Value
-import eu.cdevreeze.tqa.ValueOrExpr
+package eu.cdevreeze.tqa.common
 
 /**
- * String value or XPath expression.
+ * CyclesAllowed attribute value, so either "any", "undirected" or "none".
  *
  * @author Chris de Vreeze
  */
-sealed trait StringValueOrExpr extends ValueOrExpr[String]
+sealed trait CyclesAllowed
 
-final case class StringValue(value: String) extends StringValueOrExpr with Value[String]
+object CyclesAllowed {
 
-final case class StringExpr(expr: ScopedXPathString) extends StringValueOrExpr with Expr[String]
+  case object AnyCycles extends CyclesAllowed
+  case object UndirectedCycles extends CyclesAllowed
+  case object NoCycles extends CyclesAllowed
+
+  def fromString(s: String): CyclesAllowed = s match {
+    case "any"        => AnyCycles
+    case "undirected" => UndirectedCycles
+    case "none"       => NoCycles
+    case _            => sys.error(s"Not a valid 'cyclesAllowed': $s")
+  }
+}

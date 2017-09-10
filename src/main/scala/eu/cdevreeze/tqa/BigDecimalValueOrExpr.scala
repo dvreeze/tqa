@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.Expr
-import eu.cdevreeze.tqa.ScopedXPathString
-import eu.cdevreeze.tqa.Value
-import eu.cdevreeze.tqa.ValueOrExpr
-import eu.cdevreeze.yaidom.core.EName
+package eu.cdevreeze.tqa
 
 /**
- * EName value or XPath expression.
+ * BigDecimal value or XPath expression.
  *
  * @author Chris de Vreeze
  */
-sealed trait ENameValueOrExpr extends ValueOrExpr[EName]
+sealed trait BigDecimalValueOrExpr extends ValueOrExpr[BigDecimal]
 
-final case class ENameValue(value: EName) extends ENameValueOrExpr with Value[EName]
+final case class BigDecimalValue(value: BigDecimal) extends BigDecimalValueOrExpr with Value[BigDecimal]
 
-final case class ENameExpr(expr: ScopedXPathString) extends ENameValueOrExpr with Expr[EName]
+final case class BigDecimalExpr(expr: ScopedXPathString) extends BigDecimalValueOrExpr with Expr[BigDecimal]

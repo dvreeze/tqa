@@ -25,6 +25,7 @@ import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.ENames.XbrliTupleEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.common.PeriodType
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 

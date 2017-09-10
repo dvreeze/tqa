@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.ENameValueOrExpr
+package eu.cdevreeze.tqa.common
 
 /**
- * Dimension filter member "specification".
+ * Value of (item declaration) attribute xbrli:periodType, so either instant or duration.
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
+sealed trait PeriodType
 
-object DimensionFilterMember {
+object PeriodType {
 
-  // TODO Axis (using that type for the axisOption property)
+  case object Instant extends PeriodType
+  case object Duration extends PeriodType
+
+  def fromString(s: String): PeriodType = s match {
+    case "instant"  => Instant
+    case "duration" => Duration
+    case _          => sys.error(s"Not a valid 'xbrli:periodType': $s")
+  }
 }

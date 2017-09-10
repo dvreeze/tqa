@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.ENameValueOrExpr
+package eu.cdevreeze.tqa.extension.formula
 
 /**
- * Dimension filter member "specification".
+ * Classes that are common to the DOM and model packages, typically "enumerations".
  *
  * @author Chris de Vreeze
  */
-final case class DimensionFilterMember(
-  memberNameOrExpr: ENameValueOrExpr,
-  linkroleOption: Option[String],
-  arcroleOption: Option[String],
-  axisOption: Option[String])
-
-object DimensionFilterMember {
-
-  // TODO Axis (using that type for the axisOption property)
-}
+package object common
