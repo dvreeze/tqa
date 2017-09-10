@@ -16,28 +16,16 @@
 
 package eu.cdevreeze.tqa.extension.formula.taxonomy
 
-import java.net.URI
-
-import scala.collection.immutable
-import scala.reflect.classTag
-
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
-import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
-import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
+import eu.cdevreeze.tqa.extension.formula.dom.FactVariable
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.relationship.DimensionalRelationship
-import eu.cdevreeze.tqa.relationship.HasHypercubeRelationship
-import eu.cdevreeze.tqa.relationship.HypercubeDimensionRelationship
-import eu.cdevreeze.tqa.relationship.PresentationRelationship
 import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
-import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
@@ -85,13 +73,38 @@ class FormulaQueryApiTest extends FunSuite {
       existenceAssertion.implicitFiltering
     }
 
+    val varSetRels = formulaTaxo.findAllOutgoingVariableSetRelationships(existenceAssertion)
+
     assertResult(Vector(
       (QName("varArc_BalanceSheetBanks_MsgAdimExistence1_BalanceSheetBeforeAfterAppropriationResults").res, BigDecimal(1), 0))) {
 
-      formulaTaxo.findAllOutgoingVariableSetRelationships(existenceAssertion).map(rel => (rel.name, rel.order, rel.priority))
+      varSetRels.map(rel => (rel.name, rel.order, rel.priority))
     }
 
-    val factVariables = formulaTaxo.findAllOutgoingVariableSetRelationships(existenceAssertion).map(_.variableOrParameter)
+    val varsOrPars = varSetRels.map(_.variableOrParameter)
+
+    val factVariables = varsOrPars collect { case fv: FactVariable => fv }
+
+    assertResult(varsOrPars) {
+      factVariables
+    }
+    assertResult(List(
+      (false, Some("0"), Some(false), Some(false)))) {
+      factVariables.map(fv => (fv.bindAsSequence, fv.fallbackValueExprOption.map(_.xpathExpression), fv.matchesOption, fv.nilsOption))
+    }
+
+    val factVariable = factVariables.head
+
+    val variableFilterRels = formulaTaxo.findAllOutgoingVariableFilterRelationships(factVariable)
+
+    assertResult(List(
+      (false, true, BigDecimal(1), 0))) {
+      variableFilterRels.map(rel => (rel.complement, rel.cover, rel.order, rel.priority))
+    }
+
+    // val variableFilterRel = variableFilterRels.head
+
+    // TODO Proceed with querying and testing
   }
 
   test("testQueryValueAssertions") {
@@ -109,12 +122,14 @@ class FormulaQueryApiTest extends FunSuite {
 
     val formulaTaxo = BasicFormulaTaxonomy.build(taxo)
 
-    val guessedScope = taxo.guessedScope
+    // val guessedScope = taxo.guessedScope
 
-    import guessedScope._
+    // import guessedScope._
 
     assertResult(17) {
       formulaTaxo.findAllValueAssertions.size
     }
+
+    // TODO Proceed with querying and testing
   }
 }
