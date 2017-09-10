@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.table.dom
+package eu.cdevreeze.tqa.extension.table.common
 
 /**
  * Parent-child order, so either parent-first or children-first.

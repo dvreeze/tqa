@@ -29,6 +29,7 @@ import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.extension.formula.dom.Filter
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
 import eu.cdevreeze.tqa.extension.formula.dom.Parameter
+import eu.cdevreeze.tqa.extension.table.common.TableAxis
 import eu.cdevreeze.tqa.extension.table.dom.AspectNode
 import eu.cdevreeze.tqa.extension.table.dom.AspectNodeFilterArc
 import eu.cdevreeze.tqa.extension.table.dom.BreakdownTreeArc
@@ -36,7 +37,6 @@ import eu.cdevreeze.tqa.extension.table.dom.DefinitionNode
 import eu.cdevreeze.tqa.extension.table.dom.DefinitionNodeSubtreeArc
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.dom.TableArc
-import eu.cdevreeze.tqa.extension.table.dom.TableAxis
 import eu.cdevreeze.tqa.extension.table.dom.TableBreakdown
 import eu.cdevreeze.tqa.extension.table.dom.TableBreakdownArc
 import eu.cdevreeze.tqa.extension.table.dom.TableFilterArc

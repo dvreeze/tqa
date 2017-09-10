@@ -20,8 +20,8 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
-import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNodeFormulaAxis
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
@@ -79,14 +79,14 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
     }
   }
 
-  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): ConceptRelationshipNodeFormulaAxis.FormulaAxis = {
+  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): ConceptRelationshipNodes.FormulaAxis = {
     conceptRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
       conceptRelationshipNode.formulaAxisExpressionOption.map(_.expr) map { expr =>
         val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
 
-        ConceptRelationshipNodeFormulaAxis.FormulaAxis.fromString(resultAsString)
+        ConceptRelationshipNodes.FormulaAxis.fromString(resultAsString)
       }
-    } getOrElse (ConceptRelationshipNodeFormulaAxis.DescendantOrSelfAxis)
+    } getOrElse (ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
   def generations(implicit xpathEvaluator: XPathEvaluator): Int = {

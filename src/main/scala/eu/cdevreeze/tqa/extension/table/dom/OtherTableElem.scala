@@ -28,6 +28,8 @@ import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
+import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
+import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.yaidom.core.EName
 import javax.xml.bind.DatatypeConverter
 
@@ -242,8 +244,8 @@ final class ConceptRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.Other
   /**
    * Returns the value as FormulaAxis. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def formulaAxis: ConceptRelationshipNodeFormulaAxis.FormulaAxis = {
-    ConceptRelationshipNodeFormulaAxis.FormulaAxis.fromString(underlyingElem.text)
+  def formulaAxis: ConceptRelationshipNodes.FormulaAxis = {
+    ConceptRelationshipNodes.FormulaAxis.fromString(underlyingElem.text)
   }
 }
 
@@ -270,8 +272,8 @@ final class DimensionRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.Oth
   /**
    * Returns the value as FormulaAxis. This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def formulaAxis: DimensionRelationshipNodeFormulaAxis.FormulaAxis = {
-    DimensionRelationshipNodeFormulaAxis.FormulaAxis.fromString(underlyingElem.text)
+  def formulaAxis: DimensionRelationshipNodes.FormulaAxis = {
+    DimensionRelationshipNodes.FormulaAxis.fromString(underlyingElem.text)
   }
 }
 
@@ -426,86 +428,6 @@ object OtherTableElem {
       }
     } else {
       None
-    }
-  }
-}
-
-object ConceptRelationshipNodeFormulaAxis {
-
-  sealed trait FormulaAxis {
-
-    def includesSelf: Boolean = {
-      this == DescendantOrSelfAxis || this == ChildOrSelfAxis ||
-        this == SiblingOrSelfAxis || this == SiblingOrDescendantOrSelfAxis
-    }
-
-    def includesDescendantsOrChildren: Boolean = {
-      this == SiblingOrDescendantAxis || this == SiblingOrDescendantOrSelfAxis ||
-        this == DescendantAxis || this == DescendantOrSelfAxis ||
-        this == ChildAxis || this == ChildOrSelfAxis
-    }
-
-    def includesSiblings: Boolean = {
-      this == SiblingAxis || this == SiblingOrSelfAxis ||
-        this == SiblingOrDescendantAxis || this == SiblingOrDescendantOrSelfAxis
-    }
-
-    def includesChildrenButNotDeeperDescendants: Boolean = {
-      this == ChildAxis || this == ChildOrSelfAxis
-    }
-  }
-
-  case object DescendantAxis extends FormulaAxis
-  case object DescendantOrSelfAxis extends FormulaAxis
-  case object ChildAxis extends FormulaAxis
-  case object ChildOrSelfAxis extends FormulaAxis
-  case object SiblingAxis extends FormulaAxis
-  case object SiblingOrSelfAxis extends FormulaAxis
-  case object SiblingOrDescendantAxis extends FormulaAxis
-  case object SiblingOrDescendantOrSelfAxis extends FormulaAxis
-
-  object FormulaAxis {
-
-    def fromString(s: String): FormulaAxis = s match {
-      case "descendant"                    => DescendantAxis
-      case "descendant-or-self"            => DescendantOrSelfAxis
-      case "child"                         => ChildAxis
-      case "child-or-self"                 => ChildOrSelfAxis
-      case "sibling"                       => SiblingAxis
-      case "sibling-or-self"               => SiblingOrSelfAxis
-      case "sibling-or-descendant"         => SiblingOrDescendantAxis
-      case "sibling-or-descendant-or-self" => SiblingOrDescendantOrSelfAxis
-      case _                               => sys.error(s"Not a valid 'formula axis': $s")
-    }
-  }
-}
-
-object DimensionRelationshipNodeFormulaAxis {
-
-  sealed trait FormulaAxis {
-
-    def includesSelf: Boolean = {
-      this == DescendantOrSelfAxis || this == ChildOrSelfAxis
-    }
-
-    def includesChildrenButNotDeeperDescendants: Boolean = {
-      this == ChildAxis || this == ChildOrSelfAxis
-    }
-  }
-
-  case object DescendantAxis extends FormulaAxis
-  case object DescendantOrSelfAxis extends FormulaAxis
-  case object ChildAxis extends FormulaAxis
-  case object ChildOrSelfAxis extends FormulaAxis
-
-  object FormulaAxis {
-
-    def fromString(s: String): FormulaAxis = s match {
-      case "descendant"         => DescendantAxis
-      case "descendant-or-self" => DescendantOrSelfAxis
-      case "child"              => ChildAxis
-      case "child-or-self"      => ChildOrSelfAxis
-      case _                    => sys.error(s"Not a valid 'formula axis': $s")
     }
   }
 }

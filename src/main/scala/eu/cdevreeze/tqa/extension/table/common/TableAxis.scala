@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.table.dom
+package eu.cdevreeze.tqa.extension.table.common
 
 /**
  * Table axis, so the x-axis, y-axis or z-axis.

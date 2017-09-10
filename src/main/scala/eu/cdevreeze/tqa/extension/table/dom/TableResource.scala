@@ -26,6 +26,7 @@ import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
+import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
 import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi

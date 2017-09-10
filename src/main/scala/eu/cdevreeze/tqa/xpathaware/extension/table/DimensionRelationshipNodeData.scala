@@ -18,8 +18,8 @@ package eu.cdevreeze.tqa.xpathaware.extension.table
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
-import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNodeFormulaAxis
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
 import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
@@ -61,14 +61,14 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
     }
   }
 
-  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): DimensionRelationshipNodeFormulaAxis.FormulaAxis = {
+  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): DimensionRelationshipNodes.FormulaAxis = {
     dimensionRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
       dimensionRelationshipNode.formulaAxisExpressionOption.map(_.expr) map { expr =>
         val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
 
-        DimensionRelationshipNodeFormulaAxis.FormulaAxis.fromString(resultAsString)
+        DimensionRelationshipNodes.FormulaAxis.fromString(resultAsString)
       }
-    } getOrElse (DimensionRelationshipNodeFormulaAxis.DescendantOrSelfAxis)
+    } getOrElse (DimensionRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
   def generations(implicit xpathEvaluator: XPathEvaluator): Int = {

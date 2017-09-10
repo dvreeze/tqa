@@ -20,6 +20,7 @@ import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.extension.table.common.TableAxis
 import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
