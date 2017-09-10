@@ -21,6 +21,9 @@ package eu.cdevreeze.tqa.extension.formula
  * other than keeping XPath expressions as strings. It is not XLink-aware, but replaces relationships
  * by a case class hierarchy.
  *
+ * The model is hierarchical, regarding filters to be properties of variable sets and fact variables,
+ * and regarding variables and parameters to be properties of variable sets.
+ *
  * The model may contain less information than the XML-backed DOM and relationship classes for formulas.
  *
  * This model is not dependent on the (formula) DOM, relationship and query API packages. The reverse

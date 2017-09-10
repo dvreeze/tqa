@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
+import scala.collection.immutable
+
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.yaidom.core.EName
 
@@ -32,7 +34,8 @@ final case class FactVariable(
   bindAsSequence: Boolean,
   fallbackValueExprOption: Option[ScopedXPathString],
   matchesOption: Option[Boolean],
-  nilsOption: Option[Boolean]) extends Variable
+  nilsOption: Option[Boolean],
+  variableFilters: immutable.IndexedSeq[VariableFilter]) extends Variable
 
 final case class GeneralVariable(
   bindAsSequence: Boolean,

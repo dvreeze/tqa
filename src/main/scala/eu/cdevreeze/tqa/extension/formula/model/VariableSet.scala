@@ -33,6 +33,12 @@ sealed trait VariableSet {
   def implicitFiltering: Boolean
 
   def aspectModel: AspectModel
+
+  def variableSetFilters: immutable.IndexedSeq[VariableSetFilter]
+
+  def variableSetPreconditions: immutable.IndexedSeq[VariableSetPrecondition]
+
+  def variableSetVariablesOrParameters: immutable.IndexedSeq[VariableSetVariableOrParameter]
 }
 
 sealed trait VariableSetAssertion extends VariableSet with Assertion
@@ -40,12 +46,18 @@ sealed trait VariableSetAssertion extends VariableSet with Assertion
 final case class ValueAssertion(
   implicitFiltering: Boolean,
   aspectModel: AspectModel,
-  testExpr: ScopedXPathString) extends VariableSetAssertion
+  testExpr: ScopedXPathString,
+  variableSetFilters: immutable.IndexedSeq[VariableSetFilter],
+  variableSetPreconditions: immutable.IndexedSeq[VariableSetPrecondition],
+  variableSetVariablesOrParameters: immutable.IndexedSeq[VariableSetVariableOrParameter]) extends VariableSetAssertion
 
 final case class ExistenceAssertion(
   implicitFiltering: Boolean,
   aspectModel: AspectModel,
-  testExprOption: Option[ScopedXPathString]) extends VariableSetAssertion
+  testExprOption: Option[ScopedXPathString],
+  variableSetFilters: immutable.IndexedSeq[VariableSetFilter],
+  variableSetPreconditions: immutable.IndexedSeq[VariableSetPrecondition],
+  variableSetVariablesOrParameters: immutable.IndexedSeq[VariableSetVariableOrParameter]) extends VariableSetAssertion
 
 final case class Formula(
   implicitFiltering: Boolean,
@@ -54,6 +66,9 @@ final case class Formula(
   valueExpr: ScopedXPathString,
   aspectRuleGroups: immutable.IndexedSeq[AspectRuleGroup],
   precisionValueOrExprOption: Option[BigDecimalValueOrExpr],
-  decimalsValueOrExprOption: Option[BigDecimalValueOrExpr]) extends VariableSet
+  decimalsValueOrExprOption: Option[BigDecimalValueOrExpr],
+  variableSetFilters: immutable.IndexedSeq[VariableSetFilter],
+  variableSetPreconditions: immutable.IndexedSeq[VariableSetPrecondition],
+  variableSetVariablesOrParameters: immutable.IndexedSeq[VariableSetVariableOrParameter]) extends VariableSet
 
 // TODO ConsistencyAssertion, but not in this file, because it is not a VariableSet
