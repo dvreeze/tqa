@@ -1160,11 +1160,11 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
   }
 
   /**
-   * Returns the linkname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   * Returns the linkname as optional ENameValueOrExpr. This may fail if this element is not schema-valid.
    */
-  def linknameValueOrExpr: ENameValueOrExpr = {
+  def linknameValueOrExprOption: Option[ENameValueOrExpr] = {
     linknameOption.map(_.linknameValue).map(v => ENameValue(v)).orElse(
-      linknameExpressionOption.map(_.expr).map(v => ENameExpr(v))).get
+      linknameExpressionOption.map(_.expr).map(v => ENameExpr(v)))
   }
 
   /**
@@ -1206,11 +1206,11 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
   }
 
   /**
-   * Returns the arcname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   * Returns the arcname as optional ENameValueOrExpr. This may fail if this element is not schema-valid.
    */
-  def arcnameValueOrExpr: ENameValueOrExpr = {
+  def arcnameValueOrExprOption: Option[ENameValueOrExpr] = {
     arcnameOption.map(_.arcnameValue).map(v => ENameValue(v)).orElse(
-      arcnameExpressionOption.map(_.expr).map(v => ENameExpr(v))).get
+      arcnameExpressionOption.map(_.expr).map(v => ENameExpr(v)))
   }
 
   def axis: ConceptRelationFilterAxis = {

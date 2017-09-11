@@ -276,9 +276,9 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       Good(model.ConceptRelationFilter(
         domFilter.sourceValueOrExpr,
         domFilter.linkroleValueOrExpr,
-        domFilter.linknameValueOrExpr,
+        domFilter.linknameValueOrExprOption,
         domFilter.arcroleValueOrExpr,
-        domFilter.arcnameValueOrExpr,
+        domFilter.arcnameValueOrExprOption,
         domFilter.axis.axisValue,
         domFilter.generationsOption.map(_.intValue),
         domFilter.testExprOption))

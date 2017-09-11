@@ -195,9 +195,9 @@ final case class AspectCoverFilter(
 final case class ConceptRelationFilter(
   sourceNameOrExpr: ENameValueOrExpr,
   linkroleOrExpr: StringValueOrExpr,
-  linknameOrExpr: ENameValueOrExpr,
+  linknameOrExprOption: Option[ENameValueOrExpr],
   arcroleOrExpr: StringValueOrExpr,
-  arcnameOrExpr: ENameValueOrExpr,
+  arcnameOrExprOption: Option[ENameValueOrExpr],
   axis: ConceptRelationFilters.Axis,
   generationsOption: Option[Int],
   exprOption: Option[ScopedXPathString]) extends Filter

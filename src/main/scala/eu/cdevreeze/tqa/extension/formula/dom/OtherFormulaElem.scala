@@ -838,11 +838,11 @@ final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspe
   }
 
   /**
-   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   * Returns the qname as optional ENameValueOrExpr. This may fail if this element is not schema-valid.
    */
-  def qnameValueOrExpr: ENameValueOrExpr = {
+  def qnameValueOrExprOption: Option[ENameValueOrExpr] = {
     qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
-      qnameExpressionElemOption.map(_.qnameExpr).map(v => ENameExpr(v))).get
+      qnameExpressionElemOption.map(_.qnameExpr).map(v => ENameExpr(v)))
   }
 }
 
