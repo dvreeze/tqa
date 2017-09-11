@@ -54,19 +54,13 @@ final case class ConceptSubstitutionGroupFilter(
   strict: Boolean) extends ConceptFilter
 
 sealed abstract class BooleanFilter(
-  val complement: Boolean,
-  val cover: Boolean,
-  val subFilters: immutable.IndexedSeq[Filter]) extends Filter
+  val subFilters: immutable.IndexedSeq[SubFilter]) extends Filter
 
 final case class AndFilter(
-  override val complement: Boolean,
-  override val cover: Boolean,
-  override val subFilters: immutable.IndexedSeq[Filter]) extends BooleanFilter(complement, cover, subFilters)
+  override val subFilters: immutable.IndexedSeq[SubFilter]) extends BooleanFilter(subFilters)
 
 final case class OrFilter(
-  override val complement: Boolean,
-  override val cover: Boolean,
-  override val subFilters: immutable.IndexedSeq[Filter]) extends BooleanFilter(complement, cover, subFilters)
+  override val subFilters: immutable.IndexedSeq[SubFilter]) extends BooleanFilter(subFilters)
 
 sealed abstract class DimensionFilter(val dimensionNameOrExpr: ENameValueOrExpr) extends Filter
 
@@ -201,9 +195,9 @@ final case class AspectCoverFilter(
 final case class ConceptRelationFilter(
   sourceNameOrExpr: ENameValueOrExpr,
   linkroleOrExpr: StringValueOrExpr,
-  linknameOrExpr: StringValueOrExpr,
+  linknameOrExpr: ENameValueOrExpr,
   arcroleOrExpr: StringValueOrExpr,
-  arcnameOrExpr: StringValueOrExpr,
+  arcnameOrExpr: ENameValueOrExpr,
   axis: ConceptRelationFilters.Axis,
   generationsOption: Option[Int],
   exprOption: Option[ScopedXPathString]) extends Filter
