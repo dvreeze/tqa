@@ -22,8 +22,14 @@ import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.ENameExpr
+import eu.cdevreeze.tqa.ENameValue
+import eu.cdevreeze.tqa.ENameValueOrExpr
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
+import eu.cdevreeze.tqa.StringExpr
+import eu.cdevreeze.tqa.StringValue
+import eu.cdevreeze.tqa.StringValueOrExpr
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
@@ -1107,6 +1113,15 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
   }
 
   /**
+   * Returns the source as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def sourceValueOrExpr: ENameValueOrExpr = {
+    variableOption.map(_.name).map(v => ENameValue(v)).orElse(
+      qnameOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+        qnameExpressionOption.map(_.expr).map(v => ENameExpr(v)))).get
+  }
+
+  /**
    * Returns `linkroleOption.orElse(linkroleExpressionOption).get`.
    */
   def linkroleOrLinkroleExpression: ConceptRelationFilterContentElem = {
@@ -1119,6 +1134,14 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
 
   def linkroleExpressionOption: Option[ConceptRelationFilterLinkroleExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterLinkroleExpression]).headOption
+  }
+
+  /**
+   * Returns the linkrole as StringValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def linkroleValueOrExpr: StringValueOrExpr = {
+    linkroleOption.map(_.linkrole).map(v => StringValue(v)).orElse(
+      linkroleExpressionOption.map(_.expr).map(v => StringExpr(v))).get
   }
 
   /**
@@ -1137,6 +1160,14 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
   }
 
   /**
+   * Returns the linkname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def linknameValueOrExpr: ENameValueOrExpr = {
+    linknameOption.map(_.linknameValue).map(v => ENameValue(v)).orElse(
+      linknameExpressionOption.map(_.expr).map(v => ENameExpr(v))).get
+  }
+
+  /**
    * Returns `arcroleOption.orElse(arcroleExpressionOption).get`.
    */
   def arcroleOrArcroleExpression: ConceptRelationFilterContentElem = {
@@ -1152,6 +1183,14 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
   }
 
   /**
+   * Returns the arcrole as StringValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def arcroleValueOrExpr: StringValueOrExpr = {
+    arcroleOption.map(_.arcrole).map(v => StringValue(v)).orElse(
+      arcroleExpressionOption.map(_.expr).map(v => StringExpr(v))).get
+  }
+
+  /**
    * Returns `arcnameOption.orElse(arcnameExpressionOption)`.
    */
   def arcnameOrArcnameExpressionOption: Option[ConceptRelationFilterContentElem] = {
@@ -1164,6 +1203,14 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
 
   def arcnameExpressionOption: Option[ConceptRelationFilterArcnameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[ConceptRelationFilterArcnameExpression]).headOption
+  }
+
+  /**
+   * Returns the arcname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def arcnameValueOrExpr: ENameValueOrExpr = {
+    arcnameOption.map(_.arcnameValue).map(v => ENameValue(v)).orElse(
+      arcnameExpressionOption.map(_.expr).map(v => ENameExpr(v))).get
   }
 
   def axis: ConceptRelationFilterAxis = {

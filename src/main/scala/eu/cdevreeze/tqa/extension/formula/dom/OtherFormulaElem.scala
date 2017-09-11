@@ -23,6 +23,9 @@ import scala.reflect.classTag
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.AspectModel
+import eu.cdevreeze.tqa.ENameExpr
+import eu.cdevreeze.tqa.ENameValue
+import eu.cdevreeze.tqa.ENameValueOrExpr
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
@@ -154,6 +157,14 @@ final class ConceptFilterConcept(underlyingElem: tqa.dom.OtherElem) extends Conc
   def qnameExpressionElemOption: Option[ConceptFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[ConceptFilterQNameExpression]).headOption
   }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
+  }
 }
 
 /**
@@ -168,6 +179,14 @@ final class ConceptFilterAttribute(underlyingElem: tqa.dom.OtherElem) extends Co
 
   def qnameExpressionElemOption: Option[ConceptFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[ConceptFilterQNameExpression]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
   }
 }
 
@@ -184,6 +203,14 @@ final class ConceptFilterType(underlyingElem: tqa.dom.OtherElem) extends Concept
   def qnameExpressionElemOption: Option[ConceptFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[ConceptFilterQNameExpression]).headOption
   }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
+  }
 }
 
 /**
@@ -198,6 +225,14 @@ final class ConceptFilterSubstitutionGroup(underlyingElem: tqa.dom.OtherElem) ex
 
   def qnameExpressionElemOption: Option[ConceptFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[ConceptFilterQNameExpression]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
   }
 }
 
@@ -244,6 +279,14 @@ final class TupleFilterParent(underlyingElem: tqa.dom.OtherElem) extends TupleFi
   def qnameExpressionElemOption: Option[TupleFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[TupleFilterQNameExpression]).headOption
   }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
+  }
 }
 
 /**
@@ -258,6 +301,14 @@ final class TupleFilterAncestor(underlyingElem: tqa.dom.OtherElem) extends Tuple
 
   def qnameExpressionElemOption: Option[TupleFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[TupleFilterQNameExpression]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
   }
 }
 
@@ -304,6 +355,14 @@ final class DimensionFilterDimension(underlyingElem: tqa.dom.OtherElem) extends 
   def qnameExpressionElemOption: Option[DimensionFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[DimensionFilterQNameExpression]).headOption
   }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
+  }
 }
 
 /**
@@ -322,6 +381,15 @@ final class DimensionFilterMember(underlyingElem: tqa.dom.OtherElem) extends Dim
 
   def qnameExpressionElemOption: Option[DimensionFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[DimensionFilterQNameExpression]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    variableElemOption.map(_.name).map(v => ENameValue(v)).orElse(
+      qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+        qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v)))).get
   }
 
   def linkroleElemOption: Option[DimensionFilterLinkrole] = {
@@ -358,6 +426,8 @@ final class DimensionFilterVariable(underlyingElem: tqa.dom.OtherElem) extends D
  */
 final class DimensionFilterLinkrole(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfLinkroleEName)
+
+  def linkrole: String = underlyingElem.text
 }
 
 /**
@@ -365,6 +435,8 @@ final class DimensionFilterLinkrole(underlyingElem: tqa.dom.OtherElem) extends D
  */
 final class DimensionFilterArcrole(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfArcroleEName)
+
+  def arcrole: String = underlyingElem.text
 }
 
 /**
@@ -372,6 +444,8 @@ final class DimensionFilterArcrole(underlyingElem: tqa.dom.OtherElem) extends Di
  */
 final class DimensionFilterAxis(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfAxisEName)
+
+  def axis: String = underlyingElem.text
 }
 
 /**
@@ -416,6 +490,14 @@ final class UnitFilterMeasure(underlyingElem: tqa.dom.OtherElem) extends UnitFil
 
   def qnameExpressionElemOption: Option[UnitFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[UnitFilterQNameExpression]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
   }
 }
 
@@ -473,6 +555,14 @@ final class AspectCoverFilterDimension(underlyingElem: tqa.dom.OtherElem) extend
   def qnameExpressionElemOption: Option[AspectCoverFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[AspectCoverFilterQNameExpression]).headOption
   }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
+  }
 }
 
 /**
@@ -487,6 +577,14 @@ final class AspectCoverFilterExcludeDimension(underlyingElem: tqa.dom.OtherElem)
 
   def qnameExpressionElemOption: Option[AspectCoverFilterQNameExpression] = {
     findAllNonXLinkChildElemsOfType(classTag[AspectCoverFilterQNameExpression]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.expr).map(v => ENameExpr(v))).get
   }
 }
 
@@ -536,6 +634,10 @@ final class ConceptRelationFilterAxis(underlyingElem: tqa.dom.OtherElem) extends
  */
 final class ConceptRelationFilterGenerations(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfGenerationsEName)
+
+  def intValue: Int = {
+    underlyingElem.text.toInt
+  }
 }
 
 /**
@@ -733,6 +835,14 @@ final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspe
 
   def qnameExpressionElemOption: Option[QNameExpressionElem] = {
     findAllNonXLinkChildElemsOfType(classTag[QNameExpressionElem]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.qnameExpr).map(v => ENameExpr(v))).get
   }
 }
 
@@ -1028,6 +1138,14 @@ final class MemberElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormu
 
   def qnameExpressionElemOption: Option[QNameExpressionElem] = {
     findAllNonXLinkChildElemsOfType(classTag[QNameExpressionElem]).headOption
+  }
+
+  /**
+   * Returns the qname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def qnameValueOrExpr: ENameValueOrExpr = {
+    qnameElemOption.map(_.qnameValue).map(v => ENameValue(v)).orElse(
+      qnameExpressionElemOption.map(_.qnameExpr).map(v => ENameExpr(v))).get
   }
 }
 
