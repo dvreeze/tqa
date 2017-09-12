@@ -23,4 +23,6 @@ package eu.cdevreeze.tqa.extension.formula.taxonomymodel
  */
 sealed trait ConversionError
 
-final case class FilterConversionError(message: String) extends ConversionError
+final case class FilterConversionError(message: String, exc: Exception) extends ConversionError
+
+final case class VariableSetConversionError(message: String, exc: Exception) extends ConversionError

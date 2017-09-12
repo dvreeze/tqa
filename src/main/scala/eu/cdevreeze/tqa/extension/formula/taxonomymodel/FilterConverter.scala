@@ -70,7 +70,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.ConceptSubstitutionGroupFilter(f.conceptSubstitutionGroup.qnameValueOrExpr, f.strict))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert concept filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert concept filter ${domFilter.key}", exc)))
     }
   }
 
@@ -94,7 +94,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.OrFilter(subFilters))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert boolean filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert boolean filter ${domFilter.key}", exc)))
     }
   }
 
@@ -115,7 +115,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.TypedDimensionFilter(f.dimension.qnameValueOrExpr, f.testExprOption))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert dimension filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert dimension filter ${domFilter.key}", exc)))
     }
   }
 
@@ -134,7 +134,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.RegexpIdentifierFilter(f.pattern))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert entity filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert entity filter ${domFilter.key}", exc)))
     }
   }
 
@@ -142,7 +142,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     try {
       Good(model.GeneralFilter(domFilter.testExprOption))
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert general filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert general filter ${domFilter.key}", exc)))
     }
   }
 
@@ -171,7 +171,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.MatchDimensionFilter(f.dimension, f.variable, f.matchAny))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert match filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert match filter ${domFilter.key}", exc)))
     }
   }
 
@@ -192,7 +192,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.InstantDurationFilter(f.variable, f.boundary))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert period aspect filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert period aspect filter ${domFilter.key}", exc)))
     }
   }
 
@@ -200,7 +200,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     try {
       Good(model.RelativeFilter(domFilter.variable))
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert relative filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert relative filter ${domFilter.key}", exc)))
     }
   }
 
@@ -213,7 +213,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.ScenarioFilter(f.testExprOption))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert segment-scenario filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert segment-scenario filter ${domFilter.key}", exc)))
     }
   }
 
@@ -230,7 +230,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.LocationFilter(f.variable, f.locationExpr))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert tuple filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert tuple filter ${domFilter.key}", exc)))
     }
   }
 
@@ -243,7 +243,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.GeneralMeasuresFilter(f.testExpr))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert unit filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert unit filter ${domFilter.key}", exc)))
     }
   }
 
@@ -256,7 +256,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           Good(model.PrecisionFilter(f.minimumExpr))
       }
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert value filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert value filter ${domFilter.key}", exc)))
     }
   }
 
@@ -267,7 +267,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         domFilter.dimensions.map(_.qnameValueOrExpr),
         domFilter.excludeDimensions.map(_.qnameValueOrExpr)))
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert aspect cover filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert aspect cover filter ${domFilter.key}", exc)))
     }
   }
 
@@ -283,7 +283,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         domFilter.generationsOption.map(_.intValue),
         domFilter.testExprOption))
     } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert concept relation filter ${domFilter.key}")))
+      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert concept relation filter ${domFilter.key}", exc)))
     }
   }
 }

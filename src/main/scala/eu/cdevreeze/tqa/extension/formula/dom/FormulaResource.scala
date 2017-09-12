@@ -21,6 +21,7 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
+import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
@@ -100,11 +101,14 @@ sealed abstract class VariableSet(val underlyingResource: tqa.dom.NonStandardRes
   /**
    * Returns the mandatory aspectModel attribute.
    * This may fail with an exception if the taxonomy is not schema-valid.
-   *
-   * TODO Return AspectModel object.
    */
-  final def aspectModel: String = {
-    underlyingResource.attribute(ENames.AspectModelEName)
+  final def aspectModel: AspectModel = {
+    val aspectModelString = underlyingResource.attribute(ENames.AspectModelEName)
+
+    aspectModelString match {
+      case "dimensional" => AspectModel.DimensionalAspectModel
+      case _             => AspectModel.NonDimensionalAspectModel
+    }
   }
 }
 

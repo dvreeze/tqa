@@ -40,7 +40,7 @@ sealed trait AspectRule {
 
 final case class ConceptAspectRule(
     sourceOption: Option[EName],
-    conceptNameOrExpr: ENameValueOrExpr) extends AspectRule {
+    conceptNameOrExprOption: Option[ENameValueOrExpr]) extends AspectRule {
 
   def aspect(aspectModel: AspectModel): Aspect = Aspect.ConceptAspect
 }

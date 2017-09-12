@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.taxonomy
+package eu.cdevreeze.tqa.extension.formula.taxonomymodel
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
-import eu.cdevreeze.tqa.extension.formula.dom.FactVariable
+import eu.cdevreeze.tqa.extension.formula.model
+import eu.cdevreeze.tqa.extension.formula.model.VariableSetVariableOrParameter
+import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
-import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
@@ -53,6 +55,8 @@ class FormulaQueryApiTest extends FunSuite {
 
     val formulaTaxo = BasicFormulaTaxonomy.build(taxo)
 
+    val variableSetConverter = new VariableSetConverter(formulaTaxo)
+
     val guessedScope = taxo.guessedScope
 
     import guessedScope._
@@ -61,48 +65,38 @@ class FormulaQueryApiTest extends FunSuite {
       formulaTaxo.findAllExistenceAssertions.size
     }
 
-    val existenceAssertion = formulaTaxo.findAllExistenceAssertions.head
+    val domExistenceAssertion = formulaTaxo.findAllExistenceAssertions.head
 
-    assertResult(Some("ExistenceAssertion_BalanceSheetBanks_MsgAdimExistence1")) {
-      existenceAssertion.underlyingResource.idOption
-    }
-    assertResult("dimensional") {
+    val existenceAssertion: model.ExistenceAssertion =
+      variableSetConverter.convertExistenceAssertion(domExistenceAssertion).toOption.get
+
+    assertResult(AspectModel.DimensionalAspectModel) {
       existenceAssertion.aspectModel
     }
     assertResult(true) {
       existenceAssertion.implicitFiltering
     }
 
-    val varSetRels = formulaTaxo.findAllOutgoingVariableSetRelationships(existenceAssertion)
+    val varSetVariablesOrParameters = existenceAssertion.variableSetVariablesOrParameters
 
-    assertResult(Vector(
-      (QName("varArc_BalanceSheetBanks_MsgAdimExistence1_BalanceSheetBeforeAfterAppropriationResults").res, BigDecimal(1), 0))) {
-
-      varSetRels.map(rel => (rel.name, rel.order, rel.priority))
+    assertResult(1) {
+      varSetVariablesOrParameters.size
     }
 
-    val varsOrPars = varSetRels.map(_.variableOrParameter)
-
-    val factVariables = varsOrPars collect { case fv: FactVariable => fv }
-
-    assertResult(varsOrPars) {
-      factVariables
-    }
-    assertResult(List(
-      (false, Some("0"), Some(false), Some(false)))) {
-      factVariables.map(fv => (fv.bindAsSequence, fv.fallbackValueExprOption.map(_.xpathExpression), fv.matchesOption, fv.nilsOption))
-    }
-
-    val factVariable = factVariables.head
-
-    val variableFilterRels = formulaTaxo.findAllOutgoingVariableFilterRelationships(factVariable)
-
-    assertResult(List(
-      (false, true, BigDecimal(1), 0))) {
-      variableFilterRels.map(rel => (rel.complement, rel.cover, rel.order, rel.priority))
+    assertResult(true) {
+      varSetVariablesOrParameters match {
+        case Seq(
+          varSetVarOrPar @ VariableSetVariableOrParameter(
+            _,
+            _,
+            _,
+            _)) if varSetVarOrPar.priority >= 0 => true
+        case _ => false
+      }
     }
 
-    // val variableFilterRel = variableFilterRels.head
+    // TODO Name must be stored, and must be:
+    // QName("varArc_BalanceSheetBanks_MsgAdimExistence1_BalanceSheetBeforeAfterAppropriationResults").res
 
     // TODO Proceed with querying and testing
   }
@@ -122,12 +116,18 @@ class FormulaQueryApiTest extends FunSuite {
 
     val formulaTaxo = BasicFormulaTaxonomy.build(taxo)
 
+    val variableSetConverter = new VariableSetConverter(formulaTaxo)
+
     // val guessedScope = taxo.guessedScope
 
     // import guessedScope._
 
     assertResult(17) {
       formulaTaxo.findAllValueAssertions.size
+    }
+    assertResult(formulaTaxo.findAllValueAssertions.size) {
+      formulaTaxo.findAllValueAssertions.
+        flatMap(va => variableSetConverter.convertValueAssertion(va).toOption).size
     }
 
     // TODO Proceed with querying and testing

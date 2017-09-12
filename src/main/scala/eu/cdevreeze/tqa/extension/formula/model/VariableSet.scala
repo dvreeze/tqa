@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.extension.formula.model
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.AspectModel
-import eu.cdevreeze.tqa.BigDecimalValueOrExpr
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.yaidom.core.EName
 
@@ -65,8 +64,8 @@ final case class Formula(
   sourceOption: Option[EName],
   valueExpr: ScopedXPathString,
   aspectRuleGroups: immutable.IndexedSeq[AspectRuleGroup],
-  precisionValueOrExprOption: Option[BigDecimalValueOrExpr],
-  decimalsValueOrExprOption: Option[BigDecimalValueOrExpr],
+  precisionValueOrExprOption: Option[ScopedXPathString],
+  decimalsValueOrExprOption: Option[ScopedXPathString],
   variableSetFilters: immutable.IndexedSeq[VariableSetFilter],
   variableSetPreconditions: immutable.IndexedSeq[VariableSetPrecondition],
   variableSetVariablesOrParameters: immutable.IndexedSeq[VariableSetVariableOrParameter]) extends VariableSet
