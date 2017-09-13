@@ -123,7 +123,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
   private def extractVariableSetFilters(domVariableSet: dom.VariableSet): immutable.IndexedSeq[model.VariableSetFilter] = {
     val varSetFilterRelationships: immutable.IndexedSeq[VariableSetFilterRelationship] =
-      formulaTaxonomy.findAllOutgoingVariableSetFilterRelationships(domVariableSet)
+      formulaTaxonomy.findAllOutgoingVariableSetFilterRelationships(domVariableSet).sortBy(_.order)
 
     val variableSetFilters: immutable.IndexedSeq[model.VariableSetFilter] =
       varSetFilterRelationships flatMap { rel =>
@@ -137,7 +137,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
   private def extractVariableSetPreconditions(domVariableSet: dom.VariableSet): immutable.IndexedSeq[model.VariableSetPrecondition] = {
     val varSetPreconditionRelationships: immutable.IndexedSeq[VariableSetPreconditionRelationship] =
-      formulaTaxonomy.findAllOutgoingVariableSetPreconditionRelationships(domVariableSet)
+      formulaTaxonomy.findAllOutgoingVariableSetPreconditionRelationships(domVariableSet).sortBy(_.order)
 
     val variableSetPreconditions: immutable.IndexedSeq[model.VariableSetPrecondition] =
       varSetPreconditionRelationships map { rel =>
@@ -151,7 +151,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
   private def extractVariableSetVariablesOrParameters(domVariableSet: dom.VariableSet): immutable.IndexedSeq[model.VariableSetVariableOrParameter] = {
     val varSetRelationships: immutable.IndexedSeq[VariableSetRelationship] =
-      formulaTaxonomy.findAllOutgoingVariableSetRelationships(domVariableSet)
+      formulaTaxonomy.findAllOutgoingVariableSetRelationships(domVariableSet).sortBy(_.order)
 
     val variableSetVariablesOrParameters: immutable.IndexedSeq[model.VariableSetVariableOrParameter] =
       varSetRelationships map { rel =>
@@ -163,7 +163,8 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           case genVar: dom.GeneralVariable =>
             model.GeneralVariable(genVar.bindAsSequence, genVar.selectExpr)
           case factVar: dom.FactVariable =>
-            val varFilterRelationships = formulaTaxonomy.findAllOutgoingVariableFilterRelationships(factVar)
+            val varFilterRelationships =
+              formulaTaxonomy.findAllOutgoingVariableFilterRelationships(factVar).sortBy(_.order)
 
             val variableFilters: immutable.IndexedSeq[model.VariableFilter] = varFilterRelationships flatMap { rel =>
               val filterOption = filterConverter.convertFilter(rel.filter).toOption

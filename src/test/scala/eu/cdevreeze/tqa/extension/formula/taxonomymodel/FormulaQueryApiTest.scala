@@ -21,17 +21,25 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.AspectModel
+import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.extension.formula.model
+import eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter
+import eu.cdevreeze.tqa.extension.formula.model.DimensionFilterMember
+import eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter
+import eu.cdevreeze.tqa.extension.formula.model.VariableFilter
 import eu.cdevreeze.tqa.extension.formula.model.VariableSetVariableOrParameter
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import eu.cdevreeze.tqa.extension.formula.model.FactVariable
 
 /**
  * Formula query API test case.
@@ -58,10 +66,6 @@ class FormulaQueryApiTest extends FunSuite {
 
     val variableSetConverter = new VariableSetConverter(formulaTaxo)
 
-    // val guessedScope = taxo.guessedScope
-
-    // import guessedScope._
-
     assertResult(1) {
       formulaTaxo.findAllExistenceAssertions.size
     }
@@ -84,21 +88,88 @@ class FormulaQueryApiTest extends FunSuite {
       varSetVariablesOrParameters.size
     }
 
-    assertResult(true) {
-      varSetVariablesOrParameters match {
-        case Seq(
-          varSetVarOrPar @ VariableSetVariableOrParameter(
-            _,
-            _,
-            EName(None, "varArc_BalanceSheetBanks_MsgAdimExistence1_BalanceSheetBeforeAfterAppropriationResults"),
-            _,
-            _,
-            _)) if varSetVarOrPar.priority >= 0 => true
-        case _ => false
-      }
+    val Elr = "urn:kvk:linkrole:balance-sheet-banks"
+
+    val varSetVarOrPar @ VariableSetVariableOrParameter(
+      elr,
+      factVariable @ FactVariable(_, _, _, _, variableFilters),
+      ename,
+      order,
+      priority,
+      use) = varSetVariablesOrParameters.head
+
+    assertResult(Elr) {
+      elr
+    }
+    assertResult(EName(None, "varArc_BalanceSheetBanks_MsgAdimExistence1_BalanceSheetBeforeAfterAppropriationResults")) {
+      ename
+    }
+    assertResult(BigDecimal(1)) {
+      order
+    }
+    assertResult(0) {
+      priority
+    }
+    assertResult(Use.Optional) {
+      use
     }
 
-    // TODO Proceed with querying and testing
+    assertResult(false) {
+      factVariable.bindAsSequence
+    }
+    assertResult(Some("0")) {
+      factVariable.fallbackValueExprOption.map(_.xpathExpression)
+    }
+    assertResult(Some(false)) {
+      factVariable.matchesOption
+    }
+    assertResult(Some(false)) {
+      factVariable.nilsOption
+    }
+
+    assertResult(1) {
+      variableFilters.size
+    }
+
+    val Seq(
+      variableFilter @ VariableFilter(
+        elr2,
+        filter2 @ ConceptNameFilter(conceptNamesOrExprs),
+        complement2,
+        cover2,
+        order2,
+        priority2,
+        use2)) = variableFilters
+
+    assertResult(Elr) {
+      elr2
+    }
+    assertResult(false) {
+      complement2
+    }
+    assertResult(true) {
+      cover2
+    }
+    assertResult(BigDecimal(1)) {
+      order2
+    }
+    assertResult(0) {
+      priority2
+    }
+    assertResult(Use.Optional) {
+      use2
+    }
+
+    val guessedScope = taxo.guessedScope
+
+    import guessedScope._
+
+    assertResult(1) {
+      conceptNamesOrExprs.size
+    }
+    assertResult(Seq(ENameValue(QName("venj-bw2-i:BalanceSheetBeforeAfterAppropriationResults").res))) {
+      conceptNamesOrExprs
+    }
   }
 
   test("testQueryValueAssertions") {
@@ -118,10 +189,6 @@ class FormulaQueryApiTest extends FunSuite {
 
     val variableSetConverter = new VariableSetConverter(formulaTaxo)
 
-    // val guessedScope = taxo.guessedScope
-
-    // import guessedScope._
-
     assertResult(17) {
       formulaTaxo.findAllValueAssertions.size
     }
@@ -130,6 +197,101 @@ class FormulaQueryApiTest extends FunSuite {
         flatMap(va => variableSetConverter.convertValueAssertion(va).toOption).size
     }
 
-    // TODO Proceed with querying and testing
+    val domValueAssertion =
+      formulaTaxo.findAllValueAssertions.find(_.underlyingResource.idOption.contains("valueAssertion_BalanceSheetBanks_MsgSeparateSumOfChildrenParentDebit1")).get
+
+    val valueAssertion: model.ValueAssertion =
+      variableSetConverter.convertValueAssertion(domValueAssertion).toOption.get
+
+    assertResult(AspectModel.DimensionalAspectModel) {
+      valueAssertion.aspectModel
+    }
+    assertResult(true) {
+      valueAssertion.implicitFiltering
+    }
+
+    assertResult(" $Assets = - sum($varArc_BalanceSheetBanks_MsgSeparateSumOfChildrenParentDebit1_ChildrenOfAssetsCredit)+ sum($varArc_BalanceSheetBanks_MsgSeparateSumOfChildrenParentDebit1_ChildrenOfAssetsDebit)") {
+      valueAssertion.testExpr.xpathExpression
+    }
+
+    assertResult(Nil) {
+      valueAssertion.variableSetPreconditions
+    }
+    assertResult(Nil) {
+      valueAssertion.variableSetFilters
+    }
+
+    assertResult(3) {
+      valueAssertion.variableSetVariablesOrParameters.size
+    }
+
+    val Elr = "urn:kvk:linkrole:balance-sheet-banks"
+
+    val varSetVarOrPar @ VariableSetVariableOrParameter(
+      elr,
+      factVariable @ FactVariable(_, _, _, _, variableFilters),
+      ename,
+      order,
+      priority,
+      use) = valueAssertion.variableSetVariablesOrParameters.head
+
+    assertResult(Elr) {
+      elr
+    }
+    assertResult(EName(None, "Assets")) {
+      ename
+    }
+    assertResult(BigDecimal(1)) {
+      order
+    }
+    assertResult(0) {
+      priority
+    }
+    assertResult(Use.Optional) {
+      use
+    }
+
+    assertResult(false) {
+      factVariable.bindAsSequence
+    }
+    assertResult(None) {
+      factVariable.fallbackValueExprOption.map(_.xpathExpression)
+    }
+    assertResult(Some(false)) {
+      factVariable.matchesOption
+    }
+    assertResult(Some(false)) {
+      factVariable.nilsOption
+    }
+
+    assertResult(3) {
+      variableFilters.size
+    }
+
+    assertResult(Set(false)) {
+      variableFilters.map(_.complement).toSet
+    }
+    assertResult(Set(true)) {
+      variableFilters.map(_.cover).toSet
+    }
+    assertResult(Set(BigDecimal(1), BigDecimal(2))) {
+      variableFilters.map(_.order).toSet
+    }
+
+    val explicitDimensionFilter @ ExplicitDimensionFilter(dim, mems) =
+      variableFilters.filter(_.order == BigDecimal(2)).head.filter
+
+    val guessedScope = taxo.guessedScope
+
+    import guessedScope._
+
+    assertResult(ENameValue(QName("venj-bw2-dim:FinancialStatementsTypeAxis").res)) {
+      dim
+    }
+    assertResult(List(DimensionFilterMember(
+      ENameValue(QName("venj-bw2-dm:SeparateMember").res), None, None, None))) {
+
+      mems
+    }
   }
 }
