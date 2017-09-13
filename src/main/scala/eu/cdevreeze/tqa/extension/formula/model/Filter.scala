@@ -54,13 +54,13 @@ final case class ConceptSubstitutionGroupFilter(
   strict: Boolean) extends ConceptFilter
 
 sealed abstract class BooleanFilter(
-  val subFilters: immutable.IndexedSeq[SubFilter]) extends Filter
+  val subFilters: immutable.IndexedSeq[BooleanFilterSubFilter]) extends Filter
 
 final case class AndFilter(
-  override val subFilters: immutable.IndexedSeq[SubFilter]) extends BooleanFilter(subFilters)
+  override val subFilters: immutable.IndexedSeq[BooleanFilterSubFilter]) extends BooleanFilter(subFilters)
 
 final case class OrFilter(
-  override val subFilters: immutable.IndexedSeq[SubFilter]) extends BooleanFilter(subFilters)
+  override val subFilters: immutable.IndexedSeq[BooleanFilterSubFilter]) extends BooleanFilter(subFilters)
 
 sealed abstract class DimensionFilter(val dimensionNameOrExpr: ENameValueOrExpr) extends Filter
 

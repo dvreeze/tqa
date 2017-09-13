@@ -17,20 +17,20 @@
 package eu.cdevreeze.tqa.extension.formula.model
 
 import eu.cdevreeze.tqa.common.Use
-import eu.cdevreeze.yaidom.core.EName
 
 /**
- * A variable set variable-or-parameter (nested) relationship, without the variable set.
+ * Boolean filter (nested) relationship.
  *
  * @author Chris de Vreeze
  */
-final case class VariableSetVariableOrParameter(
+final case class BooleanFilterSubFilter(
     elr: String,
-    variableOrParameter: VariableOrParameter,
-    name: EName,
+    subFilter: Filter,
+    complement: Boolean,
+    cover: Boolean,
     order: BigDecimal,
     priority: Int,
-    use: Use) extends NestedRelationship[VariableOrParameter] {
+    use: Use) extends NestedRelationship[Filter] {
 
-  def target: VariableOrParameter = variableOrParameter
+  def target: Filter = subFilter
 }

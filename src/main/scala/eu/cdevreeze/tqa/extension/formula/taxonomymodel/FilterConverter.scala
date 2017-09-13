@@ -84,7 +84,9 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         booleanFilterRelationships flatMap { rel =>
           val subFilterOption = convertFilter(rel.subFilter).toOption
 
-          subFilterOption.map(subFilter => model.SubFilter(rel.complement, rel.cover, subFilter))
+          subFilterOption map { subFilter =>
+            model.BooleanFilterSubFilter(rel.elr, subFilter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
+          }
         }
 
       domFilter match {

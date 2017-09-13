@@ -29,6 +29,7 @@ import eu.cdevreeze.tqa.extension.formula.model.VariableSetVariableOrParameter
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
 import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
+import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
@@ -57,9 +58,9 @@ class FormulaQueryApiTest extends FunSuite {
 
     val variableSetConverter = new VariableSetConverter(formulaTaxo)
 
-    val guessedScope = taxo.guessedScope
+    // val guessedScope = taxo.guessedScope
 
-    import guessedScope._
+    // import guessedScope._
 
     assertResult(1) {
       formulaTaxo.findAllExistenceAssertions.size
@@ -89,14 +90,13 @@ class FormulaQueryApiTest extends FunSuite {
           varSetVarOrPar @ VariableSetVariableOrParameter(
             _,
             _,
+            EName(None, "varArc_BalanceSheetBanks_MsgAdimExistence1_BalanceSheetBeforeAfterAppropriationResults"),
+            _,
             _,
             _)) if varSetVarOrPar.priority >= 0 => true
         case _ => false
       }
     }
-
-    // TODO Name must be stored, and must be:
-    // QName("varArc_BalanceSheetBanks_MsgAdimExistence1_BalanceSheetBeforeAfterAppropriationResults").res
 
     // TODO Proceed with querying and testing
   }

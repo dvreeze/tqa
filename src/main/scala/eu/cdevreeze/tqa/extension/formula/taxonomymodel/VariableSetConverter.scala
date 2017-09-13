@@ -129,7 +129,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       varSetFilterRelationships flatMap { rel =>
         val filterOption = filterConverter.convertFilter(rel.filter).toOption
 
-        filterOption.map(filter => model.VariableSetFilter(filter, rel.complement, rel.order, rel.priority, rel.use))
+        filterOption.map(filter => model.VariableSetFilter(rel.elr, filter, rel.complement, rel.order, rel.priority, rel.use))
       }
 
     variableSetFilters
@@ -143,7 +143,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       varSetPreconditionRelationships map { rel =>
         val precondition = model.Precondition(rel.precondition.testExpr)
 
-        model.VariableSetPrecondition(precondition, rel.order, rel.priority, rel.use)
+        model.VariableSetPrecondition(rel.elr, precondition, rel.order, rel.priority, rel.use)
       }
 
     variableSetPreconditions
@@ -168,13 +168,15 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
             val variableFilters: immutable.IndexedSeq[model.VariableFilter] = varFilterRelationships flatMap { rel =>
               val filterOption = filterConverter.convertFilter(rel.filter).toOption
 
-              filterOption.map(filter => model.VariableFilter(filter, rel.complement, rel.cover, rel.order, rel.priority, rel.use))
+              filterOption map { filter =>
+                model.VariableFilter(rel.elr, filter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
+              }
             }
 
             model.FactVariable(factVar.bindAsSequence, factVar.fallbackValueExprOption, factVar.matchesOption, factVar.nilsOption, variableFilters)
         }
 
-        model.VariableSetVariableOrParameter(varOrPar, rel.order, rel.priority, rel.use)
+        model.VariableSetVariableOrParameter(rel.elr, varOrPar, rel.name, rel.order, rel.priority, rel.use)
       }
 
     variableSetVariablesOrParameters

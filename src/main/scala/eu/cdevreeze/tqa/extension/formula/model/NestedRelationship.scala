@@ -16,12 +16,24 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
+import eu.cdevreeze.tqa.common.Use
+
 /**
- * Sub-filter in a boolean filter relationship.
+ * A "nested relationship" in a formula context. It contains the relationship target, and not the source.
+ * It also contains relationship attributes such as order, priority and use. It also contains the ELR
+ * of the parent extended link.
  *
  * @author Chris de Vreeze
  */
-final case class SubFilter(
-  complement: Boolean,
-  cover: Boolean,
-  filter: Filter)
+trait NestedRelationship[Target] {
+
+  def elr: String
+
+  def target: Target
+
+  def order: BigDecimal
+
+  def priority: Int
+
+  def use: Use
+}
