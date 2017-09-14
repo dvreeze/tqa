@@ -23,8 +23,6 @@ import eu.cdevreeze.tqa.BigDecimalValueOrExpr
 import eu.cdevreeze.tqa.ENameValueOrExpr
 import eu.cdevreeze.tqa.StringValueOrExpr
 import eu.cdevreeze.tqa.extension.formula.model.AspectRule
-import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
-import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
 import eu.cdevreeze.yaidom.core.EName
 
@@ -57,8 +55,8 @@ final case class ConceptRelationshipNode(
   linknameOrExprOption: Option[ENameValueOrExpr],
   arcroleOrExpr: StringValueOrExpr,
   arcnameOrExprOption: Option[ENameValueOrExpr],
-  formulaAxisOption: Option[ConceptRelationshipNodes.FormulaAxis],
-  generationsOption: Option[BigDecimalValueOrExpr],
+  formulaAxisOrExprOption: Option[StringValueOrExpr], // Parsable as ConceptRelationshipNodes.FormulaAxis
+  generationsOrExprOption: Option[BigDecimalValueOrExpr],
   definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]) extends RelationshipNode
 
 final case class DimensionRelationshipNode(
@@ -67,8 +65,8 @@ final case class DimensionRelationshipNode(
   dimension: EName,
   relationshipSourceNamesOrExprs: immutable.IndexedSeq[ENameValueOrExpr],
   linkroleOrExprOption: Option[StringValueOrExpr],
-  formulaAxisOption: Option[DimensionRelationshipNodes.FormulaAxis],
-  generationsOption: Option[BigDecimalValueOrExpr],
+  formulaAxisOrExprOption: Option[StringValueOrExpr], // Parsable as DimensionRelationshipNodes.FormulaAxis
+  generationsOrExprOption: Option[BigDecimalValueOrExpr],
   definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]) extends RelationshipNode
 
 final case class RuleNode(
