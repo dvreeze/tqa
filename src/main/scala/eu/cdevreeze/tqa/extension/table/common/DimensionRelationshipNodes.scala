@@ -41,10 +41,10 @@ object DimensionRelationshipNodes {
 
   object FormulaAxis {
 
-    case object DescendantAxis extends FormulaAxis
-    case object DescendantOrSelfAxis extends FormulaAxis
-    case object ChildAxis extends FormulaAxis
-    case object ChildOrSelfAxis extends FormulaAxis
+    case object DescendantAxis extends FormulaAxis { override def toString: String = "descendant" }
+    case object DescendantOrSelfAxis extends FormulaAxis { override def toString: String = "descendant-or-self" }
+    case object ChildAxis extends FormulaAxis { override def toString: String = "child" }
+    case object ChildOrSelfAxis extends FormulaAxis { override def toString: String = "child-or-self" }
 
     def fromString(s: String): FormulaAxis = s match {
       case "descendant"         => DescendantAxis

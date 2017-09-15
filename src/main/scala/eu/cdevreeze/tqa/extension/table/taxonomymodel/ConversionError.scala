@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.table.model
-
-import scala.collection.immutable
-
-import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
+package eu.cdevreeze.tqa.extension.table.taxonomymodel
 
 /**
- * Table breakdown.
+ * Conversion error, when converting from the table DOM to the model.
  *
  * @author Chris de Vreeze
  */
-final case class Breakdown(
-  parentChildOrderOption: Option[ParentChildOrder],
-  breakdownTrees: immutable.IndexedSeq[BreakdownTree])
+sealed trait ConversionError
+
+final case class TableConversionError(message: String, exc: Exception) extends ConversionError

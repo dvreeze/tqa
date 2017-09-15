@@ -31,7 +31,7 @@ import eu.cdevreeze.tqa.extension.formula.relationship.VariableSetRelationship
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
 
 /**
- * Converter from formula taxonomy filters to filters in the model layer.
+ * Converter from formula DOM variable sets to variable sets in the model layer.
  *
  * @author Chris de Vreeze
  */
@@ -185,40 +185,9 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
   private def extractAspectRuleGroups(domFormula: dom.Formula): immutable.IndexedSeq[model.AspectRuleGroup] = {
     domFormula.formulaAspectsElems map { aspectsElem =>
-      model.AspectRuleGroup(aspectsElem.sourceOption, aspectsElem.formulaAspects.map(asp => convertAspectRule(asp)))
+      model.AspectRuleGroup(
+        aspectsElem.sourceOption,
+        aspectsElem.formulaAspects.map(asp => AspectRuleConverter.convertAspectRule(asp)))
     }
-  }
-
-  private def convertAspectRule(domAspectRule: dom.FormulaAspect): model.AspectRule = domAspectRule match {
-    case fa: dom.ConceptAspect =>
-      model.ConceptAspectRule(fa.sourceOption, fa.qnameValueOrExprOption)
-    case fa: dom.EntityIdentifierAspect =>
-      model.EntityIdentifierAspectRule(fa.sourceOption, fa.schemeExprOption, fa.valueExprOption)
-    case fa: dom.PeriodAspect =>
-      val periods: immutable.IndexedSeq[model.PeriodAspectRule.Period] = fa.periodElems map {
-        case pe: dom.ForeverElem  => model.PeriodAspectRule.ForeverPeriod
-        case pe: dom.InstantElem  => model.PeriodAspectRule.InstantPeriod(pe.valueExprOption)
-        case pe: dom.DurationElem => model.PeriodAspectRule.DurationPeriod(pe.startExprOption, pe.endExprOption)
-      }
-
-      model.PeriodAspectRule(fa.sourceOption, periods)
-    case fa: dom.UnitAspect =>
-      model.UnitAspectRule(
-        fa.sourceOption,
-        fa.multiplyByElems.map(e => model.MultiplyBy(e.sourceOption, e.measureExprOption)),
-        fa.divideByElems.map(e => model.DivideBy(e.sourceOption, e.measureExprOption)),
-        fa.augmentOption)
-    case fa: dom.OccEmptyAspect =>
-      model.OccEmptyAspectRule(fa.sourceOption, fa.occ)
-    case fa: dom.OccFragmentsAspect =>
-      model.OccFragmentsAspectRule(fa.sourceOption, fa.occ)
-    case fa: dom.OccXpathAspect =>
-      model.OccXPathAspectRule(fa.sourceOption, fa.occ, fa.selectExprOption)
-    case fa: dom.ExplicitDimensionAspect =>
-      model.ExplicitDimensionAspectRule(fa.sourceOption, fa.dimension, fa.memberElemOption.map(_.qnameValueOrExpr))
-    case fa: dom.TypedDimensionAspect =>
-      // TODO Typed dimension member!
-
-      model.TypedDimensionAspectRule(fa.sourceOption, fa.dimension, None)
   }
 }

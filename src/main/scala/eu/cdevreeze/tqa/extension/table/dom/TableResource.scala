@@ -28,6 +28,15 @@ import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
 import eu.cdevreeze.tqa.xlink.XLinkResource
+import eu.cdevreeze.tqa.BigDecimalExpr
+import eu.cdevreeze.tqa.BigDecimalValue
+import eu.cdevreeze.tqa.BigDecimalValueOrExpr
+import eu.cdevreeze.tqa.ENameExpr
+import eu.cdevreeze.tqa.ENameValue
+import eu.cdevreeze.tqa.ENameValueOrExpr
+import eu.cdevreeze.tqa.StringExpr
+import eu.cdevreeze.tqa.StringValue
+import eu.cdevreeze.tqa.StringValueOrExpr
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import javax.xml.bind.DatatypeConverter
@@ -221,12 +230,28 @@ final class ConceptRelationshipNode(underlyingResource: tqa.dom.NonStandardResou
     findAllNonXLinkChildElemsOfTableElemType(classTag[RelationshipSourceExpression])
   }
 
+  /**
+   * Returns the sources as collection of ENameValueOrExpr objects. This may fail if this element is not schema-valid.
+   */
+  def sourceValuesOrExpressions: immutable.IndexedSeq[ENameValueOrExpr] = {
+    relationshipSources.map(_.source).map(v => ENameValue(v)) ++
+      relationshipSourceExpressions.map(_.expr).map(v => ENameExpr(v))
+  }
+
   def linkroleOption: Option[Linkrole] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[Linkrole]).headOption
   }
 
   def linkroleExpressionOption: Option[LinkroleExpression] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[LinkroleExpression]).headOption
+  }
+
+  /**
+   * Returns the optional linkrole as StringValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def linkroleValueOrExprOption: Option[StringValueOrExpr] = {
+    linkroleOption.map(_.linkrole).map(v => StringValue(v)).orElse(
+      linkroleExpressionOption.map(_.expr).map(v => StringExpr(v)))
   }
 
   def arcroleOption: Option[Arcrole] = {
@@ -237,12 +262,28 @@ final class ConceptRelationshipNode(underlyingResource: tqa.dom.NonStandardResou
     findAllNonXLinkChildElemsOfTableElemType(classTag[ArcroleExpression]).headOption
   }
 
+  /**
+   * Returns the arcrole as StringValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def arcroleValueOrExpr: StringValueOrExpr = {
+    arcroleOption.map(_.arcrole).map(v => StringValue(v)).orElse(
+      arcroleExpressionOption.map(_.expr).map(v => StringExpr(v))).get
+  }
+
   def formulaAxisOption: Option[ConceptRelationshipNodeFormulaAxis] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[ConceptRelationshipNodeFormulaAxis]).headOption
   }
 
   def formulaAxisExpressionOption: Option[ConceptRelationshipNodeFormulaAxisExpression] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[ConceptRelationshipNodeFormulaAxisExpression]).headOption
+  }
+
+  /**
+   * Returns the optional formulaAxis as StringValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def formulaAxisValueOrExprOption: Option[StringValueOrExpr] = {
+    formulaAxisOption.map(_.formulaAxis).map(v => StringValue(v.toString)).orElse(
+      formulaAxisExpressionOption.map(_.expr).map(v => StringExpr(v)))
   }
 
   def generationsOption: Option[Generations] = {
@@ -253,6 +294,14 @@ final class ConceptRelationshipNode(underlyingResource: tqa.dom.NonStandardResou
     findAllNonXLinkChildElemsOfTableElemType(classTag[GenerationsExpression]).headOption
   }
 
+  /**
+   * Returns the optional generations as BigDecimalValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def generationsValueOrExprOption: Option[BigDecimalValueOrExpr] = {
+    generationsOption.map(_.generations).map(v => BigDecimalValue(v)).orElse(
+      generationsExpressionOption.map(_.expr).map(v => BigDecimalExpr(v)))
+  }
+
   def linknameOption: Option[Linkname] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[Linkname]).headOption
   }
@@ -261,12 +310,28 @@ final class ConceptRelationshipNode(underlyingResource: tqa.dom.NonStandardResou
     findAllNonXLinkChildElemsOfTableElemType(classTag[LinknameExpression]).headOption
   }
 
+  /**
+   * Returns the optional linkname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def linknameValueOrExprOption: Option[ENameValueOrExpr] = {
+    linknameOption.map(_.linkname).map(v => ENameValue(v)).orElse(
+      linknameExpressionOption.map(_.expr).map(v => ENameExpr(v)))
+  }
+
   def arcnameOption: Option[Arcname] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[Arcname]).headOption
   }
 
   def arcnameExpressionOption: Option[ArcnameExpression] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[ArcnameExpression]).headOption
+  }
+
+  /**
+   * Returns the optional arcname as ENameValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def arcnameValueOrExprOption: Option[ENameValueOrExpr] = {
+    arcnameOption.map(_.arcname).map(v => ENameValue(v)).orElse(
+      arcnameExpressionOption.map(_.expr).map(v => ENameExpr(v)))
   }
 }
 
@@ -291,12 +356,28 @@ final class DimensionRelationshipNode(underlyingResource: tqa.dom.NonStandardRes
     findAllNonXLinkChildElemsOfTableElemType(classTag[RelationshipSourceExpression])
   }
 
+  /**
+   * Returns the sources as collection of ENameValueOrExpr objects. This may fail if this element is not schema-valid.
+   */
+  def sourceValuesOrExpressions: immutable.IndexedSeq[ENameValueOrExpr] = {
+    relationshipSources.map(_.source).map(v => ENameValue(v)) ++
+      relationshipSourceExpressions.map(_.expr).map(v => ENameExpr(v))
+  }
+
   def linkroleOption: Option[Linkrole] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[Linkrole]).headOption
   }
 
   def linkroleExpressionOption: Option[LinkroleExpression] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[LinkroleExpression]).headOption
+  }
+
+  /**
+   * Returns the optional linkrole as StringValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def linkroleValueOrExprOption: Option[StringValueOrExpr] = {
+    linkroleOption.map(_.linkrole).map(v => StringValue(v)).orElse(
+      linkroleExpressionOption.map(_.expr).map(v => StringExpr(v)))
   }
 
   def formulaAxisOption: Option[DimensionRelationshipNodeFormulaAxis] = {
@@ -307,12 +388,28 @@ final class DimensionRelationshipNode(underlyingResource: tqa.dom.NonStandardRes
     findAllNonXLinkChildElemsOfTableElemType(classTag[DimensionRelationshipNodeFormulaAxisExpression]).headOption
   }
 
+  /**
+   * Returns the optional formulaAxis as StringValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def formulaAxisValueOrExprOption: Option[StringValueOrExpr] = {
+    formulaAxisOption.map(_.formulaAxis).map(v => StringValue(v.toString)).orElse(
+      formulaAxisExpressionOption.map(_.expr).map(v => StringExpr(v)))
+  }
+
   def generationsOption: Option[Generations] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[Generations]).headOption
   }
 
   def generationsExpressionOption: Option[GenerationsExpression] = {
     findAllNonXLinkChildElemsOfTableElemType(classTag[GenerationsExpression]).headOption
+  }
+
+  /**
+   * Returns the optional generations as BigDecimalValueOrExpr. This may fail if this element is not schema-valid.
+   */
+  def generationsValueOrExprOption: Option[BigDecimalValueOrExpr] = {
+    generationsOption.map(_.generations).map(v => BigDecimalValue(v)).orElse(
+      generationsExpressionOption.map(_.expr).map(v => BigDecimalExpr(v)))
   }
 
   /**

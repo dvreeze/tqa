@@ -30,7 +30,7 @@ import eu.cdevreeze.tqa.extension.formula.relationship.BooleanFilterRelationship
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
 
 /**
- * Converter from formula taxonomy filters to filters in the model layer.
+ * Converter from formula DOM filters to filters in the model layer.
  *
  * @author Chris de Vreeze
  */

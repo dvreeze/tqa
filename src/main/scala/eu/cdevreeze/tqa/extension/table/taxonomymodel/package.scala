@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.table.model
-
-import scala.collection.immutable
-
-import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
+package eu.cdevreeze.tqa.extension.table
 
 /**
- * Table breakdown.
+ * Model-aware layer on top of a BasicTableTaxonomy.
  *
  * @author Chris de Vreeze
  */
-final case class Breakdown(
-  parentChildOrderOption: Option[ParentChildOrder],
-  breakdownTrees: immutable.IndexedSeq[BreakdownTree])
+package object taxonomymodel
