@@ -17,11 +17,7 @@
 package eu.cdevreeze.tqa.extension.formula.taxonomymodel
 
 import scala.collection.immutable
-
-import org.scalactic.Bad
-import org.scalactic.Good
-import org.scalactic.One
-import org.scalactic.Or
+import scala.util.Try
 
 import eu.cdevreeze.tqa.extension.formula.dom
 import eu.cdevreeze.tqa.extension.formula.model
@@ -39,14 +35,14 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
   private val filterConverter = new FilterConverter(formulaTaxonomy)
 
-  def convertVariableSet(domVariableSet: dom.VariableSet): model.VariableSet Or One[ConversionError] = domVariableSet match {
-    case f: dom.ValueAssertion     => convertValueAssertion(f)
-    case f: dom.ExistenceAssertion => convertExistenceAssertion(f)
-    case f: dom.Formula            => convertFormula(f)
+  def tryToConvertVariableSet(domVariableSet: dom.VariableSet): Try[model.VariableSet] = domVariableSet match {
+    case f: dom.ValueAssertion     => tryToConvertValueAssertion(f)
+    case f: dom.ExistenceAssertion => tryToConvertExistenceAssertion(f)
+    case f: dom.Formula            => tryToConvertFormula(f)
   }
 
-  def convertValueAssertion(domVariableSet: dom.ValueAssertion): model.ValueAssertion Or One[ConversionError] = {
-    try {
+  def tryToConvertValueAssertion(domVariableSet: dom.ValueAssertion): Try[model.ValueAssertion] = {
+    Try {
       val variableSetFilters: immutable.IndexedSeq[model.VariableSetFilter] =
         extractVariableSetFilters(domVariableSet)
 
@@ -56,20 +52,18 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       val variableSetVariablesOrParameters: immutable.IndexedSeq[model.VariableSetVariableOrParameter] =
         extractVariableSetVariablesOrParameters(domVariableSet)
 
-      Good(model.ValueAssertion(
+      model.ValueAssertion(
         domVariableSet.implicitFiltering,
         domVariableSet.aspectModel,
         domVariableSet.testExpr,
         variableSetFilters,
         variableSetPreconditions,
-        variableSetVariablesOrParameters))
-    } catch {
-      case exc: Exception => Bad(One(VariableSetConversionError(s"Could not convert value assertion ${domVariableSet.key}", exc)))
+        variableSetVariablesOrParameters)
     }
   }
 
-  def convertExistenceAssertion(domVariableSet: dom.ExistenceAssertion): model.ExistenceAssertion Or One[ConversionError] = {
-    try {
+  def tryToConvertExistenceAssertion(domVariableSet: dom.ExistenceAssertion): Try[model.ExistenceAssertion] = {
+    Try {
       val variableSetFilters: immutable.IndexedSeq[model.VariableSetFilter] =
         extractVariableSetFilters(domVariableSet)
 
@@ -79,20 +73,18 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       val variableSetVariablesOrParameters: immutable.IndexedSeq[model.VariableSetVariableOrParameter] =
         extractVariableSetVariablesOrParameters(domVariableSet)
 
-      Good(model.ExistenceAssertion(
+      model.ExistenceAssertion(
         domVariableSet.implicitFiltering,
         domVariableSet.aspectModel,
         domVariableSet.testExprOption,
         variableSetFilters,
         variableSetPreconditions,
-        variableSetVariablesOrParameters))
-    } catch {
-      case exc: Exception => Bad(One(VariableSetConversionError(s"Could not convert existence assertion ${domVariableSet.key}", exc)))
+        variableSetVariablesOrParameters)
     }
   }
 
-  def convertFormula(domVariableSet: dom.Formula): model.Formula Or One[ConversionError] = {
-    try {
+  def tryToConvertFormula(domVariableSet: dom.Formula): Try[model.Formula] = {
+    Try {
       val variableSetFilters: immutable.IndexedSeq[model.VariableSetFilter] =
         extractVariableSetFilters(domVariableSet)
 
@@ -105,7 +97,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       val aspectRuleGroups: immutable.IndexedSeq[model.AspectRuleGroup] =
         extractAspectRuleGroups(domVariableSet)
 
-      Good(model.Formula(
+      model.Formula(
         domVariableSet.implicitFiltering,
         domVariableSet.aspectModel,
         domVariableSet.sourceOption,
@@ -115,9 +107,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         domVariableSet.decimalsElemOption.map(_.expr),
         variableSetFilters,
         variableSetPreconditions,
-        variableSetVariablesOrParameters))
-    } catch {
-      case exc: Exception => Bad(One(VariableSetConversionError(s"Could not convert formula ${domVariableSet.key}", exc)))
+        variableSetVariablesOrParameters)
     }
   }
 
@@ -126,10 +116,11 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       formulaTaxonomy.findAllOutgoingVariableSetFilterRelationships(domVariableSet).sortBy(_.order)
 
     val variableSetFilters: immutable.IndexedSeq[model.VariableSetFilter] =
-      varSetFilterRelationships flatMap { rel =>
-        val filterOption = filterConverter.convertFilter(rel.filter).toOption
+      varSetFilterRelationships map { rel =>
+        // Throwing an exception if not successful, and that is ok here.
+        val filter = filterConverter.tryToConvertFilter(rel.filter).get
 
-        filterOption.map(filter => model.VariableSetFilter(rel.elr, filter, rel.complement, rel.order, rel.priority, rel.use))
+        model.VariableSetFilter(rel.elr, filter, rel.complement, rel.order, rel.priority, rel.use)
       }
 
     variableSetFilters
@@ -166,12 +157,11 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
             val varFilterRelationships =
               formulaTaxonomy.findAllOutgoingVariableFilterRelationships(factVar).sortBy(_.order)
 
-            val variableFilters: immutable.IndexedSeq[model.VariableFilter] = varFilterRelationships flatMap { rel =>
-              val filterOption = filterConverter.convertFilter(rel.filter).toOption
+            val variableFilters: immutable.IndexedSeq[model.VariableFilter] = varFilterRelationships map { rel =>
+              // Throwing an exception if not successful, and that is ok here.
+              val filter = filterConverter.tryToConvertFilter(rel.filter).get
 
-              filterOption map { filter =>
-                model.VariableFilter(rel.elr, filter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
-              }
+              model.VariableFilter(rel.elr, filter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
             }
 
             model.FactVariable(factVar.bindAsSequence, factVar.fallbackValueExprOption, factVar.matchesOption, factVar.nilsOption, variableFilters)

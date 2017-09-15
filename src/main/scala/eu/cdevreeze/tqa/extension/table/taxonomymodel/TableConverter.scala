@@ -17,11 +17,7 @@
 package eu.cdevreeze.tqa.extension.table.taxonomymodel
 
 import scala.collection.immutable
-
-import org.scalactic.Bad
-import org.scalactic.Good
-import org.scalactic.One
-import org.scalactic.Or
+import scala.util.Try
 
 import eu.cdevreeze.tqa.extension.formula
 import eu.cdevreeze.tqa.extension.table.dom
@@ -39,19 +35,15 @@ import eu.cdevreeze.tqa.extension.formula.taxonomymodel.AspectRuleConverter
  */
 final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
 
-  def convertTable(domTable: dom.Table): model.Table Or One[ConversionError] = {
-    try {
+  def tryToConvertTable(domTable: dom.Table): Try[model.Table] = {
+    Try {
       val tableBreakdownRelationships: immutable.IndexedSeq[TableBreakdownRelationship] =
         tableTaxonomy.findAllOutgoingTableBreakdownRelationships(domTable)
 
       val tableBreakdowns =
         tableBreakdownRelationships.map(rel => convertTableBreakdownRelationship(rel))
 
-      Good(model.Table(
-        domTable.parentChildOrder,
-        tableBreakdowns))
-    } catch {
-      case exc: Exception => Bad(One(TableConversionError(s"Could not convert table ${domTable.key}", exc)))
+      model.Table(domTable.parentChildOrder, tableBreakdowns)
     }
   }
 

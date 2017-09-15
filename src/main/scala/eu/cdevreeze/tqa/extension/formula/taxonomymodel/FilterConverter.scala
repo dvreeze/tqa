@@ -18,11 +18,7 @@ package eu.cdevreeze.tqa.extension.formula.taxonomymodel
 
 import scala.collection.immutable
 import scala.reflect.classTag
-
-import org.scalactic.Bad
-import org.scalactic.Good
-import org.scalactic.One
-import org.scalactic.Or
+import scala.util.Try
 
 import eu.cdevreeze.tqa.extension.formula.dom
 import eu.cdevreeze.tqa.extension.formula.model
@@ -36,72 +32,67 @@ import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
  */
 final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
-  def convertFilter(domFilter: dom.Filter): model.Filter Or One[ConversionError] = domFilter match {
-    case f: dom.ConceptFilter         => convertConceptFilter(f)
-    case f: dom.BooleanFilter         => convertBooleanFilter(f)
-    case f: dom.DimensionFilter       => convertDimensionFilter(f)
-    case f: dom.EntityFilter          => convertEntityFilter(f)
-    case f: dom.GeneralFilter         => convertGeneralFilter(f)
-    case f: dom.MatchFilter           => convertMatchFilter(f)
-    case f: dom.PeriodAspectFilter    => convertPeriodAspectFilter(f)
-    case f: dom.RelativeFilter        => convertRelativeFilter(f)
-    case f: dom.SegmentScenarioFilter => convertSegmentScenarioFilter(f)
-    case f: dom.TupleFilter           => convertTupleFilter(f)
-    case f: dom.UnitFilter            => convertUnitFilter(f)
-    case f: dom.ValueFilter           => convertValueFilter(f)
-    case f: dom.AspectCoverFilter     => convertAspectCoverFilter(f)
-    case f: dom.ConceptRelationFilter => convertConceptRelationFilter(f)
+  def tryToConvertFilter(domFilter: dom.Filter): Try[model.Filter] = domFilter match {
+    case f: dom.ConceptFilter         => tryToConvertConceptFilter(f)
+    case f: dom.BooleanFilter         => tryToConvertBooleanFilter(f)
+    case f: dom.DimensionFilter       => tryToConvertDimensionFilter(f)
+    case f: dom.EntityFilter          => tryToConvertEntityFilter(f)
+    case f: dom.GeneralFilter         => tryToConvertGeneralFilter(f)
+    case f: dom.MatchFilter           => tryToConvertMatchFilter(f)
+    case f: dom.PeriodAspectFilter    => tryToConvertPeriodAspectFilter(f)
+    case f: dom.RelativeFilter        => tryToConvertRelativeFilter(f)
+    case f: dom.SegmentScenarioFilter => tryToConvertSegmentScenarioFilter(f)
+    case f: dom.TupleFilter           => tryToConvertTupleFilter(f)
+    case f: dom.UnitFilter            => tryToConvertUnitFilter(f)
+    case f: dom.ValueFilter           => tryToConvertValueFilter(f)
+    case f: dom.AspectCoverFilter     => tryToConvertAspectCoverFilter(f)
+    case f: dom.ConceptRelationFilter => tryToConvertConceptRelationFilter(f)
   }
 
-  def convertConceptFilter(domFilter: dom.ConceptFilter): model.ConceptFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertConceptFilter(domFilter: dom.ConceptFilter): Try[model.ConceptFilter] = {
+    Try {
       domFilter match {
         case f: dom.ConceptNameFilter =>
-          Good(model.ConceptNameFilter(f.concepts.map(_.qnameValueOrExpr)))
+          model.ConceptNameFilter(f.concepts.map(_.qnameValueOrExpr))
         case f: dom.ConceptPeriodTypeFilter =>
-          Good(model.ConceptPeriodTypeFilter(f.periodType))
+          model.ConceptPeriodTypeFilter(f.periodType)
         case f: dom.ConceptBalanceFilter =>
-          Good(model.ConceptBalanceFilter(f.balance))
+          model.ConceptBalanceFilter(f.balance)
         case f: dom.ConceptCustomAttributeFilter =>
-          Good(model.ConceptCustomAttributeFilter(f.customAttribute.qnameValueOrExpr, f.valueExprOption))
+          model.ConceptCustomAttributeFilter(f.customAttribute.qnameValueOrExpr, f.valueExprOption)
         case f: dom.ConceptDataTypeFilter =>
-          Good(model.ConceptDataTypeFilter(f.conceptDataType.qnameValueOrExpr, f.strict))
+          model.ConceptDataTypeFilter(f.conceptDataType.qnameValueOrExpr, f.strict)
         case f: dom.ConceptSubstitutionGroupFilter =>
-          Good(model.ConceptSubstitutionGroupFilter(f.conceptSubstitutionGroup.qnameValueOrExpr, f.strict))
+          model.ConceptSubstitutionGroupFilter(f.conceptSubstitutionGroup.qnameValueOrExpr, f.strict)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert concept filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertBooleanFilter(domFilter: dom.BooleanFilter): model.BooleanFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertBooleanFilter(domFilter: dom.BooleanFilter): Try[model.BooleanFilter] = {
+    Try {
       val booleanFilterRelationships =
         formulaTaxonomy.findAllOutgoingFormulaRelationshipsOfType(domFilter, classTag[BooleanFilterRelationship]).sortBy(_.order)
 
       // Recursive calls to convertFilter
       val subFilters =
-        booleanFilterRelationships flatMap { rel =>
-          val subFilterOption = convertFilter(rel.subFilter).toOption
+        booleanFilterRelationships map { rel =>
+          // Throwing an exception if not successful, and that is ok here.
+          val subFilter = tryToConvertFilter(rel.subFilter).get
 
-          subFilterOption map { subFilter =>
-            model.BooleanFilterSubFilter(rel.elr, subFilter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
-          }
+          model.BooleanFilterSubFilter(rel.elr, subFilter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
         }
 
       domFilter match {
         case f: dom.AndFilter =>
-          Good(model.AndFilter(subFilters))
+          model.AndFilter(subFilters)
         case f: dom.OrFilter =>
-          Good(model.OrFilter(subFilters))
+          model.OrFilter(subFilters)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert boolean filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertDimensionFilter(domFilter: dom.DimensionFilter): model.DimensionFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertDimensionFilter(domFilter: dom.DimensionFilter): Try[model.DimensionFilter] = {
+    Try {
       domFilter match {
         case f: dom.ExplicitDimensionFilter =>
           val dimMembers: immutable.IndexedSeq[model.DimensionFilterMember] = f.members map { mem =>
@@ -112,170 +103,148 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
               mem.axisElemOption.map(_.axis))
           }
 
-          Good(model.ExplicitDimensionFilter(f.dimension.qnameValueOrExpr, dimMembers))
+          model.ExplicitDimensionFilter(f.dimension.qnameValueOrExpr, dimMembers)
         case f: dom.TypedDimensionFilter =>
-          Good(model.TypedDimensionFilter(f.dimension.qnameValueOrExpr, f.testExprOption))
+          model.TypedDimensionFilter(f.dimension.qnameValueOrExpr, f.testExprOption)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert dimension filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertEntityFilter(domFilter: dom.EntityFilter): model.EntityFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertEntityFilter(domFilter: dom.EntityFilter): Try[model.EntityFilter] = {
+    Try {
       domFilter match {
         case f: dom.IdentifierFilter =>
-          Good(model.IdentifierFilter(f.testExpr))
+          model.IdentifierFilter(f.testExpr)
         case f: dom.SpecificSchemeFilter =>
-          Good(model.SpecificSchemeFilter(f.schemeExpr))
+          model.SpecificSchemeFilter(f.schemeExpr)
         case f: dom.RegexpSchemeFilter =>
-          Good(model.RegexpSchemeFilter(f.pattern))
+          model.RegexpSchemeFilter(f.pattern)
         case f: dom.SpecificIdentifierFilter =>
-          Good(model.SpecificIdentifierFilter(f.schemeExpr, f.valueExpr))
+          model.SpecificIdentifierFilter(f.schemeExpr, f.valueExpr)
         case f: dom.RegexpIdentifierFilter =>
-          Good(model.RegexpIdentifierFilter(f.pattern))
+          model.RegexpIdentifierFilter(f.pattern)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert entity filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertGeneralFilter(domFilter: dom.GeneralFilter): model.GeneralFilter Or One[ConversionError] = {
-    try {
-      Good(model.GeneralFilter(domFilter.testExprOption))
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert general filter ${domFilter.key}", exc)))
+  def tryToConvertGeneralFilter(domFilter: dom.GeneralFilter): Try[model.GeneralFilter] = {
+    Try {
+      model.GeneralFilter(domFilter.testExprOption)
     }
   }
 
-  def convertMatchFilter(domFilter: dom.MatchFilter): model.MatchFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertMatchFilter(domFilter: dom.MatchFilter): Try[model.MatchFilter] = {
+    Try {
       domFilter match {
         case f: dom.MatchConceptFilter =>
-          Good(model.MatchConceptFilter(f.variable, f.matchAny))
+          model.MatchConceptFilter(f.variable, f.matchAny)
         case f: dom.MatchLocationFilter =>
-          Good(model.MatchLocationFilter(f.variable, f.matchAny))
+          model.MatchLocationFilter(f.variable, f.matchAny)
         case f: dom.MatchUnitFilter =>
-          Good(model.MatchUnitFilter(f.variable, f.matchAny))
+          model.MatchUnitFilter(f.variable, f.matchAny)
         case f: dom.MatchEntityIdentifierFilter =>
-          Good(model.MatchEntityIdentifierFilter(f.variable, f.matchAny))
+          model.MatchEntityIdentifierFilter(f.variable, f.matchAny)
         case f: dom.MatchPeriodFilter =>
-          Good(model.MatchPeriodFilter(f.variable, f.matchAny))
+          model.MatchPeriodFilter(f.variable, f.matchAny)
         case f: dom.MatchSegmentFilter =>
-          Good(model.MatchSegmentFilter(f.variable, f.matchAny))
+          model.MatchSegmentFilter(f.variable, f.matchAny)
         case f: dom.MatchScenarioFilter =>
-          Good(model.MatchScenarioFilter(f.variable, f.matchAny))
+          model.MatchScenarioFilter(f.variable, f.matchAny)
         case f: dom.MatchNonXDTSegmentFilter =>
-          Good(model.MatchNonXDTSegmentFilter(f.variable, f.matchAny))
+          model.MatchNonXDTSegmentFilter(f.variable, f.matchAny)
         case f: dom.MatchNonXDTScenarioFilter =>
-          Good(model.MatchNonXDTScenarioFilter(f.variable, f.matchAny))
+          model.MatchNonXDTScenarioFilter(f.variable, f.matchAny)
         case f: dom.MatchDimensionFilter =>
-          Good(model.MatchDimensionFilter(f.dimension, f.variable, f.matchAny))
+          model.MatchDimensionFilter(f.dimension, f.variable, f.matchAny)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert match filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertPeriodAspectFilter(domFilter: dom.PeriodAspectFilter): model.PeriodAspectFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertPeriodAspectFilter(domFilter: dom.PeriodAspectFilter): Try[model.PeriodAspectFilter] = {
+    Try {
       domFilter match {
         case f: dom.PeriodFilter =>
-          Good(model.PeriodFilter(f.testExpr))
+          model.PeriodFilter(f.testExpr)
         case f: dom.PeriodStartFilter =>
-          Good(model.PeriodStartFilter(f.dateExpr, f.timeExprOption))
+          model.PeriodStartFilter(f.dateExpr, f.timeExprOption)
         case f: dom.PeriodEndFilter =>
-          Good(model.PeriodEndFilter(f.dateExpr, f.timeExprOption))
+          model.PeriodEndFilter(f.dateExpr, f.timeExprOption)
         case f: dom.PeriodInstantFilter =>
-          Good(model.PeriodInstantFilter(f.dateExpr, f.timeExprOption))
+          model.PeriodInstantFilter(f.dateExpr, f.timeExprOption)
         case f: dom.ForeverFilter =>
-          Good(model.ForeverFilter)
+          model.ForeverFilter
         case f: dom.InstantDurationFilter =>
-          Good(model.InstantDurationFilter(f.variable, f.boundary))
+          model.InstantDurationFilter(f.variable, f.boundary)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert period aspect filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertRelativeFilter(domFilter: dom.RelativeFilter): model.RelativeFilter Or One[ConversionError] = {
-    try {
-      Good(model.RelativeFilter(domFilter.variable))
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert relative filter ${domFilter.key}", exc)))
+  def tryToConvertRelativeFilter(domFilter: dom.RelativeFilter): Try[model.RelativeFilter] = {
+    Try {
+      model.RelativeFilter(domFilter.variable)
     }
   }
 
-  def convertSegmentScenarioFilter(domFilter: dom.SegmentScenarioFilter): model.SegmentScenarioFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertSegmentScenarioFilter(domFilter: dom.SegmentScenarioFilter): Try[model.SegmentScenarioFilter] = {
+    Try {
       domFilter match {
         case f: dom.SegmentFilter =>
-          Good(model.SegmentFilter(f.testExprOption))
+          model.SegmentFilter(f.testExprOption)
         case f: dom.ScenarioFilter =>
-          Good(model.ScenarioFilter(f.testExprOption))
+          model.ScenarioFilter(f.testExprOption)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert segment-scenario filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertTupleFilter(domFilter: dom.TupleFilter): model.TupleFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertTupleFilter(domFilter: dom.TupleFilter): Try[model.TupleFilter] = {
+    Try {
       domFilter match {
         case f: dom.ParentFilter =>
-          Good(model.ParentFilter(f.parent.qnameValueOrExpr))
+          model.ParentFilter(f.parent.qnameValueOrExpr)
         case f: dom.AncestorFilter =>
-          Good(model.AncestorFilter(f.ancestor.qnameValueOrExpr))
+          model.AncestorFilter(f.ancestor.qnameValueOrExpr)
         case f: dom.SiblingFilter =>
-          Good(model.SiblingFilter(f.variable))
+          model.SiblingFilter(f.variable)
         case f: dom.LocationFilter =>
-          Good(model.LocationFilter(f.variable, f.locationExpr))
+          model.LocationFilter(f.variable, f.locationExpr)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert tuple filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertUnitFilter(domFilter: dom.UnitFilter): model.UnitFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertUnitFilter(domFilter: dom.UnitFilter): Try[model.UnitFilter] = {
+    Try {
       domFilter match {
         case f: dom.SingleMeasureFilter =>
-          Good(model.SingleMeasureFilter(f.measure.qnameValueOrExpr))
+          model.SingleMeasureFilter(f.measure.qnameValueOrExpr)
         case f: dom.GeneralMeasuresFilter =>
-          Good(model.GeneralMeasuresFilter(f.testExpr))
+          model.GeneralMeasuresFilter(f.testExpr)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert unit filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertValueFilter(domFilter: dom.ValueFilter): model.ValueFilter Or One[ConversionError] = {
-    try {
+  def tryToConvertValueFilter(domFilter: dom.ValueFilter): Try[model.ValueFilter] = {
+    Try {
       domFilter match {
         case f: dom.NilFilter =>
-          Good(model.NilFilter)
+          model.NilFilter
         case f: dom.PrecisionFilter =>
-          Good(model.PrecisionFilter(f.minimumExpr))
+          model.PrecisionFilter(f.minimumExpr)
       }
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert value filter ${domFilter.key}", exc)))
     }
   }
 
-  def convertAspectCoverFilter(domFilter: dom.AspectCoverFilter): model.AspectCoverFilter Or One[ConversionError] = {
-    try {
-      Good(model.AspectCoverFilter(
+  def tryToConvertAspectCoverFilter(domFilter: dom.AspectCoverFilter): Try[model.AspectCoverFilter] = {
+    Try {
+      model.AspectCoverFilter(
         domFilter.aspects.map(_.aspectValue).toSet,
         domFilter.dimensions.map(_.qnameValueOrExpr),
-        domFilter.excludeDimensions.map(_.qnameValueOrExpr)))
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert aspect cover filter ${domFilter.key}", exc)))
+        domFilter.excludeDimensions.map(_.qnameValueOrExpr))
     }
   }
 
-  def convertConceptRelationFilter(domFilter: dom.ConceptRelationFilter): model.ConceptRelationFilter Or One[ConversionError] = {
-    try {
-      Good(model.ConceptRelationFilter(
+  def tryToConvertConceptRelationFilter(domFilter: dom.ConceptRelationFilter): Try[model.ConceptRelationFilter] = {
+    Try {
+      model.ConceptRelationFilter(
         domFilter.sourceValueOrExpr,
         domFilter.linkroleValueOrExpr,
         domFilter.linknameValueOrExprOption,
@@ -283,9 +252,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         domFilter.arcnameValueOrExprOption,
         domFilter.axis.axisValue,
         domFilter.generationsOption.map(_.intValue),
-        domFilter.testExprOption))
-    } catch {
-      case exc: Exception => Bad(One(FilterConversionError(s"Could not convert concept relation filter ${domFilter.key}", exc)))
+        domFilter.testExprOption)
     }
   }
 }

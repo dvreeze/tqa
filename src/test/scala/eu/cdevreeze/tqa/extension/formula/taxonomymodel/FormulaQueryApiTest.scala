@@ -73,7 +73,7 @@ class FormulaQueryApiTest extends FunSuite {
     val domExistenceAssertion = formulaTaxo.findAllExistenceAssertions.head
 
     val existenceAssertion: model.ExistenceAssertion =
-      variableSetConverter.convertExistenceAssertion(domExistenceAssertion).toOption.get
+      variableSetConverter.tryToConvertExistenceAssertion(domExistenceAssertion).get
 
     assertResult(AspectModel.DimensionalAspectModel) {
       existenceAssertion.aspectModel
@@ -194,14 +194,14 @@ class FormulaQueryApiTest extends FunSuite {
     }
     assertResult(formulaTaxo.findAllValueAssertions.size) {
       formulaTaxo.findAllValueAssertions.
-        flatMap(va => variableSetConverter.convertValueAssertion(va).toOption).size
+        flatMap(va => variableSetConverter.tryToConvertValueAssertion(va).toOption).size
     }
 
     val domValueAssertion =
       formulaTaxo.findAllValueAssertions.find(_.underlyingResource.idOption.contains("valueAssertion_BalanceSheetBanks_MsgSeparateSumOfChildrenParentDebit1")).get
 
     val valueAssertion: model.ValueAssertion =
-      variableSetConverter.convertValueAssertion(domValueAssertion).toOption.get
+      variableSetConverter.tryToConvertValueAssertion(domValueAssertion).get
 
     assertResult(AspectModel.DimensionalAspectModel) {
       valueAssertion.aspectModel
