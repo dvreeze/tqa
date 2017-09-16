@@ -22,7 +22,7 @@ import scala.reflect.classTag
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.OtherElem
+import eu.cdevreeze.tqa.dom.OtherNonXLinkElem
 import eu.cdevreeze.tqa.extension.formula.dom.ExistenceAssertion
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaArc
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
@@ -76,7 +76,7 @@ object BasicFormulaTaxonomy {
 
     val nonStandardArcs = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NonStandardArc]))
     val nonStandardResources = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NonStandardResource]))
-    val otherElems = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[OtherElem]))
+    val otherElems = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[OtherNonXLinkElem]))
 
     val formulaArcs = nonStandardArcs.flatMap(e => FormulaArc.opt(e))
     val formulaResources = nonStandardResources.flatMap(e => FormulaResource.opt(e))

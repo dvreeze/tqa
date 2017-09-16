@@ -22,7 +22,7 @@ import scala.reflect.classTag
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.OtherElem
+import eu.cdevreeze.tqa.dom.OtherNonXLinkElem
 import eu.cdevreeze.tqa.extension.table.dom.OtherTableElem
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.dom.TableArc
@@ -66,7 +66,7 @@ object BasicTableTaxonomy {
 
     val nonStandardArcs = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NonStandardArc]))
     val nonStandardResources = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NonStandardResource]))
-    val otherElems = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[OtherElem]))
+    val otherElems = rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[OtherNonXLinkElem]))
 
     val tableArcs = nonStandardArcs.flatMap(e => TableArc.opt(e))
     val tableResources = nonStandardResources.flatMap(e => TableResource.opt(e))

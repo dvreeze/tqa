@@ -44,7 +44,7 @@ import javax.xml.bind.DatatypeConverter
  */
 sealed trait OtherFormulaElem extends tqa.dom.AnyTaxonomyElem {
 
-  def underlyingElem: tqa.dom.OtherElem
+  def underlyingElem: tqa.dom.OtherNonXLinkElem
 
   final def key: XmlFragmentKey = underlyingElem.key
 
@@ -59,7 +59,7 @@ sealed trait OtherFormulaElem extends tqa.dom.AnyTaxonomyElem {
 
     implicit val clsTag = cls
 
-    underlyingElem.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
+    underlyingElem.findAllChildElemsOfType(classTag[tqa.dom.OtherNonXLinkElem]).
       flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
@@ -73,12 +73,12 @@ sealed trait OtherFormulaElem extends tqa.dom.AnyTaxonomyElem {
 /**
  * A child element of a variable:function.
  */
-sealed abstract class FunctionContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class FunctionContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * A variable:input child element of a variable:function.
  */
-final class FunctionInput(underlyingElem: tqa.dom.OtherElem) extends FunctionContentElem(underlyingElem) {
+final class FunctionInput(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FunctionContentElem(underlyingElem) {
   requireResolvedName(ENames.VariableInputEName)
 
   /**
@@ -90,12 +90,12 @@ final class FunctionInput(underlyingElem: tqa.dom.OtherElem) extends FunctionCon
 /**
  * A child element of a cfi:implementation.
  */
-sealed abstract class FunctionImplementationContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class FunctionImplementationContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * A cfi:input child element of a cfi:implementation.
  */
-final class FunctionImplementationInput(underlyingElem: tqa.dom.OtherElem) extends FunctionImplementationContentElem(underlyingElem) {
+final class FunctionImplementationInput(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FunctionImplementationContentElem(underlyingElem) {
   requireResolvedName(ENames.CfiInputEName)
 
   /**
@@ -111,7 +111,7 @@ final class FunctionImplementationInput(underlyingElem: tqa.dom.OtherElem) exten
 /**
  * A cfi:step child element of a cfi:implementation.
  */
-final class FunctionImplementationStep(underlyingElem: tqa.dom.OtherElem) extends FunctionImplementationContentElem(underlyingElem) {
+final class FunctionImplementationStep(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FunctionImplementationContentElem(underlyingElem) {
   requireResolvedName(ENames.CfiStepEName)
 
   /**
@@ -131,7 +131,7 @@ final class FunctionImplementationStep(underlyingElem: tqa.dom.OtherElem) extend
 /**
  * A cfi:output child element of a cfi:implementation.
  */
-final class FunctionImplementationOutput(underlyingElem: tqa.dom.OtherElem) extends FunctionImplementationContentElem(underlyingElem) {
+final class FunctionImplementationOutput(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FunctionImplementationContentElem(underlyingElem) {
   requireResolvedName(ENames.CfiOutputEName)
 
   def expr: ScopedXPathString = {
@@ -142,12 +142,12 @@ final class FunctionImplementationOutput(underlyingElem: tqa.dom.OtherElem) exte
 /**
  * A descendant element of a concept filter.
  */
-sealed abstract class ConceptFilterContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class ConceptFilterContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * A cf:concept child element of a concept filter.
  */
-final class ConceptFilterConcept(underlyingElem: tqa.dom.OtherElem) extends ConceptFilterContentElem(underlyingElem) {
+final class ConceptFilterConcept(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CfConceptEName)
 
   def qnameElemOption: Option[ConceptFilterQName] = {
@@ -170,7 +170,7 @@ final class ConceptFilterConcept(underlyingElem: tqa.dom.OtherElem) extends Conc
 /**
  * A cf:attribute child element of a concept filter.
  */
-final class ConceptFilterAttribute(underlyingElem: tqa.dom.OtherElem) extends ConceptFilterContentElem(underlyingElem) {
+final class ConceptFilterAttribute(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CfAttributeEName)
 
   def qnameElemOption: Option[ConceptFilterQName] = {
@@ -193,7 +193,7 @@ final class ConceptFilterAttribute(underlyingElem: tqa.dom.OtherElem) extends Co
 /**
  * A cf:type child element of a concept filter.
  */
-final class ConceptFilterType(underlyingElem: tqa.dom.OtherElem) extends ConceptFilterContentElem(underlyingElem) {
+final class ConceptFilterType(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CfTypeEName)
 
   def qnameElemOption: Option[ConceptFilterQName] = {
@@ -216,7 +216,7 @@ final class ConceptFilterType(underlyingElem: tqa.dom.OtherElem) extends Concept
 /**
  * A cf:substitutionGroup child element of a concept filter.
  */
-final class ConceptFilterSubstitutionGroup(underlyingElem: tqa.dom.OtherElem) extends ConceptFilterContentElem(underlyingElem) {
+final class ConceptFilterSubstitutionGroup(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CfSubstitutionGroupEName)
 
   def qnameElemOption: Option[ConceptFilterQName] = {
@@ -239,7 +239,7 @@ final class ConceptFilterSubstitutionGroup(underlyingElem: tqa.dom.OtherElem) ex
 /**
  * A cf:qname descendant element of a concept filter.
  */
-final class ConceptFilterQName(underlyingElem: tqa.dom.OtherElem) extends ConceptFilterContentElem(underlyingElem) {
+final class ConceptFilterQName(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CfQnameEName)
 
   /**
@@ -253,7 +253,7 @@ final class ConceptFilterQName(underlyingElem: tqa.dom.OtherElem) extends Concep
 /**
  * A cf:qnameExpression descendant element of a concept filter.
  */
-final class ConceptFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends ConceptFilterContentElem(underlyingElem) {
+final class ConceptFilterQNameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CfQnameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -264,12 +264,12 @@ final class ConceptFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) exte
 /**
  * A descendant element of a tuple filter.
  */
-sealed abstract class TupleFilterContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class TupleFilterContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * A tf:parent child element of a concept filter.
  */
-final class TupleFilterParent(underlyingElem: tqa.dom.OtherElem) extends TupleFilterContentElem(underlyingElem) {
+final class TupleFilterParent(underlyingElem: tqa.dom.OtherNonXLinkElem) extends TupleFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.TfParentEName)
 
   def qnameElemOption: Option[TupleFilterQName] = {
@@ -292,7 +292,7 @@ final class TupleFilterParent(underlyingElem: tqa.dom.OtherElem) extends TupleFi
 /**
  * A tf:ancestor child element of a concept filter.
  */
-final class TupleFilterAncestor(underlyingElem: tqa.dom.OtherElem) extends TupleFilterContentElem(underlyingElem) {
+final class TupleFilterAncestor(underlyingElem: tqa.dom.OtherNonXLinkElem) extends TupleFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.TfAncestorEName)
 
   def qnameElemOption: Option[TupleFilterQName] = {
@@ -315,7 +315,7 @@ final class TupleFilterAncestor(underlyingElem: tqa.dom.OtherElem) extends Tuple
 /**
  * A tf:qname descendant element of a tuple filter.
  */
-final class TupleFilterQName(underlyingElem: tqa.dom.OtherElem) extends TupleFilterContentElem(underlyingElem) {
+final class TupleFilterQName(underlyingElem: tqa.dom.OtherNonXLinkElem) extends TupleFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.TfQnameEName)
 
   /**
@@ -329,7 +329,7 @@ final class TupleFilterQName(underlyingElem: tqa.dom.OtherElem) extends TupleFil
 /**
  * A tf:qnameExpression descendant element of a tuple filter.
  */
-final class TupleFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends TupleFilterContentElem(underlyingElem) {
+final class TupleFilterQNameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends TupleFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.TfQnameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -340,12 +340,12 @@ final class TupleFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extend
 /**
  * A descendant element of a dimension filter.
  */
-sealed abstract class DimensionFilterContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class DimensionFilterContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * A df:dimension child element of a dimension filter.
  */
-final class DimensionFilterDimension(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterDimension(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfDimensionEName)
 
   def qnameElemOption: Option[DimensionFilterQName] = {
@@ -368,7 +368,7 @@ final class DimensionFilterDimension(underlyingElem: tqa.dom.OtherElem) extends 
 /**
  * A df:member child element of a dimension filter.
  */
-final class DimensionFilterMember(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterMember(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfMemberEName)
 
   def variableElemOption: Option[DimensionFilterVariable] = {
@@ -408,7 +408,7 @@ final class DimensionFilterMember(underlyingElem: tqa.dom.OtherElem) extends Dim
 /**
  * A df:variable descendant element of a dimension filter.
  */
-final class DimensionFilterVariable(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterVariable(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfVariableEName)
 
   /**
@@ -424,7 +424,7 @@ final class DimensionFilterVariable(underlyingElem: tqa.dom.OtherElem) extends D
 /**
  * A df:linkrole descendant element of a dimension filter.
  */
-final class DimensionFilterLinkrole(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterLinkrole(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfLinkroleEName)
 
   def linkrole: String = underlyingElem.text
@@ -433,7 +433,7 @@ final class DimensionFilterLinkrole(underlyingElem: tqa.dom.OtherElem) extends D
 /**
  * A df:arcrole descendant element of a dimension filter.
  */
-final class DimensionFilterArcrole(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterArcrole(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfArcroleEName)
 
   def arcrole: String = underlyingElem.text
@@ -442,7 +442,7 @@ final class DimensionFilterArcrole(underlyingElem: tqa.dom.OtherElem) extends Di
 /**
  * A df:axis descendant element of a dimension filter.
  */
-final class DimensionFilterAxis(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterAxis(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfAxisEName)
 
   def axis: String = underlyingElem.text
@@ -451,7 +451,7 @@ final class DimensionFilterAxis(underlyingElem: tqa.dom.OtherElem) extends Dimen
 /**
  * A df:qname descendant element of a dimension filter.
  */
-final class DimensionFilterQName(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterQName(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfQnameEName)
 
   /**
@@ -465,7 +465,7 @@ final class DimensionFilterQName(underlyingElem: tqa.dom.OtherElem) extends Dime
 /**
  * A df:qnameExpression descendant element of a dimension filter.
  */
-final class DimensionFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends DimensionFilterContentElem(underlyingElem) {
+final class DimensionFilterQNameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.DfQnameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -476,12 +476,12 @@ final class DimensionFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) ex
 /**
  * A descendant element of a unit filter.
  */
-sealed abstract class UnitFilterContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class UnitFilterContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * A uf:measure child element of a dimension filter.
  */
-final class UnitFilterMeasure(underlyingElem: tqa.dom.OtherElem) extends UnitFilterContentElem(underlyingElem) {
+final class UnitFilterMeasure(underlyingElem: tqa.dom.OtherNonXLinkElem) extends UnitFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.UfMeasureEName)
 
   def qnameElemOption: Option[UnitFilterQName] = {
@@ -504,7 +504,7 @@ final class UnitFilterMeasure(underlyingElem: tqa.dom.OtherElem) extends UnitFil
 /**
  * A uf:qname descendant element of a dimension filter.
  */
-final class UnitFilterQName(underlyingElem: tqa.dom.OtherElem) extends UnitFilterContentElem(underlyingElem) {
+final class UnitFilterQName(underlyingElem: tqa.dom.OtherNonXLinkElem) extends UnitFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.UfQnameEName)
 
   /**
@@ -518,7 +518,7 @@ final class UnitFilterQName(underlyingElem: tqa.dom.OtherElem) extends UnitFilte
 /**
  * A uf:qnameExpression descendant element of a dimension filter.
  */
-final class UnitFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends UnitFilterContentElem(underlyingElem) {
+final class UnitFilterQNameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends UnitFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.UfQnameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -529,12 +529,12 @@ final class UnitFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends
 /**
  * A descendant element of an aspect cover filter.
  */
-sealed abstract class AspectCoverFilterContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class AspectCoverFilterContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * An acf:aspect descendant element of a dimension filter.
  */
-final class AspectCoverFilterAspect(underlyingElem: tqa.dom.OtherElem) extends AspectCoverFilterContentElem(underlyingElem) {
+final class AspectCoverFilterAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectCoverFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.AcfAspectEName)
 
   def aspectValue: AspectCoverFilters.Aspect = {
@@ -545,7 +545,7 @@ final class AspectCoverFilterAspect(underlyingElem: tqa.dom.OtherElem) extends A
 /**
  * An acf:dimension child element of an aspect cover filter.
  */
-final class AspectCoverFilterDimension(underlyingElem: tqa.dom.OtherElem) extends AspectCoverFilterContentElem(underlyingElem) {
+final class AspectCoverFilterDimension(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectCoverFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.AcfDimensionEName)
 
   def qnameElemOption: Option[AspectCoverFilterQName] = {
@@ -568,7 +568,7 @@ final class AspectCoverFilterDimension(underlyingElem: tqa.dom.OtherElem) extend
 /**
  * An acf:excludeDimension child element of an aspect cover filter.
  */
-final class AspectCoverFilterExcludeDimension(underlyingElem: tqa.dom.OtherElem) extends AspectCoverFilterContentElem(underlyingElem) {
+final class AspectCoverFilterExcludeDimension(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectCoverFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.AcfExcludeDimensionEName)
 
   def qnameElemOption: Option[AspectCoverFilterQName] = {
@@ -591,7 +591,7 @@ final class AspectCoverFilterExcludeDimension(underlyingElem: tqa.dom.OtherElem)
 /**
  * An acf:qname descendant element of a dimension filter.
  */
-final class AspectCoverFilterQName(underlyingElem: tqa.dom.OtherElem) extends AspectCoverFilterContentElem(underlyingElem) {
+final class AspectCoverFilterQName(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectCoverFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.AcfQnameEName)
 
   /**
@@ -605,7 +605,7 @@ final class AspectCoverFilterQName(underlyingElem: tqa.dom.OtherElem) extends As
 /**
  * An acf:qnameExpression descendant element of a dimension filter.
  */
-final class AspectCoverFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends AspectCoverFilterContentElem(underlyingElem) {
+final class AspectCoverFilterQNameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectCoverFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.AcfQnameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -616,12 +616,12 @@ final class AspectCoverFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) 
 /**
  * A descendant element of a concept relation filter.
  */
-sealed abstract class ConceptRelationFilterContentElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class ConceptRelationFilterContentElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * A crf:axis descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterAxis(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterAxis(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfAxisEName)
 
   def axisValue: ConceptRelationFilters.Axis = {
@@ -632,7 +632,7 @@ final class ConceptRelationFilterAxis(underlyingElem: tqa.dom.OtherElem) extends
 /**
  * A crf:generations descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterGenerations(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterGenerations(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfGenerationsEName)
 
   def intValue: Int = {
@@ -643,7 +643,7 @@ final class ConceptRelationFilterGenerations(underlyingElem: tqa.dom.OtherElem) 
 /**
  * A crf:variable descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterVariable(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterVariable(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfVariableEName)
 
   /**
@@ -659,7 +659,7 @@ final class ConceptRelationFilterVariable(underlyingElem: tqa.dom.OtherElem) ext
 /**
  * A crf:linkrole descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterLinkrole(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterLinkrole(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfLinkroleEName)
 
   def linkrole: String = underlyingElem.text
@@ -668,7 +668,7 @@ final class ConceptRelationFilterLinkrole(underlyingElem: tqa.dom.OtherElem) ext
 /**
  * A crf:linkroleExpression descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterLinkroleExpression(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterLinkroleExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfLinkroleExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -679,7 +679,7 @@ final class ConceptRelationFilterLinkroleExpression(underlyingElem: tqa.dom.Othe
 /**
  * A crf:linkname descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterLinkname(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterLinkname(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfLinknameEName)
 
   /**
@@ -693,7 +693,7 @@ final class ConceptRelationFilterLinkname(underlyingElem: tqa.dom.OtherElem) ext
 /**
  * A crf:linknameExpression descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterLinknameExpression(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterLinknameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfLinknameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -704,7 +704,7 @@ final class ConceptRelationFilterLinknameExpression(underlyingElem: tqa.dom.Othe
 /**
  * A crf:arcrole descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterArcrole(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterArcrole(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfArcroleEName)
 
   def arcrole: String = underlyingElem.text
@@ -713,7 +713,7 @@ final class ConceptRelationFilterArcrole(underlyingElem: tqa.dom.OtherElem) exte
 /**
  * A crf:arcroleExpression descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterArcroleExpression(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterArcroleExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfArcroleExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -724,7 +724,7 @@ final class ConceptRelationFilterArcroleExpression(underlyingElem: tqa.dom.Other
 /**
  * A crf:arcname descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterArcname(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterArcname(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfArcnameEName)
 
   /**
@@ -738,7 +738,7 @@ final class ConceptRelationFilterArcname(underlyingElem: tqa.dom.OtherElem) exte
 /**
  * A crf:arcnameExpression descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterArcnameExpression(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterArcnameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfArcnameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -749,7 +749,7 @@ final class ConceptRelationFilterArcnameExpression(underlyingElem: tqa.dom.Other
 /**
  * A crf:qname descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterQName(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterQName(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfQnameEName)
 
   /**
@@ -763,7 +763,7 @@ final class ConceptRelationFilterQName(underlyingElem: tqa.dom.OtherElem) extend
 /**
  * A crf:qnameExpression descendant element of a concept relation filter.
  */
-final class ConceptRelationFilterQNameExpression(underlyingElem: tqa.dom.OtherElem) extends ConceptRelationFilterContentElem(underlyingElem) {
+final class ConceptRelationFilterQNameExpression(underlyingElem: tqa.dom.OtherNonXLinkElem) extends ConceptRelationFilterContentElem(underlyingElem) {
   requireResolvedName(ENames.CrfQnameExpressionEName)
 
   def expr: ScopedXPathString = {
@@ -774,12 +774,12 @@ final class ConceptRelationFilterQNameExpression(underlyingElem: tqa.dom.OtherEl
 /**
  * An aspect or aspects element.
  */
-sealed abstract class FormulaAspectOrAspectsElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem
+sealed abstract class FormulaAspectOrAspectsElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem
 
 /**
  * An aspects element.
  */
-final class FormulaAspectsElem(underlyingElem: tqa.dom.OtherElem) extends FormulaAspectOrAspectsElem(underlyingElem) {
+final class FormulaAspectsElem(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspectOrAspectsElem(underlyingElem) {
   requireResolvedName(ENames.FormulaAspectsEName)
 
   /**
@@ -803,7 +803,7 @@ final class FormulaAspectsElem(underlyingElem: tqa.dom.OtherElem) extends Formul
 /**
  * An aspect.
  */
-sealed abstract class FormulaAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspectOrAspectsElem(underlyingElem) {
+sealed abstract class FormulaAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspectOrAspectsElem(underlyingElem) {
 
   /**
    * Returns the optional source as EName. The default namespace is not used to resolve the QName.
@@ -824,7 +824,7 @@ sealed abstract class FormulaAspect(underlyingElem: tqa.dom.OtherElem) extends F
 /**
  * A formula:concept.
  */
-final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+final class ConceptAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaConceptEName)
 
   def aspect(aspectModel: AspectModel): Aspect = Aspect.ConceptAspect
@@ -849,7 +849,7 @@ final class ConceptAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspe
 /**
  * A formula:entityIdentifier.
  */
-final class EntityIdentifierAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+final class EntityIdentifierAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaEntityIdentifierEName)
 
   def aspect(aspectModel: AspectModel): Aspect = Aspect.EntityIdentifierAspect
@@ -866,7 +866,7 @@ final class EntityIdentifierAspect(underlyingElem: tqa.dom.OtherElem) extends Fo
 /**
  * A formula:period.
  */
-final class PeriodAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+final class PeriodAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaPeriodEName)
 
   def aspect(aspectModel: AspectModel): Aspect = Aspect.PeriodAspect
@@ -891,7 +891,7 @@ final class PeriodAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspec
 /**
  * A formula:unit.
  */
-final class UnitAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+final class UnitAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaUnitEName)
 
   def aspect(aspectModel: AspectModel): Aspect = Aspect.UnitAspect
@@ -915,7 +915,7 @@ final class UnitAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(
 /**
  * An OCC aspect.
  */
-sealed abstract class OccAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+sealed abstract class OccAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspect(underlyingElem) {
 
   final def aspect(aspectModel: AspectModel): Aspect.OccAspect = (occ, aspectModel) match {
     case (Occ.Segment, AspectModel.DimensionalAspectModel)     => Aspect.NonXDTSegmentAspect
@@ -935,21 +935,21 @@ sealed abstract class OccAspect(underlyingElem: tqa.dom.OtherElem) extends Formu
 /**
  * A formula:occEmpty.
  */
-final class OccEmptyAspect(underlyingElem: tqa.dom.OtherElem) extends OccAspect(underlyingElem) {
+final class OccEmptyAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends OccAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaOccEmptyEName)
 }
 
 /**
  * A formula:occFragments.
  */
-final class OccFragmentsAspect(underlyingElem: tqa.dom.OtherElem) extends OccAspect(underlyingElem) {
+final class OccFragmentsAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends OccAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaOccFragmentsEName)
 }
 
 /**
  * A formula:occXpath.
  */
-final class OccXpathAspect(underlyingElem: tqa.dom.OtherElem) extends OccAspect(underlyingElem) {
+final class OccXpathAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends OccAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaOccXpathEName)
 
   def selectExprOption: Option[ScopedXPathString] = {
@@ -960,7 +960,7 @@ final class OccXpathAspect(underlyingElem: tqa.dom.OtherElem) extends OccAspect(
 /**
  * A dimension aspect.
  */
-sealed abstract class DimensionAspect(underlyingElem: tqa.dom.OtherElem) extends FormulaAspect(underlyingElem) {
+sealed abstract class DimensionAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends FormulaAspect(underlyingElem) {
 
   final def aspect(aspectModel: AspectModel): Aspect.DimensionAspect = {
     require(
@@ -981,7 +981,7 @@ sealed abstract class DimensionAspect(underlyingElem: tqa.dom.OtherElem) extends
 /**
  * A formula:explicitDimension.
  */
-final class ExplicitDimensionAspect(underlyingElem: tqa.dom.OtherElem) extends DimensionAspect(underlyingElem) {
+final class ExplicitDimensionAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaExplicitDimensionEName)
 
   def memberElemOption: Option[MemberElem] = {
@@ -996,7 +996,7 @@ final class ExplicitDimensionAspect(underlyingElem: tqa.dom.OtherElem) extends D
 /**
  * A formula:typedDimension.
  */
-final class TypedDimensionAspect(underlyingElem: tqa.dom.OtherElem) extends DimensionAspect(underlyingElem) {
+final class TypedDimensionAspect(underlyingElem: tqa.dom.OtherNonXLinkElem) extends DimensionAspect(underlyingElem) {
   requireResolvedName(ENames.FormulaTypedDimensionEName)
 
   def xpathElemOption: Option[XpathElem] = {
@@ -1015,7 +1015,7 @@ final class TypedDimensionAspect(underlyingElem: tqa.dom.OtherElem) extends Dime
 /**
  * A formula:qname.
  */
-final class QNameElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class QNameElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaQNameEName)
 
   /**
@@ -1029,7 +1029,7 @@ final class QNameElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormul
 /**
  * A formula:qnameExpression.
  */
-final class QNameExpressionElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class QNameExpressionElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaQNameExpressionEName)
 
   def qnameExpr: ScopedXPathString = {
@@ -1040,7 +1040,7 @@ final class QNameExpressionElem(val underlyingElem: tqa.dom.OtherElem) extends O
 /**
  * A child element of a PeriodAspect.
  */
-sealed abstract class PeriodElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+sealed abstract class PeriodElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
 
   def periodType: PeriodType
 }
@@ -1048,7 +1048,7 @@ sealed abstract class PeriodElem(val underlyingElem: tqa.dom.OtherElem) extends 
 /**
  * A formula:forever.
  */
-final class ForeverElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(underlyingElem) {
+final class ForeverElem(underlyingElem: tqa.dom.OtherNonXLinkElem) extends PeriodElem(underlyingElem) {
   requireResolvedName(ENames.FormulaForeverEName)
 
   def periodType: PeriodType = PeriodType.Duration
@@ -1057,7 +1057,7 @@ final class ForeverElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(un
 /**
  * A formula:instant.
  */
-final class InstantElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(underlyingElem) {
+final class InstantElem(underlyingElem: tqa.dom.OtherNonXLinkElem) extends PeriodElem(underlyingElem) {
   requireResolvedName(ENames.FormulaInstantEName)
 
   def valueExprOption: Option[ScopedXPathString] = {
@@ -1070,7 +1070,7 @@ final class InstantElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(un
 /**
  * A formula:duration.
  */
-final class DurationElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(underlyingElem) {
+final class DurationElem(underlyingElem: tqa.dom.OtherNonXLinkElem) extends PeriodElem(underlyingElem) {
   requireResolvedName(ENames.FormulaDurationEName)
 
   def startExprOption: Option[ScopedXPathString] = {
@@ -1087,7 +1087,7 @@ final class DurationElem(underlyingElem: tqa.dom.OtherElem) extends PeriodElem(u
 /**
  * A formula:multiplyBy.
  */
-final class MultiplyByElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class MultiplyByElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaMultiplyByEName)
 
   def measureExprOption: Option[ScopedXPathString] = {
@@ -1108,7 +1108,7 @@ final class MultiplyByElem(val underlyingElem: tqa.dom.OtherElem) extends OtherF
 /**
  * A formula:divideBy.
  */
-final class DivideByElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class DivideByElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaDivideByEName)
 
   def measureExprOption: Option[ScopedXPathString] = {
@@ -1129,7 +1129,7 @@ final class DivideByElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFor
 /**
  * A formula:member.
  */
-final class MemberElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class MemberElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaMemberEName)
 
   def qnameElemOption: Option[QNameElem] = {
@@ -1152,14 +1152,14 @@ final class MemberElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormu
 /**
  * A formula:omit.
  */
-final class OmitElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class OmitElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaOmitEName)
 }
 
 /**
  * A formula:xpath.
  */
-final class XpathElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class XpathElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaXpathEName)
 
   def expr: ScopedXPathString = {
@@ -1170,14 +1170,14 @@ final class XpathElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormul
 /**
  * A formula:value.
  */
-final class ValueElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class ValueElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaValueEName)
 }
 
 /**
  * A formula:precision.
  */
-final class PrecisionElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class PrecisionElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaPrecisionEName)
 
   def expr: ScopedXPathString = {
@@ -1188,7 +1188,7 @@ final class PrecisionElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFo
 /**
  * A formula:decimals.
  */
-final class DecimalsElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFormulaElem {
+final class DecimalsElem(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherFormulaElem {
   requireResolvedName(ENames.FormulaDecimalsEName)
 
   def expr: ScopedXPathString = {
@@ -1201,9 +1201,9 @@ final class DecimalsElem(val underlyingElem: tqa.dom.OtherElem) extends OtherFor
 object OtherFormulaElem {
 
   /**
-   * Lenient method to optionally create an OtherFormulaElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create an OtherFormulaElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[OtherFormulaElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[OtherFormulaElem] = {
     underlyingElem.resolvedName.namespaceUriOption.getOrElse("") match {
       case Namespaces.FormulaNamespace =>
         underlyingElem.resolvedName match {
@@ -1255,9 +1255,9 @@ object OtherFormulaElem {
 object FormulaAspectOrAspectsElem {
 
   /**
-   * Lenient method to optionally create a FormulaAspectOrAspectsElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create a FormulaAspectOrAspectsElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[FormulaAspectOrAspectsElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[FormulaAspectOrAspectsElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.FormulaNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.FormulaAspectsEName           => Some(new FormulaAspectsElem(underlyingElem))
@@ -1281,9 +1281,9 @@ object FormulaAspectOrAspectsElem {
 object ConceptFilterContentElem {
 
   /**
-   * Lenient method to optionally create a ConceptFilterContentElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create a ConceptFilterContentElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[ConceptFilterContentElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[ConceptFilterContentElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.CfNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.CfConceptEName           => Some(new ConceptFilterConcept(underlyingElem))
@@ -1303,9 +1303,9 @@ object ConceptFilterContentElem {
 object TupleFilterContentElem {
 
   /**
-   * Lenient method to optionally create a TupleFilterContentElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create a TupleFilterContentElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[TupleFilterContentElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[TupleFilterContentElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.TfNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.TfParentEName          => Some(new TupleFilterParent(underlyingElem))
@@ -1323,9 +1323,9 @@ object TupleFilterContentElem {
 object DimensionFilterContentElem {
 
   /**
-   * Lenient method to optionally create a DimensionFilterContentElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create a DimensionFilterContentElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[DimensionFilterContentElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[DimensionFilterContentElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.DfNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.DfDimensionEName       => Some(new DimensionFilterDimension(underlyingElem))
@@ -1347,9 +1347,9 @@ object DimensionFilterContentElem {
 object UnitFilterContentElem {
 
   /**
-   * Lenient method to optionally create a UnitFilterContentElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create a UnitFilterContentElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[UnitFilterContentElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[UnitFilterContentElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.UfNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.UfMeasureEName         => Some(new UnitFilterMeasure(underlyingElem))
@@ -1366,9 +1366,9 @@ object UnitFilterContentElem {
 object AspectCoverFilterContentElem {
 
   /**
-   * Lenient method to optionally create a AspectCoverFilterContentElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create a AspectCoverFilterContentElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[AspectCoverFilterContentElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[AspectCoverFilterContentElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.AcfNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.AcfAspectEName           => Some(new AspectCoverFilterAspect(underlyingElem))
@@ -1387,9 +1387,9 @@ object AspectCoverFilterContentElem {
 object ConceptRelationFilterContentElem {
 
   /**
-   * Lenient method to optionally create a ConceptRelationFilterContentElem from an underlying tqa.dom.OtherElem.
+   * Lenient method to optionally create a ConceptRelationFilterContentElem from an underlying tqa.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherElem): Option[ConceptRelationFilterContentElem] = {
+  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[ConceptRelationFilterContentElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.CrfNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.CrfAxisEName               => Some(new ConceptRelationFilterAxis(underlyingElem))

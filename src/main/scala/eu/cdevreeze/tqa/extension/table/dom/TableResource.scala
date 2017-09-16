@@ -77,7 +77,7 @@ sealed trait TableResource extends tqa.dom.AnyTaxonomyElem with XLinkResource {
 
     implicit val clsTag = cls
 
-    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
+    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherNonXLinkElem]).
       flatMap(e => OtherTableElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
@@ -92,7 +92,7 @@ sealed trait TableResource extends tqa.dom.AnyTaxonomyElem with XLinkResource {
 
     implicit val clsTag = cls
 
-    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherElem]).
+    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherNonXLinkElem]).
       flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
