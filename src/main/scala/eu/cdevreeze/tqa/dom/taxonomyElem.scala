@@ -77,7 +77,7 @@ import javax.xml.bind.DatatypeConverter
  *
  * The classes in this type hierarchy have been designed to be very '''lenient when instantiating''' them, even for schema-invalid content.
  * The few builder methods that may throw exceptions have been clearly documented to potentially do so. For schema-invalid taxonomy
- * content, the resulting object may be something like `OtherXsdElem`, `OtherLinkElem` or `OtherElem`. For example,
+ * content, the resulting object may be something like `OtherXsdElem`, `OtherLinkElem` or `OtherNonXLinkElem`. For example,
  * an element named xs:element with both a name and ref attribute cannot be both an element declaration and element
  * reference, and will be instantiated as an `OtherXsdElem`. A non-standard XLink arc, whether a known generic arc or some
  * unknown and potentially erroneous arc, becomes a `NonStandardArc`, etc.
@@ -1422,12 +1422,12 @@ final class OtherLinkElem private[dom] (
  * Any element that is neither an `XsdElem` nor a `LinkElem`, and that is also not recognized as a non-standard link,
  * non-standard arc or non-standard resource. It may still be valid taxonomy content, but even in taxonomies with XBRL formulas
  * or XBRL tables most non-standard linkbase content is still XLink arc or resource content, and therefore does not fall in
- * this `OtherElem` category.
+ * this `OtherNonXLinkElem` category.
  *
- * The elements that do fall into this `OtherElem` category are typically either reference parts (used in reference linkbases)
+ * The elements that do fall into this `OtherNonXLinkElem` category are typically either reference parts (used in reference linkbases)
  * or formula/table-related non-XLink content.
  */
-final class OtherElem private[dom] (
+final class OtherNonXLinkElem private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems)
 
@@ -1444,7 +1444,7 @@ object TaxonomyElem {
    * nor an element reference, but it will be returned as an `OtherXsdElem` element.
    *
    * This property makes the TQA DOM type hierarchy useful in situations where TQA is used for validating (possibly
-   * invalid) taxonomies, but it does imply that `OtherXsdElem`, `OtherLinkElem` and `OtherElem` elements must be
+   * invalid) taxonomies, but it does imply that `OtherXsdElem`, `OtherLinkElem` and `OtherNonXLinkElem` elements must be
    * recognized and possibly rejected during validation. The same may be true for some `NonStandardArc` objects, etc.
    */
   def build(backingElem: BackingElemApi): TaxonomyElem = {
@@ -1471,7 +1471,7 @@ object TaxonomyElem {
           case Some("arc")      => new NonStandardArc(backingElem, childElems)
           case Some("resource") => new NonStandardResource(backingElem, childElems)
           case Some("locator")  => new NonStandardLocator(backingElem, childElems)
-          case _                => new OtherElem(backingElem, childElems)
+          case _                => new OtherNonXLinkElem(backingElem, childElems)
         }
     }
   }
