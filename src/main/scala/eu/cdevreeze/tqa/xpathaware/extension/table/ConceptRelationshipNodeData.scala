@@ -25,6 +25,9 @@ import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
+import eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator
+import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
+import eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -37,67 +40,44 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
   def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
-    val directlyMentionedSources = conceptRelationshipNode.relationshipSources.map(_.source)
-
-    val xpathResultSources =
-      conceptRelationshipNode.relationshipSourceExpressions.map(_.expr) map { expr =>
-        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-
-    directlyMentionedSources ++ xpathResultSources
+    conceptRelationshipNode.sourceValuesOrExpressions.
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    conceptRelationshipNode.linkroleOption.map(_.underlyingElem.text) orElse {
-      conceptRelationshipNode.linkroleExpressionOption.map(_.expr) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-    }
+    conceptRelationshipNode.linkroleValueOrExprOption.
+      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
-  def arcroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    conceptRelationshipNode.arcroleOption.map(_.underlyingElem.text) orElse {
-      conceptRelationshipNode.arcroleExpressionOption.map(_.expr) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-    }
+  def arcrole(implicit xpathEvaluator: XPathEvaluator): String = {
+    StringValueOrExprEvaluator.evaluate(conceptRelationshipNode.arcroleValueOrExpr)(xpathEvaluator)
   }
 
   def linknameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
-    conceptRelationshipNode.linknameOption.map(_.linkname) orElse {
-      conceptRelationshipNode.linknameExpressionOption.map(_.expr) map { expr =>
-        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-    }
+    conceptRelationshipNode.linknameValueOrExprOption.
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def arcnameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
-    conceptRelationshipNode.arcnameOption.map(_.arcname) orElse {
-      conceptRelationshipNode.arcnameExpressionOption.map(_.expr) map { expr =>
-        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-    }
+    conceptRelationshipNode.arcnameValueOrExprOption.
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def formulaAxis(implicit xpathEvaluator: XPathEvaluator): ConceptRelationshipNodes.FormulaAxis = {
-    conceptRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
-      conceptRelationshipNode.formulaAxisExpressionOption.map(_.expr) map { expr =>
-        val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
+    val stringResultOption =
+      conceptRelationshipNode.formulaAxisValueOrExprOption.
+        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
-        ConceptRelationshipNodes.FormulaAxis.fromString(resultAsString)
-      }
-    } getOrElse (ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
+    stringResultOption.map(v => ConceptRelationshipNodes.FormulaAxis.fromString(v)).
+      getOrElse(ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
   def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
-    val resultAsStringOption =
-      conceptRelationshipNode.generationsOption.map(_.underlyingElem.text) orElse {
-        conceptRelationshipNode.generationsExpressionOption.map(_.expr) map { expr =>
-          xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-        }
-      }
+    val resultAsBigDecimalOption =
+      conceptRelationshipNode.generationsValueOrExprOption.
+        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
-    resultAsStringOption.map(_.toInt).getOrElse(0)
+    resultAsBigDecimalOption.map(_.toInt).getOrElse(0)
   }
 }
 
@@ -118,7 +98,7 @@ object ConceptRelationshipNodeData {
 
     val linkroleOption: Option[String] = conceptRelationNodeData.linkroleOption(xpathEvaluator)
 
-    val arcroleOption: Option[String] = conceptRelationNodeData.arcroleOption(xpathEvaluator)
+    val arcrole: String = conceptRelationNodeData.arcrole(xpathEvaluator)
 
     val linknameOption: Option[EName] = conceptRelationNodeData.linknameOption(xpathEvaluator)
 
@@ -128,7 +108,7 @@ object ConceptRelationshipNodeData {
 
     val effectiveRelationshipSources: immutable.IndexedSeq[EName] = {
       if (doResolveXfiRoot) {
-        val resolvedXfiRoot = resolveXfiRoot(linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo).toIndexedSeq
+        val resolvedXfiRoot = resolveXfiRoot(linkroleOption, arcrole, linknameOption, arcnameOption, taxo).toIndexedSeq
 
         (resolvedXfiRoot ++ rawRelationshipSources.filterNot(Set(ENames.XfiRootEName))).sortBy(_.toString)
       } else {
@@ -149,7 +129,7 @@ object ConceptRelationshipNodeData {
 
     val conceptTreeWalkSpecs: immutable.IndexedSeq[ConceptTreeWalkSpec] =
       effectiveRelationshipSources map { startConcept =>
-        new ConceptTreeWalkSpec(startConcept, includeSelf, effectiveGenerationsOption, linkroleOption, arcroleOption, linknameOption, arcnameOption)
+        new ConceptTreeWalkSpec(startConcept, includeSelf, effectiveGenerationsOption, linkroleOption, arcrole, linknameOption, arcnameOption)
       }
 
     // Find the descendant-or-self or descendant concepts for the given number of generations, if applicable.
@@ -163,7 +143,7 @@ object ConceptRelationshipNodeData {
     val includedSiblings: Set[EName] = {
       if (axis.includesSiblings) {
         rawRelationshipSources.filterNot(Set(ENames.XfiRootEName)).
-          flatMap(c => findAllSiblings(c, linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo)).toSet
+          flatMap(c => findAllSiblings(c, linkroleOption, arcrole, linknameOption, arcnameOption, taxo)).toSet
       } else {
         Set()
       }
@@ -189,7 +169,7 @@ object ConceptRelationshipNodeData {
           path.isElrValid &&
             treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
             treeWalkSpec.linkroleOption.forall(lr => path.relationships.head.elr == lr) &&
-            treeWalkSpec.arcroleOption.forall(ar => path.relationships.head.arcrole == ar) &&
+            (path.firstRelationship.arcrole == treeWalkSpec.arcrole) &&
             treeWalkSpec.linknameOption.forall(ln => path.relationships.map(_.baseSetKey.extLinkEName).forall(_ == ln)) &&
             treeWalkSpec.arcnameOption.forall(an => path.relationships.map(_.baseSetKey.arcEName).forall(_ == an))
         }
@@ -200,14 +180,14 @@ object ConceptRelationshipNodeData {
 
   private def resolveXfiRoot(
     linkroleOption: Option[String],
-    arcroleOption: Option[String],
+    arcrole: String,
     linknameOption: Option[EName],
     arcnameOption: Option[EName],
     taxo: BasicTableTaxonomy): Set[EName] = {
 
     val relationships =
       taxo.underlyingTaxonomy.filterInterConceptRelationshipsOfType(classTag[InterConceptRelationship]) { rel =>
-        relationshipMatchesCriteria(rel, linkroleOption, arcroleOption, linknameOption, arcnameOption)
+        relationshipMatchesCriteria(rel, linkroleOption, arcrole, linknameOption, arcnameOption)
       }
 
     val sources = relationships.map(_.sourceConceptEName).toSet
@@ -218,37 +198,37 @@ object ConceptRelationshipNodeData {
   private def findAllSiblings(
     concept: EName,
     linkroleOption: Option[String],
-    arcroleOption: Option[String],
+    arcrole: String,
     linknameOption: Option[EName],
     arcnameOption: Option[EName],
     taxo: BasicTableTaxonomy): Set[EName] = {
 
     val incomingRelationships =
       taxo.underlyingTaxonomy.filterIncomingInterConceptRelationshipsOfType(concept, classTag[InterConceptRelationship]) { rel =>
-        relationshipMatchesCriteria(rel, linkroleOption, arcroleOption, linknameOption, arcnameOption)
+        relationshipMatchesCriteria(rel, linkroleOption, arcrole, linknameOption, arcnameOption)
       }
 
     if (incomingRelationships.nonEmpty) {
       (incomingRelationships flatMap { rel =>
         taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationshipsOfType(rel.sourceConceptEName, classTag[InterConceptRelationship]) { r =>
-          relationshipMatchesCriteria(r, linkroleOption, arcroleOption, linknameOption, arcnameOption)
+          relationshipMatchesCriteria(r, linkroleOption, arcrole, linknameOption, arcnameOption)
         }
       }).map(_.targetConceptEName).toSet.diff(Set(concept))
     } else {
       // Find roots
-      resolveXfiRoot(linkroleOption, arcroleOption, linknameOption, arcnameOption, taxo).diff(Set(concept))
+      resolveXfiRoot(linkroleOption, arcrole, linknameOption, arcnameOption, taxo).diff(Set(concept))
     }
   }
 
   private def relationshipMatchesCriteria(
     relationship: InterConceptRelationship,
     linkroleOption: Option[String],
-    arcroleOption: Option[String],
+    arcrole: String,
     linknameOption: Option[EName],
     arcnameOption: Option[EName]): Boolean = {
 
     linkroleOption.forall(lr => relationship.elr == lr) &&
-      arcroleOption.forall(ar => relationship.arcrole == ar) &&
+      (relationship.arcrole == arcrole) &&
       linknameOption.forall(ln => relationship.baseSetKey.extLinkEName == ln) &&
       arcnameOption.forall(an => relationship.baseSetKey.arcEName == an)
   }
@@ -265,7 +245,7 @@ object ConceptRelationshipNodeData {
     val includeSelf: Boolean,
     val generationsOption: Option[Int],
     val linkroleOption: Option[String],
-    val arcroleOption: Option[String],
+    val arcrole: String,
     val linknameOption: Option[EName],
     val arcnameOption: Option[EName])
 }

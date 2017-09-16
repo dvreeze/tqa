@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.xpathaware.extension.formula
 
 import eu.cdevreeze.tqa.extension.formula.dom.ConceptAspect
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
+import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -30,10 +31,7 @@ final class ConceptAspectData(val conceptAspect: ConceptAspect) {
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
   def qnameValueOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
-    conceptAspect.qnameElemOption.map(_.qnameValue) orElse {
-      conceptAspect.qnameExpressionElemOption.map(_.qnameExpr) map { expr =>
-        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-    }
+    conceptAspect.qnameValueOrExprOption.
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 }

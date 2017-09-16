@@ -26,6 +26,9 @@ import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
+import eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator
+import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
+import eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -43,43 +46,30 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
   def dimensionName: EName = dimensionRelationshipNode.dimensionName
 
   def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
-    val directlyMentionedSources = dimensionRelationshipNode.relationshipSources.map(_.source)
-
-    val xpathResultSources =
-      dimensionRelationshipNode.relationshipSourceExpressions.map(_.expr) map { expr =>
-        xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-
-    directlyMentionedSources ++ xpathResultSources
+    dimensionRelationshipNode.sourceValuesOrExpressions.
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    dimensionRelationshipNode.linkroleOption.map(_.underlyingElem.text) orElse {
-      dimensionRelationshipNode.linkroleExpressionOption.map(_.expr) map { expr =>
-        xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-      }
-    }
+    dimensionRelationshipNode.linkroleValueOrExprOption.
+      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def formulaAxis(implicit xpathEvaluator: XPathEvaluator): DimensionRelationshipNodes.FormulaAxis = {
-    dimensionRelationshipNode.formulaAxisOption.map(_.formulaAxis) orElse {
-      dimensionRelationshipNode.formulaAxisExpressionOption.map(_.expr) map { expr =>
-        val resultAsString = xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
+    val stringResultOption =
+      dimensionRelationshipNode.formulaAxisValueOrExprOption.
+        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
-        DimensionRelationshipNodes.FormulaAxis.fromString(resultAsString)
-      }
-    } getOrElse (DimensionRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
+    stringResultOption.map(v => DimensionRelationshipNodes.FormulaAxis.fromString(v)).
+      getOrElse(DimensionRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
   def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
-    val resultAsStringOption =
-      dimensionRelationshipNode.generationsOption.map(_.underlyingElem.text) orElse {
-        dimensionRelationshipNode.generationsExpressionOption.map(_.expr) map { expr =>
-          xpathEvaluator.evaluateAsString(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)
-        }
-      }
+    val resultAsBigDecimalOption =
+      dimensionRelationshipNode.generationsValueOrExprOption.
+        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
-    resultAsStringOption.map(_.toInt).getOrElse(0)
+    resultAsBigDecimalOption.map(_.toInt).getOrElse(0)
   }
 }
 

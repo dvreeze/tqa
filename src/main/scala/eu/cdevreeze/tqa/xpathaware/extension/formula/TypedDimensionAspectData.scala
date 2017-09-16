@@ -36,6 +36,8 @@ final class TypedDimensionAspectData(val dimensionAspect: TypedDimensionAspect) 
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
   def valueOption(implicit xpathEvaluator: XPathEvaluator): Option[BackingElemApi] = {
+    // TODO Is this correct?
+
     dimensionAspect.valueElemOption.map(_.underlyingElem.backingElem.findAllChildElems.head) orElse {
       dimensionAspect.xpathElemOption.map(_.expr) map { expr =>
         xpathEvaluator.evaluateAsBackingElem(xpathEvaluator.toXPathExpression(expr.xpathExpression), None)

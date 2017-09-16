@@ -27,6 +27,7 @@ package eu.cdevreeze.tqa
  * <li>All prefixes used in XPath expressions must be bound to namespaces</li>
  * <li>The backing element implementation used is coupled to the XPath processor used. In practice, use Saxon for XPath processing and backing elements</li>
  * <li>Configuration of the XPath processor may be sensitive, not only w.r.t. namespaces, but also w.r.t. the base URI, etc.</li>
+ * <li>It may be challenging to find the optimal lifetime of XPath evaluators and compiled XPath expressions, balancing between performance and clarity.</li>
  * </ul>
  *
  * @author Chris de Vreeze

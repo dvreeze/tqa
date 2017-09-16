@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.xpathaware
 
-import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.tqa.ValueOrExpr
+import eu.cdevreeze.tqa.xpath.XPathEvaluator
 
 /**
- * EName value or XPath expression. If it is an ENameExpr, the XPath expression is expected to resolve
- * to schema type xs:QName. Hence, a very simple ENameExpr would syntactically look like a lexical
- * QName literal (and not like an EName in James Clark notation).
+ * XPath-aware evaluator of a ValueOrExpr for some type A.
  *
  * @author Chris de Vreeze
  */
-sealed trait ENameValueOrExpr extends ValueOrExpr[EName]
+trait ValueOrExprEvaluator[A] {
 
-final case class ENameValue(value: EName) extends ENameValueOrExpr with Value[EName]
+  type ValueOrExprType <: ValueOrExpr[A]
 
-final case class ENameExpr(expr: ScopedXPathString) extends ENameValueOrExpr with Expr[EName]
+  def evaluate(valueOrExpr: ValueOrExprType)(implicit xpathEvaluator: XPathEvaluator): A
+}
