@@ -25,7 +25,7 @@ sealed trait Variety
 
 object Variety {
 
-  case object List extends Variety
-  case object Union extends Variety
-  case object Atomic extends Variety
+  case object List extends Variety { override def toString: String = "list" }
+  case object Union extends Variety { override def toString: String = "union" }
+  case object Atomic extends Variety { override def toString: String = "atomic" }
 }

@@ -25,8 +25,8 @@ sealed trait Use
 
 object Use {
 
-  case object Optional extends Use
-  case object Prohibited extends Use
+  case object Optional extends Use { override def toString: String = "optional" }
+  case object Prohibited extends Use { override def toString: String = "prohibited" }
 
   def fromString(s: String): Use = s match {
     case "optional"   => Optional

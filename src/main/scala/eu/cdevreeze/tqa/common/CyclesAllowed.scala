@@ -25,9 +25,9 @@ sealed trait CyclesAllowed
 
 object CyclesAllowed {
 
-  case object AnyCycles extends CyclesAllowed
-  case object UndirectedCycles extends CyclesAllowed
-  case object NoCycles extends CyclesAllowed
+  case object AnyCycles extends CyclesAllowed { override def toString: String = "any" }
+  case object UndirectedCycles extends CyclesAllowed { override def toString: String = "undirected" }
+  case object NoCycles extends CyclesAllowed { override def toString: String = "none" }
 
   def fromString(s: String): CyclesAllowed = s match {
     case "any"        => AnyCycles

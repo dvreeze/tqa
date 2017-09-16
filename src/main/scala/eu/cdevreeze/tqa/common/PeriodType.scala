@@ -25,8 +25,8 @@ sealed trait PeriodType
 
 object PeriodType {
 
-  case object Instant extends PeriodType
-  case object Duration extends PeriodType
+  case object Instant extends PeriodType { override def toString: String = "instant" }
+  case object Duration extends PeriodType { override def toString: String = "duration" }
 
   def fromString(s: String): PeriodType = s match {
     case "instant"  => Instant
