@@ -25,6 +25,7 @@ import eu.cdevreeze.tqa.ENames.IdEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
  * Very limited notion of a taxonomy, as a collection of taxonomy root elements. It contains a map from URIs
@@ -267,21 +268,21 @@ object TaxonomyBase {
 
   private def getGlobalElementDeclarationMap(rootElem: TaxonomyElem): Map[EName, GlobalElementDeclaration] = {
     // TODO Speed up by finding the target namespace (per xs:schema) only once.
-    val globalElementDeclarations = rootElem.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration])
+    val globalElementDeclarations = rootElem.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem)
 
     globalElementDeclarations.groupBy(_.targetEName).mapValues(_.head)
   }
 
   private def getNamedTypeDefinitionMap(rootElem: TaxonomyElem): Map[EName, NamedTypeDefinition] = {
     // TODO Speed up by finding the target namespace (per xs:schema) only once.
-    val namedTypeDefinitions = rootElem.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition])
+    val namedTypeDefinitions = rootElem.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(anyElem)
 
     namedTypeDefinitions.groupBy(_.targetEName).mapValues(_.head)
   }
 
   private def getGlobalAttributeDeclarationMap(rootElem: TaxonomyElem): Map[EName, GlobalAttributeDeclaration] = {
     // TODO Speed up by finding the target namespace (per xs:schema) only once.
-    val globalAttributeDeclarations = rootElem.findAllElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])
+    val globalAttributeDeclarations = rootElem.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(anyElem)
 
     globalAttributeDeclarations.groupBy(_.targetEName).mapValues(_.head)
   }

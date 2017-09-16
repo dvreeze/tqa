@@ -40,6 +40,7 @@ import eu.cdevreeze.tqa.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
  * Basic implementation of a taxonomy that offers the TaxonomyApi query API. It does not enforce closure
@@ -79,11 +80,11 @@ final class BasicTaxonomy private (
   }
 
   def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
-    taxonomyBase.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[XsdSchema]))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[XsdSchema])(anyElem))
   }
 
   def findAllGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
-    taxonomyBase.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalElementDeclaration]))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem))
   }
 
   def findGlobalElementDeclaration(ename: EName): Option[GlobalElementDeclaration] = {
@@ -95,7 +96,7 @@ final class BasicTaxonomy private (
   }
 
   def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
-    taxonomyBase.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[GlobalAttributeDeclaration]))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(anyElem))
   }
 
   def findGlobalAttributeDeclaration(ename: EName): Option[GlobalAttributeDeclaration] = {
@@ -103,11 +104,15 @@ final class BasicTaxonomy private (
   }
 
   def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition] = {
-    taxonomyBase.rootElems.flatMap(_.findAllElemsOrSelfOfType(classTag[NamedTypeDefinition]))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(anyElem))
   }
 
   def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition] = {
     taxonomyBase.findNamedTypeDefinitionByEName(ename)
+  }
+
+  def findBaseTypeOrSelfUntil(typeEName: EName, p: EName => Boolean): Option[EName] = {
+    taxonomyBase.findBaseTypeOrSelfUntil(typeEName, p)
   }
 
   def findConceptDeclaration(ename: EName): Option[ConceptDeclaration] = {

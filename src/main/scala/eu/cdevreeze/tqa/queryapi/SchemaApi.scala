@@ -24,6 +24,8 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.dom.GlobalAttributeDeclaration
 import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
 import eu.cdevreeze.tqa.dom.NamedTypeDefinition
+import eu.cdevreeze.tqa.dom.NamedComplexTypeDefinition
+import eu.cdevreeze.tqa.dom.NamedSimpleTypeDefinition
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
 
@@ -41,16 +43,41 @@ import eu.cdevreeze.yaidom.core.EName
  * Only methods for querying "global" schema content are offered. The returned objects themselves
  * can be used to query for nested content.
  *
+ * Finder methods for schema root elements and their (expected) children (like global element declarations,
+ * named type definitions etc.) are free to stop searching beyond topmost found elements. Hence, in
+ * schema-invalid taxonomies, it is possible that these finder methods do not find all elements of the
+ * expected type.
+ *
  * @author Chris de Vreeze
  */
 trait SchemaApi {
 
   // Schema root elements
 
+  /**
+   * Returns the schema root elements. To find certain taxonomy schema elements, the following pattern can be used:
+   * {{{
+   * findAllXsdSchemas.flatMap(_.filterElemsOrSelfOfType(classTag[E])(pred))
+   * }}}
+   */
   def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema]
 
+  /**
+   * Returns schema root elements obeying some predicate. To find certain taxonomy schema elements,
+   * the following pattern can be used:
+   * {{{
+   * filterXsdSchemas(p).flatMap(_.filterElemsOrSelfOfType(classTag[E])(pred))
+   * }}}
+   */
   def filterXsdSchemas(p: XsdSchema => Boolean): immutable.IndexedSeq[XsdSchema]
 
+  /**
+   * Finds an optional schema root element obeying some predicate. To find certain taxonomy schema elements,
+   * the following pattern can be used:
+   * {{{
+   * findXsdSchema(p).toIndexedSeq.flatMap(_.filterElemsOrSelfOfType(classTag[E])(pred))
+   * }}}
+   */
   def findXsdSchema(p: XsdSchema => Boolean): Option[XsdSchema]
 
   // Known substitution groups
@@ -109,7 +136,38 @@ trait SchemaApi {
 
   def getNamedTypeDefinition(ename: EName): NamedTypeDefinition
 
-  // TODO Methods to find ancestry of types
+  // Named complex type definitions, across documents
+
+  def findAllNamedComplexTypeDefinitions: immutable.IndexedSeq[NamedComplexTypeDefinition]
+
+  def filterNamedComplexTypeDefinitions(p: NamedComplexTypeDefinition => Boolean): immutable.IndexedSeq[NamedComplexTypeDefinition]
+
+  def findNamedComplexTypeDefinition(p: NamedComplexTypeDefinition => Boolean): Option[NamedComplexTypeDefinition]
+
+  def findNamedComplexTypeDefinition(ename: EName): Option[NamedComplexTypeDefinition]
+
+  def getNamedComplexTypeDefinition(ename: EName): NamedComplexTypeDefinition
+
+  // Named simple type definitions, across documents
+
+  def findAllNamedSimpleTypeDefinitions: immutable.IndexedSeq[NamedSimpleTypeDefinition]
+
+  def filterNamedSimpleTypeDefinitions(p: NamedSimpleTypeDefinition => Boolean): immutable.IndexedSeq[NamedSimpleTypeDefinition]
+
+  def findNamedSimpleTypeDefinition(p: NamedSimpleTypeDefinition => Boolean): Option[NamedSimpleTypeDefinition]
+
+  def findNamedSimpleTypeDefinition(ename: EName): Option[NamedSimpleTypeDefinition]
+
+  def getNamedSimpleTypeDefinition(ename: EName): NamedSimpleTypeDefinition
+
+  // Finding ancestry of types, across documents
+
+  /**
+   * If the given type obeys the type predicate, returns it, wrapped in an Option.
+   * Otherwise, returns the optional base type if that type obeys the type predicate, and so on,
+   * until either the predicate holds or no further base type can be found in the taxonomy.
+   */
+  def findBaseTypeOrSelfUntil(typeEName: EName, p: EName => Boolean): Option[EName]
 
   // TODO Methods to validate some closure properties, such as closure under DTS discovery rules
 }

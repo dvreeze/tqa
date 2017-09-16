@@ -24,6 +24,8 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.dom.GlobalAttributeDeclaration
 import eu.cdevreeze.tqa.dom.GlobalElementDeclaration
 import eu.cdevreeze.tqa.dom.NamedTypeDefinition
+import eu.cdevreeze.tqa.dom.NamedComplexTypeDefinition
+import eu.cdevreeze.tqa.dom.NamedSimpleTypeDefinition
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
 
@@ -53,6 +55,8 @@ trait SchemaLike extends SchemaApi {
   def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition]
 
   def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition]
+
+  def findBaseTypeOrSelfUntil(typeEName: EName, p: EName => Boolean): Option[EName]
 
   // Concrete methods
 
@@ -120,7 +124,49 @@ trait SchemaLike extends SchemaApi {
     findNamedTypeDefinition(ename).getOrElse(sys.error(s"Missing named type definition for expanded name $ename"))
   }
 
-  // TODO Methods to find ancestry of types
+  // Named complex type definitions, across documents
+
+  final def findAllNamedComplexTypeDefinitions: immutable.IndexedSeq[NamedComplexTypeDefinition] = {
+    findAllNamedTypeDefinitions collect { case t: NamedComplexTypeDefinition => t }
+  }
+
+  final def filterNamedComplexTypeDefinitions(p: NamedComplexTypeDefinition => Boolean): immutable.IndexedSeq[NamedComplexTypeDefinition] = {
+    findAllNamedComplexTypeDefinitions.filter(p)
+  }
+
+  final def findNamedComplexTypeDefinition(p: NamedComplexTypeDefinition => Boolean): Option[NamedComplexTypeDefinition] = {
+    findAllNamedComplexTypeDefinitions.find(p)
+  }
+
+  final def findNamedComplexTypeDefinition(ename: EName): Option[NamedComplexTypeDefinition] = {
+    findNamedTypeDefinition(ename) collect { case t: NamedComplexTypeDefinition => t }
+  }
+
+  final def getNamedComplexTypeDefinition(ename: EName): NamedComplexTypeDefinition = {
+    findNamedComplexTypeDefinition(ename).getOrElse(sys.error(s"Missing named type definition for expanded name $ename"))
+  }
+
+  // Named simple type definitions, across documents
+
+  final def findAllNamedSimpleTypeDefinitions: immutable.IndexedSeq[NamedSimpleTypeDefinition] = {
+    findAllNamedTypeDefinitions collect { case t: NamedSimpleTypeDefinition => t }
+  }
+
+  final def filterNamedSimpleTypeDefinitions(p: NamedSimpleTypeDefinition => Boolean): immutable.IndexedSeq[NamedSimpleTypeDefinition] = {
+    findAllNamedSimpleTypeDefinitions.filter(p)
+  }
+
+  final def findNamedSimpleTypeDefinition(p: NamedSimpleTypeDefinition => Boolean): Option[NamedSimpleTypeDefinition] = {
+    findAllNamedSimpleTypeDefinitions.find(p)
+  }
+
+  final def findNamedSimpleTypeDefinition(ename: EName): Option[NamedSimpleTypeDefinition] = {
+    findNamedTypeDefinition(ename) collect { case t: NamedSimpleTypeDefinition => t }
+  }
+
+  final def getNamedSimpleTypeDefinition(ename: EName): NamedSimpleTypeDefinition = {
+    findNamedSimpleTypeDefinition(ename).getOrElse(sys.error(s"Missing named type definition for expanded name $ename"))
+  }
 
   // TODO Methods to validate some closure properties, such as closure under DTS discovery rules
 }

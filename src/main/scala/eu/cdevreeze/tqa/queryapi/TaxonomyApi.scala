@@ -38,7 +38,17 @@ trait TaxonomyApi
     with ConceptReferenceRelationshipContainerApi
     with DimensionalRelationshipContainerApi {
 
+  /**
+   * Returns all relationships in the taxonomy
+   */
   def relationships: immutable.IndexedSeq[Relationship]
 
+  /**
+   * Returns all (document) root elements. To find certain taxonomy elements across the taxonomy,
+   * in taxonomy schemas and linkbases, the following pattern can be used:
+   * {{{
+   * rootElems.flatMap(_.filterElemsOrSelfOfType(classTag[E])(pred))
+   * }}}
+   */
   def rootElems: immutable.IndexedSeq[TaxonomyElem]
 }
