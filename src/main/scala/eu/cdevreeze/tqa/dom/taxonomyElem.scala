@@ -77,7 +77,7 @@ import javax.xml.bind.DatatypeConverter
  *
  * The classes in this type hierarchy have been designed to be very '''lenient when instantiating''' them, even for schema-invalid content.
  * The few builder methods that may throw exceptions have been clearly documented to potentially do so. For schema-invalid taxonomy
- * content, the resulting object may be something like `OtherXsdElem`, `OtherLinkbaseElem` or `OtherElem`. For example,
+ * content, the resulting object may be something like `OtherXsdElem`, `OtherLinkElem` or `OtherElem`. For example,
  * an element named xs:element with both a name and ref attribute cannot be both an element declaration and element
  * reference, and will be instantiated as an `OtherXsdElem`. A non-standard XLink arc, whether a known generic arc or some
  * unknown and potentially erroneous arc, becomes a `NonStandardArc`, etc.
@@ -601,6 +601,22 @@ final class XsdSchema private[dom] (
 
   def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition] = {
     filterNamedTypeDefinitions(_ => true)
+  }
+
+  def filterComplexTypeDefinitions(p: ComplexTypeDefinition => Boolean): immutable.IndexedSeq[ComplexTypeDefinition] = {
+    filterChildElemsOfType(classTag[ComplexTypeDefinition])(p)
+  }
+
+  def findAllComplexTypeDefinitions: immutable.IndexedSeq[ComplexTypeDefinition] = {
+    filterComplexTypeDefinitions(_ => true)
+  }
+
+  def filterSimpleTypeDefinitions(p: SimpleTypeDefinition => Boolean): immutable.IndexedSeq[SimpleTypeDefinition] = {
+    filterChildElemsOfType(classTag[SimpleTypeDefinition])(p)
+  }
+
+  def findAllSimpleTypeDefinitions: immutable.IndexedSeq[SimpleTypeDefinition] = {
+    filterSimpleTypeDefinitions(_ => true)
   }
 
   def filterModelGroupDefinitionOrReferences(p: ModelGroupDefinitionOrReference => Boolean): immutable.IndexedSeq[ModelGroupDefinitionOrReference] = {
@@ -1398,7 +1414,7 @@ final class UsedOn private[dom] (
  * Any `LinkElem` not recognized as an instance of one of the other concrete `LinkElem` sub-types. This means that either
  * this is valid linkbase content not modeled in the `LinkElem` sub-type hierarchy, or it is syntactically incorrect.
  */
-final class OtherLinkbaseElem private[dom] (
+final class OtherLinkElem private[dom] (
   backingElem: BackingElemApi,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem
 
@@ -1559,7 +1575,7 @@ object LinkElem {
       case ENames.LinkArcroleTypeEName      => new ArcroleType(backingElem, childElems)
       case ENames.LinkDefinitionEName       => new Definition(backingElem, childElems)
       case ENames.LinkUsedOnEName           => new UsedOn(backingElem, childElems)
-      case _                                => new OtherLinkbaseElem(backingElem, childElems)
+      case _                                => new OtherLinkElem(backingElem, childElems)
     }
   }
 }

@@ -94,6 +94,8 @@ package eu.cdevreeze.tqa
  * On the other hand, this API (and the entirety of TQA) has its own design. Briefly, it starts bottom-up with yaidom,
  * and gradually offers higher level (partial) abstractions on top of that. It does not hide yaidom, however.
  *
+ * TODO Support for built-in schema types, and built-in XBRL types.
+ *
  * @author Chris de Vreeze
  */
 package object dom
