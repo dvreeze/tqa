@@ -25,8 +25,8 @@ sealed trait Occ
 
 object Occ {
 
-  case object Segment extends Occ
-  case object Scenario extends Occ
+  case object Segment extends Occ { override def toString: String = "segment" }
+  case object Scenario extends Occ { override def toString: String = "scenario" }
 
   def fromString(s: String): Occ = s match {
     case "segment"  => Segment

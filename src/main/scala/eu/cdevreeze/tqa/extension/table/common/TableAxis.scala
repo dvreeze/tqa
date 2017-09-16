@@ -25,9 +25,9 @@ sealed trait TableAxis
 
 object TableAxis {
 
-  case object XAxis extends TableAxis
-  case object YAxis extends TableAxis
-  case object ZAxis extends TableAxis
+  case object XAxis extends TableAxis { override def toString: String = "x" }
+  case object YAxis extends TableAxis { override def toString: String = "y" }
+  case object ZAxis extends TableAxis { override def toString: String = "z" }
 
   def fromString(s: String): TableAxis = s match {
     case "x" => XAxis

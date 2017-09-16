@@ -25,8 +25,8 @@ sealed trait ParentChildOrder
 
 object ParentChildOrder {
 
-  case object ParentFirst extends ParentChildOrder
-  case object ChildrenFirst extends ParentChildOrder
+  case object ParentFirst extends ParentChildOrder { override def toString: String = "parent-first" }
+  case object ChildrenFirst extends ParentChildOrder { override def toString: String = "children-first" }
 
   def fromString(s: String): ParentChildOrder = s match {
     case "parent-first"   => ParentFirst
