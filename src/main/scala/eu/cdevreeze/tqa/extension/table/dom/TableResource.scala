@@ -21,22 +21,22 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
-import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.Namespaces
-import eu.cdevreeze.tqa.XmlFragmentKey
-import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
-import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
-import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
-import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.tqa.BigDecimalExpr
 import eu.cdevreeze.tqa.BigDecimalValue
 import eu.cdevreeze.tqa.BigDecimalValueOrExpr
 import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.ENameValueOrExpr
+import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.StringExpr
 import eu.cdevreeze.tqa.StringValue
 import eu.cdevreeze.tqa.StringValueOrExpr
+import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
+import eu.cdevreeze.tqa.extension.formula.dom.FormulaOrTableResource
+import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
+import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import javax.xml.bind.DatatypeConverter
@@ -46,7 +46,7 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait TableResource extends tqa.dom.AnyTaxonomyElem with XLinkResource {
+sealed trait TableResource extends FormulaOrTableResource {
 
   def underlyingResource: tqa.dom.NonStandardResource
 

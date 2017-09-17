@@ -27,6 +27,7 @@ import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.NonStandardArc
 import eu.cdevreeze.tqa.dom.NonStandardResource
 import eu.cdevreeze.tqa.extension.formula.dom.Filter
+import eu.cdevreeze.tqa.extension.formula.dom.FormulaOrTableResource
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
 import eu.cdevreeze.tqa.extension.formula.dom.Parameter
 import eu.cdevreeze.tqa.extension.table.common.TableAxis
@@ -56,8 +57,8 @@ import eu.cdevreeze.yaidom.core.Path
  */
 sealed abstract class TableRelationship(
     val arc: TableArc,
-    val resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource],
-    val resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource]) {
+    val resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaOrTableResource],
+    val resolvedTo: ResolvedLocatorOrResource[_ <: FormulaOrTableResource]) {
 
   require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
   require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
@@ -68,9 +69,9 @@ sealed abstract class TableRelationship(
     this
   }
 
-  final def sourceElem: AnyTaxonomyElem with XLinkResource = resolvedFrom.resolvedElem
+  final def sourceElem: FormulaOrTableResource = resolvedFrom.resolvedElem
 
-  final def targetElem: AnyTaxonomyElem with XLinkResource = resolvedTo.resolvedElem
+  final def targetElem: FormulaOrTableResource = resolvedTo.resolvedElem
 
   final def docUri: URI = arc.underlyingArc.docUri
 

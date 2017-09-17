@@ -61,8 +61,8 @@ import eu.cdevreeze.yaidom.core.Path
  */
 sealed abstract class FormulaRelationship(
     val arc: FormulaArc,
-    val resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource],
-    val resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource]) {
+    val resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaResource],
+    val resolvedTo: ResolvedLocatorOrResource[_ <: FormulaResource]) {
 
   require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
   require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
@@ -73,9 +73,9 @@ sealed abstract class FormulaRelationship(
     this
   }
 
-  final def sourceElem: AnyTaxonomyElem with XLinkResource = resolvedFrom.resolvedElem
+  final def sourceElem: FormulaResource = resolvedFrom.resolvedElem
 
-  final def targetElem: AnyTaxonomyElem with XLinkResource = resolvedTo.resolvedElem
+  final def targetElem: FormulaResource = resolvedTo.resolvedElem
 
   final def docUri: URI = arc.underlyingArc.docUri
 
@@ -233,8 +233,8 @@ final class ConsistencyAssertionParameterRelationship(
  */
 sealed abstract class OtherFormulaRelationship(
   arc: OtherFormulaArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource],
-  resolvedTo: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo)
+  resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaResource],
+  resolvedTo: ResolvedLocatorOrResource[_ <: FormulaResource]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A variable-set-precondition relationship.
@@ -286,10 +286,10 @@ final class AssertionSetRelationship(
  */
 sealed abstract class ElementMessageRelationship(
     arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: AnyTaxonomyElem with XLinkResource],
+    resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaResource],
     resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
-  final def referredElement: AnyTaxonomyElem with XLinkResource = resolvedFrom.resolvedElem
+  final def referredElement: FormulaResource = resolvedFrom.resolvedElem
 
   final def message: Message = resolvedTo.resolvedElem
 }

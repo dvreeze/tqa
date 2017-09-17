@@ -22,17 +22,16 @@ import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.AspectModel
-import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.ENameValueOrExpr
+import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.StringExpr
 import eu.cdevreeze.tqa.StringValue
 import eu.cdevreeze.tqa.StringValueOrExpr
 import eu.cdevreeze.tqa.XmlFragmentKey
-import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import javax.xml.bind.DatatypeConverter
@@ -42,7 +41,7 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait FormulaResource extends tqa.dom.AnyTaxonomyElem with XLinkResource {
+sealed trait FormulaResource extends FormulaOrTableResource {
 
   def underlyingResource: tqa.dom.NonStandardResource
 
