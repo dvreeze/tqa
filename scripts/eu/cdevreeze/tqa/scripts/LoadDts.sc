@@ -2,9 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.LoadDts"
 
-// Taking TQA version 0.4.7-M1
+// Taking TQA version 0.4.7-M2
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.4.7-M1`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.4.7-M2`
 
 // Imports that (must) remain available after this initialization script
 
@@ -91,12 +91,6 @@ def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, len
 
 def loadDts(localRootDir: File, entrypointUri: URI): BasicTaxonomy = {
   loadDts(localRootDir, Set(entrypointUri), 10000, false)
-}
-
-def guessedScope(taxonomy: BasicTaxonomy): Scope = {
-  taxonomy.rootElems.map(_.scope.withoutDefaultNamespace).foldLeft(Scope.Empty) { case (accScope, currScope) =>
-    (accScope ++ currScope).ensuring(_.retainingDefaultNamespace.isEmpty)
-  }
 }
 
 // Now the REPL has been set up for ad-hoc DTS querying (combined with ad-hoc yaidom usage)
