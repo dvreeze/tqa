@@ -16,7 +16,6 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -25,12 +24,9 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 final case class VariableSetVariableOrParameter(
-    elr: String,
-    variableOrParameter: VariableOrParameter,
+    commonAttributes: CommonRelationshipAttributes,
     name: EName,
-    order: BigDecimal,
-    priority: Int,
-    use: Use) extends NestedRelationship[VariableOrParameter] {
+    variableOrParameter: VariableOrParameter) extends NestedRelationship[VariableOrParameter] {
 
   def target: VariableOrParameter = variableOrParameter
 }

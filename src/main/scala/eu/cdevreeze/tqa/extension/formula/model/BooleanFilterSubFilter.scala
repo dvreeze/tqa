@@ -16,21 +16,16 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.common.Use
-
 /**
  * Boolean filter (nested) relationship.
  *
  * @author Chris de Vreeze
  */
 final case class BooleanFilterSubFilter(
-    elr: String,
-    subFilter: Filter,
+    commonAttributes: CommonRelationshipAttributes,
     complement: Boolean,
     cover: Boolean,
-    order: BigDecimal,
-    priority: Int,
-    use: Use) extends NestedRelationship[Filter] {
+    subFilter: Filter) extends NestedRelationship[Filter] {
 
   def target: Filter = subFilter
 }

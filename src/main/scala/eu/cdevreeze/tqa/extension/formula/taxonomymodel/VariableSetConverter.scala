@@ -120,7 +120,14 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         // Throwing an exception if not successful, and that is ok here.
         val filter = filterConverter.tryToConvertFilter(rel.filter).get
 
-        model.VariableSetFilter(rel.elr, filter, rel.complement, rel.order, rel.priority, rel.use)
+        model.VariableSetFilter(
+          model.CommonRelationshipAttributes(
+            rel.elr,
+            rel.order,
+            rel.priority,
+            rel.use),
+          rel.complement,
+          filter)
       }
 
     variableSetFilters
@@ -134,7 +141,13 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       varSetPreconditionRelationships map { rel =>
         val precondition = model.Precondition(rel.precondition.testExpr)
 
-        model.VariableSetPrecondition(rel.elr, precondition, rel.order, rel.priority, rel.use)
+        model.VariableSetPrecondition(
+          model.CommonRelationshipAttributes(
+            rel.elr,
+            rel.order,
+            rel.priority,
+            rel.use),
+          precondition)
       }
 
     variableSetPreconditions
@@ -161,13 +174,28 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
               // Throwing an exception if not successful, and that is ok here.
               val filter = filterConverter.tryToConvertFilter(rel.filter).get
 
-              model.VariableFilter(rel.elr, filter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
+              model.VariableFilter(
+                model.CommonRelationshipAttributes(
+                  rel.elr,
+                  rel.order,
+                  rel.priority,
+                  rel.use),
+                rel.complement,
+                rel.cover,
+                filter)
             }
 
             model.FactVariable(factVar.bindAsSequence, factVar.fallbackValueExprOption, factVar.matchesOption, factVar.nilsOption, variableFilters)
         }
 
-        model.VariableSetVariableOrParameter(rel.elr, varOrPar, rel.name, rel.order, rel.priority, rel.use)
+        model.VariableSetVariableOrParameter(
+          model.CommonRelationshipAttributes(
+            rel.elr,
+            rel.order,
+            rel.priority,
+            rel.use),
+          rel.name,
+          varOrPar)
       }
 
     variableSetVariablesOrParameters

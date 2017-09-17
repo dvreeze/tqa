@@ -16,19 +16,14 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.common.Use
-
 /**
  * A variable set precondition (nested) relationship, without the variable set.
  *
  * @author Chris de Vreeze
  */
 final case class VariableSetPrecondition(
-    elr: String,
-    precondition: Precondition,
-    order: BigDecimal,
-    priority: Int,
-    use: Use) extends NestedRelationship[Precondition] {
+    commonAttributes: CommonRelationshipAttributes,
+    precondition: Precondition) extends NestedRelationship[Precondition] {
 
   def target: Precondition = precondition
 }

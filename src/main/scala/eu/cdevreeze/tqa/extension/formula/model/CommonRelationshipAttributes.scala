@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.table.model
+package eu.cdevreeze.tqa.extension.formula.model
+
+import eu.cdevreeze.tqa.common.Use
 
 /**
- * Breakdown tree (nested) relationship.
+ * Common relationship attributes, such as ELR, order, priority and use.
  *
  * @author Chris de Vreeze
  */
-final case class BreakdownTree(
-    commonAttributes: CommonRelationshipAttributes,
-    tree: DefinitionNode) extends NestedRelationship[DefinitionNode] {
-
-  def target: DefinitionNode = tree
-}
+final case class CommonRelationshipAttributes(
+  elr: String,
+  order: BigDecimal,
+  priority: Int,
+  use: Use)

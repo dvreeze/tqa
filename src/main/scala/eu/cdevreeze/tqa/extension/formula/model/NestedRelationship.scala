@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.common.Use
-
 /**
  * A "nested relationship" in a formula context. It contains the relationship target, and not the source.
  * It also contains relationship attributes such as order, priority and use. It also contains the ELR
@@ -27,13 +25,7 @@ import eu.cdevreeze.tqa.common.Use
  */
 trait NestedRelationship[Target] {
 
-  def elr: String
-
   def target: Target
 
-  def order: BigDecimal
-
-  def priority: Int
-
-  def use: Use
+  def commonAttributes: CommonRelationshipAttributes
 }

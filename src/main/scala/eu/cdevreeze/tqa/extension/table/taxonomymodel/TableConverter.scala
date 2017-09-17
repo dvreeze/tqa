@@ -53,12 +53,13 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
     val breakdown = convertBreakdown(tableBreakdownRelationship.breakdown)
 
     model.TableBreakdown(
-      tableBreakdownRelationship.elr,
-      breakdown,
+      model.CommonRelationshipAttributes(
+        tableBreakdownRelationship.elr,
+        tableBreakdownRelationship.order,
+        tableBreakdownRelationship.priority,
+        tableBreakdownRelationship.use),
       tableBreakdownRelationship.axis,
-      tableBreakdownRelationship.order,
-      tableBreakdownRelationship.priority,
-      tableBreakdownRelationship.use)
+      breakdown)
   }
 
   private def convertBreakdown(domBreakdown: dom.TableBreakdown): model.Breakdown = {
@@ -77,11 +78,12 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
     val subtree = convertDefinitionNode(breakdownTreeRelationship.definitionNode)
 
     model.BreakdownTree(
-      breakdownTreeRelationship.elr,
-      subtree,
-      breakdownTreeRelationship.order,
-      breakdownTreeRelationship.priority,
-      breakdownTreeRelationship.use)
+      model.CommonRelationshipAttributes(
+        breakdownTreeRelationship.elr,
+        breakdownTreeRelationship.order,
+        breakdownTreeRelationship.priority,
+        breakdownTreeRelationship.use),
+      subtree)
   }
 
   private def convertDefinitionNode(domNode: dom.DefinitionNode): model.DefinitionNode = domNode match {
@@ -97,11 +99,12 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
     val subtree = convertDefinitionNode(definitionNodeSubtreeRelationship.toNode)
 
     model.DefinitionNodeSubtree(
-      definitionNodeSubtreeRelationship.elr,
-      subtree,
-      definitionNodeSubtreeRelationship.order,
-      definitionNodeSubtreeRelationship.priority,
-      definitionNodeSubtreeRelationship.use)
+      model.CommonRelationshipAttributes(
+        definitionNodeSubtreeRelationship.elr,
+        definitionNodeSubtreeRelationship.order,
+        definitionNodeSubtreeRelationship.priority,
+        definitionNodeSubtreeRelationship.use),
+      subtree)
   }
 
   private def convertRuleNode(domNode: dom.RuleNode): model.RuleNode = {

@@ -27,6 +27,7 @@ import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
 import eu.cdevreeze.tqa.extension.formula.model
+import eu.cdevreeze.tqa.extension.formula.model.CommonRelationshipAttributes
 import eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter
 import eu.cdevreeze.tqa.extension.formula.model.DimensionFilterMember
 import eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter
@@ -91,12 +92,9 @@ class FormulaQueryApiTest extends FunSuite {
     val Elr = "urn:kvk:linkrole:balance-sheet-banks"
 
     val varSetVarOrPar @ VariableSetVariableOrParameter(
-      elr,
-      factVariable @ FactVariable(_, _, _, _, variableFilters),
+      CommonRelationshipAttributes(elr, order, priority, use),
       ename,
-      order,
-      priority,
-      use) = varSetVariablesOrParameters.head
+      factVariable @ FactVariable(_, _, _, _, variableFilters)) = varSetVariablesOrParameters.head
 
     assertResult(Elr) {
       elr
@@ -133,13 +131,10 @@ class FormulaQueryApiTest extends FunSuite {
 
     val Seq(
       variableFilter @ VariableFilter(
-        elr2,
-        filter2 @ ConceptNameFilter(conceptNamesOrExprs),
+        CommonRelationshipAttributes(elr2, order2, priority2, use2),
         complement2,
         cover2,
-        order2,
-        priority2,
-        use2)) = variableFilters
+        filter2 @ ConceptNameFilter(conceptNamesOrExprs))) = variableFilters
 
     assertResult(Elr) {
       elr2
@@ -228,12 +223,9 @@ class FormulaQueryApiTest extends FunSuite {
     val Elr = "urn:kvk:linkrole:balance-sheet-banks"
 
     val varSetVarOrPar @ VariableSetVariableOrParameter(
-      elr,
-      factVariable @ FactVariable(_, _, _, _, variableFilters),
+      CommonRelationshipAttributes(elr, order, priority, use),
       ename,
-      order,
-      priority,
-      use) = valueAssertion.variableSetVariablesOrParameters.head
+      factVariable @ FactVariable(_, _, _, _, variableFilters)) = valueAssertion.variableSetVariablesOrParameters.head
 
     assertResult(Elr) {
       elr
@@ -275,11 +267,11 @@ class FormulaQueryApiTest extends FunSuite {
       variableFilters.map(_.cover).toSet
     }
     assertResult(Set(BigDecimal(1), BigDecimal(2))) {
-      variableFilters.map(_.order).toSet
+      variableFilters.map(_.commonAttributes.order).toSet
     }
 
     val explicitDimensionFilter @ ExplicitDimensionFilter(dim, mems) =
-      variableFilters.filter(_.order == BigDecimal(2)).head.filter
+      variableFilters.filter(_.commonAttributes.order == BigDecimal(2)).head.filter
 
     val guessedScope = taxo.guessedScope
 

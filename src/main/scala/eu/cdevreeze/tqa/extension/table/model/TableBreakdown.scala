@@ -16,7 +16,6 @@
 
 package eu.cdevreeze.tqa.extension.table.model
 
-import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.extension.table.common.TableAxis
 
 /**
@@ -25,12 +24,9 @@ import eu.cdevreeze.tqa.extension.table.common.TableAxis
  * @author Chris de Vreeze
  */
 final case class TableBreakdown(
-    elr: String,
-    breakdown: Breakdown,
+    commonAttributes: CommonRelationshipAttributes,
     axis: TableAxis,
-    order: BigDecimal,
-    priority: Int,
-    use: Use) extends NestedRelationship[Breakdown] {
+    breakdown: Breakdown) extends NestedRelationship[Breakdown] {
 
   def target: Breakdown = breakdown
 }

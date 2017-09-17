@@ -16,19 +16,14 @@
 
 package eu.cdevreeze.tqa.extension.table.model
 
-import eu.cdevreeze.tqa.common.Use
-
 /**
  * Definition node subtree (nested) relationship.
  *
  * @author Chris de Vreeze
  */
 final case class DefinitionNodeSubtree(
-    elr: String,
-    subtree: DefinitionNode,
-    order: BigDecimal,
-    priority: Int,
-    use: Use) extends NestedRelationship[DefinitionNode] {
+    commonAttributes: CommonRelationshipAttributes,
+    subtree: DefinitionNode) extends NestedRelationship[DefinitionNode] {
 
   def target: DefinitionNode = subtree
 }

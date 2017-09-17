@@ -79,7 +79,15 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
           // Throwing an exception if not successful, and that is ok here.
           val subFilter = tryToConvertFilter(rel.subFilter).get
 
-          model.BooleanFilterSubFilter(rel.elr, subFilter, rel.complement, rel.cover, rel.order, rel.priority, rel.use)
+          model.BooleanFilterSubFilter(
+            model.CommonRelationshipAttributes(
+              rel.elr,
+              rel.order,
+              rel.priority,
+              rel.use),
+            rel.complement,
+            rel.cover,
+            subFilter)
         }
 
       domFilter match {

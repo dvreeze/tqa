@@ -16,21 +16,16 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.common.Use
-
 /**
  * A variable filter (nested) relationship, without the fact variable.
  *
  * @author Chris de Vreeze
  */
 final case class VariableFilter(
-    elr: String,
-    filter: Filter,
+    commonAttributes: CommonRelationshipAttributes,
     complement: Boolean,
     cover: Boolean,
-    order: BigDecimal,
-    priority: Int,
-    use: Use) extends NestedRelationship[Filter] {
+    filter: Filter) extends NestedRelationship[Filter] {
 
   def target: Filter = filter
 }
