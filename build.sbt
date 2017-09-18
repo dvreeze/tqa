@@ -26,9 +26,11 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
 
 libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.7.0-M1"
 
-libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-18"
-
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.3"
+
+libraryDependencies += "com.lihaoyi" %% "fastparse" % "0.4.4"
+
+libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-18"
 
 libraryDependencies += "com.google.guava" % "guava" % "22.0"
 
