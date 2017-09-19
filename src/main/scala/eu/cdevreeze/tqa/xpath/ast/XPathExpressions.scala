@@ -28,7 +28,7 @@ import eu.cdevreeze.yaidom.core.QName
  * <li>It must represent the syntax tree of a successfully parsed XPath expression</li>
  * <li>It is not annotated with more semantic information, like type information that is not included in the XPath expression</li>
  * <li>It does not know anything about the context in which it runs, like bound namespaces etc.</li>
- * <li>It is rich enough to be able to serialize the AST back to XPath, knowing exactly where to place parentheses, etc.</li>
+ * <li>It is rich enough to be able to serialize the AST back to XPath, knowing exactly where to place parentheses, braces, etc.</li>
  * <li>It is rich enough to contain operator precedence in the AST itself</li>
  * <li>Serialization of the AST to XPath may lead to differences in whitespace (and operator aliases), but other than that the result must be the same</li>
  * <li>The AST class hierarchy does not have to use the exact same names as the XPath grammar</li>
