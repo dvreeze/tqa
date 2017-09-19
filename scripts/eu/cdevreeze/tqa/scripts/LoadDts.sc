@@ -2,9 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.LoadDts"
 
-// Taking TQA version 0.4.7-M2
+// Taking TQA version 0.4.7-SNAPSHOT
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.4.7-M2`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.4.7-SNAPSHOT`
 
 // Imports that (must) remain available after this initialization script
 

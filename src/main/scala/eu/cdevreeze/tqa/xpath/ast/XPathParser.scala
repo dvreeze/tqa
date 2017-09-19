@@ -20,7 +20,7 @@ import eu.cdevreeze.yaidom.core.QName
 import fastparse.WhitespaceApi
 
 /**
- * XPath 2.0 parsing support, using FastParse.
+ * XPath 3.0 parsing support, using FastParse.
  *
  * Usage: XPathParser.xpathExpr.parse(xpathString)
  *
@@ -99,7 +99,7 @@ object XPathParser {
     }
 
   private val additiveExpr: P[AdditiveExpr] =
-    P(varName) map (_ => AdditiveExpr()) // TODO
+    P(varName.!) map (s => AdditiveExpr(s)) // TODO
 
   private val valueComp: P[ValueComp] =
     P(("eq" | "ne" | "lt" | "le" | "gt" | "ge").!) map (s => ValueComp.parse(s))
@@ -112,7 +112,15 @@ object XPathParser {
 
   // TODO
   private val varName: P[QName] =
-    P(CharsWhile(c => java.lang.Character.isJavaIdentifierPart(c) || (c == ':')).!) map (s => QName.parse(s))
+    P(CharsWhile(c => java.lang.Character.isJavaIdentifierPart(c) || (c == ':')).!) filter (s => !keywords.contains(s)) map (s => QName.parse(s))
+
+  private val keywords: Set[String] = Set(
+    "if",
+    "in",
+    "return",
+    "some",
+    "every",
+    "satisfies")
 
   def main(args: Array[String]): Unit = {
     // Remove main method!!!

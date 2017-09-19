@@ -21,7 +21,7 @@ import scala.collection.immutable
 import eu.cdevreeze.yaidom.core.QName
 
 /**
- * XPath 2.0 AST.
+ * XPath 3.0 AST.
  *
  * @author Chris de Vreeze
  */
@@ -29,17 +29,23 @@ object XPathExpressions {
 
   final case class XPathExpr(expr: Expr)
 
+  // Expressions
+
   final case class Expr(exprSingleSeq: immutable.IndexedSeq[ExprSingle])
 
   sealed trait ExprSingle
 
   final case class ForExpr(
-    variables: immutable.IndexedSeq[BoundVariable],
+    simpleForBindings: immutable.IndexedSeq[SimpleForBinding],
+    returnExpr: ExprSingle) extends ExprSingle
+
+  final case class LetExpr(
+    simpleLetBindings: immutable.IndexedSeq[SimpleLetBinding],
     returnExpr: ExprSingle) extends ExprSingle
 
   final case class QuantifiedExpr(
     quantifier: Quantifier,
-    variables: immutable.IndexedSeq[BoundVariable],
+    simpleBindings: immutable.IndexedSeq[SimpleBindingInQuantifiedExpr],
     satisfiesExpr: ExprSingle) extends ExprSingle
 
   final case class IfExpr(
@@ -53,9 +59,11 @@ object XPathExpressions {
 
   sealed trait ComparisonExpr
 
-  final case class SimpleComparisonExpr(rangeExpr: RangeExpr) extends ComparisonExpr
+  final case class SimpleComparisonExpr(stringConcatExpr: StringConcatExpr) extends ComparisonExpr
 
-  final case class CompoundComparisonExpr(rangeExpr1: RangeExpr, comp: Comp, rangeExpr2: RangeExpr) extends ComparisonExpr
+  final case class CompoundComparisonExpr(stringConcatExpr1: StringConcatExpr, comp: Comp, stringConcatExpr2: StringConcatExpr) extends ComparisonExpr
+
+  final case class StringConcatExpr(rangeExprs: immutable.IndexedSeq[RangeExpr])
 
   sealed trait RangeExpr
 
@@ -63,9 +71,31 @@ object XPathExpressions {
 
   final case class CompoundRangeExpr(additiveExpr1: AdditiveExpr, additiveExpr2: AdditiveExpr) extends RangeExpr
 
-  final case class AdditiveExpr()
+  sealed trait AdditiveExpr
 
-  final case class BoundVariable(varName: QName, expr: ExprSingle) // TODO Correct name?
+  final case class SimpleAdditiveExpr(expr: MultiplicativeExpr) extends AdditiveExpr
+
+  final case class CompoundAdditiveExpr(headExpr: MultiplicativeExpr, op: AdditionOp, tailExpr: AdditiveExpr) extends AdditiveExpr
+
+  sealed trait MultiplicativeExpr
+
+  final case class SimpleMultiplicativeExpr(expr: UnionExpr) extends MultiplicativeExpr
+
+  final case class CompoundMultiplicativeExpr(headExpr: UnionExpr, op: MultiplicativeOp, tailExpr: MultiplicativeExpr) extends MultiplicativeExpr
+
+  final case class UnionExpr(intersectExceptExprs: immutable.IndexedSeq[IntersectExceptExpr])
+
+  sealed trait IntersectExceptExpr
+
+  // Bindings
+
+  final case class SimpleForBinding(varName: QName, expr: ExprSingle)
+
+  final case class SimpleLetBinding(varName: QName, expr: ExprSingle)
+
+  final case class SimpleBindingInQuantifiedExpr(varName: QName, expr: ExprSingle)
+
+  // Operators
 
   sealed trait Comp
   sealed trait ValueComp extends Comp
@@ -123,11 +153,70 @@ object XPathExpressions {
     }
   }
 
+  sealed trait AdditionOp
+
+  object AdditionOp {
+
+    case object Plus extends AdditionOp
+    case object Minus extends AdditionOp
+
+    def parse(s: String): AdditionOp = s match {
+      case "+" => Plus
+      case "-" => Minus
+    }
+  }
+
+  sealed trait MultiplicativeOp
+
+  object MultiplicativeOp {
+
+    case object Times extends MultiplicativeOp
+    case object Div extends MultiplicativeOp
+    case object IDiv extends MultiplicativeOp
+    case object Mod extends MultiplicativeOp
+
+    def parse(s: String): MultiplicativeOp = s match {
+      case "*"    => Times
+      case "div"  => Div
+      case "idiv" => IDiv
+      case "mod"  => Mod
+    }
+  }
+
+  sealed trait IntersectExceptOp
+
+  object IntersectExceptOp {
+
+    case object Intersect extends IntersectExceptOp
+    case object Except extends IntersectExceptOp
+
+    def parse(s: String): IntersectExceptOp = s match {
+      case "intersect" => Intersect
+      case "except"    => Except
+    }
+  }
+
+  sealed trait UnaryOp
+
+  object UnaryOp {
+
+    case object Plus extends UnaryOp
+    case object Minus extends UnaryOp
+
+    def parse(s: String): UnaryOp = s match {
+      case "+" => Plus
+      case "-" => Minus
+    }
+  }
+
+  // Keywords etc.
+
   sealed trait Quantifier
-  case object SomeQuantifier extends Quantifier
-  case object EveryQuantifier extends Quantifier
 
   object Quantifier {
+
+    case object SomeQuantifier extends Quantifier
+    case object EveryQuantifier extends Quantifier
 
     def parse(s: String): Quantifier = s match {
       case "some"  => SomeQuantifier
