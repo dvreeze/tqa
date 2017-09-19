@@ -49,13 +49,21 @@ object XPathParser {
     }
 
   private val exprSingle: P[ExprSingle] =
-    P(forExpr | quantifiedExpr | ifExpr | orExpr)
+    P(forExpr | letExpr | quantifiedExpr | ifExpr | orExpr)
 
   private val forExpr: P[ForExpr] =
     P("for" ~ "$" ~ varName ~ "in" ~ exprSingle ~ ("," ~ "$" ~ varName ~ "in" ~ exprSingle).rep ~ "return" ~ exprSingle) map {
       case (qn, exp1, qnameExpSeq, returnExp) =>
         ForExpr(
-          BoundVariable(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => BoundVariable(qnExpPair._1, qnExpPair._2)),
+          SimpleForBinding(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => SimpleForBinding(qnExpPair._1, qnExpPair._2)),
+          returnExp)
+    }
+
+  private val letExpr: P[LetExpr] =
+    P("let" ~ "$" ~ varName ~ ":=" ~ exprSingle ~ ("," ~ "$" ~ varName ~ ":=" ~ exprSingle).rep ~ "return" ~ exprSingle) map {
+      case (qn, exp1, qnameExpSeq, returnExp) =>
+        LetExpr(
+          SimpleLetBinding(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => SimpleLetBinding(qnExpPair._1, qnExpPair._2)),
           returnExp)
     }
 
@@ -64,7 +72,7 @@ object XPathParser {
       case (quant, qn, exp1, qnameExpSeq, satisfiesExp) =>
         QuantifiedExpr(
           Quantifier.parse(quant),
-          BoundVariable(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => BoundVariable(qnExpPair._1, qnExpPair._2)),
+          SimpleBindingInQuantifiedExpr(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => SimpleBindingInQuantifiedExpr(qnExpPair._1, qnExpPair._2)),
           satisfiesExp)
     }
 
@@ -87,19 +95,72 @@ object XPathParser {
     }
 
   private val comparisonExpr: P[ComparisonExpr] =
-    P(rangeExpr ~ ((valueComp | generalComp | nodeComp) ~ rangeExpr).?) map {
-      case (range1, Some((op, range2))) => CompoundComparisonExpr(range1, op, range2)
-      case (range1, None)               => SimpleComparisonExpr(range1)
+    P(stringConcatExpr ~ ((valueComp | generalComp | nodeComp) ~ stringConcatExpr).?) map {
+      case (expr1, Some((op, expr2))) => CompoundComparisonExpr(expr1, op, expr2)
+      case (expr, None)               => SimpleComparisonExpr(expr)
+    }
+
+  private val stringConcatExpr: P[StringConcatExpr] =
+    P(rangeExpr ~ ("||" ~ rangeExpr).rep) map {
+      case (rangeExpr, rangeExprSeq) =>
+        StringConcatExpr(rangeExpr +: rangeExprSeq.toIndexedSeq)
     }
 
   private val rangeExpr: P[RangeExpr] =
     P(additiveExpr ~ ("to" ~ additiveExpr).?) map {
       case (additiveExp1, Some(additiveExp2)) => CompoundRangeExpr(additiveExp1, additiveExp2)
-      case (additiveExp1, None)               => SimpleRangeExpr(additiveExp1)
+      case (additiveExp, None)                => SimpleRangeExpr(additiveExp)
     }
 
   private val additiveExpr: P[AdditiveExpr] =
-    P(varName.!) map (s => AdditiveExpr(s)) // TODO
+    P(multiplicativeExpr ~ (("+" | "-").! ~ additiveExpr).?) map {
+      case (expr, None) =>
+        SimpleAdditiveExpr(expr)
+      case (expr, Some(opAndExpr)) =>
+        CompoundAdditiveExpr(expr, AdditionOp.parse(opAndExpr._1), opAndExpr._2)
+    }
+
+  private val multiplicativeExpr: P[MultiplicativeExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val unionExpr: P[UnionExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val intersectExceptExpr: P[IntersectExceptExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val instanceOfExpr: P[InstanceOfExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val treatExpr: P[TreatExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val castableExpr: P[CastableExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val castExpr: P[CastExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val unaryExpr: P[UnaryExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val valueExpr: P[ValueExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val simpleMapExpr: P[SimpleMapExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val pathExpr: P[PathExpr] =
+    P(???) map (v => ???) // TODO Also mind the single slash recognition
+
+  private val relativePathExpr: P[RelativePathExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val stepExpr: P[StepExpr] =
+    P(???) map (v => ???) // TODO
+
+  private val axisStep: P[AxisStep] =
+    P(???) map (v => ???) // TODO
 
   private val valueComp: P[ValueComp] =
     P(("eq" | "ne" | "lt" | "le" | "gt" | "ge").!) map (s => ValueComp.parse(s))
