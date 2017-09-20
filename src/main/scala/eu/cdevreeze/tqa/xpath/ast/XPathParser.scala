@@ -35,7 +35,7 @@ object XPathParser {
   private val White = WhitespaceApi.Wrapper {
     import fastparse.all._
 
-    NoTrace(" ".rep) // TODO Adapt. Not only spaces are whitespace. What about parsing of comments?
+    NoTrace(CharPred(c => java.lang.Character.isWhitespace(c)).rep) // TODO Adapt. What about parsing of comments?
   }
 
   import White._
@@ -45,9 +45,8 @@ object XPathParser {
     P(expr) map (e => XPathExpr(e)) // TODO End
 
   private val expr: P[Expr] =
-    P(exprSingle ~ ("," ~ exprSingle).rep) map {
-      case (exprSingle, exprSingleSeq) =>
-        Expr(exprSingle +: exprSingleSeq.toIndexedSeq)
+    P(exprSingle.rep(min = 1, sep = ",")) map {
+      case (exprs) => Expr(exprs.toIndexedSeq)
     }
 
   private val enclosedExpr: P[EnclosedExpr] =
@@ -59,46 +58,48 @@ object XPathParser {
     P(forExpr | letExpr | quantifiedExpr | ifExpr | orExpr)
 
   private val forExpr: P[ForExpr] =
-    P("for" ~ "$" ~ varName ~ "in" ~ exprSingle ~ ("," ~ "$" ~ varName ~ "in" ~ exprSingle).rep ~ "return" ~ exprSingle) map {
-      case (qn, exp1, qnameExpSeq, returnExp) =>
-        ForExpr(
-          SimpleForBinding(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => SimpleForBinding(qnExpPair._1, qnExpPair._2)),
-          returnExp)
+    P("for" ~ simpleForBinding.rep(min = 1, sep = ",") ~ "return" ~ exprSingle) map {
+      case (bindings, returnExp) => ForExpr(bindings.toIndexedSeq, returnExp)
+    }
+
+  private val simpleForBinding: P[SimpleForBinding] =
+    P("$" ~ varName ~ "in" ~ exprSingle) map {
+      case (qn, exp) => SimpleForBinding(qn, exp)
     }
 
   private val letExpr: P[LetExpr] =
-    P("let" ~ "$" ~ varName ~ ":=" ~ exprSingle ~ ("," ~ "$" ~ varName ~ ":=" ~ exprSingle).rep ~ "return" ~ exprSingle) map {
-      case (qn, exp1, qnameExpSeq, returnExp) =>
-        LetExpr(
-          SimpleLetBinding(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => SimpleLetBinding(qnExpPair._1, qnExpPair._2)),
-          returnExp)
+    P("let" ~ simpleLetBinding.rep(min = 1, sep = ",") ~ "return" ~ exprSingle) map {
+      case (bindings, returnExp) => LetExpr(bindings.toIndexedSeq, returnExp)
+    }
+
+  private val simpleLetBinding: P[SimpleLetBinding] =
+    P("$" ~ varName ~ ":=" ~ exprSingle) map {
+      case (qn, exp) => SimpleLetBinding(qn, exp)
     }
 
   private val quantifiedExpr: P[QuantifiedExpr] =
-    P(("some" | "every").! ~ "$" ~ varName ~ "in" ~ exprSingle ~ ("," ~ "$" ~ varName ~ "in" ~ exprSingle).rep ~ "satisfies" ~ exprSingle) map {
-      case (quant, qn, exp1, qnameExpSeq, satisfiesExp) =>
-        QuantifiedExpr(
-          Quantifier.parse(quant),
-          SimpleBindingInQuantifiedExpr(qn, exp1) +: qnameExpSeq.toIndexedSeq.map(qnExpPair => SimpleBindingInQuantifiedExpr(qnExpPair._1, qnExpPair._2)),
-          satisfiesExp)
+    P(("some" | "every").! ~ simpleBindingInQuantifiedExpr.rep(min = 1, sep = ",") ~ "satisfies" ~ exprSingle) map {
+      case (quant, bindings, satisfiesExp) => QuantifiedExpr(Quantifier.parse(quant), bindings.toIndexedSeq, satisfiesExp)
+    }
+
+  private val simpleBindingInQuantifiedExpr: P[SimpleBindingInQuantifiedExpr] =
+    P("$" ~ varName ~ "in" ~ exprSingle) map {
+      case (qn, exp) => SimpleBindingInQuantifiedExpr(qn, exp)
     }
 
   private val ifExpr: P[IfExpr] =
     P("if" ~ "(" ~ expr ~ ")" ~ "then" ~ exprSingle ~ "else" ~ exprSingle) map {
-      case (e1, e2, e3) =>
-        IfExpr(e1, e2, e3)
+      case (e1, e2, e3) => IfExpr(e1, e2, e3)
     }
 
   private val orExpr: P[OrExpr] =
-    P(andExpr ~ ("or" ~ andExpr).rep) map {
-      case (andExp, andExpSeq) =>
-        OrExpr(andExp +: andExpSeq.toIndexedSeq)
+    P(andExpr.rep(min = 1, sep = "or")) map {
+      case exps => OrExpr(exps.toIndexedSeq)
     }
 
   private val andExpr: P[AndExpr] =
-    P(comparisonExpr ~ ("and" ~ comparisonExpr).rep) map {
-      case (compExp, compExpSeq) =>
-        AndExpr(compExp +: compExpSeq.toIndexedSeq)
+    P(comparisonExpr.rep(min = 1, sep = "and")) map {
+      case exps => AndExpr(exps.toIndexedSeq)
     }
 
   private val comparisonExpr: P[ComparisonExpr] =
@@ -108,9 +109,8 @@ object XPathParser {
     }
 
   private val stringConcatExpr: P[StringConcatExpr] =
-    P(rangeExpr ~ ("||" ~ rangeExpr).rep) map {
-      case (rangeExpr, rangeExprSeq) =>
-        StringConcatExpr(rangeExpr +: rangeExprSeq.toIndexedSeq)
+    P(rangeExpr.rep(min = 1, sep = "||")) map {
+      case exps => StringConcatExpr(exps.toIndexedSeq)
     }
 
   private val rangeExpr: P[RangeExpr] =
@@ -121,74 +121,60 @@ object XPathParser {
 
   private val additiveExpr: P[AdditiveExpr] =
     P(multiplicativeExpr ~ (("+" | "-").! ~ additiveExpr).?) map {
-      case (expr, None) =>
-        SimpleAdditiveExpr(expr)
-      case (expr, Some(opAndExpr)) =>
-        CompoundAdditiveExpr(expr, AdditionOp.parse(opAndExpr._1), opAndExpr._2)
+      case (expr, None)            => SimpleAdditiveExpr(expr)
+      case (expr, Some(opAndExpr)) => CompoundAdditiveExpr(expr, AdditionOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val multiplicativeExpr: P[MultiplicativeExpr] =
     P(unionExpr ~ (("*" | "div" | "idiv" | "mod").! ~ multiplicativeExpr).?) map {
-      case (expr, None) =>
-        SimpleMultiplicativeExpr(expr)
-      case (expr, Some(opAndExpr)) =>
-        CompoundMultiplicativeExpr(expr, MultiplicativeOp.parse(opAndExpr._1), opAndExpr._2)
+      case (expr, None)            => SimpleMultiplicativeExpr(expr)
+      case (expr, Some(opAndExpr)) => CompoundMultiplicativeExpr(expr, MultiplicativeOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val unionExpr: P[UnionExpr] =
     P(intersectExceptExpr ~ (("union" | "|") ~ intersectExceptExpr).rep) map {
-      case (expr, exprSeq) =>
-        UnionExpr(expr +: exprSeq.toIndexedSeq)
+      case (expr, exprSeq) => UnionExpr(expr +: exprSeq.toIndexedSeq)
     }
 
   private val intersectExceptExpr: P[IntersectExceptExpr] =
     P(instanceOfExpr ~ (("intersect" | "except").! ~ intersectExceptExpr).?) map {
-      case (expr, None) =>
-        SimpleIntersectExceptExpr(expr)
-      case (expr, Some(opAndExpr)) =>
-        CompoundIntersectExceptExpr(expr, IntersectExceptOp.parse(opAndExpr._1), opAndExpr._2)
+      case (expr, None)            => SimpleIntersectExceptExpr(expr)
+      case (expr, Some(opAndExpr)) => CompoundIntersectExceptExpr(expr, IntersectExceptOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val instanceOfExpr: P[InstanceOfExpr] =
     P(treatExpr ~ ("instance" ~ "of" ~ sequenceType).?) map {
-      case (expr, tpeOption) =>
-        InstanceOfExpr(expr, tpeOption)
+      case (expr, tpeOption) => InstanceOfExpr(expr, tpeOption)
     }
 
   private val treatExpr: P[TreatExpr] =
     P(castableExpr ~ ("treat" ~ "as" ~ sequenceType).?) map {
-      case (expr, tpeOption) =>
-        TreatExpr(expr, tpeOption)
+      case (expr, tpeOption) => TreatExpr(expr, tpeOption)
     }
 
   private val castableExpr: P[CastableExpr] =
     P(castExpr ~ ("castable" ~ "as" ~ singleType).?) map {
-      case (expr, tpeOption) =>
-        CastableExpr(expr, tpeOption)
+      case (expr, tpeOption) => CastableExpr(expr, tpeOption)
     }
 
   private val castExpr: P[CastExpr] =
     P(unaryExpr ~ ("cast" ~ "as" ~ singleType).?) map {
-      case (expr, tpeOption) =>
-        CastExpr(expr, tpeOption)
+      case (expr, tpeOption) => CastExpr(expr, tpeOption)
     }
 
   private val unaryExpr: P[UnaryExpr] =
     P(("-" | "+").!.rep ~ valueExpr) map {
-      case (ops, expr) =>
-        UnaryExpr(ops.toIndexedSeq.map(op => UnaryOp.parse(op)), expr)
+      case (ops, expr) => UnaryExpr(ops.toIndexedSeq.map(op => UnaryOp.parse(op)), expr)
     }
 
   private val valueExpr: P[ValueExpr] =
     P(simpleMapExpr) map {
-      case expr =>
-        ValueExpr(expr)
+      case expr => ValueExpr(expr)
     }
 
   private val simpleMapExpr: P[SimpleMapExpr] =
-    P(pathExpr ~ ("|" ~ pathExpr).rep) map {
-      case (expr, exprSeq) =>
-        SimpleMapExpr(expr +: exprSeq.toIndexedSeq)
+    P(pathExpr.rep(min = 1, sep = "|")) map {
+      case exps => SimpleMapExpr(exps.toIndexedSeq)
     }
 
   private val pathExpr: P[PathExpr] =
@@ -210,8 +196,7 @@ object XPathParser {
 
   private val slashOnlyPathExpr: P[PathExpr] =
     P("/" ~ !("/" | canStartRelativePathExpr)) map {
-      case _ =>
-        SlashOnlyPathExpr
+      case _ => SlashOnlyPathExpr
     }
 
   // Looking ahead to distinguish single slash from double slash, and to recognize start of relativePathExpr.
@@ -219,22 +204,18 @@ object XPathParser {
 
   private val pathExprStartingWithSingleSlash: P[PathExpr] =
     P("/" ~ &(canStartRelativePathExpr) ~ relativePathExpr) map {
-      case expr =>
-        PathExprStartingWithSingleSlash(expr)
+      case expr => PathExprStartingWithSingleSlash(expr)
     }
 
   private val pathExprStartingWithDoubleSlash: P[PathExpr] =
     P("//" ~ relativePathExpr) map {
-      case expr =>
-        PathExprStartingWithDoubleSlash(expr)
+      case expr => PathExprStartingWithDoubleSlash(expr)
     }
 
   private val relativePathExpr: P[RelativePathExpr] =
     P(stepExpr ~ (("/" | "//").! ~ relativePathExpr).?) map {
-      case (expr, None) =>
-        SimpleRelativePathExpr(expr)
-      case (expr, Some(opAndExpr)) =>
-        CompoundRelativePathExpr(expr, StepOp.parse(opAndExpr._1), opAndExpr._2)
+      case (expr, None)            => SimpleRelativePathExpr(expr)
+      case (expr, Some(opAndExpr)) => CompoundRelativePathExpr(expr, StepOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val stepExpr: P[StepExpr] =
@@ -245,14 +226,12 @@ object XPathParser {
 
   private val forwardAxisStep: P[ForwardAxisStep] =
     P(forwardStep ~ predicate.rep) map {
-      case (forwardStep, predicates) =>
-        ForwardAxisStep(forwardStep, predicates.toIndexedSeq)
+      case (forwardStep, predicates) => ForwardAxisStep(forwardStep, predicates.toIndexedSeq)
     }
 
   private val reverseAxisStep: P[ReverseAxisStep] =
     P(reverseStep ~ predicate.rep) map {
-      case (reverseStep, predicates) =>
-        ReverseAxisStep(reverseStep, predicates.toIndexedSeq)
+      case (reverseStep, predicates) => ReverseAxisStep(reverseStep, predicates.toIndexedSeq)
     }
 
   private val forwardStep: P[ForwardStep] =
@@ -263,20 +242,17 @@ object XPathParser {
 
   private val simpleAbbrevForwardStep: P[SimpleAbbrevForwardStep] =
     P(nodeTest) map {
-      case nodeTest =>
-        SimpleAbbrevForwardStep(nodeTest)
+      case nodeTest => SimpleAbbrevForwardStep(nodeTest)
     }
 
   private val attributeAxisAbbrevForwardStep: P[AttributeAxisAbbrevForwardStep] =
     P("@" ~ nodeTest) map {
-      case nodeTest =>
-        AttributeAxisAbbrevForwardStep(nodeTest)
+      case nodeTest => AttributeAxisAbbrevForwardStep(nodeTest)
     }
 
   private val nonAbbrevForwardStep: P[NonAbbrevForwardStep] =
     P(forwardAxis ~ nodeTest) map {
-      case (axis, nodeTest) =>
-        NonAbbrevForwardStep(axis, nodeTest)
+      case (axis, nodeTest) => NonAbbrevForwardStep(axis, nodeTest)
     }
 
   private val forwardAxis: P[ForwardAxis] =
@@ -299,8 +275,7 @@ object XPathParser {
 
   private val nonAbbrevReverseStep: P[NonAbbrevReverseStep] =
     P(reverseAxis ~ nodeTest) map {
-      case (axis, nodeTest) =>
-        NonAbbrevReverseStep(axis, nodeTest)
+      case (axis, nodeTest) => NonAbbrevReverseStep(axis, nodeTest)
     }
 
   private val reverseAxis: P[ReverseAxis] =
@@ -320,8 +295,7 @@ object XPathParser {
 
   private val simpleNameTest: P[SimpleNameTest] =
     P(eqName) map {
-      case name =>
-        SimpleNameTest(name)
+      case name => SimpleNameTest(name)
     }
 
   // See ws:explicit constraint.
@@ -352,14 +326,12 @@ object XPathParser {
 
   private val documentTestContainingElementTest: P[DocumentTestContainingElementTest] =
     P("document-node" ~ "(" ~ elementTest ~ ")") map {
-      case elemTest =>
-        DocumentTestContainingElementTest(elemTest)
+      case elemTest => DocumentTestContainingElementTest(elemTest)
     }
 
   private val documentTestContainingSchemaElementTest: P[DocumentTestContainingSchemaElementTest] =
     P("document-node" ~ "(" ~ schemaElementTest ~ ")") map {
-      case schemaElmTest =>
-        DocumentTestContainingSchemaElementTest(schemaElmTest)
+      case schemaElmTest => DocumentTestContainingSchemaElementTest(schemaElmTest)
     }
 
   private val elementTest: P[ElementTest] =
@@ -458,8 +430,7 @@ object XPathParser {
 
   private val postfixExpr: P[PostfixExpr] =
     P(primaryExpr ~ (predicate | argumentList).rep) map {
-      case (primaryExp, predicateOrArgumentListSeq) =>
-        PostfixExpr(primaryExp, predicateOrArgumentListSeq.toIndexedSeq)
+      case (primaryExp, predicateOrArgumentListSeq) => PostfixExpr(primaryExp, predicateOrArgumentListSeq.toIndexedSeq)
     }
 
   private val argumentList: P[ArgumentList] =
@@ -485,8 +456,7 @@ object XPathParser {
 
   private val param: P[Param] =
     P("$" ~ eqName ~ ("as" ~ sequenceType).?) map {
-      case (name, tpeOption) =>
-        Param(name, tpeOption.map(t => TypeDeclaration(t)))
+      case (name, tpeOption) => Param(name, tpeOption.map(t => TypeDeclaration(t)))
     }
 
   private val predicate: P[Predicate] =
@@ -582,8 +552,7 @@ object XPathParser {
 
   private val typedFunctionTest: P[TypedFunctionTest] =
     P("function" ~ "(" ~ sequenceType.rep(sep = ",") ~ ")" ~ "as" ~ sequenceType) map {
-      case (parTpes, resultTpe) =>
-        TypedFunctionTest(parTpes.toIndexedSeq, resultTpe)
+      case (parTpes, resultTpe) => TypedFunctionTest(parTpes.toIndexedSeq, resultTpe)
     }
 
   private val atomicOrUnionType: P[AtomicOrUnionType] =
@@ -626,6 +595,9 @@ object XPathParser {
     "if",
     "in",
     "return",
+    "and",
+    "or",
+    "not",
     "some",
     "every",
     "satisfies")

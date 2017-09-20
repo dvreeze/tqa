@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.xpath.ast
 
 import scala.collection.immutable
+import scala.reflect.ClassTag
 
 import eu.cdevreeze.yaidom.core.QName
 
@@ -42,308 +43,556 @@ import eu.cdevreeze.yaidom.core.QName
  */
 object XPathExpressions {
 
+  val anyElem: XPathElem => Boolean = { _ => true }
+
+  /**
+   * Any XPath language element
+   */
+  sealed trait XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem]
+
+    final def findTopmostElems(p: XPathElem => Boolean): immutable.IndexedSeq[XPathElem] = {
+      children.flatMap(_.findTopmostElemsOrSelf(p))
+    }
+
+    final def findAllTopmostElemsOfType[A <: XPathElem](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
+      findTopmostElemsOfType(cls)(anyElem)
+    }
+
+    final def findTopmostElemsOfType[A <: XPathElem](cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      implicit val tag = cls
+
+      findTopmostElems {
+        case e: A if p(e) => true
+        case e            => false
+      } collect {
+        case e: A => e
+      }
+    }
+
+    final def findElem(p: XPathElem => Boolean): Option[XPathElem] = {
+      // Not very efficient
+
+      findTopmostElems(p).headOption
+    }
+
+    final def findElemOfType[A <: XPathElem](cls: ClassTag[A])(p: A => Boolean): Option[A] = {
+      implicit val tag = cls
+
+      findElem {
+        case e: A if p(e) => true
+        case e            => false
+      } collectFirst {
+        case e: A => e
+      }
+    }
+
+    private def findTopmostElemsOrSelf(p: XPathElem => Boolean): immutable.IndexedSeq[XPathElem] = {
+      if (p(this)) {
+        immutable.IndexedSeq(this)
+      } else {
+        // Recursive calls
+        children.flatMap(_.findTopmostElemsOrSelf(p))
+      }
+    }
+  }
+
+  sealed trait LeafElem extends XPathElem {
+
+    final def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq()
+  }
+
   // TODO Model and use EQName
 
-  final case class XPathExpr(expr: Expr)
+  final case class XPathExpr(expr: Expr) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
 
   // Enclosed expressions
 
-  final case class EnclosedExpr(expr: Expr)
+  final case class EnclosedExpr(expr: Expr) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
 
   // Expressions
 
-  final case class Expr(exprSingleSeq: immutable.IndexedSeq[ExprSingle])
+  final case class Expr(exprSingleSeq: immutable.IndexedSeq[ExprSingle]) extends XPathElem {
 
-  sealed trait ExprSingle
+    def children: immutable.IndexedSeq[XPathElem] = exprSingleSeq
+  }
+
+  sealed trait ExprSingle extends XPathElem
 
   final case class ForExpr(
-    simpleForBindings: immutable.IndexedSeq[SimpleForBinding],
-    returnExpr: ExprSingle) extends ExprSingle
+      simpleForBindings: immutable.IndexedSeq[SimpleForBinding],
+      returnExpr: ExprSingle) extends ExprSingle {
+
+    def children: immutable.IndexedSeq[XPathElem] = simpleForBindings :+ returnExpr
+  }
 
   final case class LetExpr(
-    simpleLetBindings: immutable.IndexedSeq[SimpleLetBinding],
-    returnExpr: ExprSingle) extends ExprSingle
+      simpleLetBindings: immutable.IndexedSeq[SimpleLetBinding],
+      returnExpr: ExprSingle) extends ExprSingle {
+
+    def children: immutable.IndexedSeq[XPathElem] = simpleLetBindings :+ returnExpr
+  }
 
   final case class QuantifiedExpr(
-    quantifier: Quantifier,
-    simpleBindings: immutable.IndexedSeq[SimpleBindingInQuantifiedExpr],
-    satisfiesExpr: ExprSingle) extends ExprSingle
+      quantifier: Quantifier,
+      simpleBindings: immutable.IndexedSeq[SimpleBindingInQuantifiedExpr],
+      satisfiesExpr: ExprSingle) extends ExprSingle {
+
+    def children: immutable.IndexedSeq[XPathElem] = (quantifier +: simpleBindings) :+ satisfiesExpr
+  }
 
   final case class IfExpr(
-    condition: Expr,
-    thenExpr: ExprSingle,
-    elseExpr: ExprSingle) extends ExprSingle
+      condition: Expr,
+      thenExpr: ExprSingle,
+      elseExpr: ExprSingle) extends ExprSingle {
 
-  final case class OrExpr(andExprs: immutable.IndexedSeq[AndExpr]) extends ExprSingle
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(condition, thenExpr, elseExpr)
+  }
 
-  final case class AndExpr(comparisonExprs: immutable.IndexedSeq[ComparisonExpr])
+  final case class OrExpr(andExprs: immutable.IndexedSeq[AndExpr]) extends ExprSingle {
 
-  sealed trait ComparisonExpr
+    def children: immutable.IndexedSeq[XPathElem] = andExprs
+  }
 
-  final case class SimpleComparisonExpr(stringConcatExpr: StringConcatExpr) extends ComparisonExpr
+  final case class AndExpr(comparisonExprs: immutable.IndexedSeq[ComparisonExpr]) extends XPathElem {
 
-  final case class CompoundComparisonExpr(stringConcatExpr1: StringConcatExpr, comp: Comp, stringConcatExpr2: StringConcatExpr) extends ComparisonExpr
+    def children: immutable.IndexedSeq[XPathElem] = comparisonExprs
+  }
 
-  final case class StringConcatExpr(rangeExprs: immutable.IndexedSeq[RangeExpr])
+  sealed trait ComparisonExpr extends XPathElem
 
-  sealed trait RangeExpr
+  final case class SimpleComparisonExpr(stringConcatExpr: StringConcatExpr) extends ComparisonExpr {
 
-  final case class SimpleRangeExpr(additiveExpr: AdditiveExpr) extends RangeExpr
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(stringConcatExpr)
+  }
 
-  final case class CompoundRangeExpr(additiveExpr1: AdditiveExpr, additiveExpr2: AdditiveExpr) extends RangeExpr
+  final case class CompoundComparisonExpr(stringConcatExpr1: StringConcatExpr, comp: Comp, stringConcatExpr2: StringConcatExpr) extends ComparisonExpr {
 
-  sealed trait AdditiveExpr
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(stringConcatExpr1, comp, stringConcatExpr2)
+  }
 
-  final case class SimpleAdditiveExpr(expr: MultiplicativeExpr) extends AdditiveExpr
+  final case class StringConcatExpr(rangeExprs: immutable.IndexedSeq[RangeExpr]) extends XPathElem {
 
-  final case class CompoundAdditiveExpr(headExpr: MultiplicativeExpr, op: AdditionOp, tailExpr: AdditiveExpr) extends AdditiveExpr
+    def children: immutable.IndexedSeq[XPathElem] = rangeExprs
+  }
 
-  sealed trait MultiplicativeExpr
+  sealed trait RangeExpr extends XPathElem
 
-  final case class SimpleMultiplicativeExpr(expr: UnionExpr) extends MultiplicativeExpr
+  final case class SimpleRangeExpr(additiveExpr: AdditiveExpr) extends RangeExpr {
 
-  final case class CompoundMultiplicativeExpr(headExpr: UnionExpr, op: MultiplicativeOp, tailExpr: MultiplicativeExpr) extends MultiplicativeExpr
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(additiveExpr)
+  }
 
-  final case class UnionExpr(intersectExceptExprs: immutable.IndexedSeq[IntersectExceptExpr])
+  final case class CompoundRangeExpr(additiveExpr1: AdditiveExpr, additiveExpr2: AdditiveExpr) extends RangeExpr {
 
-  sealed trait IntersectExceptExpr
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(additiveExpr1, additiveExpr2)
+  }
 
-  final case class SimpleIntersectExceptExpr(expr: InstanceOfExpr) extends IntersectExceptExpr
+  sealed trait AdditiveExpr extends XPathElem
 
-  final case class CompoundIntersectExceptExpr(headExpr: InstanceOfExpr, op: IntersectExceptOp, tailExpr: IntersectExceptExpr) extends IntersectExceptExpr
+  final case class SimpleAdditiveExpr(expr: MultiplicativeExpr) extends AdditiveExpr {
 
-  final case class InstanceOfExpr(treatExpr: TreatExpr, sequenceTypeOption: Option[SequenceType])
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
 
-  final case class TreatExpr(castableExpr: CastableExpr, sequenceTypeOption: Option[SequenceType])
+  final case class CompoundAdditiveExpr(headExpr: MultiplicativeExpr, op: AdditionOp, tailExpr: AdditiveExpr) extends AdditiveExpr {
 
-  final case class CastableExpr(castExpr: CastExpr, singleTypeOption: Option[SingleType])
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(headExpr, op, tailExpr)
+  }
 
-  final case class CastExpr(unaryExpr: UnaryExpr, singleTypeOption: Option[SingleType])
+  sealed trait MultiplicativeExpr extends XPathElem
 
-  final case class UnaryExpr(ops: immutable.IndexedSeq[UnaryOp], valueExpr: ValueExpr)
+  final case class SimpleMultiplicativeExpr(expr: UnionExpr) extends MultiplicativeExpr {
 
-  final case class ValueExpr(expr: SimpleMapExpr)
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
 
-  final case class SimpleMapExpr(pathExprs: immutable.IndexedSeq[PathExpr])
+  final case class CompoundMultiplicativeExpr(headExpr: UnionExpr, op: MultiplicativeOp, tailExpr: MultiplicativeExpr) extends MultiplicativeExpr {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(headExpr, op, tailExpr)
+  }
+
+  final case class UnionExpr(intersectExceptExprs: immutable.IndexedSeq[IntersectExceptExpr]) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = intersectExceptExprs
+  }
+
+  sealed trait IntersectExceptExpr extends XPathElem
+
+  final case class SimpleIntersectExceptExpr(expr: InstanceOfExpr) extends IntersectExceptExpr {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
+
+  final case class CompoundIntersectExceptExpr(headExpr: InstanceOfExpr, op: IntersectExceptOp, tailExpr: IntersectExceptExpr) extends IntersectExceptExpr {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(headExpr, op, tailExpr)
+  }
+
+  final case class InstanceOfExpr(treatExpr: TreatExpr, sequenceTypeOption: Option[SequenceType]) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = treatExpr +: sequenceTypeOption.toIndexedSeq
+  }
+
+  final case class TreatExpr(castableExpr: CastableExpr, sequenceTypeOption: Option[SequenceType]) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = castableExpr +: sequenceTypeOption.toIndexedSeq
+  }
+
+  final case class CastableExpr(castExpr: CastExpr, singleTypeOption: Option[SingleType]) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = castExpr +: singleTypeOption.toIndexedSeq
+  }
+
+  final case class CastExpr(unaryExpr: UnaryExpr, singleTypeOption: Option[SingleType]) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = unaryExpr +: singleTypeOption.toIndexedSeq
+  }
+
+  final case class UnaryExpr(ops: immutable.IndexedSeq[UnaryOp], valueExpr: ValueExpr) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = ops :+ valueExpr
+  }
+
+  final case class ValueExpr(expr: SimpleMapExpr) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
+
+  final case class SimpleMapExpr(pathExprs: immutable.IndexedSeq[PathExpr]) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = pathExprs
+  }
 
   // Path and step expressions
 
-  sealed trait PathExpr
+  sealed trait PathExpr extends XPathElem
 
-  case object SlashOnlyPathExpr extends PathExpr
+  case object SlashOnlyPathExpr extends PathExpr with LeafElem
 
-  final case class PathExprStartingWithSingleSlash(relativePathExpr: RelativePathExpr) extends PathExpr
+  final case class PathExprStartingWithSingleSlash(relativePathExpr: RelativePathExpr) extends PathExpr {
 
-  final case class PathExprStartingWithDoubleSlash(relativePathExpr: RelativePathExpr) extends PathExpr
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(relativePathExpr)
+  }
+
+  final case class PathExprStartingWithDoubleSlash(relativePathExpr: RelativePathExpr) extends PathExpr {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(relativePathExpr)
+  }
 
   sealed trait RelativePathExpr extends PathExpr
 
-  final case class SimpleRelativePathExpr(stepExpr: StepExpr) extends RelativePathExpr
+  final case class SimpleRelativePathExpr(stepExpr: StepExpr) extends RelativePathExpr {
 
-  final case class CompoundRelativePathExpr(headExpr: StepExpr, op: StepOp, tailExpr: RelativePathExpr) extends RelativePathExpr
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(stepExpr)
+  }
 
-  sealed trait StepExpr
+  final case class CompoundRelativePathExpr(headExpr: StepExpr, op: StepOp, tailExpr: RelativePathExpr) extends RelativePathExpr {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(headExpr, op, tailExpr)
+  }
+
+  sealed trait StepExpr extends XPathElem
 
   final case class PostfixExpr(
-    primaryExpr: PrimaryExpr,
-    predicatesAndArgumentLists: immutable.IndexedSeq[PredicateOrArgumentList]) extends StepExpr
+      primaryExpr: PrimaryExpr,
+      predicatesAndArgumentLists: immutable.IndexedSeq[PredicateOrArgumentList]) extends StepExpr {
+
+    def children: immutable.IndexedSeq[XPathElem] = primaryExpr +: predicatesAndArgumentLists
+  }
 
   sealed trait AxisStep extends StepExpr {
 
     def predicateList: immutable.IndexedSeq[Predicate]
   }
 
-  final case class ForwardAxisStep(step: ForwardStep, predicateList: immutable.IndexedSeq[Predicate]) extends AxisStep
+  final case class ForwardAxisStep(step: ForwardStep, predicateList: immutable.IndexedSeq[Predicate]) extends AxisStep {
 
-  final case class ReverseAxisStep(step: ReverseStep, predicateList: immutable.IndexedSeq[Predicate]) extends AxisStep
+    def children: immutable.IndexedSeq[XPathElem] = step +: predicateList
+  }
 
-  sealed trait ForwardStep {
+  final case class ReverseAxisStep(step: ReverseStep, predicateList: immutable.IndexedSeq[Predicate]) extends AxisStep {
+
+    def children: immutable.IndexedSeq[XPathElem] = step +: predicateList
+  }
+
+  sealed trait ForwardStep extends XPathElem {
 
     def nodeTest: NodeTest
   }
 
-  final case class NonAbbrevForwardStep(forwardAxis: ForwardAxis, nodeTest: NodeTest) extends ForwardStep
+  final case class NonAbbrevForwardStep(forwardAxis: ForwardAxis, nodeTest: NodeTest) extends ForwardStep {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(forwardAxis, nodeTest)
+  }
 
   sealed trait AbbrevForwardStep extends ForwardStep
 
-  final case class SimpleAbbrevForwardStep(nodeTest: NodeTest) extends AbbrevForwardStep
+  final case class SimpleAbbrevForwardStep(nodeTest: NodeTest) extends AbbrevForwardStep {
 
-  final case class AttributeAxisAbbrevForwardStep(nodeTest: NodeTest) extends AbbrevForwardStep
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(nodeTest)
+  }
 
-  sealed trait ReverseStep
+  final case class AttributeAxisAbbrevForwardStep(nodeTest: NodeTest) extends AbbrevForwardStep {
 
-  final case class NonAbbrevReverseStep(reverseAxis: ReverseAxis, nodeTest: NodeTest) extends ReverseStep
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(nodeTest)
+  }
 
-  case object AbbrevReverseStep extends ReverseStep
+  sealed trait ReverseStep extends XPathElem
 
-  sealed trait NodeTest
+  final case class NonAbbrevReverseStep(reverseAxis: ReverseAxis, nodeTest: NodeTest) extends ReverseStep {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(reverseAxis, nodeTest)
+  }
+
+  case object AbbrevReverseStep extends ReverseStep {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq()
+  }
+
+  sealed trait NodeTest extends XPathElem
 
   sealed trait KindTest extends NodeTest
 
   sealed trait NameTest extends NodeTest
 
-  final case class SimpleNameTest(name: QName) extends NameTest
+  final case class SimpleNameTest(name: QName) extends NameTest with LeafElem
 
   sealed trait Wildcard extends NameTest
 
-  case object AnyWildcard extends Wildcard
+  case object AnyWildcard extends Wildcard with LeafElem
 
-  final case class PrefixWildcard(prefix: String) extends Wildcard
+  final case class PrefixWildcard(prefix: String) extends Wildcard with LeafElem
 
-  final case class LocalNameWildcard(localName: String) extends Wildcard
+  final case class LocalNameWildcard(localName: String) extends Wildcard with LeafElem
 
-  final case class NamespaceWildcard(namespace: String) extends Wildcard
+  final case class NamespaceWildcard(namespace: String) extends Wildcard with LeafElem
 
   sealed trait DocumentTest extends KindTest
 
-  case object SimpleDocumentTest extends DocumentTest
+  case object SimpleDocumentTest extends DocumentTest with LeafElem
 
-  final case class DocumentTestContainingElementTest(elementTest: ElementTest) extends DocumentTest
+  final case class DocumentTestContainingElementTest(elementTest: ElementTest) extends DocumentTest {
 
-  final case class DocumentTestContainingSchemaElementTest(schemaElementTest: SchemaElementTest) extends DocumentTest
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(elementTest)
+  }
+
+  final case class DocumentTestContainingSchemaElementTest(schemaElementTest: SchemaElementTest) extends DocumentTest {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(schemaElementTest)
+  }
 
   sealed trait ElementTest extends KindTest
 
-  case object AnyElementTest extends ElementTest
+  case object AnyElementTest extends ElementTest with LeafElem
 
-  final case class ElementNameTest(name: QName) extends ElementTest
+  final case class ElementNameTest(name: QName) extends ElementTest with LeafElem
 
-  final case class ElementNameAndTypeTest(name: QName, tpe: QName) extends ElementTest
+  final case class ElementNameAndTypeTest(name: QName, tpe: QName) extends ElementTest with LeafElem
 
-  final case class NillableElementNameAndTypeTest(name: QName, tpe: QName) extends ElementTest
+  final case class NillableElementNameAndTypeTest(name: QName, tpe: QName) extends ElementTest with LeafElem
 
-  final case class ElementTypeTest(tpe: QName) extends ElementTest
+  final case class ElementTypeTest(tpe: QName) extends ElementTest with LeafElem
 
-  final case class NillableElementTypeTest(tpe: QName) extends ElementTest
+  final case class NillableElementTypeTest(tpe: QName) extends ElementTest with LeafElem
 
   sealed trait AttributeTest extends KindTest
 
-  case object AnyAttributeTest extends AttributeTest
+  case object AnyAttributeTest extends AttributeTest with LeafElem
 
-  final case class AttributeNameTest(name: QName) extends AttributeTest
+  final case class AttributeNameTest(name: QName) extends AttributeTest with LeafElem
 
-  final case class AttributeNameAndTypeTest(name: QName, tpe: QName) extends AttributeTest
+  final case class AttributeNameAndTypeTest(name: QName, tpe: QName) extends AttributeTest with LeafElem
 
-  final case class AttributeTypeTest(tpe: QName) extends AttributeTest
+  final case class AttributeTypeTest(tpe: QName) extends AttributeTest with LeafElem
 
-  final case class SchemaElementTest(name: QName) extends KindTest
+  final case class SchemaElementTest(name: QName) extends KindTest with LeafElem
 
-  final case class SchemaAttributeTest(name: QName) extends KindTest
+  final case class SchemaAttributeTest(name: QName) extends KindTest with LeafElem
 
   sealed trait PITest extends KindTest
 
-  case object SimplePITest extends PITest
+  case object SimplePITest extends PITest with LeafElem
 
-  final case class TargetPITest(target: String) extends PITest // TODO Is this correct?
+  // TODO Is this correct?
+  final case class TargetPITest(target: String) extends PITest with LeafElem
 
-  final case class DataPITest(data: StringLiteral) extends PITest // TODO Is this correct?
+  // TODO Is this correct?
+  final case class DataPITest(data: StringLiteral) extends PITest {
 
-  case object CommentTest extends KindTest
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(data)
+  }
 
-  case object TextTest extends KindTest
+  case object CommentTest extends KindTest with LeafElem
 
-  case object NamespaceNodeTest extends KindTest
+  case object TextTest extends KindTest with LeafElem
 
-  case object AnyKindTest extends KindTest
+  case object NamespaceNodeTest extends KindTest with LeafElem
+
+  case object AnyKindTest extends KindTest with LeafElem
 
   // Primary expressions
 
-  sealed trait PrimaryExpr
+  sealed trait PrimaryExpr extends XPathElem
 
   sealed trait Literal extends PrimaryExpr
 
-  final case class StringLiteral(value: String) extends Literal
+  final case class StringLiteral(value: String) extends Literal with LeafElem
 
   sealed trait NumericLiteral extends Literal
 
-  final case class IntegerLiteral(value: Int) extends NumericLiteral
+  final case class IntegerLiteral(value: Int) extends NumericLiteral with LeafElem
 
-  final case class DecimalLiteral(value: BigDecimal) extends NumericLiteral
+  final case class DecimalLiteral(value: BigDecimal) extends NumericLiteral with LeafElem
 
-  final case class DoubleLiteral(value: Double) extends NumericLiteral
+  final case class DoubleLiteral(value: Double) extends NumericLiteral with LeafElem
 
-  final case class VarRef(varName: QName) extends PrimaryExpr
+  final case class VarRef(varName: QName) extends PrimaryExpr with LeafElem
 
-  final case class ParenthesizedExpr(exprOption: Option[Expr]) extends PrimaryExpr
+  final case class ParenthesizedExpr(exprOption: Option[Expr]) extends PrimaryExpr {
 
-  case object ContextItemExpr extends PrimaryExpr
+    def children: immutable.IndexedSeq[XPathElem] = exprOption.toIndexedSeq
+  }
 
-  final case class FunctionCall(functionName: QName, argumentList: ArgumentList) extends PrimaryExpr
+  case object ContextItemExpr extends PrimaryExpr with LeafElem
+
+  final case class FunctionCall(functionName: QName, argumentList: ArgumentList) extends PrimaryExpr {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(argumentList)
+  }
 
   sealed trait FunctionItemExpr extends PrimaryExpr
 
-  final case class NamedFunctionRef(functionName: QName, arity: Int) extends FunctionItemExpr
+  final case class NamedFunctionRef(functionName: QName, arity: Int) extends FunctionItemExpr with LeafElem
 
   final case class InlineFunctionExpr(
-    paramListOption: Option[ParamList],
-    resultTypeOption: Option[SequenceType],
-    body: EnclosedExpr) extends FunctionItemExpr
+      paramListOption: Option[ParamList],
+      resultTypeOption: Option[SequenceType],
+      body: EnclosedExpr) extends FunctionItemExpr {
 
-  sealed trait PredicateOrArgumentList
+    def children: immutable.IndexedSeq[XPathElem] = paramListOption.toIndexedSeq ++ resultTypeOption.toIndexedSeq :+ body
+  }
 
-  final case class Predicate(expr: Expr) extends PredicateOrArgumentList
+  sealed trait PredicateOrArgumentList extends XPathElem
 
-  final case class ArgumentList(arguments: immutable.IndexedSeq[Argument]) extends PredicateOrArgumentList
+  final case class Predicate(expr: Expr) extends PredicateOrArgumentList {
 
-  final case class ParamList(params: immutable.IndexedSeq[Param])
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
 
-  final case class Param(paramName: QName, typeDeclarationOption: Option[TypeDeclaration])
+  final case class ArgumentList(arguments: immutable.IndexedSeq[Argument]) extends PredicateOrArgumentList {
 
-  sealed trait Argument
+    def children: immutable.IndexedSeq[XPathElem] = arguments
+  }
 
-  final case class ExprSingleArgument(exprSingle: ExprSingle) extends Argument
+  final case class ParamList(params: immutable.IndexedSeq[Param]) extends XPathElem {
 
-  case object ArgumentPlaceholder extends Argument
+    def children: immutable.IndexedSeq[XPathElem] = params
+  }
+
+  final case class Param(paramName: QName, typeDeclarationOption: Option[TypeDeclaration]) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = typeDeclarationOption.toIndexedSeq
+  }
+
+  sealed trait Argument extends XPathElem
+
+  final case class ExprSingleArgument(exprSingle: ExprSingle) extends Argument {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(exprSingle)
+  }
+
+  case object ArgumentPlaceholder extends Argument with LeafElem
 
   // Bindings
 
-  final case class SimpleForBinding(varName: QName, expr: ExprSingle)
+  final case class SimpleForBinding(varName: QName, expr: ExprSingle) extends XPathElem {
 
-  final case class SimpleLetBinding(varName: QName, expr: ExprSingle)
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
 
-  final case class SimpleBindingInQuantifiedExpr(varName: QName, expr: ExprSingle)
+  final case class SimpleLetBinding(varName: QName, expr: ExprSingle) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
+
+  final case class SimpleBindingInQuantifiedExpr(varName: QName, expr: ExprSingle) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
+  }
 
   // Types
 
-  sealed trait SequenceType
+  sealed trait SequenceType extends XPathElem
 
-  case object EmptySequenceType extends SequenceType
+  case object EmptySequenceType extends SequenceType with LeafElem
 
-  final case class ExactlyOneSequenceType(itemType: ItemType) extends SequenceType
+  final case class ExactlyOneSequenceType(itemType: ItemType) extends SequenceType {
 
-  final case class ZeroOrOneSequenceType(itemType: ItemType) extends SequenceType
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(itemType)
+  }
 
-  final case class ZeroOrMoreSequenceType(itemType: ItemType) extends SequenceType
+  final case class ZeroOrOneSequenceType(itemType: ItemType) extends SequenceType {
 
-  final case class OneOrMoreSequenceType(itemType: ItemType) extends SequenceType
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(itemType)
+  }
 
-  sealed trait SingleType
+  final case class ZeroOrMoreSequenceType(itemType: ItemType) extends SequenceType {
 
-  final case class NonEmptySingleType(name: QName) extends SingleType
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(itemType)
+  }
 
-  final case class PotentiallyEmptySingleType(name: QName) extends SingleType
+  final case class OneOrMoreSequenceType(itemType: ItemType) extends SequenceType {
 
-  sealed trait ItemType
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(itemType)
+  }
 
-  final case class KindTestItemType(kindTest: KindTest) extends ItemType
+  sealed trait SingleType extends XPathElem
 
-  case object AnyItemType extends ItemType
+  final case class NonEmptySingleType(name: QName) extends SingleType with LeafElem
+
+  final case class PotentiallyEmptySingleType(name: QName) extends SingleType with LeafElem
+
+  sealed trait ItemType extends XPathElem
+
+  final case class KindTestItemType(kindTest: KindTest) extends ItemType {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(kindTest)
+  }
+
+  case object AnyItemType extends ItemType with LeafElem
 
   sealed trait FunctionTest extends ItemType
 
-  case object AnyFunctionTest extends FunctionTest
+  case object AnyFunctionTest extends FunctionTest with LeafElem
 
-  final case class TypedFunctionTest(argumentTypes: immutable.IndexedSeq[SequenceType], resultType: SequenceType) extends FunctionTest
+  final case class TypedFunctionTest(argumentTypes: immutable.IndexedSeq[SequenceType], resultType: SequenceType) extends FunctionTest {
 
-  final case class AtomicOrUnionType(tpe: QName) extends ItemType
+    def children: immutable.IndexedSeq[XPathElem] = argumentTypes :+ resultType
+  }
 
-  final case class ParenthesizedItemType(itemType: ItemType) extends ItemType
+  final case class AtomicOrUnionType(tpe: QName) extends ItemType with LeafElem
 
-  final case class TypeDeclaration(tpe: SequenceType)
+  final case class ParenthesizedItemType(itemType: ItemType) extends ItemType {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(itemType)
+  }
+
+  final case class TypeDeclaration(tpe: SequenceType) extends XPathElem {
+
+    def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(tpe)
+  }
 
   // Axes
 
-  sealed trait ForwardAxis
+  sealed trait ForwardAxis extends XPathElem with LeafElem
 
   object ForwardAxis {
 
@@ -368,7 +617,7 @@ object XPathExpressions {
     }
   }
 
-  sealed trait ReverseAxis
+  sealed trait ReverseAxis extends XPathElem with LeafElem
 
   object ReverseAxis {
 
@@ -389,7 +638,8 @@ object XPathExpressions {
 
   // Operators
 
-  sealed trait Comp
+  sealed trait Comp extends XPathElem with LeafElem
+
   sealed trait ValueComp extends Comp
   sealed trait GeneralComp extends Comp
   sealed trait NodeComp extends Comp
@@ -445,7 +695,7 @@ object XPathExpressions {
     }
   }
 
-  sealed trait AdditionOp
+  sealed trait AdditionOp extends XPathElem with LeafElem
 
   object AdditionOp {
 
@@ -458,7 +708,7 @@ object XPathExpressions {
     }
   }
 
-  sealed trait MultiplicativeOp
+  sealed trait MultiplicativeOp extends XPathElem with LeafElem
 
   object MultiplicativeOp {
 
@@ -475,7 +725,7 @@ object XPathExpressions {
     }
   }
 
-  sealed trait IntersectExceptOp
+  sealed trait IntersectExceptOp extends XPathElem with LeafElem
 
   object IntersectExceptOp {
 
@@ -488,7 +738,7 @@ object XPathExpressions {
     }
   }
 
-  sealed trait UnaryOp
+  sealed trait UnaryOp extends XPathElem with LeafElem
 
   object UnaryOp {
 
@@ -501,7 +751,7 @@ object XPathExpressions {
     }
   }
 
-  sealed trait StepOp
+  sealed trait StepOp extends XPathElem with LeafElem
 
   object StepOp {
 
@@ -516,7 +766,7 @@ object XPathExpressions {
 
   // Keywords etc.
 
-  sealed trait Quantifier
+  sealed trait Quantifier extends XPathElem with LeafElem
 
   object Quantifier {
 
