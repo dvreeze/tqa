@@ -59,6 +59,24 @@ import ENameUtil._
 
 import yaidom.queryapi.HasENameApi._
 
+// Utilities
+
+def toFormulaTaxo(taxo: BasicTaxonomy): extension.formula.taxonomy.BasicFormulaTaxonomy = {
+  extension.formula.taxonomy.BasicFormulaTaxonomy.build(taxo)
+}
+
+def toTableTaxo(taxo: BasicTaxonomy): extension.table.taxonomy.BasicTableTaxonomy = {
+  extension.table.taxonomy.BasicTableTaxonomy.build(taxo)
+}
+
+def toVariableSetConverter(formulaTaxo: extension.formula.taxonomy.BasicFormulaTaxonomy): extension.formula.taxonomymodel.VariableSetConverter = {
+  new extension.formula.taxonomymodel.VariableSetConverter(formulaTaxo)
+}
+
+def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): extension.table.taxonomymodel.TableConverter = {
+  new extension.table.taxonomymodel.TableConverter(tableTaxo)
+}
+
 // TQA: DTS bootstrapping function
 
 val processor = new Processor(false)
