@@ -28,12 +28,14 @@ import fastparse.WhitespaceApi
  */
 object XPathParser {
 
+  // TODO Improve, improve, improve. Study XPath spec more closely, use FastParse in a better way, make code complete and more robust, improve the AST class hierarchy, etc.
+
   import XPathExpressions._
 
   private val White = WhitespaceApi.Wrapper {
     import fastparse.all._
 
-    NoTrace(" ".rep) // TODO Adapt. Not only spaces are whitespace.
+    NoTrace(" ".rep) // TODO Adapt. Not only spaces are whitespace. What about parsing of comments?
   }
 
   import White._
@@ -46,6 +48,11 @@ object XPathParser {
     P(exprSingle ~ ("," ~ exprSingle).rep) map {
       case (exprSingle, exprSingleSeq) =>
         Expr(exprSingle +: exprSingleSeq.toIndexedSeq)
+    }
+
+  private val enclosedExpr: P[EnclosedExpr] =
+    P("{" ~ expr ~ "}") map {
+      case exp => EnclosedExpr(exp)
     }
 
   private val exprSingle: P[ExprSingle] =
@@ -199,7 +206,7 @@ object XPathParser {
     P(literal | varRef | "(" | contextItemExpr | eqName | "function").map(_ => ())
 
   // Looking ahead to distinguish single slash from double slash, and to recognize start of relativePathExpr.
-  // See xgc: leading-lone-slash constraint.
+  // See xgc:leading-lone-slash constraint.
 
   private val slashOnlyPathExpr: P[PathExpr] =
     P("/" ~ !("/" | canStartRelativePathExpr)) map {
@@ -208,7 +215,7 @@ object XPathParser {
     }
 
   // Looking ahead to distinguish single slash from double slash, and to recognize start of relativePathExpr.
-  // See xgc: leading-lone-slash constraint. Note that canStartRelativePathExpr implies that the next token is not a slash!
+  // See xgc:leading-lone-slash constraint. Note that canStartRelativePathExpr implies that the next token is not a slash!
 
   private val pathExprStartingWithSingleSlash: P[PathExpr] =
     P("/" ~ &(canStartRelativePathExpr) ~ relativePathExpr) map {
@@ -317,58 +324,175 @@ object XPathParser {
         SimpleNameTest(name)
     }
 
-  // See ws: explicit constraint.
+  // See ws:explicit constraint.
 
   private val wildcard: P[Wildcard] =
-    P(???) map (v => ???) // TODO
+    P(anyWildcard | prefixWildcard | localNameWildcard | namespaceWildcard)
+
+  private val anyWildcard: P[AnyWildcard.type] =
+    P(CharsWhileIn("*:").!) filter (s => s == "*") map (_ => AnyWildcard)
+
+  private val prefixWildcard: P[PrefixWildcard] =
+    P(CharsWhile(isNCNameCharOrColonOrStar).!) filter (isPrefixWildcard) map (v => PrefixWildcard(v.dropRight(2)))
+
+  private val localNameWildcard: P[LocalNameWildcard] =
+    P(CharsWhile(isNCNameCharOrColonOrStar).!) filter (isLocalNameWildcard) map (v => LocalNameWildcard(v.drop(2)))
+
+  private val namespaceWildcard: P[NamespaceWildcard] =
+    P(CharsWhile(isNCNameCharOrBraceOrStar).!) filter (isNamespaceWildcard) map (v => NamespaceWildcard(v.drop(2).dropRight(2)))
 
   private val kindTest: P[KindTest] =
     P(documentTest | elementTest | attributeTest | schemaElementTest | schemaAttributeTest | piTest | commentTest | textTest | namespaceNodeTest | anyKindTest)
 
   private val documentTest: P[DocumentTest] =
-    P(???) map (v => ???) // TODO
+    P(simpleDocumentTest | documentTestContainingElementTest | documentTestContainingSchemaElementTest)
+
+  private val simpleDocumentTest: P[SimpleDocumentTest.type] =
+    P("document-node" ~ "(" ~ ")") map (_ => SimpleDocumentTest)
+
+  private val documentTestContainingElementTest: P[DocumentTestContainingElementTest] =
+    P("document-node" ~ "(" ~ elementTest ~ ")") map {
+      case elemTest =>
+        DocumentTestContainingElementTest(elemTest)
+    }
+
+  private val documentTestContainingSchemaElementTest: P[DocumentTestContainingSchemaElementTest] =
+    P("document-node" ~ "(" ~ schemaElementTest ~ ")") map {
+      case schemaElmTest =>
+        DocumentTestContainingSchemaElementTest(schemaElmTest)
+    }
 
   private val elementTest: P[ElementTest] =
-    P(???) map (v => ???) // TODO
+    P(anyElementTest | elementNameTest | elementNameAndTypeTest | nillableElementNameAndTypeTest | elementTypeTest | nillableElementTypeTest)
+
+  // Losing some efficiency on parsing of element tests
+
+  private val anyElementTest: P[AnyElementTest.type] =
+    P("element" ~ "(" ~ "*".? ~ ")") map (_ => AnyElementTest)
+
+  private val elementNameTest: P[ElementNameTest] =
+    P("element" ~ "(" ~ eqName ~ ")") map {
+      case name => ElementNameTest(name)
+    }
+
+  private val elementNameAndTypeTest: P[ElementNameAndTypeTest] =
+    P("element" ~ "(" ~ eqName ~ "," ~ eqName ~ ")") map {
+      case (name, tpe) => ElementNameAndTypeTest(name, tpe)
+    }
+
+  private val nillableElementNameAndTypeTest: P[NillableElementNameAndTypeTest] =
+    P("element" ~ "(" ~ eqName ~ "," ~ eqName ~ "?" ~ ")") map {
+      case (name, tpe) => NillableElementNameAndTypeTest(name, tpe)
+    }
+
+  private val elementTypeTest: P[ElementTypeTest] =
+    P("element" ~ "(" ~ "*" ~ "," ~ eqName ~ ")") map {
+      case tpe => ElementTypeTest(tpe)
+    }
+
+  private val nillableElementTypeTest: P[NillableElementTypeTest] =
+    P("element" ~ "(" ~ "*" ~ "," ~ eqName ~ "?" ~ ")") map {
+      case tpe => NillableElementTypeTest(tpe)
+    }
 
   private val attributeTest: P[AttributeTest] =
-    P(???) map (v => ???) // TODO
+    P(anyAttributeTest | attributeNameTest | attributeNameAndTypeTest | attributeTypeTest)
+
+  // Losing some efficiency on parsing of attribute tests
+
+  private val anyAttributeTest: P[AnyAttributeTest.type] =
+    P("attribute" ~ "(" ~ "*".? ~ ")") map (_ => AnyAttributeTest)
+
+  private val attributeNameTest: P[AttributeNameTest] =
+    P("attribute" ~ "(" ~ eqName ~ ")") map {
+      case name => AttributeNameTest(name)
+    }
+
+  private val attributeNameAndTypeTest: P[AttributeNameAndTypeTest] =
+    P("attribute" ~ "(" ~ eqName ~ "," ~ eqName ~ ")") map {
+      case (name, tpe) => AttributeNameAndTypeTest(name, tpe)
+    }
+
+  private val attributeTypeTest: P[AttributeTypeTest] =
+    P("attribute" ~ "(" ~ "*" ~ "," ~ eqName ~ ")") map {
+      case tpe => AttributeTypeTest(tpe)
+    }
 
   private val schemaElementTest: P[SchemaElementTest] =
-    P(???) map (v => ???) // TODO
+    P("schema-element" ~ "(" ~ eqName ~ ")") map {
+      case name => SchemaElementTest(name)
+    }
 
   private val schemaAttributeTest: P[SchemaAttributeTest] =
-    P(???) map (v => ???) // TODO
+    P("schema-attribute" ~ "(" ~ eqName ~ ")") map {
+      case name => SchemaAttributeTest(name)
+    }
 
   private val piTest: P[PITest] =
-    P(???) map (v => ???) // TODO
+    P(simplePiTest | targetPiTest | dataPiTest)
+
+  private val simplePiTest: P[SimplePITest.type] =
+    P("processing-instruction" ~ "(" ~ ")") map (_ => SimplePITest)
+
+  private val targetPiTest: P[TargetPITest] =
+    P("processing-instruction" ~ "(" ~ CharsWhile(isNCNameChar).!.filter(isProbableNCName) ~ ")") map {
+      case name => TargetPITest(name)
+    }
+
+  private val dataPiTest: P[DataPITest] =
+    P("processing-instruction" ~ "(" ~ stringLiteral ~ ")") map {
+      case stringLit => DataPITest(stringLit)
+    }
 
   private val commentTest: P[CommentTest.type] =
-    P(???) map (v => ???) // TODO
+    P("comment" ~ "(" ~ ")") map (_ => CommentTest)
 
   private val textTest: P[TextTest.type] =
-    P(???) map (v => ???) // TODO
+    P("text" ~ "(" ~ ")") map (_ => TextTest)
 
   private val namespaceNodeTest: P[NamespaceNodeTest.type] =
-    P(???) map (v => ???) // TODO
+    P("namespace-node" ~ "(" ~ ")") map (_ => NamespaceNodeTest)
 
   private val anyKindTest: P[AnyKindTest.type] =
-    P(???) map (v => ???) // TODO
+    P("node" ~ "(" ~ ")") map (_ => AnyKindTest)
 
   private val postfixExpr: P[PostfixExpr] =
-    P(???) map (v => ???) // TODO
+    P(primaryExpr ~ (predicate | argumentList).rep) map {
+      case (primaryExp, predicateOrArgumentListSeq) =>
+        PostfixExpr(primaryExp, predicateOrArgumentListSeq.toIndexedSeq)
+    }
 
   private val argumentList: P[ArgumentList] =
-    P(???) map (v => ???) // TODO
+    P("(" ~ argument.rep(sep = ",") ~ ")") map {
+      case args => ArgumentList(args.toIndexedSeq)
+    }
+
+  private val argument: P[Argument] =
+    P(argumentPlaceholder | exprSingleArgument)
+
+  private val argumentPlaceholder: P[ArgumentPlaceholder.type] =
+    P("?") map (_ => ArgumentPlaceholder)
+
+  private val exprSingleArgument: P[ExprSingleArgument] =
+    P(exprSingle) map {
+      case exp => ExprSingleArgument(exp)
+    }
 
   private val paramList: P[ParamList] =
-    P(???) map (v => ???) // TODO
+    P(param.rep(min = 1, sep = ",")) map {
+      case pars => ParamList(pars.toIndexedSeq)
+    }
 
   private val param: P[Param] =
-    P(???) map (v => ???) // TODO
+    P("$" ~ eqName ~ ("as" ~ sequenceType).?) map {
+      case (name, tpeOption) =>
+        Param(name, tpeOption.map(t => TypeDeclaration(t)))
+    }
 
   private val predicate: P[Predicate] =
-    P(???) map (v => ???) // TODO
+    P("[" ~ expr ~ "]") map {
+      case exp => Predicate(exp)
+    }
 
   // Primary expressions
 
@@ -376,36 +500,107 @@ object XPathParser {
     P(literal | varRef | parenthesizedExpr | contextItemExpr | functionCall | functionItemExpr)
 
   private val literal: P[Literal] =
-    P(???) map (v => ???) // TODO
+    P(stringLiteral | numericLiteral)
+
+  private val stringLiteral: P[StringLiteral] =
+    P(CharsWhile(isStringLiteralChar).!) filter (isStringLiteral) map (v => StringLiteral(v.drop(1).dropRight(1)))
+
+  private val numericLiteral: P[NumericLiteral] =
+    P(integerLiteral | decimalLiteral | doubleLiteral)
+
+  private val integerLiteral: P[IntegerLiteral] =
+    P(CharsWhileIn("0123456789").!) filter (_.nonEmpty) map (v => IntegerLiteral(v.toInt))
+
+  private val decimalLiteral: P[DecimalLiteral] =
+    P(integerLiteral) map (v => DecimalLiteral(v.value)) // TODO
+
+  private val doubleLiteral: P[DoubleLiteral] =
+    P(integerLiteral) map (v => DoubleLiteral(v.value)) // TODO
 
   private val varRef: P[VarRef] =
-    P(???) map (v => ???) // TODO
+    P("$" ~ eqName) map {
+      name => VarRef(name)
+    }
 
   private val parenthesizedExpr: P[ParenthesizedExpr] =
-    P(???) map (v => ???) // TODO
+    P("(" ~ expr.? ~ ")") map {
+      case expOption => ParenthesizedExpr(expOption)
+    }
 
   private val contextItemExpr: P[ContextItemExpr.type] =
-    P(???) map (v => ???) // TODO
+    P(".") map (_ => ContextItemExpr)
 
   private val functionCall: P[FunctionCall] =
-    P(???) map (v => ???) // TODO
+    P(eqName ~ argumentList) map {
+      case (name, argList) => FunctionCall(name, argList)
+    }
 
   private val functionItemExpr: P[FunctionItemExpr] =
     P(namedFunctionRef | inlineFunctionExpr)
 
   private val namedFunctionRef: P[NamedFunctionRef] =
-    P(???) map (v => ???) // TODO
+    P(eqName ~ "#" ~ integerLiteral) map {
+      case (name, arity) => NamedFunctionRef(name, arity.value)
+    }
 
   private val inlineFunctionExpr: P[InlineFunctionExpr] =
-    P(???) map (v => ???) // TODO
+    P("function" ~ "(" ~ paramList.? ~ ")" ~ ("as" ~ sequenceType).? ~ enclosedExpr) map {
+      case (parListOption, resultTpeOption, body) =>
+        InlineFunctionExpr(parListOption, resultTpeOption, body)
+    }
 
   // Types
 
   private val sequenceType: P[SequenceType] =
-    P(???) map (v => ???) // TODO
+    P(emptySequenceType | nonEmptySequenceType)
+
+  private val emptySequenceType: P[EmptySequenceType.type] =
+    P("empty-sequence" ~ "(" ~ ")") map (_ => EmptySequenceType)
+
+  private val nonEmptySequenceType: P[SequenceType] =
+    P(itemType ~ ("?" | "*" | "+").!.?) map {
+      case (tpe, None)      => ExactlyOneSequenceType(tpe)
+      case (tpe, Some("?")) => ZeroOrOneSequenceType(tpe)
+      case (tpe, Some("*")) => ZeroOrMoreSequenceType(tpe)
+      case (tpe, Some("+")) => OneOrMoreSequenceType(tpe)
+      case _                => EmptySequenceType
+    }
+
+  private val itemType: P[ItemType] =
+    P(kindTestItemType | anyItemType | anyFunctionTest | typedFunctionTest | atomicOrUnionType | parenthesizedItemType)
+
+  private val kindTestItemType: P[KindTestItemType] =
+    P(kindTest) map {
+      case kindTst => KindTestItemType(kindTst)
+    }
+
+  private val anyItemType: P[AnyItemType.type] =
+    P("item" ~ "(" ~ ")") map (_ => AnyItemType)
+
+  private val anyFunctionTest: P[AnyFunctionTest.type] =
+    P("function" ~ "(" ~ "*" ~ ")") map (_ => AnyFunctionTest)
+
+  private val typedFunctionTest: P[TypedFunctionTest] =
+    P("function" ~ "(" ~ sequenceType.rep(sep = ",") ~ ")" ~ "as" ~ sequenceType) map {
+      case (parTpes, resultTpe) =>
+        TypedFunctionTest(parTpes.toIndexedSeq, resultTpe)
+    }
+
+  private val atomicOrUnionType: P[AtomicOrUnionType] =
+    P(eqName) map {
+      case tpe => AtomicOrUnionType(tpe)
+    }
+
+  private val parenthesizedItemType: P[ParenthesizedItemType] =
+    P("(" ~ itemType ~ ")") map {
+      case tpe => ParenthesizedItemType(tpe)
+    }
 
   private val singleType: P[SingleType] =
-    P(???) map (v => ???) // TODO
+    P(eqName ~ "?".!.?) map {
+      case (tpe, None)    => NonEmptySingleType(tpe)
+      case (tpe, Some(_)) => PotentiallyEmptySingleType(tpe)
+    }
 
   // Operators etc.
 
@@ -420,11 +615,11 @@ object XPathParser {
 
   // TODO
   private val eqName: P[QName] =
-    P(CharsWhile(c => java.lang.Character.isJavaIdentifierPart(c) || (c == ':')).!) filter (s => !keywords.contains(s)) map (s => QName.parse(s))
+    P(CharsWhile(c => isProbableXmlNameChar(c)).!) filter (s => !keywords.contains(s) && isProbablyValidXmlName(s)) map (s => QName.parse(s))
 
   // TODO
   private val varName: P[QName] =
-    P(CharsWhile(c => java.lang.Character.isJavaIdentifierPart(c) || (c == ':')).!) filter (s => !keywords.contains(s)) map (s => QName.parse(s))
+    P(CharsWhile(c => isProbableXmlNameChar(c)).!) filter (s => !keywords.contains(s) && isProbablyValidXmlName(s)) map (s => QName.parse(s))
 
   // TODO
   private val keywords: Set[String] = Set(
@@ -434,6 +629,77 @@ object XPathParser {
     "some",
     "every",
     "satisfies")
+
+  private def isPrefixWildcard(s: String): Boolean = {
+    s.endsWith(":*") && s.dropRight(2).forall(isNCNameChar)
+  }
+
+  private def isLocalNameWildcard(s: String): Boolean = {
+    s.startsWith("*:") && s.drop(2).forall(isNCNameChar)
+  }
+
+  private def isNamespaceWildcard(s: String): Boolean = {
+    s.startsWith("Q{") && s.endsWith("}*") && s.drop(2).dropRight(2).forall(isNCNameChar)
+  }
+
+  private def isNCNameCharOrColonOrStar(c: Char): Boolean = {
+    isNCNameChar(c) || (c == ':') || (c == '*')
+  }
+
+  private def isNCNameCharOrBraceOrStar(c: Char): Boolean = {
+    isNCNameChar(c) || (c == '{') || (c == '}') || (c == '*')
+  }
+
+  private def isNCNameChar(c: Char): Boolean = {
+    // TODO Improve
+    isProbableXmlNameChar(c) && (c != ':')
+  }
+
+  private def isStringLiteral(s: String): Boolean = {
+    // TODO Improve, and mind escaping of quotes
+
+    (s.startsWith("\"") && s.endsWith("\"") && isProbablyValidXmlName(s.drop(1).dropRight(1))) ||
+      (s.startsWith("'") && s.endsWith("'") && isProbablyValidXmlName(s.drop(1).dropRight(1)))
+  }
+
+  private def isStringLiteralChar(c: Char): Boolean = {
+    // TODO Improve
+    (c == '"') || (c == '\'') || isProbableXmlNameChar(c)
+  }
+
+  // Some utility functions
+
+  private def isProbableNCName(s: String): Boolean = {
+    isProbablyValidXmlName(s) && !containsColon(s)
+  }
+
+  /** Returns true if the name is probably a valid XML name (even if reserved or containing a colon) */
+  private def isProbablyValidXmlName(s: String): Boolean = {
+    require(s ne null) // scalastyle:off null
+    (s.length > 0) && isProbableXmlNameStart(s(0)) && {
+      s.drop(1) forall { c => isProbableXmlNameChar(c) }
+    }
+  }
+
+  private def containsColon(s: String): Boolean = s.indexOf(":") >= 0
+
+  private def isProbableXmlNameStart(c: Char): Boolean = c match {
+    case '-'                                 => false
+    case '.'                                 => false
+    case c if java.lang.Character.isDigit(c) => false
+    case _                                   => isProbableXmlNameChar(c)
+  }
+
+  private def isProbableXmlNameChar(c: Char): Boolean = c match {
+    case '_' => true
+    case '-' => true
+    case '.' => true
+    case '$' => false
+    case ':' => true
+    case c if java.lang.Character.isWhitespace(c) => false
+    case c if java.lang.Character.isJavaIdentifierPart(c) => true
+    case _ => false
+  }
 
   def main(args: Array[String]): Unit = {
     // Remove main method!!!

@@ -186,6 +186,14 @@ object XPathExpressions {
 
   sealed trait Wildcard extends NameTest
 
+  case object AnyWildcard extends Wildcard
+
+  final case class PrefixWildcard(prefix: String) extends Wildcard
+
+  final case class LocalNameWildcard(localName: String) extends Wildcard
+
+  final case class NamespaceWildcard(namespace: String) extends Wildcard
+
   sealed trait DocumentTest extends KindTest
 
   case object SimpleDocumentTest extends DocumentTest
@@ -329,7 +337,7 @@ object XPathExpressions {
 
   final case class AtomicOrUnionType(tpe: QName) extends ItemType
 
-  final class ParenthesizedItemType(itemType: ItemType) extends ItemType
+  final case class ParenthesizedItemType(itemType: ItemType) extends ItemType
 
   final case class TypeDeclaration(tpe: SequenceType)
 
