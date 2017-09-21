@@ -26,7 +26,10 @@ import eu.cdevreeze.yaidom.core.QName
  */
 sealed trait EQName
 
-final case class QNameAsEQName(qname: QName) extends EQName
+final case class QNameAsEQName(qname: QName) extends EQName {
+
+  override def toString: String = qname.toString
+}
 
 final case class URIQualifiedName(ename: EName) extends EQName {
 

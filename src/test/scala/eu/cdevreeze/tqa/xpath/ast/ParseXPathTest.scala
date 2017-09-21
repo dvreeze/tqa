@@ -22,9 +22,16 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import XPathExpressions.AdditionOp
 import XPathExpressions.FunctionCall
+import XPathExpressions.GeneralComp
 import XPathExpressions.IfExpr
+import XPathExpressions.NumericLiteral
 import XPathExpressions.SimpleNameTest
+import XPathExpressions.StringLiteral
+import XPathExpressions.ValueComp
+import XPathExpressions.VarRef
+import XPathExpressions.UnaryOp
 
 /**
  * XPath parsing test case.
@@ -83,6 +90,8 @@ class ParseXPathTest extends FunSuite {
   }
 
   test("testParseIfExprWithFunctionCalls") {
+    // From the NL taxonomy (NT12)
+
     val exprString =
       "if(xff:has-fallback-value(xs:QName('varArc_BalanceSheetVertical_MsgPrecondValueConceptAndNoExistenceConcept1_ResultForTheYear'))) " +
         "then true() else not(count($varArc_BalanceSheetVertical_MsgPrecondValueConceptAndNoExistenceConcept1_ResultForTheYear) ge 1)"
@@ -98,7 +107,200 @@ class ParseXPathTest extends FunSuite {
     assertResult(5) {
       parseResult.get.value.findAllElemsOrSelfOfType(classTag[FunctionCall]).size
     }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).size
+    }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[StringLiteral]).size
+    }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[NumericLiteral]).size
+    }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[ValueComp.Ge.type]).size
+    }
+
+    assertResult(List(QNameAsEQName("varArc_BalanceSheetVertical_MsgPrecondValueConceptAndNoExistenceConcept1_ResultForTheYear"))) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).map(_.varName)
+    }
   }
+
+  test("testParseSummation") {
+    // From the NL taxonomy (NT12)
+
+    val exprString =
+      "$varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSumOfMembersOnAbstract1_Abstract_SumOfMembers =  " +
+        "sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSumOfMembersOnAbstract1_Abstract_ChildrenMember) "
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[GeneralComp.Eq.type]).size
+    }
+
+    assertResult(2) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).size
+    }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[FunctionCall]).size
+    }
+
+    assertResult(List(
+      QNameAsEQName("varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSumOfMembersOnAbstract1_Abstract_SumOfMembers"),
+      QNameAsEQName("varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSumOfMembersOnAbstract1_Abstract_ChildrenMember"))) {
+
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).map(_.varName)
+    }
+  }
+
+  test("testParseLargeSummation") {
+    // From the NL taxonomy (NT12)
+
+    val exprString =
+      "+ sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesIssue)" +
+        "  + sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesPurchase)" +
+        " + sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesGranting)" +
+        " + sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesSale)" +
+        " + sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesWithdrawal)" +
+        " + sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesDistributionAsDividend)" +
+        " + sum($varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesOtherMovements)" +
+        " =  $varArc_NotesShareCapitalStatementOfChanges_MsgSeparateSevenVariables1_ShareCapitalNumberSharesMovement "
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[GeneralComp.Eq.type]).size
+    }
+
+    assertResult(8) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).size
+    }
+
+    assertResult(7) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[FunctionCall]).size
+    }
+
+    assertResult(true) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).map(_.varName).
+        forall(nm => nm.toString.startsWith("varArc_NotesShareCapitalStatementOfChanges"))
+    }
+  }
+
+  test("testParseIfExprWithFunctionCallsAndStringLiterals") {
+    // From the NL taxonomy (NT12)
+
+    val exprString =
+      "xfi:fact-has-explicit-dimension-value($varArc_DocumentInformation_MsgPrecondExistenceMemberAspect3_AllItems," +
+        "xs:QName('venj-bw2-dim:FinancialStatementsTypeAxis'),xs:QName('venj-bw2-dm:SeparateMember'))"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(3) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[FunctionCall]).size
+    }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).size
+    }
+
+    assertResult(2) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[StringLiteral]).size
+    }
+
+    assertResult(List(QNameAsEQName("varArc_DocumentInformation_MsgPrecondExistenceMemberAspect3_AllItems"))) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).map(_.varName)
+    }
+  }
+
+  test("testParseComplexIf") {
+    // From the NL taxonomy (NT12)
+
+    val exprString =
+      "if(xfi:is-instant-period(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)))then " +
+        "((xfi:period-instant(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)) = " +
+        "xs:dateTime($FinancialReportingPeriodPrePreviousEndDateParam)+ xs:dayTimeDuration('PT24H'))or " +
+        "(xfi:period-instant(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)) = " +
+        "xs:dateTime($FinancialReportingPeriodPreviousEndDateParam)+ xs:dayTimeDuration('PT24H'))or " +
+        "(xfi:period-instant(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)) = " +
+        "xs:dateTime($FinancialReportingPeriodCurrentEndDateParam)+ xs:dayTimeDuration('PT24H')))else " +
+        "(if(xfi:is-start-end-period(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)))then " +
+        "(((xfi:period-end(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)) = " +
+        "(xs:dateTime($FinancialReportingPeriodPreviousEndDateParam)+ xs:dayTimeDuration('PT24H'))) and " +
+        "(xfi:period-start(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)) = " +
+        "(xs:dateTime($FinancialReportingPeriodPreviousStartDateParam))))or " +
+        "((xfi:period-end(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)) = " +
+        "(xs:dateTime($FinancialReportingPeriodCurrentEndDateParam)+ xs:dayTimeDuration('PT24H'))) and " +
+        "(xfi:period-start(xfi:period($varArc_DocumentInformation_MsgContextDatesParamPPEtCE1_AllItems)) = " +
+        "(xs:dateTime($FinancialReportingPeriodCurrentStartDateParam)))))else (false()))"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(2) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[IfExpr]).size
+    }
+
+    assertResult(Set(
+      QNameAsEQName("xfi:is-instant-period"),
+      QNameAsEQName("xfi:period"),
+      QNameAsEQName("xfi:period-instant"),
+      QNameAsEQName("xs:dateTime"),
+      QNameAsEQName("xs:dayTimeDuration"),
+      QNameAsEQName("xfi:is-start-end-period"),
+      QNameAsEQName("xfi:period-end"),
+      QNameAsEQName("xfi:period-start"),
+      QNameAsEQName("false"))) {
+
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[FunctionCall]).map(_.functionName).toSet
+    }
+
+    assertResult(16) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).size
+    }
+  }
+
+  test("testParseExprWithUnaryOp") {
+    // From the NL taxonomy (NT12)
+
+    val exprString =
+      " $AuditorsFees = - sum($varArc_NotesAuditorsFeesBreakdown_MsgSeparateSumOfChildrenParentDebitDimensionFilter1_ChildrenOfAuditorsFeesCredit)+ " +
+        "sum($varArc_NotesAuditorsFeesBreakdown_MsgSeparateSumOfChildrenParentDebitDimensionFilter1_ChildrenOfAuditorsFeesDebit)"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(3) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[VarRef]).size
+    }
+
+    assertResult(2) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[FunctionCall]).size
+    }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[UnaryOp.Minus.type]).size
+    }
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[AdditionOp.Plus.type]).size
+    }
+  }
+
+  // TODO What goes wrong with parsing of this one:
+  // xfi:identifier-scheme(xfi:identifier($varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems)) eq 'http://www.kvk.nl/kvk-id'
 
   private def assertSuccess(parseResult: Parsed[_]): Unit = {
     assertResult(true) {
