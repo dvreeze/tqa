@@ -42,7 +42,7 @@ object XPathParser {
   import fastparse.noApi._
 
   val xpathExpr: P[XPathExpr] =
-    P(expr) map (e => XPathExpr(e)) // TODO End
+    P(expr ~ End) map (e => XPathExpr(e)) // TODO Make this work if there is more than one comma-separated ExprSingle
 
   private val expr: P[Expr] =
     P(exprSingle.rep(min = 1, sep = ",")) map {
@@ -63,8 +63,8 @@ object XPathParser {
     }
 
   private val simpleForBinding: P[SimpleForBinding] =
-    P("$" ~ varName ~ "in" ~ exprSingle) map {
-      case (qn, exp) => SimpleForBinding(qn, exp)
+    P("$" ~ eqName ~ "in" ~ exprSingle) map {
+      case (eqn, exp) => SimpleForBinding(eqn, exp)
     }
 
   private val letExpr: P[LetExpr] =
@@ -73,8 +73,8 @@ object XPathParser {
     }
 
   private val simpleLetBinding: P[SimpleLetBinding] =
-    P("$" ~ varName ~ ":=" ~ exprSingle) map {
-      case (qn, exp) => SimpleLetBinding(qn, exp)
+    P("$" ~ eqName ~ ":=" ~ exprSingle) map {
+      case (eqn, exp) => SimpleLetBinding(eqn, exp)
     }
 
   private val quantifiedExpr: P[QuantifiedExpr] =
@@ -83,8 +83,8 @@ object XPathParser {
     }
 
   private val simpleBindingInQuantifiedExpr: P[SimpleBindingInQuantifiedExpr] =
-    P("$" ~ varName ~ "in" ~ exprSingle) map {
-      case (qn, exp) => SimpleBindingInQuantifiedExpr(qn, exp)
+    P("$" ~ eqName ~ "in" ~ exprSingle) map {
+      case (eqn, exp) => SimpleBindingInQuantifiedExpr(eqn, exp)
     }
 
   private val ifExpr: P[IfExpr] =
@@ -307,13 +307,13 @@ object XPathParser {
     P(CharsWhileIn("*:").!) filter (s => s == "*") map (_ => AnyWildcard)
 
   private val prefixWildcard: P[PrefixWildcard] =
-    P(CharsWhile(isNCNameCharOrColonOrStar).!) filter (isPrefixWildcard) map (v => PrefixWildcard(v.dropRight(2)))
+    P(CharsWhile(isNCNameCharOrColonOrStar).!) filter (isPrefixWildcard) map (v => PrefixWildcard(NCName(v.dropRight(2))))
 
   private val localNameWildcard: P[LocalNameWildcard] =
-    P(CharsWhile(isNCNameCharOrColonOrStar).!) filter (isLocalNameWildcard) map (v => LocalNameWildcard(v.drop(2)))
+    P(CharsWhile(isNCNameCharOrColonOrStar).!) filter (isLocalNameWildcard) map (v => LocalNameWildcard(NCName(v.drop(2))))
 
   private val namespaceWildcard: P[NamespaceWildcard] =
-    P(CharsWhile(isNCNameCharOrBraceOrStar).!) filter (isNamespaceWildcard) map (v => NamespaceWildcard(v.drop(2).dropRight(2)))
+    P(CharsWhile(isNCNameCharOrBraceOrStar).!) filter (isNamespaceWildcard) map (v => NamespaceWildcard(BracedUriLiteral.parse(v.dropRight(1))))
 
   private val kindTest: P[KindTest] =
     P(documentTest | elementTest | attributeTest | schemaElementTest | schemaAttributeTest | piTest | commentTest | textTest | namespaceNodeTest | anyKindTest)
@@ -407,7 +407,7 @@ object XPathParser {
     P("processing-instruction" ~ "(" ~ ")") map (_ => SimplePITest)
 
   private val targetPiTest: P[TargetPITest] =
-    P("processing-instruction" ~ "(" ~ CharsWhile(isNCNameChar).!.filter(isProbableNCName) ~ ")") map {
+    P("processing-instruction" ~ "(" ~ ncName ~ ")") map {
       case name => TargetPITest(name)
     }
 
@@ -472,6 +472,8 @@ object XPathParser {
   private val literal: P[Literal] =
     P(stringLiteral | numericLiteral)
 
+  // TODO Fix and improve string and numeric literals
+
   private val stringLiteral: P[StringLiteral] =
     P(CharsWhile(isStringLiteralChar).!) filter (isStringLiteral) map (v => StringLiteral(v.drop(1).dropRight(1)))
 
@@ -500,6 +502,8 @@ object XPathParser {
   private val contextItemExpr: P[ContextItemExpr.type] =
     P(".") map (_ => ContextItemExpr)
 
+  // TODO xgc:reserved-function-names and gn:parens
+
   private val functionCall: P[FunctionCall] =
     P(eqName ~ argumentList) map {
       case (name, argList) => FunctionCall(name, argList)
@@ -507,6 +511,8 @@ object XPathParser {
 
   private val functionItemExpr: P[FunctionItemExpr] =
     P(namedFunctionRef | inlineFunctionExpr)
+
+  // TODO xgc:reserved-function-names
 
   private val namedFunctionRef: P[NamedFunctionRef] =
     P(eqName ~ "#" ~ integerLiteral) map {
@@ -526,6 +532,8 @@ object XPathParser {
 
   private val emptySequenceType: P[EmptySequenceType.type] =
     P("empty-sequence" ~ "(" ~ ")") map (_ => EmptySequenceType)
+
+  // TODO xgc:occurrence-indicators
 
   private val nonEmptySequenceType: P[SequenceType] =
     P(itemType ~ ("?" | "*" | "+").!.?) map {
@@ -571,6 +579,20 @@ object XPathParser {
       case (tpe, Some(_)) => PotentiallyEmptySingleType(tpe)
     }
 
+  // Names (EQNames, NCNames etc.)
+
+  private val ncName: P[NCName] =
+    P(CharsWhile(c => NCName.canBePartOfNCName(c)).!) filter (s => NCName.canBeNCName(s)) map (s => NCName(s))
+
+  private val eqName: P[EQName] =
+    P(qName | uriQualifiedName)
+
+  private val qName: P[QNameAsEQName] =
+    P(CharsWhile(c => QNameAsEQName.canBePartOfQNameAsEQName(c)).!) filter (s => QNameAsEQName.canBeQNameAsEQName(s)) map (s => QNameAsEQName.parse(s))
+
+  private val uriQualifiedName: P[URIQualifiedName] =
+    P(CharsWhile(c => URIQualifiedName.canBePartOfURIQualifiedName(c)).!) filter (s => URIQualifiedName.canBeURIQualifiedName(s)) map (s => URIQualifiedName.parse(s))
+
   // Operators etc.
 
   private val valueComp: P[ValueComp] =
@@ -582,15 +604,9 @@ object XPathParser {
   private val nodeComp: P[NodeComp] =
     P(("is" | "<<" | ">>").!) map (s => NodeComp.parse(s))
 
-  // TODO
-  private val eqName: P[QName] =
-    P(CharsWhile(c => isProbableXmlNameChar(c)).!) filter (s => !keywords.contains(s) && isProbablyValidXmlName(s)) map (s => QName.parse(s))
+  // Utility methods (and data)
 
-  // TODO
-  private val varName: P[QName] =
-    P(CharsWhile(c => isProbableXmlNameChar(c)).!) filter (s => !keywords.contains(s) && isProbablyValidXmlName(s)) map (s => QName.parse(s))
-
-  // TODO
+  // TODO There are no keywords; it is the position of the word that counts. So we are cheating here.
   private val keywords: Set[String] = Set(
     "if",
     "in",
@@ -603,28 +619,23 @@ object XPathParser {
     "satisfies")
 
   private def isPrefixWildcard(s: String): Boolean = {
-    s.endsWith(":*") && s.dropRight(2).forall(isNCNameChar)
+    s.endsWith(":*") && NCName.canBeNCName(s.dropRight(2))
   }
 
   private def isLocalNameWildcard(s: String): Boolean = {
-    s.startsWith("*:") && s.drop(2).forall(isNCNameChar)
+    s.startsWith("*:") && NCName.canBeNCName(s.drop(2))
   }
 
   private def isNamespaceWildcard(s: String): Boolean = {
-    s.startsWith("Q{") && s.endsWith("}*") && s.drop(2).dropRight(2).forall(isNCNameChar)
+    s.startsWith("Q{") && s.endsWith("}*") && NCName.canBeNCName(s.drop(2).dropRight(2))
   }
 
   private def isNCNameCharOrColonOrStar(c: Char): Boolean = {
-    isNCNameChar(c) || (c == ':') || (c == '*')
+    NCName.canBePartOfNCName(c) || (c == ':') || (c == '*')
   }
 
   private def isNCNameCharOrBraceOrStar(c: Char): Boolean = {
-    isNCNameChar(c) || (c == '{') || (c == '}') || (c == '*')
-  }
-
-  private def isNCNameChar(c: Char): Boolean = {
-    // TODO Improve
-    isProbableXmlNameChar(c) && (c != ':')
+    NCName.canBePartOfNCName(c) || (c == '{') || (c == '}') || (c == '*')
   }
 
   private def isStringLiteral(s: String): Boolean = {
@@ -639,12 +650,6 @@ object XPathParser {
     (c == '"') || (c == '\'') || isProbableXmlNameChar(c)
   }
 
-  // Some utility functions
-
-  private def isProbableNCName(s: String): Boolean = {
-    isProbablyValidXmlName(s) && !containsColon(s)
-  }
-
   /** Returns true if the name is probably a valid XML name (even if reserved or containing a colon) */
   private def isProbablyValidXmlName(s: String): Boolean = {
     require(s ne null) // scalastyle:off null
@@ -652,8 +657,6 @@ object XPathParser {
       s.drop(1) forall { c => isProbableXmlNameChar(c) }
     }
   }
-
-  private def containsColon(s: String): Boolean = s.indexOf(":") >= 0
 
   private def isProbableXmlNameStart(c: Char): Boolean = c match {
     case '-'                                 => false
@@ -674,7 +677,7 @@ object XPathParser {
   }
 
   def main(args: Array[String]): Unit = {
-    // Remove main method!!!
+    // TODO Remove main method!!!
     val exprString = args(0)
 
     val parseResult = xpathExpr.parse(exprString)

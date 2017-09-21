@@ -19,8 +19,6 @@ package eu.cdevreeze.tqa.xpath.ast
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
-import eu.cdevreeze.yaidom.core.QName
-
 /**
  * XPath 3.0 AST.
  *
@@ -102,8 +100,6 @@ object XPathExpressions {
 
     final def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq()
   }
-
-  // TODO Model and use EQName
 
   final case class XPathExpr(expr: Expr) extends XPathElem {
 
@@ -363,17 +359,17 @@ object XPathExpressions {
 
   sealed trait NameTest extends NodeTest
 
-  final case class SimpleNameTest(name: QName) extends NameTest with LeafElem
+  final case class SimpleNameTest(name: EQName) extends NameTest with LeafElem
 
   sealed trait Wildcard extends NameTest
 
   case object AnyWildcard extends Wildcard with LeafElem
 
-  final case class PrefixWildcard(prefix: String) extends Wildcard with LeafElem
+  final case class PrefixWildcard(prefix: NCName) extends Wildcard with LeafElem
 
-  final case class LocalNameWildcard(localName: String) extends Wildcard with LeafElem
+  final case class LocalNameWildcard(localName: NCName) extends Wildcard with LeafElem
 
-  final case class NamespaceWildcard(namespace: String) extends Wildcard with LeafElem
+  final case class NamespaceWildcard(bracedUriLiteral: BracedUriLiteral) extends Wildcard with LeafElem
 
   sealed trait DocumentTest extends KindTest
 
@@ -393,36 +389,36 @@ object XPathExpressions {
 
   case object AnyElementTest extends ElementTest with LeafElem
 
-  final case class ElementNameTest(name: QName) extends ElementTest with LeafElem
+  final case class ElementNameTest(name: EQName) extends ElementTest with LeafElem
 
-  final case class ElementNameAndTypeTest(name: QName, tpe: QName) extends ElementTest with LeafElem
+  final case class ElementNameAndTypeTest(name: EQName, tpe: EQName) extends ElementTest with LeafElem
 
-  final case class NillableElementNameAndTypeTest(name: QName, tpe: QName) extends ElementTest with LeafElem
+  final case class NillableElementNameAndTypeTest(name: EQName, tpe: EQName) extends ElementTest with LeafElem
 
-  final case class ElementTypeTest(tpe: QName) extends ElementTest with LeafElem
+  final case class ElementTypeTest(tpe: EQName) extends ElementTest with LeafElem
 
-  final case class NillableElementTypeTest(tpe: QName) extends ElementTest with LeafElem
+  final case class NillableElementTypeTest(tpe: EQName) extends ElementTest with LeafElem
 
   sealed trait AttributeTest extends KindTest
 
   case object AnyAttributeTest extends AttributeTest with LeafElem
 
-  final case class AttributeNameTest(name: QName) extends AttributeTest with LeafElem
+  final case class AttributeNameTest(name: EQName) extends AttributeTest with LeafElem
 
-  final case class AttributeNameAndTypeTest(name: QName, tpe: QName) extends AttributeTest with LeafElem
+  final case class AttributeNameAndTypeTest(name: EQName, tpe: EQName) extends AttributeTest with LeafElem
 
-  final case class AttributeTypeTest(tpe: QName) extends AttributeTest with LeafElem
+  final case class AttributeTypeTest(tpe: EQName) extends AttributeTest with LeafElem
 
-  final case class SchemaElementTest(name: QName) extends KindTest with LeafElem
+  final case class SchemaElementTest(name: EQName) extends KindTest with LeafElem
 
-  final case class SchemaAttributeTest(name: QName) extends KindTest with LeafElem
+  final case class SchemaAttributeTest(name: EQName) extends KindTest with LeafElem
 
   sealed trait PITest extends KindTest
 
   case object SimplePITest extends PITest with LeafElem
 
   // TODO Is this correct?
-  final case class TargetPITest(target: String) extends PITest with LeafElem
+  final case class TargetPITest(target: NCName) extends PITest with LeafElem
 
   // TODO Is this correct?
   final case class DataPITest(data: StringLiteral) extends PITest {
@@ -454,7 +450,7 @@ object XPathExpressions {
 
   final case class DoubleLiteral(value: Double) extends NumericLiteral with LeafElem
 
-  final case class VarRef(varName: QName) extends PrimaryExpr with LeafElem
+  final case class VarRef(varName: EQName) extends PrimaryExpr with LeafElem
 
   final case class ParenthesizedExpr(exprOption: Option[Expr]) extends PrimaryExpr {
 
@@ -463,14 +459,14 @@ object XPathExpressions {
 
   case object ContextItemExpr extends PrimaryExpr with LeafElem
 
-  final case class FunctionCall(functionName: QName, argumentList: ArgumentList) extends PrimaryExpr {
+  final case class FunctionCall(functionName: EQName, argumentList: ArgumentList) extends PrimaryExpr {
 
     def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(argumentList)
   }
 
   sealed trait FunctionItemExpr extends PrimaryExpr
 
-  final case class NamedFunctionRef(functionName: QName, arity: Int) extends FunctionItemExpr with LeafElem
+  final case class NamedFunctionRef(functionName: EQName, arity: Int) extends FunctionItemExpr with LeafElem
 
   final case class InlineFunctionExpr(
       paramListOption: Option[ParamList],
@@ -497,7 +493,7 @@ object XPathExpressions {
     def children: immutable.IndexedSeq[XPathElem] = params
   }
 
-  final case class Param(paramName: QName, typeDeclarationOption: Option[TypeDeclaration]) extends XPathElem {
+  final case class Param(paramName: EQName, typeDeclarationOption: Option[TypeDeclaration]) extends XPathElem {
 
     def children: immutable.IndexedSeq[XPathElem] = typeDeclarationOption.toIndexedSeq
   }
@@ -513,17 +509,17 @@ object XPathExpressions {
 
   // Bindings
 
-  final case class SimpleForBinding(varName: QName, expr: ExprSingle) extends XPathElem {
+  final case class SimpleForBinding(varName: EQName, expr: ExprSingle) extends XPathElem {
 
     def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
   }
 
-  final case class SimpleLetBinding(varName: QName, expr: ExprSingle) extends XPathElem {
+  final case class SimpleLetBinding(varName: EQName, expr: ExprSingle) extends XPathElem {
 
     def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
   }
 
-  final case class SimpleBindingInQuantifiedExpr(varName: QName, expr: ExprSingle) extends XPathElem {
+  final case class SimpleBindingInQuantifiedExpr(varName: EQName, expr: ExprSingle) extends XPathElem {
 
     def children: immutable.IndexedSeq[XPathElem] = immutable.IndexedSeq(expr)
   }
@@ -556,9 +552,9 @@ object XPathExpressions {
 
   sealed trait SingleType extends XPathElem
 
-  final case class NonEmptySingleType(name: QName) extends SingleType with LeafElem
+  final case class NonEmptySingleType(name: EQName) extends SingleType with LeafElem
 
-  final case class PotentiallyEmptySingleType(name: QName) extends SingleType with LeafElem
+  final case class PotentiallyEmptySingleType(name: EQName) extends SingleType with LeafElem
 
   sealed trait ItemType extends XPathElem
 
@@ -578,7 +574,7 @@ object XPathExpressions {
     def children: immutable.IndexedSeq[XPathElem] = argumentTypes :+ resultType
   }
 
-  final case class AtomicOrUnionType(tpe: QName) extends ItemType with LeafElem
+  final case class AtomicOrUnionType(tpe: EQName) extends ItemType with LeafElem
 
   final case class ParenthesizedItemType(itemType: ItemType) extends ItemType {
 
@@ -764,7 +760,7 @@ object XPathExpressions {
     }
   }
 
-  // Keywords etc.
+  // "Keywords" etc.
 
   sealed trait Quantifier extends XPathElem with LeafElem
 
