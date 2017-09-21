@@ -45,19 +45,26 @@ object EQName {
 
 object QNameAsEQName {
 
+  def apply(s: String): QNameAsEQName = {
+    parse(s)
+  }
+
   def parse(s: String): QNameAsEQName = {
     QNameAsEQName(QName.parse(s))
   }
 
   def canBeStartOfQNameAsEQName(s: String): Boolean = {
     val idx = s.indexOf(':')
-    
-    if (idx < 0) ???  else ???
-    ???
+
+    if (idx < 0) {
+      NCName.canBeStartOfNCName(s)
+    } else {
+      NCName.canBeNCName(s.substring(0, idx)) && NCName.canBeStartOfNCName(s.substring(idx + 1))
+    }
   }
 
   def canBeQNameAsEQName(s: String): Boolean = {
-    ???
+    canBeStartOfQNameAsEQName(s) && !s.endsWith(":")
   }
 
   def canBeStartOfQNameAsEQName(c: Char): Boolean = {
@@ -85,18 +92,30 @@ object URIQualifiedName {
   }
 
   def canBeStartOfURIQualifiedName(s: String): Boolean = {
-    ???
+    if (!s.startsWith("Q{")) {
+      false
+    } else {
+      val idx = s.indexOf('}')
+
+      if (idx < 0) {
+        !s.drop(2).contains('{') // TODO What else?
+      } else {
+        !s.drop(2).contains('{') && NCName.canBeStartOfNCName(s.substring(idx + 1)) // TODO What else?
+      }
+    }
   }
 
   def canBeURIQualifiedName(s: String): Boolean = {
-    ???
+    canBeStartOfURIQualifiedName(s) && !s.endsWith("}")
   }
 
   def canBeStartOfURIQualifiedName(c: Char): Boolean = {
-    ???
+    c == 'Q'
   }
 
   def canBePartOfURIQualifiedName(c: Char): Boolean = {
-    ???
+    // TODO Just quessing here. At some point during parsing some whitespace is expected (to stop parsing the URI qualified name).
+
+    !java.lang.Character.isWhitespace(c)
   }
 }

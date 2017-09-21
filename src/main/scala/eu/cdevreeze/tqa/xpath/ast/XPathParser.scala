@@ -28,7 +28,8 @@ import fastparse.WhitespaceApi
  */
 object XPathParser {
 
-  // TODO Improve, improve, improve. Study XPath spec more closely, use FastParse in a better way, make code complete and more robust, improve the AST class hierarchy, etc.
+  // TODO Improve, improve, improve. Study XPath spec more closely, use FastParse in a better way, make code complete and more robust,
+  // improve the AST class hierarchy, etc.
 
   import XPathExpressions._
 
@@ -42,7 +43,7 @@ object XPathParser {
   import fastparse.noApi._
 
   val xpathExpr: P[XPathExpr] =
-    P(expr ~ End) map (e => XPathExpr(e)) // TODO Make this work if there is more than one comma-separated ExprSingle
+    P(expr) map (e => XPathExpr(e)) // TODO Make this work with "End" if there is more than one comma-separated ExprSingle
 
   private val expr: P[Expr] =
     P(exprSingle.rep(min = 1, sep = ",")) map {
@@ -502,20 +503,21 @@ object XPathParser {
   private val contextItemExpr: P[ContextItemExpr.type] =
     P(".") map (_ => ContextItemExpr)
 
-  // TODO xgc:reserved-function-names and gn:parens
+  // See xgc:reserved-function-names
+  // TODO gn:parens
 
   private val functionCall: P[FunctionCall] =
-    P(eqName ~ argumentList) map {
+    P(eqName.filter(nm => !ReservedFunctionNames.contains(nm)) ~ argumentList) map {
       case (name, argList) => FunctionCall(name, argList)
     }
 
   private val functionItemExpr: P[FunctionItemExpr] =
     P(namedFunctionRef | inlineFunctionExpr)
 
-  // TODO xgc:reserved-function-names
+  // See xgc:reserved-function-names
 
   private val namedFunctionRef: P[NamedFunctionRef] =
-    P(eqName ~ "#" ~ integerLiteral) map {
+    P(eqName.filter(nm => !ReservedFunctionNames.contains(nm)) ~ "#" ~ integerLiteral) map {
       case (name, arity) => NamedFunctionRef(name, arity.value)
     }
 
@@ -588,10 +590,14 @@ object XPathParser {
     P(qName | uriQualifiedName)
 
   private val qName: P[QNameAsEQName] =
-    P(CharsWhile(c => QNameAsEQName.canBePartOfQNameAsEQName(c)).!) filter (s => QNameAsEQName.canBeQNameAsEQName(s)) map (s => QNameAsEQName.parse(s))
+    P(CharsWhile(c => QNameAsEQName.canBePartOfQNameAsEQName(c)).!) filter (s => QNameAsEQName.canBeQNameAsEQName(s)) map { s =>
+      QNameAsEQName.parse(s)
+    }
 
   private val uriQualifiedName: P[URIQualifiedName] =
-    P(CharsWhile(c => URIQualifiedName.canBePartOfURIQualifiedName(c)).!) filter (s => URIQualifiedName.canBeURIQualifiedName(s)) map (s => URIQualifiedName.parse(s))
+    P(CharsWhile(c => URIQualifiedName.canBePartOfURIQualifiedName(c)).!) filter (s => URIQualifiedName.canBeURIQualifiedName(s)) map { s =>
+      URIQualifiedName.parse(s)
+    }
 
   // Operators etc.
 
@@ -606,17 +612,23 @@ object XPathParser {
 
   // Utility methods (and data)
 
-  // TODO There are no keywords; it is the position of the word that counts. So we are cheating here.
-  private val keywords: Set[String] = Set(
-    "if",
-    "in",
-    "return",
-    "and",
-    "or",
-    "not",
-    "some",
-    "every",
-    "satisfies")
+  private val ReservedFunctionNames: Set[EQName] = Set(
+    QNameAsEQName("attribute"),
+    QNameAsEQName("comment"),
+    QNameAsEQName("document-node"),
+    QNameAsEQName("element"),
+    QNameAsEQName("empty-sequence"),
+    QNameAsEQName("function"),
+    QNameAsEQName("if"),
+    QNameAsEQName("item"),
+    QNameAsEQName("namespace-node"),
+    QNameAsEQName("node"),
+    QNameAsEQName("processing-instruction"),
+    QNameAsEQName("schema-attribute"),
+    QNameAsEQName("schema-element"),
+    QNameAsEQName("switch"),
+    QNameAsEQName("text"),
+    QNameAsEQName("typeswitch"))
 
   private def isPrefixWildcard(s: String): Boolean = {
     s.endsWith(":*") && NCName.canBeNCName(s.dropRight(2))
@@ -650,6 +662,8 @@ object XPathParser {
     (c == '"') || (c == '\'') || isProbableXmlNameChar(c)
   }
 
+  // TODO The functions below are hacks. Fix this.
+
   /** Returns true if the name is probably a valid XML name (even if reserved or containing a colon) */
   private def isProbablyValidXmlName(s: String): Boolean = {
     require(s ne null) // scalastyle:off null
@@ -664,6 +678,8 @@ object XPathParser {
     case c if java.lang.Character.isDigit(c) => false
     case _                                   => isProbableXmlNameChar(c)
   }
+
+  // TODO What about slash etc.?
 
   private def isProbableXmlNameChar(c: Char): Boolean = c match {
     case '_' => true
