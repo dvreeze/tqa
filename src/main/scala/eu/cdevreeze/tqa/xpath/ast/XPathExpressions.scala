@@ -50,6 +50,8 @@ object XPathExpressions {
 
     def children: immutable.IndexedSeq[XPathElem]
 
+    // Finding topmost descendant elements (of a certain type, obeying some predicate)
+
     final def findTopmostElems(p: XPathElem => Boolean): immutable.IndexedSeq[XPathElem] = {
       children.flatMap(_.findTopmostElemsOrSelf(p))
     }
@@ -69,6 +71,85 @@ object XPathExpressions {
       }
     }
 
+    // Finding topmost descendant-or-self elements (of a certain type, obeying some predicate)
+
+    /**
+     * Finds all topmost elements-or-self obeying the given predicate. This is a core method in that
+     * several methods are implemented directly or indirectly in terms of this one.
+     */
+    final def findTopmostElemsOrSelf(p: XPathElem => Boolean): immutable.IndexedSeq[XPathElem] = {
+      if (p(this)) {
+        immutable.IndexedSeq(this)
+      } else {
+        // Recursive calls
+        children.flatMap(_.findTopmostElemsOrSelf(p))
+      }
+    }
+
+    final def findAllTopmostElemsOrSelfOfType[A <: XPathElem](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
+      findTopmostElemsOrSelfOfType(cls)(anyElem)
+    }
+
+    final def findTopmostElemsOrSelfOfType[A <: XPathElem](cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      implicit val tag = cls
+
+      findTopmostElemsOrSelf {
+        case e: A if p(e) => true
+        case e            => false
+      } collect {
+        case e: A => e
+      }
+    }
+
+    // Filtering descendant elements (of a certain type, obeying some predicate)
+
+    final def filterElems(p: XPathElem => Boolean): immutable.IndexedSeq[XPathElem] = {
+      children.flatMap(_.filterElemsOrSelf(p))
+    }
+
+    final def findAllElemsOfType[A <: XPathElem](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
+      filterElemsOfType(cls)(anyElem)
+    }
+
+    final def filterElemsOfType[A <: XPathElem](cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      implicit val tag = cls
+
+      filterElems {
+        case e: A if p(e) => true
+        case e            => false
+      } collect {
+        case e: A => e
+      }
+    }
+
+    // Filtering descendant-or-self elements (of a certain type, obeying some predicate)
+
+    /**
+     * Finds all descendant-or-self elements obeying the given predicate. This is a core method in that
+     * several methods are implemented directly or indirectly in terms of this one.
+     */
+    final def filterElemsOrSelf(p: XPathElem => Boolean): immutable.IndexedSeq[XPathElem] = {
+      // Recursive calls
+      immutable.IndexedSeq(this).filter(p) ++ children.flatMap(_.filterElemsOrSelf(p))
+    }
+
+    final def findAllElemsOrSelfOfType[A <: XPathElem](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
+      filterElemsOrSelfOfType(cls)(anyElem)
+    }
+
+    final def filterElemsOrSelfOfType[A <: XPathElem](cls: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      implicit val tag = cls
+
+      filterElemsOrSelf {
+        case e: A if p(e) => true
+        case e            => false
+      } collect {
+        case e: A => e
+      }
+    }
+
+    // Finding an optional element (of a certain type, obeying some predicate)
+
     final def findElem(p: XPathElem => Boolean): Option[XPathElem] = {
       // Not very efficient
 
@@ -83,15 +164,6 @@ object XPathExpressions {
         case e            => false
       } collectFirst {
         case e: A => e
-      }
-    }
-
-    private def findTopmostElemsOrSelf(p: XPathElem => Boolean): immutable.IndexedSeq[XPathElem] = {
-      if (p(this)) {
-        immutable.IndexedSeq(this)
-      } else {
-        // Recursive calls
-        children.flatMap(_.findTopmostElemsOrSelf(p))
       }
     }
   }

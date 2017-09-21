@@ -16,7 +16,6 @@
 
 package eu.cdevreeze.tqa.xpath.ast
 
-import eu.cdevreeze.yaidom.core.QName
 import fastparse.WhitespaceApi
 
 /**
@@ -43,7 +42,7 @@ object XPathParser {
   import fastparse.noApi._
 
   val xpathExpr: P[XPathExpr] =
-    P(expr) map (e => XPathExpr(e)) // TODO Make this work with "End" if there is more than one comma-separated ExprSingle
+    P(expr ~ End) map (e => XPathExpr(e)) // TODO Make this work with "End" if there is more than one comma-separated ExprSingle
 
   private val expr: P[Expr] =
     P(exprSingle.rep(min = 1, sep = ",")) map {
@@ -213,8 +212,10 @@ object XPathParser {
       case expr => PathExprStartingWithDoubleSlash(expr)
     }
 
+  // Distinguishing single from double slash
+
   private val relativePathExpr: P[RelativePathExpr] =
-    P(stepExpr ~ (("/" | "//").! ~ relativePathExpr).?) map {
+    P(stepExpr ~ ((("/" ~ !"/") | "//").! ~ relativePathExpr).?) map {
       case (expr, None)            => SimpleRelativePathExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundRelativePathExpr(expr, StepOp.parse(opAndExpr._1), opAndExpr._2)
     }
