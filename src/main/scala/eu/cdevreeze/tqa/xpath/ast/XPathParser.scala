@@ -651,10 +651,6 @@ object XPathParser {
     NCName.canBePartOfNCName(c) || (c == '{') || (c == '}') || (c == '*')
   }
 
-  private def isNumericLiteral(s: String): Boolean = {
-    isIntegerLiteral(s) || isDecimalLiteral(s) || isDoubleLiteral(s)
-  }
-
   private def isIntegerLiteral(s: String): Boolean = {
     s.nonEmpty && s.forall(c => java.lang.Character.isDigit(c))
   }
