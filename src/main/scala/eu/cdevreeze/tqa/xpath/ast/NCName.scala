@@ -45,6 +45,10 @@ object NCName {
     !DisallowedNonWhitespaceChars.contains(c) && !java.lang.Character.isWhitespace(c)
   }
 
-  private val DisallowedNonWhitespaceChars: Set[Char] =
-    Set(':', '@', '$', '%', '&', '/', '+', ',', ';', '(', ')', '[', ']', '{', '}', '<', '>')
+  private val DisallowedNonWhitespaceChars: Set[Char] = {
+    // The quote characters, if not disallowed, would confuse an XPath parser when a string literal must be found
+    // instead of an NCName.
+
+    Set(':', '@', '$', '%', '&', '/', '+', ',', ';', '(', ')', '[', ']', '{', '}', '<', '>', '\'', '"')
+  }
 }
