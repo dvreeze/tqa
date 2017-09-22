@@ -37,6 +37,9 @@ object NCName {
 
   // See https://stackoverflow.com/questions/1631396/what-is-an-xsncname-type-and-when-should-it-be-used
   def canBeStartOfNCName(c: Char): Boolean = {
+    // By disallowing digits and dots as first characters of an NCName, an XPath parser does not confuse
+    // NCNames with numeric literals.
+
     canBePartOfNCName(c) && !java.lang.Character.isDigit(c) && (c != '.') && (c != '-')
   }
 

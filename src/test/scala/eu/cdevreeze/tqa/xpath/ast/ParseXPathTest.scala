@@ -26,7 +26,7 @@ import XPathExpressions.AdditionOp
 import XPathExpressions.FunctionCall
 import XPathExpressions.GeneralComp
 import XPathExpressions.IfExpr
-import XPathExpressions.NumericLiteral
+import XPathExpressions.IntegerLiteral
 import XPathExpressions.SimpleNameTest
 import XPathExpressions.StringLiteral
 import XPathExpressions.ValueComp
@@ -117,7 +117,7 @@ class ParseXPathTest extends FunSuite {
     }
 
     assertResult(1) {
-      parseResult.get.value.findAllElemsOrSelfOfType(classTag[NumericLiteral]).size
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[IntegerLiteral]).size
     }
 
     assertResult(1) {

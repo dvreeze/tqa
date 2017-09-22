@@ -474,7 +474,7 @@ object XPathParser {
   private val literal: P[Literal] =
     P(stringLiteral | numericLiteral)
 
-  // TODO Fix and improve string and numeric literals
+  // TODO Fix and improve string literals
 
   private val stringLiteral: P[StringLiteral] =
     P(CharsWhile(isStringLiteralChar).!) filter (isStringLiteral) map (v => StringLiteral(v.drop(1).dropRight(1)))
@@ -483,13 +483,13 @@ object XPathParser {
     P(integerLiteral | decimalLiteral | doubleLiteral)
 
   private val integerLiteral: P[IntegerLiteral] =
-    P(CharsWhileIn("0123456789").!) filter (_.nonEmpty) map (v => IntegerLiteral(v.toInt))
+    P(CharsWhileIn("0123456789").!) filter (v => isIntegerLiteral(v)) map (v => IntegerLiteral(v.toInt))
 
   private val decimalLiteral: P[DecimalLiteral] =
-    P(integerLiteral) map (v => DecimalLiteral(v.value)) // TODO
+    P(CharsWhileIn("0123456789.").!) filter (v => isDecimalLiteral(v)) map (v => DecimalLiteral(BigDecimal(v)))
 
   private val doubleLiteral: P[DoubleLiteral] =
-    P(integerLiteral) map (v => DoubleLiteral(v.value)) // TODO
+    P(CharsWhileIn("0123456789.eE+-").!) filter (v => isDoubleLiteral(v)) map (v => DoubleLiteral(v.toDouble))
 
   private val varRef: P[VarRef] =
     P("$" ~ eqName) map {
@@ -649,6 +649,31 @@ object XPathParser {
 
   private def isNCNameCharOrBraceOrStar(c: Char): Boolean = {
     NCName.canBePartOfNCName(c) || (c == '{') || (c == '}') || (c == '*')
+  }
+
+  private def isNumericLiteral(s: String): Boolean = {
+    isIntegerLiteral(s) || isDecimalLiteral(s) || isDoubleLiteral(s)
+  }
+
+  private def isIntegerLiteral(s: String): Boolean = {
+    s.nonEmpty && s.forall(c => java.lang.Character.isDigit(c))
+  }
+
+  private def isDecimalLiteral(s: String): Boolean = {
+    s.nonEmpty && (s.count(_ == '.') == 1) &&
+      s.forall(c => java.lang.Character.isDigit(c) || (c == '.'))
+  }
+
+  private def isDoubleLiteral(s: String): Boolean = {
+    val idx = s.indexWhere(c => (c == 'e') || (c == 'E'))
+
+    (idx > 0) && {
+      val base = s.substring(0, idx)
+      val exp = s.substring(idx + 1)
+      val expWithoutSign = if (exp.startsWith("+") || exp.startsWith("-")) exp.drop(1) else exp
+
+      (isIntegerLiteral(base) || isDecimalLiteral(base)) && isIntegerLiteral(expWithoutSign)
+    }
   }
 
   private def isStringLiteral(s: String): Boolean = {
