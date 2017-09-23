@@ -32,23 +32,25 @@ object XPathParser {
 
   import XPathExpressions._
 
+  object StringLiterals {
+    import fastparse.all._
+
+    val stringLiteral: P[StringLiteral] =
+      P(singleQuoteStringLiteral | doubleQuoteStringLiteral)
+
+    // TODO Escaping
+
+    private val singleQuoteStringLiteral: P[StringLiteral] =
+      P("'" ~ CharsWhile(_ != '\'').! ~ "'") map (v => StringLiteral(v))
+
+    private val doubleQuoteStringLiteral: P[StringLiteral] =
+      P("\"" ~ CharsWhile(_ != '"').! ~ "\"") map (v => StringLiteral(v))
+  }
+
   private val White = WhitespaceApi.Wrapper {
     import fastparse.all._
 
     // TODO Adapt. What about parsing of comments?
-
-    //    val stringLiteral: P[String] =
-    //      P(singleQuoteStringLiteral | doubleQuoteStringLiteral)
-    //
-    //    val singleQuoteStringLiteral: P[String] =
-    //      ???
-    //
-    //    val doubleQuoteStringLiteral: P[String] =
-    //      ???
-
-    // TODO Fix string literals. Strategy I want to try: recognize string literals here,
-    // do not strip whitespace within string literals, and recognize string literals again below
-    // (in the same way), knowing that whitespace within string literals is not stripped.
 
     NoTrace(CharPred(c => java.lang.Character.isWhitespace(c)).rep)
   }
@@ -103,77 +105,77 @@ object XPathParser {
     }
 
   private val ifExpr: P[IfExpr] =
-    P("if" ~ "(" ~/ expr ~ ")" ~ "then" ~ exprSingle ~ "else" ~ exprSingle) map {
+    P("if" ~/ "(" ~ expr ~ ")" ~ "then" ~ exprSingle ~ "else" ~ exprSingle) map {
       case (e1, e2, e3) => IfExpr(e1, e2, e3)
     }
 
   private val orExpr: P[OrExpr] =
-    P(andExpr.rep(min = 1, sep = "or")) map {
+    P(andExpr.rep(min = 1, sep = "or" ~/ Pass)) map {
       case exps => OrExpr(exps.toIndexedSeq)
     }
 
   private val andExpr: P[AndExpr] =
-    P(comparisonExpr.rep(min = 1, sep = "and")) map {
+    P(comparisonExpr.rep(min = 1, sep = "and" ~/ Pass)) map {
       case exps => AndExpr(exps.toIndexedSeq)
     }
 
   private val comparisonExpr: P[ComparisonExpr] =
-    P(stringConcatExpr ~ ((valueComp | generalComp | nodeComp) ~ stringConcatExpr).?) map {
+    P(stringConcatExpr ~ ((valueComp | generalComp | nodeComp) ~/ stringConcatExpr).?) map {
       case (expr1, Some((op, expr2))) => CompoundComparisonExpr(expr1, op, expr2)
       case (expr, None)               => SimpleComparisonExpr(expr)
     }
 
   private val stringConcatExpr: P[StringConcatExpr] =
-    P(rangeExpr.rep(min = 1, sep = "||")) map {
+    P(rangeExpr.rep(min = 1, sep = "||" ~/ Pass)) map {
       case exps => StringConcatExpr(exps.toIndexedSeq)
     }
 
   private val rangeExpr: P[RangeExpr] =
-    P(additiveExpr ~ ("to" ~ additiveExpr).?) map {
+    P(additiveExpr ~ ("to" ~/ additiveExpr).?) map {
       case (additiveExp1, Some(additiveExp2)) => CompoundRangeExpr(additiveExp1, additiveExp2)
       case (additiveExp, None)                => SimpleRangeExpr(additiveExp)
     }
 
   private val additiveExpr: P[AdditiveExpr] =
-    P(multiplicativeExpr ~ (StringIn("+", "-").! ~ additiveExpr).?) map {
+    P(multiplicativeExpr ~ (StringIn("+", "-").! ~/ additiveExpr).?) map {
       case (expr, None)            => SimpleAdditiveExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundAdditiveExpr(expr, AdditionOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val multiplicativeExpr: P[MultiplicativeExpr] =
-    P(unionExpr ~ (StringIn("*", "div", "idiv", "mod").! ~ multiplicativeExpr).?) map {
+    P(unionExpr ~ (StringIn("*", "div", "idiv", "mod").! ~/ multiplicativeExpr).?) map {
       case (expr, None)            => SimpleMultiplicativeExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundMultiplicativeExpr(expr, MultiplicativeOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val unionExpr: P[UnionExpr] =
-    P(intersectExceptExpr ~ (StringIn("union", "|") ~ intersectExceptExpr).rep) map {
+    P(intersectExceptExpr ~ (StringIn("union", "|") ~/ intersectExceptExpr).rep) map {
       case (expr, exprSeq) => UnionExpr(expr +: exprSeq.toIndexedSeq)
     }
 
   private val intersectExceptExpr: P[IntersectExceptExpr] =
-    P(instanceOfExpr ~ (StringIn("intersect", "except").! ~ intersectExceptExpr).?) map {
+    P(instanceOfExpr ~ (StringIn("intersect", "except").! ~/ intersectExceptExpr).?) map {
       case (expr, None)            => SimpleIntersectExceptExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundIntersectExceptExpr(expr, IntersectExceptOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val instanceOfExpr: P[InstanceOfExpr] =
-    P(treatExpr ~ ("instance" ~ "of" ~ sequenceType).?) map {
+    P(treatExpr ~ ("instance" ~ "of" ~/ sequenceType).?) map {
       case (expr, tpeOption) => InstanceOfExpr(expr, tpeOption)
     }
 
   private val treatExpr: P[TreatExpr] =
-    P(castableExpr ~ ("treat" ~ "as" ~ sequenceType).?) map {
+    P(castableExpr ~ ("treat" ~ "as" ~/ sequenceType).?) map {
       case (expr, tpeOption) => TreatExpr(expr, tpeOption)
     }
 
   private val castableExpr: P[CastableExpr] =
-    P(castExpr ~ ("castable" ~ "as" ~ singleType).?) map {
+    P(castExpr ~ ("castable" ~ "as" ~/ singleType).?) map {
       case (expr, tpeOption) => CastableExpr(expr, tpeOption)
     }
 
   private val castExpr: P[CastExpr] =
-    P(unaryExpr ~ ("cast" ~ "as" ~ singleType).?) map {
+    P(unaryExpr ~ ("cast" ~ "as" ~/ singleType).?) map {
       case (expr, tpeOption) => CastExpr(expr, tpeOption)
     }
 
@@ -230,7 +232,7 @@ object XPathParser {
   // Distinguishing single from double slash
 
   private val relativePathExpr: P[RelativePathExpr] =
-    P(stepExpr ~ ((("/" ~ !"/") | "//").! ~ relativePathExpr).?) map {
+    P(stepExpr ~ ((("/" ~ !"/") | "//").! ~/ relativePathExpr).?) map {
       case (expr, None)            => SimpleRelativePathExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundRelativePathExpr(expr, StepOp.parse(opAndExpr._1), opAndExpr._2)
     }
@@ -268,7 +270,7 @@ object XPathParser {
     }
 
   private val nonAbbrevForwardStep: P[NonAbbrevForwardStep] =
-    P(forwardAxis ~ nodeTest) map {
+    P(forwardAxis ~/ nodeTest) map {
       case (axis, nodeTest) => NonAbbrevForwardStep(axis, nodeTest)
     }
 
@@ -291,7 +293,7 @@ object XPathParser {
     P("..") map (_ => AbbrevReverseStep)
 
   private val nonAbbrevReverseStep: P[NonAbbrevReverseStep] =
-    P(reverseAxis ~ nodeTest) map {
+    P(reverseAxis ~/ nodeTest) map {
       case (axis, nodeTest) => NonAbbrevReverseStep(axis, nodeTest)
     }
 
@@ -489,10 +491,10 @@ object XPathParser {
   private val literal: P[Literal] =
     P(stringLiteral | numericLiteral)
 
-  // TODO Fix string literals. This is entirely wrong!
+  // Using the StringLiterals.stringLiteral parser
 
   private val stringLiteral: P[StringLiteral] =
-    P(CharsWhile(isStringLiteralChar).!) filter (isStringLiteral) map (v => StringLiteral(v.drop(1).dropRight(1)))
+    P(StringLiterals.stringLiteral)
 
   private val numericLiteral: P[NumericLiteral] =
     P(integerLiteral | decimalLiteral | doubleLiteral)
@@ -685,47 +687,5 @@ object XPathParser {
 
       (isIntegerLiteral(base) || isDecimalLiteral(base)) && isIntegerLiteral(expWithoutSign)
     }
-  }
-
-  private def isStringLiteral(s: String): Boolean = {
-    // TODO Improve, and mind escaping of quotes
-
-    (s.startsWith("\"") && s.endsWith("\"") && isProbablyValidXmlName(s.drop(1).dropRight(1))) ||
-      (s.startsWith("'") && s.endsWith("'") && isProbablyValidXmlName(s.drop(1).dropRight(1)))
-  }
-
-  private def isStringLiteralChar(c: Char): Boolean = {
-    // TODO Improve
-    (c == '"') || (c == '\'') || isProbableXmlNameChar(c)
-  }
-
-  // TODO The functions below are hacks. Fix this.
-
-  /** Returns true if the name is probably a valid XML name (even if reserved or containing a colon) */
-  private def isProbablyValidXmlName(s: String): Boolean = {
-    require(s ne null) // scalastyle:off null
-    (s.length > 0) && isProbableXmlNameStart(s(0)) && {
-      s.drop(1) forall { c => isProbableXmlNameChar(c) }
-    }
-  }
-
-  private def isProbableXmlNameStart(c: Char): Boolean = c match {
-    case '-'                                 => false
-    case '.'                                 => false
-    case c if java.lang.Character.isDigit(c) => false
-    case _                                   => isProbableXmlNameChar(c)
-  }
-
-  // TODO What about slash etc.?
-
-  private def isProbableXmlNameChar(c: Char): Boolean = c match {
-    case '_' => true
-    case '-' => true
-    case '.' => true
-    case '$' => false
-    case ':' => true
-    case c if java.lang.Character.isWhitespace(c) => false
-    case c if java.lang.Character.isJavaIdentifierPart(c) => true
-    case _ => false
   }
 }

@@ -300,32 +300,32 @@ class ParseXPathTest extends FunSuite {
     }
   }
 
-//  test("testParseExprWithStringLiteral") {
-//    // From the NL taxonomy (NT12)
-//
-//    val exprString =
-//      "xfi:identifier-scheme(xfi:identifier($varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems)) eq 'http://www.kvk.nl/kvk-id'"
-//
-//    val parseResult = xpathExpr.parse(exprString)
-//
-//    assertSuccess(parseResult)
-//
-//    assertResult(1) {
-//      parseResult.get.value.findAllElemsOfType(classTag[ValueComp.Eq.type]).size
-//    }
-//
-//    assertResult(Set(QNameAsEQName("varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems"))) {
-//      parseResult.get.value.findAllElemsOfType(classTag[VarRef]).map(_.varName).toSet
-//    }
-//
-//    assertResult(Set(QNameAsEQName("xfi:identifier"), QNameAsEQName("xfi:identifier-scheme"))) {
-//      parseResult.get.value.findAllElemsOfType(classTag[FunctionCall]).map(_.functionName).toSet
-//    }
-//
-//    assertResult(Set("http://www.kvk.nl/kvk-id")) {
-//      parseResult.get.value.findAllElemsOfType(classTag[StringLiteral]).map(_.value).toSet
-//    }
-//  }
+  test("testParseExprWithStringLiteral") {
+    // From the NL taxonomy (NT12)
+
+    val exprString =
+      "xfi:identifier-scheme(xfi:identifier($varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems)) eq 'http://www.kvk.nl/kvk-id'"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOfType(classTag[ValueComp.Eq.type]).size
+    }
+
+    assertResult(Set(QNameAsEQName("varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems"))) {
+      parseResult.get.value.findAllElemsOfType(classTag[VarRef]).map(_.varName).toSet
+    }
+
+    assertResult(Set(QNameAsEQName("xfi:identifier"), QNameAsEQName("xfi:identifier-scheme"))) {
+      parseResult.get.value.findAllElemsOfType(classTag[FunctionCall]).map(_.functionName).toSet
+    }
+
+    assertResult(Set("http://www.kvk.nl/kvk-id")) {
+      parseResult.get.value.findAllElemsOfType(classTag[StringLiteral]).map(_.value).toSet
+    }
+  }
 
   test("testMultipleExprSingles") {
     val exprString = "/p:a/p:b[@xlink:type = 'arc'], if (//p:c) then //p:c else //p:d"
