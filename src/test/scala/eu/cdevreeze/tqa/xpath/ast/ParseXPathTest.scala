@@ -23,6 +23,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import XPathExpressions.AdditionOp
+import XPathExpressions.ExprSingle
 import XPathExpressions.FunctionCall
 import XPathExpressions.GeneralComp
 import XPathExpressions.IfExpr
@@ -299,8 +300,54 @@ class ParseXPathTest extends FunSuite {
     }
   }
 
-  // TODO What goes wrong with parsing of this one:
-  // xfi:identifier-scheme(xfi:identifier($varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems)) eq 'http://www.kvk.nl/kvk-id'
+//  test("testParseExprWithStringLiteral") {
+//    // From the NL taxonomy (NT12)
+//
+//    val exprString =
+//      "xfi:identifier-scheme(xfi:identifier($varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems)) eq 'http://www.kvk.nl/kvk-id'"
+//
+//    val parseResult = xpathExpr.parse(exprString)
+//
+//    assertSuccess(parseResult)
+//
+//    assertResult(1) {
+//      parseResult.get.value.findAllElemsOfType(classTag[ValueComp.Eq.type]).size
+//    }
+//
+//    assertResult(Set(QNameAsEQName("varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems"))) {
+//      parseResult.get.value.findAllElemsOfType(classTag[VarRef]).map(_.varName).toSet
+//    }
+//
+//    assertResult(Set(QNameAsEQName("xfi:identifier"), QNameAsEQName("xfi:identifier-scheme"))) {
+//      parseResult.get.value.findAllElemsOfType(classTag[FunctionCall]).map(_.functionName).toSet
+//    }
+//
+//    assertResult(Set("http://www.kvk.nl/kvk-id")) {
+//      parseResult.get.value.findAllElemsOfType(classTag[StringLiteral]).map(_.value).toSet
+//    }
+//  }
+
+  test("testMultipleExprSingles") {
+    val exprString = "/p:a/p:b[@xlink:type = 'arc'], if (//p:c) then //p:c else //p:d"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    val topmostExprSingles = parseResult.get.value.findAllTopmostElemsOrSelfOfType(classTag[ExprSingle])
+
+    assertResult(2) {
+      topmostExprSingles.size
+    }
+
+    assertResult(Set(QNameAsEQName("p:a"), QNameAsEQName("p:b"), QNameAsEQName("xlink:type"))) {
+      topmostExprSingles(0).findAllElemsOfType(classTag[SimpleNameTest]).map(_.name).toSet
+    }
+
+    assertResult(Set(QNameAsEQName("p:c"), QNameAsEQName("p:d"))) {
+      topmostExprSingles(1).findAllElemsOfType(classTag[SimpleNameTest]).map(_.name).toSet
+    }
+  }
 
   private def assertSuccess(parseResult: Parsed[_]): Unit = {
     assertResult(true) {

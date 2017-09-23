@@ -35,14 +35,29 @@ object XPathParser {
   private val White = WhitespaceApi.Wrapper {
     import fastparse.all._
 
-    NoTrace(CharPred(c => java.lang.Character.isWhitespace(c)).rep) // TODO Adapt. What about parsing of comments?
+    // TODO Adapt. What about parsing of comments?
+
+    //    val stringLiteral: P[String] =
+    //      P(singleQuoteStringLiteral | doubleQuoteStringLiteral)
+    //
+    //    val singleQuoteStringLiteral: P[String] =
+    //      ???
+    //
+    //    val doubleQuoteStringLiteral: P[String] =
+    //      ???
+
+    // TODO Fix string literals. Strategy I want to try: recognize string literals here,
+    // do not strip whitespace within string literals, and recognize string literals again below
+    // (in the same way), knowing that whitespace within string literals is not stripped.
+
+    NoTrace(CharPred(c => java.lang.Character.isWhitespace(c)).rep)
   }
 
   import White._
   import fastparse.noApi._
 
   val xpathExpr: P[XPathExpr] =
-    P(expr ~ End) map (e => XPathExpr(e)) // TODO Make this work with "End" if there is more than one comma-separated ExprSingle
+    P(expr ~ End) map (e => XPathExpr(e))
 
   private val expr: P[Expr] =
     P(exprSingle.rep(min = 1, sep = ",")) map {
@@ -58,7 +73,7 @@ object XPathParser {
     P(forExpr | letExpr | quantifiedExpr | ifExpr | orExpr)
 
   private val forExpr: P[ForExpr] =
-    P("for" ~ simpleForBinding.rep(min = 1, sep = ",") ~ "return" ~ exprSingle) map {
+    P("for" ~/ simpleForBinding.rep(min = 1, sep = ",") ~ "return" ~ exprSingle) map {
       case (bindings, returnExp) => ForExpr(bindings.toIndexedSeq, returnExp)
     }
 
@@ -68,7 +83,7 @@ object XPathParser {
     }
 
   private val letExpr: P[LetExpr] =
-    P("let" ~ simpleLetBinding.rep(min = 1, sep = ",") ~ "return" ~ exprSingle) map {
+    P("let" ~/ simpleLetBinding.rep(min = 1, sep = ",") ~ "return" ~ exprSingle) map {
       case (bindings, returnExp) => LetExpr(bindings.toIndexedSeq, returnExp)
     }
 
@@ -78,7 +93,7 @@ object XPathParser {
     }
 
   private val quantifiedExpr: P[QuantifiedExpr] =
-    P(("some" | "every").! ~ simpleBindingInQuantifiedExpr.rep(min = 1, sep = ",") ~ "satisfies" ~ exprSingle) map {
+    P(StringIn("some", "every").! ~/ simpleBindingInQuantifiedExpr.rep(min = 1, sep = ",") ~ "satisfies" ~ exprSingle) map {
       case (quant, bindings, satisfiesExp) => QuantifiedExpr(Quantifier.parse(quant), bindings.toIndexedSeq, satisfiesExp)
     }
 
@@ -88,7 +103,7 @@ object XPathParser {
     }
 
   private val ifExpr: P[IfExpr] =
-    P("if" ~ "(" ~ expr ~ ")" ~ "then" ~ exprSingle ~ "else" ~ exprSingle) map {
+    P("if" ~ "(" ~/ expr ~ ")" ~ "then" ~ exprSingle ~ "else" ~ exprSingle) map {
       case (e1, e2, e3) => IfExpr(e1, e2, e3)
     }
 
@@ -120,24 +135,24 @@ object XPathParser {
     }
 
   private val additiveExpr: P[AdditiveExpr] =
-    P(multiplicativeExpr ~ (("+" | "-").! ~ additiveExpr).?) map {
+    P(multiplicativeExpr ~ (StringIn("+", "-").! ~ additiveExpr).?) map {
       case (expr, None)            => SimpleAdditiveExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundAdditiveExpr(expr, AdditionOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val multiplicativeExpr: P[MultiplicativeExpr] =
-    P(unionExpr ~ (("*" | "div" | "idiv" | "mod").! ~ multiplicativeExpr).?) map {
+    P(unionExpr ~ (StringIn("*", "div", "idiv", "mod").! ~ multiplicativeExpr).?) map {
       case (expr, None)            => SimpleMultiplicativeExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundMultiplicativeExpr(expr, MultiplicativeOp.parse(opAndExpr._1), opAndExpr._2)
     }
 
   private val unionExpr: P[UnionExpr] =
-    P(intersectExceptExpr ~ (("union" | "|") ~ intersectExceptExpr).rep) map {
+    P(intersectExceptExpr ~ (StringIn("union", "|") ~ intersectExceptExpr).rep) map {
       case (expr, exprSeq) => UnionExpr(expr +: exprSeq.toIndexedSeq)
     }
 
   private val intersectExceptExpr: P[IntersectExceptExpr] =
-    P(instanceOfExpr ~ (("intersect" | "except").! ~ intersectExceptExpr).?) map {
+    P(instanceOfExpr ~ (StringIn("intersect", "except").! ~ intersectExceptExpr).?) map {
       case (expr, None)            => SimpleIntersectExceptExpr(expr)
       case (expr, Some(opAndExpr)) => CompoundIntersectExceptExpr(expr, IntersectExceptOp.parse(opAndExpr._1), opAndExpr._2)
     }
@@ -163,7 +178,7 @@ object XPathParser {
     }
 
   private val unaryExpr: P[UnaryExpr] =
-    P(("-" | "+").!.rep ~ valueExpr) map {
+    P(StringIn("-", "+").!.rep ~ valueExpr) map {
       case (ops, expr) => UnaryExpr(ops.toIndexedSeq.map(op => UnaryOp.parse(op)), expr)
     }
 
@@ -173,7 +188,7 @@ object XPathParser {
     }
 
   private val simpleMapExpr: P[SimpleMapExpr] =
-    P(pathExpr.rep(min = 1, sep = "|")) map {
+    P(pathExpr.rep(min = 1, sep = "!")) map {
       case exps => SimpleMapExpr(exps.toIndexedSeq)
     }
 
@@ -258,7 +273,7 @@ object XPathParser {
     }
 
   private val forwardAxis: P[ForwardAxis] =
-    P(("child" | "descendant" | "attribute" | "self" | "descendant-or-self" | "following-sibling" | "following" | "namespace").! ~ "::") map {
+    P(StringIn("child", "descendant", "attribute", "self", "descendant-or-self", "following-sibling", "following", "namespace").! ~ "::") map {
       case "child"              => ForwardAxis.Child
       case "descendant"         => ForwardAxis.Descendant
       case "attribute"          => ForwardAxis.Attribute
@@ -281,7 +296,7 @@ object XPathParser {
     }
 
   private val reverseAxis: P[ReverseAxis] =
-    P(("parent" | "ancestor" | "preceding-sibling" | "preceding" | "ancestor-or-self").! ~ "::") map {
+    P(StringIn("parent", "ancestor", "preceding-sibling", "preceding", "ancestor-or-self").! ~ "::") map {
       case "parent"            => ReverseAxis.Parent
       case "ancestor"          => ReverseAxis.Ancestor
       case "preceding-sibling" => ReverseAxis.PrecedingSibling
@@ -474,7 +489,7 @@ object XPathParser {
   private val literal: P[Literal] =
     P(stringLiteral | numericLiteral)
 
-  // TODO Fix and improve string literals
+  // TODO Fix string literals. This is entirely wrong!
 
   private val stringLiteral: P[StringLiteral] =
     P(CharsWhile(isStringLiteralChar).!) filter (isStringLiteral) map (v => StringLiteral(v.drop(1).dropRight(1)))
@@ -712,13 +727,5 @@ object XPathParser {
     case c if java.lang.Character.isWhitespace(c) => false
     case c if java.lang.Character.isJavaIdentifierPart(c) => true
     case _ => false
-  }
-
-  def main(args: Array[String]): Unit = {
-    // TODO Remove main method!!!
-    val exprString = args(0)
-
-    val parseResult = xpathExpr.parse(exprString)
-    println(parseResult)
   }
 }
