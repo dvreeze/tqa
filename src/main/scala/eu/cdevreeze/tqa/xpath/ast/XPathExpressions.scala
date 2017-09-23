@@ -37,6 +37,8 @@ import scala.reflect.ClassTag
  *
  * TODO Improve several class names.
  *
+ * TODO XPath 3.1.
+ *
  * @author Chris de Vreeze
  */
 object XPathExpressions {
@@ -156,10 +158,37 @@ object XPathExpressions {
       findTopmostElems(p).headOption
     }
 
+    final def findAnyElemOfType[A <: XPathElem](cls: ClassTag[A]): Option[A] = {
+      findElemOfType(cls)(anyElem)
+    }
+
     final def findElemOfType[A <: XPathElem](cls: ClassTag[A])(p: A => Boolean): Option[A] = {
       implicit val tag = cls
 
       findElem {
+        case e: A if p(e) => true
+        case e            => false
+      } collectFirst {
+        case e: A => e
+      }
+    }
+
+    // Finding an optional element-or-self (of a certain type, obeying some predicate)
+
+    final def findElemOrSelf(p: XPathElem => Boolean): Option[XPathElem] = {
+      // Not very efficient
+
+      findTopmostElemsOrSelf(p).headOption
+    }
+
+    final def findAnyElemOrSelfOfType[A <: XPathElem](cls: ClassTag[A]): Option[A] = {
+      findElemOrSelfOfType(cls)(anyElem)
+    }
+
+    final def findElemOrSelfOfType[A <: XPathElem](cls: ClassTag[A])(p: A => Boolean): Option[A] = {
+      implicit val tag = cls
+
+      findElemOrSelf {
         case e: A if p(e) => true
         case e            => false
       } collectFirst {

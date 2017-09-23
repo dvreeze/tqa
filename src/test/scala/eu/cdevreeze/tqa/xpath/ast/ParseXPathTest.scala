@@ -22,12 +22,17 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import XPathExpressions.AbbrevForwardStep
+import XPathExpressions.AxisStep
 import XPathExpressions.AdditionOp
 import XPathExpressions.ExprSingle
+import XPathExpressions.ForwardAxisStep
 import XPathExpressions.FunctionCall
 import XPathExpressions.GeneralComp
 import XPathExpressions.IfExpr
+import XPathExpressions.InlineFunctionExpr
 import XPathExpressions.IntegerLiteral
+import XPathExpressions.LetExpr
 import XPathExpressions.SimpleNameTest
 import XPathExpressions.StringLiteral
 import XPathExpressions.ValueComp
@@ -79,6 +84,10 @@ class ParseXPathTest extends FunSuite {
       QNameAsEQName("p:e"))) {
 
       simpleNameTests.map(e => e.name)
+    }
+
+    assertResult(5) {
+      parseResult.get.value.findAllElemsOrSelfOfType(classTag[AxisStep]).size
     }
   }
 
@@ -348,6 +357,112 @@ class ParseXPathTest extends FunSuite {
       topmostExprSingles(1).findAllElemsOfType(classTag[SimpleNameTest]).map(_.name).toSet
     }
   }
+
+  test("testLetExpr") {
+    // Example from the XPath 3.0 spec
+
+    val exprString =
+      """let $f := function($a) { starts-with($a, "E") }
+        return local:filter(("Ethel", "Enid", "Gertrude"), $f)"""
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    val letExprOption = parseResult.get.value.findAnyElemOrSelfOfType(classTag[LetExpr])
+
+    assertResult(true) {
+      letExprOption.isDefined
+    }
+
+    assertResult(true) {
+      letExprOption.get.simpleLetBindings.head.expr.findAnyElemOrSelfOfType(classTag[InlineFunctionExpr]).nonEmpty
+    }
+
+    assertResult(1) {
+      letExprOption.get.returnExpr.findAllElemsOrSelfOfType(classTag[FunctionCall]).size
+    }
+
+    assertResult(Set(QNameAsEQName("a"), QNameAsEQName("f"))) {
+      letExprOption.get.findAllElemsOrSelfOfType(classTag[VarRef]).map(_.varName).toSet
+    }
+
+    assertResult(Set("E", "Ethel", "Enid", "Gertrude")) {
+      letExprOption.get.findAllElemsOrSelfOfType(classTag[StringLiteral]).map(_.value).toSet
+    }
+  }
+
+  test("testSimplePathExpr") {
+    // Example from https://en.wikibooks.org/wiki/XQuery/XPath_examples
+
+    val exprString = "$books//book[contains(title, 'XQuery')]/title/text()"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(4) {
+      parseResult.get.value.findAllElemsOfType(classTag[AxisStep]).size
+    }
+
+    assertResult(4) {
+      parseResult.get.value.findAllElemsOfType(classTag[ForwardAxisStep]).size
+    }
+
+    assertResult(4) {
+      parseResult.get.value.findAllElemsOfType(classTag[AbbrevForwardStep]).size
+    }
+  }
+
+  test("testIncorrectSimplePathExpr") {
+    // Example from https://en.wikibooks.org/wiki/XQuery/XPath_examples, but adapted
+
+    val exprString = "$books///book[contains(title, 'XQuery')]/title/text()"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertFailure(parseResult)
+  }
+
+  test("testIncorrectSimplePathExprWithTwoCommas") {
+    // Example from https://en.wikibooks.org/wiki/XQuery/XPath_examples, but adapted
+
+    val exprString = "$books//book[contains(title,, 'XQuery')]/title/text()"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertFailure(parseResult)
+  }
+
+  test("testSimplePathExprWithEscapeInStringLiteral") {
+    // Example from https://en.wikibooks.org/wiki/XQuery/XPath_examples, but adapted
+
+    val exprString = "$books//book[contains(description, 'A ''fine book''')]/title/text()"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(4) {
+      parseResult.get.value.findAllElemsOfType(classTag[AxisStep]).size
+    }
+
+    assertResult(List("A 'fine book'")) {
+      parseResult.get.value.findAllElemsOfType(classTag[StringLiteral]).map(_.value)
+    }
+  }
+
+  test("testSimplePathExprWithIncorrectlyEscapeInStringLiteral") {
+    // Example from https://en.wikibooks.org/wiki/XQuery/XPath_examples, but adapted
+
+    val exprString = "$books//book[contains(description, 'A 'fine book'')]/title/text()"
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertFailure(parseResult)
+  }
+
+  // TODO Many tests with syntactically incorrect XPath expressions
 
   private def assertSuccess(parseResult: Parsed[_]): Unit = {
     assertResult(true) {

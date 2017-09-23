@@ -23,12 +23,14 @@ import fastparse.WhitespaceApi
  *
  * Usage: XPathParser.xpathExpr.parse(xpathString)
  *
+ * TODO XPath 3.1.
+ *
  * @author Chris de Vreeze
  */
 object XPathParser {
 
-  // TODO Improve, improve, improve. Study XPath spec more closely, use FastParse in a better way, make code complete and more robust,
-  // improve the AST class hierarchy, etc.
+  // TODO Improve, improve, improve. Study XPath spec more closely, use FastParse in a better way,
+  // make code complete and more robust, improve the AST class hierarchy, etc.
 
   import XPathExpressions._
 
@@ -36,15 +38,35 @@ object XPathParser {
     import fastparse.all._
 
     val stringLiteral: P[StringLiteral] =
-      P(singleQuoteStringLiteral | doubleQuoteStringLiteral)
+      P(aposStringLiteral | quoteStringLiteral)
 
-    // TODO Escaping
+    // TODO Make more efficient
 
-    private val singleQuoteStringLiteral: P[StringLiteral] =
-      P("'" ~ CharsWhile(_ != '\'').! ~ "'") map (v => StringLiteral(v))
+    private val aposStringLiteral: P[StringLiteral] =
+      P("'" ~/ (escapeApos | nonEscapedCharInAposStringLiteral).rep.! ~ "'") map { v =>
+        // Why do we still need the "unescaping" here?
 
-    private val doubleQuoteStringLiteral: P[StringLiteral] =
-      P("\"" ~ CharsWhile(_ != '"').! ~ "\"") map (v => StringLiteral(v))
+        StringLiteral(v.replace("''", "'"))
+      }
+
+    private val quoteStringLiteral: P[StringLiteral] =
+      P("\"" ~/ (escapeQuote | nonEscapedCharInQuoteStringLiteral).rep.! ~ "\"") map { v =>
+        // Why do we still need the "unescaping" here?
+
+        StringLiteral(v.replace("\"\"", "\""))
+      }
+
+    private val escapeApos: P[String] =
+      P("'".rep(exactly = 2).!) map (_.substring(0, 1).ensuring(_.size == 1))
+
+    private val nonEscapedCharInAposStringLiteral: P[String] =
+      P(CharPred(_ != '\'').!) map (_.ensuring(_.size == 1))
+
+    private val escapeQuote: P[String] =
+      P("\"".rep(exactly = 2).!) map (_.substring(0, 1).ensuring(_.size == 1))
+
+    private val nonEscapedCharInQuoteStringLiteral: P[String] =
+      P(CharPred(_ != '"').!) map (_.ensuring(_.size == 1))
   }
 
   private val White = WhitespaceApi.Wrapper {
