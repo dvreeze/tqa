@@ -38,6 +38,7 @@ import XPathExpressions.StringLiteral
 import XPathExpressions.ValueComp
 import XPathExpressions.VarRef
 import XPathExpressions.UnaryOp
+import eu.cdevreeze.yaidom.core.EName
 
 /**
  * XPath parsing test case.
@@ -328,6 +329,35 @@ class ParseXPathTest extends FunSuite {
     }
 
     assertResult(Set(QNameAsEQName("xfi:identifier"), QNameAsEQName("xfi:identifier-scheme"))) {
+      parseResult.get.value.findAllElemsOfType(classTag[FunctionCall]).map(_.functionName).toSet
+    }
+
+    assertResult(Set("http://www.kvk.nl/kvk-id")) {
+      parseResult.get.value.findAllElemsOfType(classTag[StringLiteral]).map(_.value).toSet
+    }
+  }
+
+  test("testParseExprWithStringLiteralAndUriQualifiedNames") {
+    // From the NL taxonomy (NT12), but adapted
+
+    val XfiNs = "http://www.xbrl.org/2008/function/instance"
+
+    val exprString =
+      s"""Q{$XfiNs}identifier-scheme(Q{$XfiNs}identifier($$varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems)) eq 'http://www.kvk.nl/kvk-id'"""
+
+    val parseResult = xpathExpr.parse(exprString)
+
+    assertSuccess(parseResult)
+
+    assertResult(1) {
+      parseResult.get.value.findAllElemsOfType(classTag[ValueComp.Eq.type]).size
+    }
+
+    assertResult(Set(QNameAsEQName("varArc_EntityInformation_MsgEqualToIdentifierScheme1_AllItems"))) {
+      parseResult.get.value.findAllElemsOfType(classTag[VarRef]).map(_.varName).toSet
+    }
+
+    assertResult(Set(URIQualifiedName(EName(XfiNs, "identifier")), URIQualifiedName(EName(XfiNs, "identifier-scheme")))) {
       parseResult.get.value.findAllElemsOfType(classTag[FunctionCall]).map(_.functionName).toSet
     }
 

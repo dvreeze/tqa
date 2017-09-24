@@ -34,6 +34,42 @@ object XPathParser {
 
   import XPathExpressions._
 
+  object Names {
+    import fastparse.all._
+
+    // TODO Make more efficient
+
+    val ncName: P[NCName] =
+      P(CharPred(c => NCName.canBeStartOfNCName(c)).! ~ CharPred(c => NCName.canBePartOfNCName(c)).rep.!) map {
+        case (s1, s2) => NCName(s1 + s2)
+      }
+
+    val eqName: P[EQName] =
+      P(uriQualifiedName | qName) // The order matters!!!
+
+    val qName: P[QNameAsEQName] =
+      P(ncName ~ (":" ~ ncName).?) map {
+        case (s1, s2Opt) =>
+          if (s2Opt.isEmpty) {
+            QNameAsEQName.parse(s1.name)
+          } else {
+            QNameAsEQName.parse(s1.name + ":" + s2Opt.get.name)
+          }
+      }
+
+    val uriQualifiedName: P[URIQualifiedName] =
+      P("Q{" ~/ CharPred(c => isAllowedUriChar(c)).rep.! ~ "}" ~ ncName) map {
+        case (uri, localPart) =>
+          URIQualifiedName.parse("Q{" + uri + "}" + localPart.name)
+      }
+
+    private def isAllowedUriChar(c: Char): Boolean = {
+      // Just guessing!
+
+      !java.lang.Character.isWhitespace(c) && (c != '{') && (c != '}')
+    }
+  }
+
   object StringLiterals {
     import fastparse.all._
 
@@ -622,22 +658,13 @@ object XPathParser {
     }
 
   // Names (EQNames, NCNames etc.)
+  // Using the Names.ncName and Names.eqName parsers
 
   private val ncName: P[NCName] =
-    P(CharsWhile(c => NCName.canBePartOfNCName(c)).!) filter (s => NCName.canBeNCName(s)) map (s => NCName(s))
+    P(Names.ncName)
 
   private val eqName: P[EQName] =
-    P(qName | uriQualifiedName)
-
-  private val qName: P[QNameAsEQName] =
-    P(CharsWhile(c => QNameAsEQName.canBePartOfQNameAsEQName(c)).!) filter (s => QNameAsEQName.canBeQNameAsEQName(s)) map { s =>
-      QNameAsEQName.parse(s)
-    }
-
-  private val uriQualifiedName: P[URIQualifiedName] =
-    P(CharsWhile(c => URIQualifiedName.canBePartOfURIQualifiedName(c)).!) filter (s => URIQualifiedName.canBeURIQualifiedName(s)) map { s =>
-      URIQualifiedName.parse(s)
-    }
+    P(Names.eqName)
 
   // Operators etc.
 
