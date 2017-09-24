@@ -44,8 +44,10 @@ object XPathParser {
         case (s1, s2) => NCName(s1 + s2)
       }
 
+    // We could change the order of the 2 branches below, but I'd rather explicitly use a small lookahead.
+
     val eqName: P[EQName] =
-      P(uriQualifiedName | qName) // The order matters!!!
+      P(!"Q{" ~ qName | uriQualifiedName)
 
     val qName: P[QNameAsEQName] =
       P(ncName ~ (":" ~ ncName).?) map {
