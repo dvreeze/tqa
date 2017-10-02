@@ -3,7 +3,7 @@ name := "tqa"
 
 organization := "eu.cdevreeze.tqa"
 
-version := "0.4.7"
+version := "0.4.8-SNAPSHOT"
 
 scalaVersion := "2.11.11"
 
