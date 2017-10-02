@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.extension.table.dom
 
+import java.net.URI
+
 import scala.collection.immutable
 import scala.reflect.ClassTag
 import scala.reflect.classTag
@@ -51,6 +53,8 @@ sealed trait TableResource extends FormulaOrTableResource {
   def underlyingResource: tqa.dom.NonStandardResource
 
   final def backingElem: BackingElemApi = underlyingResource.backingElem
+
+  final def docUri: URI = underlyingResource.docUri
 
   final def xlinkType: String = underlyingResource.xlinkType
 

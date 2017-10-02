@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.extension.table.dom
 
+import java.net.URI
+
 import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
@@ -36,6 +38,8 @@ sealed trait TableArc extends tqa.dom.AnyTaxonomyElem with XLinkArc {
   def underlyingArc: tqa.dom.NonStandardArc
 
   final def backingElem: BackingElemApi = underlyingArc.backingElem
+
+  final def docUri: URI = underlyingArc.docUri
 
   final def xlinkType: String = underlyingArc.xlinkType
 

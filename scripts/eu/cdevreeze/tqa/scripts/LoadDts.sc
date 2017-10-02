@@ -77,6 +77,25 @@ def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): ex
   new extension.table.taxonomymodel.TableConverter(tableTaxo)
 }
 
+// Printing a taxonomy element or backing element as simple element
+
+def backingElemToSimpleElem(backingElem: yaidom.queryapi.BackingElemApi): yaidom.simple.Elem = {
+  backingElem match {
+    case e: yaidom.indexed.IndexedScopedNode.Elem[_] if e.underlyingElem.isInstanceOf[yaidom.simple.Elem] =>
+      e.underlyingElem.asInstanceOf[yaidom.simple.Elem]
+    case e: backingelem.nodeinfo.SaxonElem =>
+      backingelem.nodeinfo.YaidomSaxonToSimpleElemConverter.convertSaxonElem(e)
+    case e =>
+      sys.error(s"Unexpected element type: ${e.getClass}")
+  }
+}
+
+def toSimpleElem(taxoElem: TaxonomyElem): yaidom.simple.Elem = {
+  val backingElem = taxoElem.backingElem
+
+  backingElemToSimpleElem(backingElem)
+}
+
 // TQA: DTS bootstrapping function
 
 val processor = new Processor(false)

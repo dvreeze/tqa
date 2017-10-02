@@ -41,6 +41,13 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     case f: dom.Formula            => tryToConvertFormula(f)
   }
 
+  def tryToConvertVariableSetAssertion(domVariableSetAssertion: dom.VariableSetAssertion): Try[model.VariableSetAssertion] = {
+    domVariableSetAssertion match {
+      case f: dom.ValueAssertion     => tryToConvertValueAssertion(f)
+      case f: dom.ExistenceAssertion => tryToConvertExistenceAssertion(f)
+    }
+  }
+
   def tryToConvertValueAssertion(domVariableSet: dom.ValueAssertion): Try[model.ValueAssertion] = {
     Try {
       val variableSetFilters: immutable.IndexedSeq[model.VariableSetFilter] =

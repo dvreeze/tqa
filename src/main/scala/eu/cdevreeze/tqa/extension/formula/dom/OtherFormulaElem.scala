@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.extension.formula.dom
 
+import java.net.URI
+
 import scala.collection.immutable
 import scala.reflect.ClassTag
 import scala.reflect.classTag
@@ -47,6 +49,8 @@ sealed trait OtherFormulaElem extends tqa.dom.AnyTaxonomyElem {
   def underlyingElem: tqa.dom.OtherNonXLinkElem
 
   final def key: XmlFragmentKey = underlyingElem.key
+
+  final def docUri: URI = underlyingElem.docUri
 
   protected[dom] def requireResolvedName(ename: EName): Unit = {
     require(
