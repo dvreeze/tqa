@@ -24,9 +24,9 @@ import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.TypeEName
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
-import eu.cdevreeze.tqa.backingelem.indexed.DocumentParserUsingStax
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import org.scalatest.junit.JUnitRunner
 
 /**

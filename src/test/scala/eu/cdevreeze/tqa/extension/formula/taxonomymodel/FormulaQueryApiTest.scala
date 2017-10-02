@@ -23,7 +23,6 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.backingelem.indexed.DocumentParserUsingStax
 import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.TaxonomyElem
@@ -40,6 +39,7 @@ import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import eu.cdevreeze.tqa.extension.formula.model.FactVariable
 
 /**

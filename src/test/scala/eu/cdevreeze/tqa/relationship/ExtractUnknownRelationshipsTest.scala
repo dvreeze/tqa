@@ -23,7 +23,6 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.RefEName
 import eu.cdevreeze.tqa.ENames.XsElementEName
-import eu.cdevreeze.tqa.backingelem.indexed.DocumentParserUsingStax
 import eu.cdevreeze.tqa.dom.ConceptLabelResource
 import eu.cdevreeze.tqa.dom.Linkbase
 import eu.cdevreeze.tqa.dom.OtherXsdElem
@@ -32,6 +31,7 @@ import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
 /**
  * Unknown relationship extraction test case. It uses test data from the XBRL Core Conformance Suite, but adapted
