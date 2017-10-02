@@ -24,6 +24,7 @@ import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.OrderEName
 import eu.cdevreeze.tqa.ENames.WeightEName
+import eu.cdevreeze.tqa.backingelem.indexed.DocumentParserUsingStax
 import eu.cdevreeze.tqa.common.Use
 import eu.cdevreeze.tqa.dom.BaseSetKey
 import eu.cdevreeze.tqa.dom.Linkbase
@@ -32,7 +33,6 @@ import eu.cdevreeze.tqa.dom.XLinkLocator
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
 /**
  * Relationship equivalence test case. It uses test data from the XBRL Core Conformance Suite.

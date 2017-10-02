@@ -24,7 +24,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
   else if (version.contains("2.11")) Seq(base / "src" / "test" / "scala-2.11") else Seq()
 }
 
-libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.7.0-M1"
+libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.6.3"
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.3"
 

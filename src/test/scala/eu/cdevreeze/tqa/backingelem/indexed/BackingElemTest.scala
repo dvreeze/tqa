@@ -24,7 +24,6 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.backingelem.AbstractBackingElemTest
 import eu.cdevreeze.yaidom.indexed.Document
 import eu.cdevreeze.yaidom.indexed.Elem
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import eu.cdevreeze.yaidom.queryapi.Nodes
 
 /**

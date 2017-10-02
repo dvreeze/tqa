@@ -21,13 +21,13 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
+import eu.cdevreeze.tqa.backingelem.indexed.DocumentParserUsingStax
 import eu.cdevreeze.tqa.dom.LabelArc
 import eu.cdevreeze.tqa.dom.Linkbase
 import eu.cdevreeze.tqa.dom.TaxonomyBase
 import eu.cdevreeze.tqa.dom.XsdSchema
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
 /**
  * Relationship extraction test case. It uses test data from the XBRL Core Conformance Suite.
