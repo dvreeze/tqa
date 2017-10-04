@@ -20,10 +20,10 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
-import eu.cdevreeze.tqa.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator

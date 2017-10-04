@@ -23,24 +23,24 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.common.Use
-import eu.cdevreeze.tqa.dom.TaxonomyBase
-import eu.cdevreeze.tqa.dom.TaxonomyElem
+import eu.cdevreeze.tqa.base.common.Use
+import eu.cdevreeze.tqa.base.dom.TaxonomyBase
+import eu.cdevreeze.tqa.base.dom.TaxonomyElem
+import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.extension.formula.model
 import eu.cdevreeze.tqa.extension.formula.model.CommonRelationshipAttributes
 import eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter
 import eu.cdevreeze.tqa.extension.formula.model.DimensionFilterMember
 import eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter
+import eu.cdevreeze.tqa.extension.formula.model.FactVariable
 import eu.cdevreeze.tqa.extension.formula.model.VariableFilter
 import eu.cdevreeze.tqa.extension.formula.model.VariableSetVariableOrParameter
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
-import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
-import eu.cdevreeze.tqa.extension.formula.model.FactVariable
 
 /**
  * Formula query API test case.

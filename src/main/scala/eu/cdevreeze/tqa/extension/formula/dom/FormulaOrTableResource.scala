@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.tqa.extension.formula.dom
 
-import eu.cdevreeze.tqa.dom.AnyTaxonomyElem
+import eu.cdevreeze.tqa.base.dom.AnyTaxonomyElem
 import eu.cdevreeze.tqa.xlink.XLinkResource
 
 /**

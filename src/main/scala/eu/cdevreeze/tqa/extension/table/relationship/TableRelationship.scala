@@ -21,11 +21,13 @@ import java.net.URI
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.Namespaces
-import eu.cdevreeze.tqa.common.Use
-import eu.cdevreeze.tqa.dom.AnyTaxonomyElem
-import eu.cdevreeze.tqa.dom.BaseSetKey
-import eu.cdevreeze.tqa.dom.NonStandardArc
-import eu.cdevreeze.tqa.dom.NonStandardResource
+import eu.cdevreeze.tqa.base.common.Use
+import eu.cdevreeze.tqa.base.dom.AnyTaxonomyElem
+import eu.cdevreeze.tqa.base.dom.BaseSetKey
+import eu.cdevreeze.tqa.base.dom.NonStandardArc
+import eu.cdevreeze.tqa.base.dom.NonStandardResource
+import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
+import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource
 import eu.cdevreeze.tqa.extension.formula.dom.Filter
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaOrTableResource
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
@@ -43,8 +45,6 @@ import eu.cdevreeze.tqa.extension.table.dom.TableBreakdownArc
 import eu.cdevreeze.tqa.extension.table.dom.TableFilterArc
 import eu.cdevreeze.tqa.extension.table.dom.TableParameterArc
 import eu.cdevreeze.tqa.extension.table.dom.TableResource
-import eu.cdevreeze.tqa.relationship.NonStandardRelationship
-import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource
 import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
@@ -229,8 +229,8 @@ final class AspectNodeFilterRelationship(
 object TableRelationship {
 
   /**
-   * Optionally builds a `TableRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `TableRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: TableArc,
@@ -251,7 +251,7 @@ object TableRelationship {
   }
 
   /**
-   * Lenient method to optionally create a TableRelationship from an underlying tqa.relationship.NonStandardRelationship.
+   * Lenient method to optionally create a TableRelationship from an underlying tqa.base.relationship.NonStandardRelationship.
    */
   def opt(underlyingRelationship: NonStandardRelationship): Option[TableRelationship] = {
     if (!underlyingRelationship.resolvedFrom.resolvedElem.isInstanceOf[XLinkResource] ||
@@ -307,11 +307,11 @@ object TableRelationship {
 
 object TableBreakdownRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `TableBreakdownRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `TableBreakdownRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: TableArc,
@@ -333,11 +333,11 @@ object TableBreakdownRelationship {
 
 object BreakdownTreeRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `BreakdownTreeRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `BreakdownTreeRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: TableArc,
@@ -359,11 +359,11 @@ object BreakdownTreeRelationship {
 
 object DefinitionNodeSubtreeRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `DefinitionNodeSubtreeRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `DefinitionNodeSubtreeRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: TableArc,
@@ -385,11 +385,11 @@ object DefinitionNodeSubtreeRelationship {
 
 object TableFilterRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `TableFilterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `TableFilterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: TableArc,
@@ -411,11 +411,11 @@ object TableFilterRelationship {
 
 object TableParameterRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `TableParameterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `TableParameterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: TableArc,
@@ -437,11 +437,11 @@ object TableParameterRelationship {
 
 object AspectNodeFilterRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `AspectNodeFilterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `AspectNodeFilterRelationship` from an underlying `TableArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: TableArc,

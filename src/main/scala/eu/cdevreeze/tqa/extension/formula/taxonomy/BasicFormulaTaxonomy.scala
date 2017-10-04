@@ -20,9 +20,11 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.XmlFragmentKey
-import eu.cdevreeze.tqa.dom.NonStandardArc
-import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.OtherNonXLinkElem
+import eu.cdevreeze.tqa.base.dom.NonStandardArc
+import eu.cdevreeze.tqa.base.dom.NonStandardResource
+import eu.cdevreeze.tqa.base.dom.OtherNonXLinkElem
+import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
+import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.extension.formula.dom.ExistenceAssertion
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaArc
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
@@ -31,8 +33,6 @@ import eu.cdevreeze.tqa.extension.formula.dom.ValueAssertion
 import eu.cdevreeze.tqa.extension.formula.dom.VariableSet
 import eu.cdevreeze.tqa.extension.formula.queryapi.FormulaRelationshipContainerLike
 import eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship
-import eu.cdevreeze.tqa.queryapi.TaxonomyApi
-import eu.cdevreeze.tqa.relationship.NonStandardRelationship
 
 /**
  * Basic implementation of a taxonomy that offers the FormulaRelationshipContainerApi query API, while wrapping

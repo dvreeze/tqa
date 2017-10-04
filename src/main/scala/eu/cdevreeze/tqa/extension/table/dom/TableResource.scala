@@ -50,7 +50,7 @@ import javax.xml.bind.DatatypeConverter
  */
 sealed trait TableResource extends FormulaOrTableResource {
 
-  def underlyingResource: tqa.dom.NonStandardResource
+  def underlyingResource: tqa.base.dom.NonStandardResource
 
   final def backingElem: BackingElemApi = underlyingResource.backingElem
 
@@ -81,7 +81,7 @@ sealed trait TableResource extends FormulaOrTableResource {
 
     implicit val clsTag = cls
 
-    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherNonXLinkElem]).
+    underlyingResource.findAllChildElemsOfType(classTag[tqa.base.dom.OtherNonXLinkElem]).
       flatMap(e => OtherTableElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
@@ -96,7 +96,7 @@ sealed trait TableResource extends FormulaOrTableResource {
 
     implicit val clsTag = cls
 
-    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherNonXLinkElem]).
+    underlyingResource.findAllChildElemsOfType(classTag[tqa.base.dom.OtherNonXLinkElem]).
       flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
@@ -110,7 +110,7 @@ sealed trait TableResource extends FormulaOrTableResource {
 /**
  * A table:table.
  */
-final class Table(val underlyingResource: tqa.dom.NonStandardResource) extends TableResource {
+final class Table(val underlyingResource: tqa.base.dom.NonStandardResource) extends TableResource {
   requireResolvedName(ENames.TableTableEName)
 
   /**
@@ -126,7 +126,7 @@ final class Table(val underlyingResource: tqa.dom.NonStandardResource) extends T
 /**
  * A table:breakdown.
  */
-final class TableBreakdown(val underlyingResource: tqa.dom.NonStandardResource) extends TableResource {
+final class TableBreakdown(val underlyingResource: tqa.base.dom.NonStandardResource) extends TableResource {
   requireResolvedName(ENames.TableBreakdownEName)
 
   /**
@@ -141,7 +141,7 @@ final class TableBreakdown(val underlyingResource: tqa.dom.NonStandardResource) 
 /**
  * A definition node.
  */
-sealed abstract class DefinitionNode(val underlyingResource: tqa.dom.NonStandardResource) extends TableResource {
+sealed abstract class DefinitionNode(val underlyingResource: tqa.base.dom.NonStandardResource) extends TableResource {
 
   final def tagSelectorOption: Option[String] = {
     underlyingResource.attributeOption(ENames.TagSelectorEName)
@@ -151,7 +151,7 @@ sealed abstract class DefinitionNode(val underlyingResource: tqa.dom.NonStandard
 /**
  * A closed definition node.
  */
-sealed abstract class ClosedDefinitionNode(underlyingResource: tqa.dom.NonStandardResource) extends DefinitionNode(underlyingResource) {
+sealed abstract class ClosedDefinitionNode(underlyingResource: tqa.base.dom.NonStandardResource) extends DefinitionNode(underlyingResource) {
 
   /**
    * Returns the optional parent-child-order.
@@ -165,12 +165,12 @@ sealed abstract class ClosedDefinitionNode(underlyingResource: tqa.dom.NonStanda
 /**
  * An open definition node.
  */
-sealed abstract class OpenDefinitionNode(underlyingResource: tqa.dom.NonStandardResource) extends DefinitionNode(underlyingResource)
+sealed abstract class OpenDefinitionNode(underlyingResource: tqa.base.dom.NonStandardResource) extends DefinitionNode(underlyingResource)
 
 /**
  * A table:ruleNode.
  */
-final class RuleNode(underlyingResource: tqa.dom.NonStandardResource) extends ClosedDefinitionNode(underlyingResource) {
+final class RuleNode(underlyingResource: tqa.base.dom.NonStandardResource) extends ClosedDefinitionNode(underlyingResource) {
   requireResolvedName(ENames.TableRuleNodeEName)
 
   def untaggedAspects: immutable.IndexedSeq[FormulaAspect] = {
@@ -218,12 +218,12 @@ final class RuleNode(underlyingResource: tqa.dom.NonStandardResource) extends Cl
 /**
  * A relationship node.
  */
-sealed abstract class RelationshipNode(underlyingResource: tqa.dom.NonStandardResource) extends ClosedDefinitionNode(underlyingResource)
+sealed abstract class RelationshipNode(underlyingResource: tqa.base.dom.NonStandardResource) extends ClosedDefinitionNode(underlyingResource)
 
 /**
  * A table:conceptRelationshipNode.
  */
-final class ConceptRelationshipNode(underlyingResource: tqa.dom.NonStandardResource) extends RelationshipNode(underlyingResource) {
+final class ConceptRelationshipNode(underlyingResource: tqa.base.dom.NonStandardResource) extends RelationshipNode(underlyingResource) {
   requireResolvedName(ENames.TableConceptRelationshipNodeEName)
 
   def relationshipSources: immutable.IndexedSeq[RelationshipSource] = {
@@ -342,7 +342,7 @@ final class ConceptRelationshipNode(underlyingResource: tqa.dom.NonStandardResou
 /**
  * A table:dimensionRelationshipNode.
  */
-final class DimensionRelationshipNode(underlyingResource: tqa.dom.NonStandardResource) extends RelationshipNode(underlyingResource) {
+final class DimensionRelationshipNode(underlyingResource: tqa.base.dom.NonStandardResource) extends RelationshipNode(underlyingResource) {
   requireResolvedName(ENames.TableDimensionRelationshipNodeEName)
 
   /**
@@ -425,7 +425,7 @@ final class DimensionRelationshipNode(underlyingResource: tqa.dom.NonStandardRes
 /**
  * A table:aspectNode.
  */
-final class AspectNode(underlyingResource: tqa.dom.NonStandardResource) extends OpenDefinitionNode(underlyingResource) {
+final class AspectNode(underlyingResource: tqa.base.dom.NonStandardResource) extends OpenDefinitionNode(underlyingResource) {
   requireResolvedName(ENames.TableAspectNodeEName)
 
   final def aspectSpec: AspectSpec = {
@@ -438,9 +438,9 @@ final class AspectNode(underlyingResource: tqa.dom.NonStandardResource) extends 
 object TableResource {
 
   /**
-   * Lenient method to optionally create a TableResource from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a TableResource from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[TableResource] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[TableResource] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.TableTableEName => Some(new Table(underlyingResource))

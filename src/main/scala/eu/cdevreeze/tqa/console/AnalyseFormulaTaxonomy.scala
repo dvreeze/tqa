@@ -26,11 +26,11 @@ import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
+import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
-import eu.cdevreeze.tqa.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.taxonomybuilder.DefaultDtsCollector
-import eu.cdevreeze.tqa.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
 

@@ -38,17 +38,17 @@ package eu.cdevreeze
  * These 3 layers are as follows in terms of packages, from low to high:
  *
  * <ul>
- * <li>Package [[eu.cdevreeze.tqa.dom]]</li>
- * <li>Package [[eu.cdevreeze.tqa.relationship]]</li>
- * <li>Package [[eu.cdevreeze.tqa.queryapi]]</li>
+ * <li>Package [[eu.cdevreeze.tqa.base.dom]]</li>
+ * <li>Package [[eu.cdevreeze.tqa.base.relationship]]</li>
+ * <li>Package [[eu.cdevreeze.tqa.base.queryapi]]</li>
  * </ul>
  *
  * ==Usage==
  *
- * How do we query XBRL taxonomies with TQA? For some examples, see package [[eu.cdevreeze.tqa.queryapi]].
+ * How do we query XBRL taxonomies with TQA? For some examples, see package [[eu.cdevreeze.tqa.base.queryapi]].
  *
- * It should be noted that typical queries involve all 3 packages [[eu.cdevreeze.tqa.queryapi]], [[eu.cdevreeze.tqa.relationship]]
- * and [[eu.cdevreeze.tqa.dom]].
+ * It should be noted that typical queries involve all 3 packages [[eu.cdevreeze.tqa.base.queryapi]], [[eu.cdevreeze.tqa.base.relationship]]
+ * and [[eu.cdevreeze.tqa.base.dom]].
  *
  * It should also be noted that TQA is deeply rooted in the '''yaidom''' XML query API ([[https://github.com/dvreeze/yaidom]]).
  * This is true internally and externally. Internally TQA has been built in a bottom-up manner on top of yaidom, and this
@@ -68,8 +68,8 @@ package eu.cdevreeze
  * From the lower level DOM-like operations to the higher level dimensional bulk query methods, TQA is useful only
  * for users who know what data they are looking for in a taxonomy.
  *
- * See package [[eu.cdevreeze.tqa.queryapi]] for some examples, and navigate to the [[eu.cdevreeze.tqa.relationship]] and
- * [[eu.cdevreeze.tqa.dom]] packages for specific relationships and type-safe taxonomy DOM content, respectively.
+ * See package [[eu.cdevreeze.tqa.base.queryapi]] for some examples, and navigate to the [[eu.cdevreeze.tqa.base.relationship]] and
+ * [[eu.cdevreeze.tqa.base.dom]] packages for specific relationships and type-safe taxonomy DOM content, respectively.
  *
  * ==Backing XML DOM implementations==
  *

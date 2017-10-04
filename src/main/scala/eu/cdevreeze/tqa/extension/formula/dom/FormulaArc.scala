@@ -32,9 +32,9 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait FormulaArc extends tqa.dom.AnyTaxonomyElem with XLinkArc {
+sealed trait FormulaArc extends tqa.base.dom.AnyTaxonomyElem with XLinkArc {
 
-  def underlyingArc: tqa.dom.NonStandardArc
+  def underlyingArc: tqa.base.dom.NonStandardArc
 
   final def backingElem: BackingElemApi = underlyingArc.backingElem
 
@@ -66,7 +66,7 @@ sealed trait FormulaArc extends tqa.dom.AnyTaxonomyElem with XLinkArc {
 /**
  * A variable:variableArc.
  */
-final class VariableArc(val underlyingArc: tqa.dom.NonStandardArc) extends FormulaArc {
+final class VariableArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends FormulaArc {
   requireResolvedName(ENames.VariableVariableArcEName)
 
   /**
@@ -82,7 +82,7 @@ final class VariableArc(val underlyingArc: tqa.dom.NonStandardArc) extends Formu
 /**
  * A variable:variableFilterArc.
  */
-final class VariableFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends FormulaArc {
+final class VariableFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends FormulaArc {
   requireResolvedName(ENames.VariableVariableFilterArcEName)
 
   /**
@@ -105,7 +105,7 @@ final class VariableFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends
 /**
  * A variable:variableSetFilterArc.
  */
-final class VariableSetFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends FormulaArc {
+final class VariableSetFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends FormulaArc {
   requireResolvedName(ENames.VariableVariableSetFilterArcEName)
 
   /**
@@ -120,18 +120,18 @@ final class VariableSetFilterArc(val underlyingArc: tqa.dom.NonStandardArc) exte
 /**
  * Another FormulaArc, with unknown arc name but with a known formula-related arcrole.
  */
-final class OtherFormulaArc(val underlyingArc: tqa.dom.NonStandardArc) extends FormulaArc
+final class OtherFormulaArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends FormulaArc
 
 // Companion objects
 
 object FormulaArc {
 
   /**
-   * Lenient method to optionally create a FormulaArc from an underlying tqa.dom.NonStandardArc.
+   * Lenient method to optionally create a FormulaArc from an underlying tqa.base.dom.NonStandardArc.
    *
    * TODO Consistency-assertion-parameter arcs.
    */
-  def opt(underlyingArc: tqa.dom.NonStandardArc): Option[FormulaArc] = {
+  def opt(underlyingArc: tqa.base.dom.NonStandardArc): Option[FormulaArc] = {
     if (underlyingArc.resolvedName.namespaceUriOption.contains(Namespaces.VariableNamespace)) {
       underlyingArc.resolvedName match {
         case ENames.VariableVariableArcEName          => Some(new VariableArc(underlyingArc))

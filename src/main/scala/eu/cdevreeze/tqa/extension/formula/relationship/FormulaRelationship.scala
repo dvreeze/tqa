@@ -21,11 +21,13 @@ import java.net.URI
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.Namespaces
-import eu.cdevreeze.tqa.common.Use
-import eu.cdevreeze.tqa.dom.AnyTaxonomyElem
-import eu.cdevreeze.tqa.dom.BaseSetKey
-import eu.cdevreeze.tqa.dom.NonStandardArc
-import eu.cdevreeze.tqa.dom.NonStandardResource
+import eu.cdevreeze.tqa.base.common.Use
+import eu.cdevreeze.tqa.base.dom.AnyTaxonomyElem
+import eu.cdevreeze.tqa.base.dom.BaseSetKey
+import eu.cdevreeze.tqa.base.dom.NonStandardArc
+import eu.cdevreeze.tqa.base.dom.NonStandardResource
+import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
+import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource
 import eu.cdevreeze.tqa.extension.formula.dom.Assertion
 import eu.cdevreeze.tqa.extension.formula.dom.AssertionSet
 import eu.cdevreeze.tqa.extension.formula.dom.BooleanFilter
@@ -47,8 +49,6 @@ import eu.cdevreeze.tqa.extension.formula.dom.VariableFilterArc
 import eu.cdevreeze.tqa.extension.formula.dom.VariableOrParameter
 import eu.cdevreeze.tqa.extension.formula.dom.VariableSet
 import eu.cdevreeze.tqa.extension.formula.dom.VariableSetFilterArc
-import eu.cdevreeze.tqa.relationship.NonStandardRelationship
-import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource
 import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.tqa.xlink.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
@@ -377,8 +377,8 @@ final class AssertionUnsatisfiedSeverityRelationship(
 object FormulaRelationship {
 
   /**
-   * Optionally builds a `FormulaRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `FormulaRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -402,7 +402,7 @@ object FormulaRelationship {
   }
 
   /**
-   * Lenient method to optionally create a FormulaRelationship from an underlying tqa.relationship.NonStandardRelationship.
+   * Lenient method to optionally create a FormulaRelationship from an underlying tqa.base.relationship.NonStandardRelationship.
    */
   def opt(underlyingRelationship: NonStandardRelationship): Option[FormulaRelationship] = {
     if (!underlyingRelationship.resolvedFrom.resolvedElem.isInstanceOf[XLinkResource] ||
@@ -445,11 +445,11 @@ object FormulaRelationship {
 
 object VariableSetRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `VariableSetRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `VariableSetRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -472,11 +472,11 @@ object VariableSetRelationship {
 
 object VariableFilterRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `VariableFilterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `VariableFilterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -499,11 +499,11 @@ object VariableFilterRelationship {
 
 object VariableSetFilterRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `VariableSetFilterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `VariableSetFilterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -526,11 +526,11 @@ object VariableSetFilterRelationship {
 
 object BooleanFilterRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `BooleanFilterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `BooleanFilterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -553,11 +553,11 @@ object BooleanFilterRelationship {
 
 object ConsistencyAssertionParameterRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `ConsistencyAssertionParameterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `ConsistencyAssertionParameterRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -580,11 +580,11 @@ object ConsistencyAssertionParameterRelationship {
 
 object VariableSetPreconditionRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `VariableSetPreconditionRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `VariableSetPreconditionRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -603,11 +603,11 @@ object VariableSetPreconditionRelationship {
 
 object ConsistencyAssertionFormulaRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `ConsistencyAssertionFormulaRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `ConsistencyAssertionFormulaRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -626,11 +626,11 @@ object ConsistencyAssertionFormulaRelationship {
 
 object AssertionSetRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `AssertionSetRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `AssertionSetRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -649,11 +649,11 @@ object AssertionSetRelationship {
 
 object AssertionSatisfiedMessageRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `AssertionSatisfiedMessageRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `AssertionSatisfiedMessageRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -672,11 +672,11 @@ object AssertionSatisfiedMessageRelationship {
 
 object AssertionUnsatisfiedMessageRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `AssertionUnsatisfiedMessageRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `AssertionUnsatisfiedMessageRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -695,11 +695,11 @@ object AssertionUnsatisfiedMessageRelationship {
 
 object InstanceVariableRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `InstanceVariableRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `InstanceVariableRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -718,11 +718,11 @@ object InstanceVariableRelationship {
 
 object FormulaInstanceRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `FormulaInstanceRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `FormulaInstanceRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,
@@ -741,11 +741,11 @@ object FormulaInstanceRelationship {
 
 object AssertionUnsatisfiedSeverityRelationship {
 
-  import eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource.unsafeCastResource
+  import eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource.unsafeCastResource
 
   /**
-   * Optionally builds a `AssertionUnsatisfiedSeverityRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]]
-   * and a "to" [[eu.cdevreeze.tqa.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
+   * Optionally builds a `AssertionUnsatisfiedSeverityRelationship` from an underlying `FormulaArc`, a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]]
+   * and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]], and returning None otherwise.
    */
   def opt(
     arc: FormulaArc,

@@ -18,13 +18,13 @@ package eu.cdevreeze.tqa.xpathaware.extension.table
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.base.relationship.DimensionDomainRelationship
+import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
+import eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship
+import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
-import eu.cdevreeze.tqa.relationship.DimensionDomainRelationship
-import eu.cdevreeze.tqa.relationship.DomainAwareRelationship
-import eu.cdevreeze.tqa.relationship.DomainMemberRelationship
-import eu.cdevreeze.tqa.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator

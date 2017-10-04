@@ -40,9 +40,9 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
+sealed trait OtherTableElem extends tqa.base.dom.AnyTaxonomyElem {
 
-  def underlyingElem: tqa.dom.OtherNonXLinkElem
+  def underlyingElem: tqa.base.dom.OtherNonXLinkElem
 
   final def key: XmlFragmentKey = underlyingElem.key
 
@@ -59,7 +59,7 @@ sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
 
     implicit val clsTag = cls
 
-    underlyingElem.findAllChildElemsOfType(classTag[tqa.dom.OtherNonXLinkElem]).
+    underlyingElem.findAllChildElemsOfType(classTag[tqa.base.dom.OtherNonXLinkElem]).
       flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
@@ -73,7 +73,7 @@ sealed trait OtherTableElem extends tqa.dom.AnyTaxonomyElem {
 /**
  * An aspect spec.
  */
-sealed abstract class AspectSpec(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+sealed abstract class AspectSpec(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
 
   /**
    * Returns the aspect, using the dimensional aspect model.
@@ -84,7 +84,7 @@ sealed abstract class AspectSpec(val underlyingElem: tqa.dom.OtherNonXLinkElem) 
 /**
  * A table:conceptAspect.
  */
-final class ConceptAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
+final class ConceptAspectSpec(underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableConceptAspectEName)
 
   def aspect: Aspect = Aspect.ConceptAspect
@@ -93,7 +93,7 @@ final class ConceptAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends
 /**
  * A table:unitAspect.
  */
-final class UnitAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
+final class UnitAspectSpec(underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableUnitAspectEName)
 
   def aspect: Aspect = Aspect.UnitAspect
@@ -102,7 +102,7 @@ final class UnitAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends As
 /**
  * A table:entityIdentifierAspect.
  */
-final class EntityIdentifierAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
+final class EntityIdentifierAspectSpec(underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableEntityIdentifierAspectEName)
 
   def aspect: Aspect = Aspect.EntityIdentifierAspect
@@ -111,7 +111,7 @@ final class EntityIdentifierAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem
 /**
  * A table:periodAspect.
  */
-final class PeriodAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
+final class PeriodAspectSpec(underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TablePeriodAspectEName)
 
   def aspect: Aspect = Aspect.PeriodAspect
@@ -120,7 +120,7 @@ final class PeriodAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends 
 /**
  * A table:dimensionAspect.
  */
-final class DimensionAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
+final class DimensionAspectSpec(underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends AspectSpec(underlyingElem) {
   requireResolvedName(ENames.TableDimensionAspectEName)
 
   def aspect: Aspect = Aspect.DimensionAspect(dimension)
@@ -145,7 +145,7 @@ final class DimensionAspectSpec(underlyingElem: tqa.dom.OtherNonXLinkElem) exten
 /**
  * A table:ruleSet.
  */
-final class RuleSet(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class RuleSet(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableRuleSetEName)
 
   def aspects: immutable.IndexedSeq[FormulaAspect] = {
@@ -168,7 +168,7 @@ final class RuleSet(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends Other
 /**
  * A table:relationshipSource.
  */
-final class RelationshipSource(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class RelationshipSource(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableRelationshipSourceEName)
 
   /**
@@ -182,7 +182,7 @@ final class RelationshipSource(val underlyingElem: tqa.dom.OtherNonXLinkElem) ex
 /**
  * A table:relationshipSourceExpression.
  */
-final class RelationshipSourceExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class RelationshipSourceExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableRelationshipSourceExpressionEName)
 
   /**
@@ -196,7 +196,7 @@ final class RelationshipSourceExpression(val underlyingElem: tqa.dom.OtherNonXLi
 /**
  * A table:linkrole.
  */
-final class Linkrole(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class Linkrole(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableLinkroleEName)
 
   def linkrole: String = underlyingElem.text
@@ -205,7 +205,7 @@ final class Linkrole(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends Othe
 /**
  * A table:linkroleExpression.
  */
-final class LinkroleExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class LinkroleExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableLinkroleExpressionEName)
 
   /**
@@ -219,7 +219,7 @@ final class LinkroleExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) ex
 /**
  * A table:arcrole.
  */
-final class Arcrole(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class Arcrole(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableArcroleEName)
 
   def arcrole: String = underlyingElem.text
@@ -228,7 +228,7 @@ final class Arcrole(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends Other
 /**
  * A table:arcroleExpression.
  */
-final class ArcroleExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class ArcroleExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableArcroleExpressionEName)
 
   /**
@@ -242,7 +242,7 @@ final class ArcroleExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) ext
 /**
  * A table:formulaAxis in a table:conceptRelationshipNode.
  */
-final class ConceptRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class ConceptRelationshipNodeFormulaAxis(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableFormulaAxisEName)
 
   /**
@@ -256,7 +256,7 @@ final class ConceptRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.Other
 /**
  * A table:formulaAxisExpression in a table:conceptRelationshipNode.
  */
-final class ConceptRelationshipNodeFormulaAxisExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class ConceptRelationshipNodeFormulaAxisExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableFormulaAxisExpressionEName)
 
   /**
@@ -270,7 +270,7 @@ final class ConceptRelationshipNodeFormulaAxisExpression(val underlyingElem: tqa
 /**
  * A table:formulaAxis in a table:dimensionRelationshipNode.
  */
-final class DimensionRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class DimensionRelationshipNodeFormulaAxis(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableFormulaAxisEName)
 
   /**
@@ -284,7 +284,7 @@ final class DimensionRelationshipNodeFormulaAxis(val underlyingElem: tqa.dom.Oth
 /**
  * A table:formulaAxisExpression in a table:dimensionRelationshipNode.
  */
-final class DimensionRelationshipNodeFormulaAxisExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class DimensionRelationshipNodeFormulaAxisExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableFormulaAxisExpressionEName)
 
   /**
@@ -298,7 +298,7 @@ final class DimensionRelationshipNodeFormulaAxisExpression(val underlyingElem: t
 /**
  * A table:generations.
  */
-final class Generations(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class Generations(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableGenerationsEName)
 
   /**
@@ -310,7 +310,7 @@ final class Generations(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends O
 /**
  * A table:generationsExpression.
  */
-final class GenerationsExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class GenerationsExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableGenerationsExpressionEName)
 
   /**
@@ -324,7 +324,7 @@ final class GenerationsExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem)
 /**
  * A table:linkname.
  */
-final class Linkname(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class Linkname(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableLinknameEName)
 
   /**
@@ -336,7 +336,7 @@ final class Linkname(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends Othe
 /**
  * A table:linknameExpression.
  */
-final class LinknameExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class LinknameExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableLinknameExpressionEName)
 
   /**
@@ -350,7 +350,7 @@ final class LinknameExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) ex
 /**
  * A table:arcname.
  */
-final class Arcname(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class Arcname(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableArcnameEName)
 
   /**
@@ -362,7 +362,7 @@ final class Arcname(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends Other
 /**
  * A table:arcnameExpression.
  */
-final class ArcnameExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class ArcnameExpression(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableArcnameExpressionEName)
 
   /**
@@ -376,7 +376,7 @@ final class ArcnameExpression(val underlyingElem: tqa.dom.OtherNonXLinkElem) ext
 /**
  * A table:dimension.
  */
-final class TableDimension(val underlyingElem: tqa.dom.OtherNonXLinkElem) extends OtherTableElem {
+final class TableDimension(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends OtherTableElem {
   requireResolvedName(ENames.TableDimensionEName)
 
   /**
@@ -392,9 +392,9 @@ final class TableDimension(val underlyingElem: tqa.dom.OtherNonXLinkElem) extend
 object OtherTableElem {
 
   /**
-   * Lenient method to optionally create an OtherTableElem from an underlying tqa.dom.OtherNonXLinkElem.
+   * Lenient method to optionally create an OtherTableElem from an underlying tqa.base.dom.OtherNonXLinkElem.
    */
-  def opt(underlyingElem: tqa.dom.OtherNonXLinkElem): Option[OtherTableElem] = {
+  def opt(underlyingElem: tqa.base.dom.OtherNonXLinkElem): Option[OtherTableElem] = {
     if (underlyingElem.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
       underlyingElem.resolvedName match {
         case ENames.TableConceptAspectEName                => Some(new ConceptAspectSpec(underlyingElem))

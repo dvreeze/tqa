@@ -33,9 +33,9 @@ import javax.xml.bind.DatatypeConverter
  *
  * @author Chris de Vreeze
  */
-sealed trait TableArc extends tqa.dom.AnyTaxonomyElem with XLinkArc {
+sealed trait TableArc extends tqa.base.dom.AnyTaxonomyElem with XLinkArc {
 
-  def underlyingArc: tqa.dom.NonStandardArc
+  def underlyingArc: tqa.base.dom.NonStandardArc
 
   final def backingElem: BackingElemApi = underlyingArc.backingElem
 
@@ -67,7 +67,7 @@ sealed trait TableArc extends tqa.dom.AnyTaxonomyElem with XLinkArc {
 /**
  * A table:tableBreakdownArc.
  */
-final class TableBreakdownArc(val underlyingArc: tqa.dom.NonStandardArc) extends TableArc {
+final class TableBreakdownArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends TableArc {
   requireResolvedName(ENames.TableTableBreakdownArcEName)
 
   /**
@@ -82,21 +82,21 @@ final class TableBreakdownArc(val underlyingArc: tqa.dom.NonStandardArc) extends
 /**
  * A table:breakdownTreeArc.
  */
-final class BreakdownTreeArc(val underlyingArc: tqa.dom.NonStandardArc) extends TableArc {
+final class BreakdownTreeArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends TableArc {
   requireResolvedName(ENames.TableBreakdownTreeArcEName)
 }
 
 /**
  * A table:definitionNodeSubtreeArc.
  */
-final class DefinitionNodeSubtreeArc(val underlyingArc: tqa.dom.NonStandardArc) extends TableArc {
+final class DefinitionNodeSubtreeArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends TableArc {
   requireResolvedName(ENames.TableDefinitionNodeSubtreeArcEName)
 }
 
 /**
  * A table:tableFilterArc.
  */
-final class TableFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends TableArc {
+final class TableFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends TableArc {
   requireResolvedName(ENames.TableTableFilterArcEName)
 
   /**
@@ -113,7 +113,7 @@ final class TableFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends Ta
 /**
  * A table:tableParameterArc.
  */
-final class TableParameterArc(val underlyingArc: tqa.dom.NonStandardArc) extends TableArc {
+final class TableParameterArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends TableArc {
   requireResolvedName(ENames.TableTableParameterArcEName)
 
   /**
@@ -129,7 +129,7 @@ final class TableParameterArc(val underlyingArc: tqa.dom.NonStandardArc) extends
 /**
  * A table:aspectNodeFilterArc.
  */
-final class AspectNodeFilterArc(val underlyingArc: tqa.dom.NonStandardArc) extends TableArc {
+final class AspectNodeFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) extends TableArc {
   requireResolvedName(ENames.TableAspectNodeFilterArcEName)
 
   /**
@@ -146,9 +146,9 @@ final class AspectNodeFilterArc(val underlyingArc: tqa.dom.NonStandardArc) exten
 object TableArc {
 
   /**
-   * Lenient method to optionally create a TableArc from an underlying tqa.dom.NonStandardArc.
+   * Lenient method to optionally create a TableArc from an underlying tqa.base.dom.NonStandardArc.
    */
-  def opt(underlyingArc: tqa.dom.NonStandardArc): Option[TableArc] = {
+  def opt(underlyingArc: tqa.base.dom.NonStandardArc): Option[TableArc] = {
     if (underlyingArc.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {
       underlyingArc.resolvedName match {
         case ENames.TableTableBreakdownArcEName        => Some(new TableBreakdownArc(underlyingArc))

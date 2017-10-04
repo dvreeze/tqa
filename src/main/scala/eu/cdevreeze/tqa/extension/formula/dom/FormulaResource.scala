@@ -45,7 +45,7 @@ import javax.xml.bind.DatatypeConverter
  */
 sealed trait FormulaResource extends FormulaOrTableResource {
 
-  def underlyingResource: tqa.dom.NonStandardResource
+  def underlyingResource: tqa.base.dom.NonStandardResource
 
   final def backingElem: BackingElemApi = underlyingResource.backingElem
 
@@ -76,7 +76,7 @@ sealed trait FormulaResource extends FormulaOrTableResource {
 
     implicit val clsTag = cls
 
-    underlyingResource.findAllChildElemsOfType(classTag[tqa.dom.OtherNonXLinkElem]).
+    underlyingResource.findAllChildElemsOfType(classTag[tqa.base.dom.OtherNonXLinkElem]).
       flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
   }
 
@@ -90,7 +90,7 @@ sealed trait FormulaResource extends FormulaOrTableResource {
 /**
  * A variable set. See variable.xsd.
  */
-sealed abstract class VariableSet(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+sealed abstract class VariableSet(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource {
 
   /**
    * Returns the mandatory implicitFiltering attribute as boolean.
@@ -118,12 +118,12 @@ sealed abstract class VariableSet(val underlyingResource: tqa.dom.NonStandardRes
 /**
  * A variable or parameter. See variable.xsd.
  */
-sealed abstract class VariableOrParameter(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource
+sealed abstract class VariableOrParameter(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource
 
 /**
  * A variable. See variable.xsd.
  */
-sealed abstract class Variable(underlyingResource: tqa.dom.NonStandardResource) extends VariableOrParameter(underlyingResource)
+sealed abstract class Variable(underlyingResource: tqa.base.dom.NonStandardResource) extends VariableOrParameter(underlyingResource)
 
 /**
  * An assertion. Either in substitution group validation:assertion or validation:variableSetAssertion. See validation.xsd.
@@ -133,19 +133,19 @@ sealed trait Assertion extends FormulaResource
 /**
  * A validation:assertionSet.
  */
-final class AssertionSet(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+final class AssertionSet(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.ValidationAssertionSetEName)
 }
 
 /**
  * A variable set assertion. See validation.xsd.
  */
-sealed abstract class VariableSetAssertion(underlyingResource: tqa.dom.NonStandardResource) extends VariableSet(underlyingResource) with Assertion
+sealed abstract class VariableSetAssertion(underlyingResource: tqa.base.dom.NonStandardResource) extends VariableSet(underlyingResource) with Assertion
 
 /**
  * A va:valueAssertion.
  */
-final class ValueAssertion(underlyingResource: tqa.dom.NonStandardResource) extends VariableSetAssertion(underlyingResource) {
+final class ValueAssertion(underlyingResource: tqa.base.dom.NonStandardResource) extends VariableSetAssertion(underlyingResource) {
   requireResolvedName(ENames.VaValueAssertionEName)
 
   /**
@@ -160,7 +160,7 @@ final class ValueAssertion(underlyingResource: tqa.dom.NonStandardResource) exte
 /**
  * A formula:formula.
  */
-final class Formula(underlyingResource: tqa.dom.NonStandardResource) extends VariableSet(underlyingResource) {
+final class Formula(underlyingResource: tqa.base.dom.NonStandardResource) extends VariableSet(underlyingResource) {
   requireResolvedName(ENames.FormulaFormulaEName)
 
   def precisionElemOption: Option[PrecisionElem] = {
@@ -196,7 +196,7 @@ final class Formula(underlyingResource: tqa.dom.NonStandardResource) extends Var
 /**
  * An ea:existenceAssertion.
  */
-final class ExistenceAssertion(underlyingResource: tqa.dom.NonStandardResource) extends VariableSetAssertion(underlyingResource) {
+final class ExistenceAssertion(underlyingResource: tqa.base.dom.NonStandardResource) extends VariableSetAssertion(underlyingResource) {
   requireResolvedName(ENames.EaExistenceAssertionEName)
 
   /**
@@ -211,7 +211,7 @@ final class ExistenceAssertion(underlyingResource: tqa.dom.NonStandardResource) 
 /**
  * A ca:consistencyAssertion.
  */
-final class ConsistencyAssertion(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource with Assertion {
+final class ConsistencyAssertion(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource with Assertion {
   requireResolvedName(ENames.CaConsistencyAssertionEName)
 
   /**
@@ -236,7 +236,7 @@ final class ConsistencyAssertion(val underlyingResource: tqa.dom.NonStandardReso
 /**
  * A variable:precondition.
  */
-final class Precondition(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+final class Precondition(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.VariablePreconditionEName)
 
   /**
@@ -251,7 +251,7 @@ final class Precondition(val underlyingResource: tqa.dom.NonStandardResource) ex
 /**
  * A variable:parameter. Not final, because an instance:instance is also a parameter.
  */
-sealed class Parameter(underlyingResource: tqa.dom.NonStandardResource) extends VariableOrParameter(underlyingResource) {
+sealed class Parameter(underlyingResource: tqa.base.dom.NonStandardResource) extends VariableOrParameter(underlyingResource) {
 
   /**
    * Returns the mandatory name attribute as EName.
@@ -289,7 +289,7 @@ sealed class Parameter(underlyingResource: tqa.dom.NonStandardResource) extends 
 /**
  * A variable:factVariable.
  */
-final class FactVariable(underlyingResource: tqa.dom.NonStandardResource) extends Variable(underlyingResource) {
+final class FactVariable(underlyingResource: tqa.base.dom.NonStandardResource) extends Variable(underlyingResource) {
   requireResolvedName(ENames.VariableFactVariableEName)
 
   /**
@@ -328,7 +328,7 @@ final class FactVariable(underlyingResource: tqa.dom.NonStandardResource) extend
 /**
  * A variable:generalVariable.
  */
-final class GeneralVariable(underlyingResource: tqa.dom.NonStandardResource) extends Variable(underlyingResource) {
+final class GeneralVariable(underlyingResource: tqa.base.dom.NonStandardResource) extends Variable(underlyingResource) {
   requireResolvedName(ENames.VariableGeneralVariableEName)
 
   /**
@@ -351,14 +351,14 @@ final class GeneralVariable(underlyingResource: tqa.dom.NonStandardResource) ext
 /**
  * An instance:instance.
  */
-final class Instance(underlyingResource: tqa.dom.NonStandardResource) extends Parameter(underlyingResource) {
+final class Instance(underlyingResource: tqa.base.dom.NonStandardResource) extends Parameter(underlyingResource) {
   requireResolvedName(ENames.InstancesInstanceEName)
 }
 
 /**
  * A variable:function.
  */
-final class Function(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+final class Function(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.VariableFunctionEName)
 
   /**
@@ -385,7 +385,7 @@ final class Function(val underlyingResource: tqa.dom.NonStandardResource) extend
 /**
  * A variable:equalityDefinition.
  */
-final class EqualityDefinition(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+final class EqualityDefinition(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.VariableEqualityDefinitionEName)
 
   /**
@@ -400,7 +400,7 @@ final class EqualityDefinition(val underlyingResource: tqa.dom.NonStandardResour
 /**
  * A cfi:implementation.
  */
-final class FunctionImplementation(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+final class FunctionImplementation(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.CfiImplementationEName)
 
   def inputs: immutable.IndexedSeq[FunctionImplementationInput] = {
@@ -420,7 +420,7 @@ final class FunctionImplementation(val underlyingResource: tqa.dom.NonStandardRe
  * A msg:message, as used in a formula-related context. Strictly speaking messages are not just related
  * to formulas, but they are introduced here to avoid sub-classing the core DOM type NonStandardResource.
  */
-final class Message(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource {
+final class Message(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource {
   requireResolvedName(ENames.MsgMessageEName)
 
   /**
@@ -435,45 +435,45 @@ final class Message(val underlyingResource: tqa.dom.NonStandardResource) extends
 /**
  * A severity.
  */
-sealed abstract class Severity(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource
+sealed abstract class Severity(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource
 
 /**
  * A sev:ok.
  */
-final class OkSeverity(underlyingResource: tqa.dom.NonStandardResource) extends Severity(underlyingResource) {
+final class OkSeverity(underlyingResource: tqa.base.dom.NonStandardResource) extends Severity(underlyingResource) {
   requireResolvedName(ENames.SevOkEName)
 }
 
 /**
  * A sev:warning.
  */
-final class WarningSeverity(underlyingResource: tqa.dom.NonStandardResource) extends Severity(underlyingResource) {
+final class WarningSeverity(underlyingResource: tqa.base.dom.NonStandardResource) extends Severity(underlyingResource) {
   requireResolvedName(ENames.SevWarningEName)
 }
 
 /**
  * A sev:error.
  */
-final class ErrorSeverity(underlyingResource: tqa.dom.NonStandardResource) extends Severity(underlyingResource) {
+final class ErrorSeverity(underlyingResource: tqa.base.dom.NonStandardResource) extends Severity(underlyingResource) {
   requireResolvedName(ENames.SevErrorEName)
 }
 
 /**
  * A filter.
  */
-sealed abstract class Filter(val underlyingResource: tqa.dom.NonStandardResource) extends FormulaResource
+sealed abstract class Filter(val underlyingResource: tqa.base.dom.NonStandardResource) extends FormulaResource
 
 // Specific filters
 
 /**
  * A concept filter.
  */
-sealed abstract class ConceptFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class ConceptFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource)
 
 /**
  * A cf:conceptName filter.
  */
-final class ConceptNameFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
+final class ConceptNameFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptNameEName)
 
   def concepts: immutable.IndexedSeq[ConceptFilterConcept] = {
@@ -484,7 +484,7 @@ final class ConceptNameFilter(underlyingResource: tqa.dom.NonStandardResource) e
 /**
  * A cf:conceptPeriodType filter.
  */
-final class ConceptPeriodTypeFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
+final class ConceptPeriodTypeFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptPeriodTypeEName)
 
   def periodType: String = {
@@ -495,7 +495,7 @@ final class ConceptPeriodTypeFilter(underlyingResource: tqa.dom.NonStandardResou
 /**
  * A cf:conceptBalance filter.
  */
-final class ConceptBalanceFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
+final class ConceptBalanceFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptBalanceEName)
 
   def balance: String = {
@@ -506,7 +506,7 @@ final class ConceptBalanceFilter(underlyingResource: tqa.dom.NonStandardResource
 /**
  * A cf:conceptCustomAttribute filter.
  */
-final class ConceptCustomAttributeFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
+final class ConceptCustomAttributeFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptCustomAttributeEName)
 
   def customAttribute: ConceptFilterAttribute = {
@@ -525,7 +525,7 @@ final class ConceptCustomAttributeFilter(underlyingResource: tqa.dom.NonStandard
 /**
  * A cf:conceptDataType filter.
  */
-final class ConceptDataTypeFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
+final class ConceptDataTypeFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptDataTypeEName)
 
   def conceptDataType: ConceptFilterType = {
@@ -540,7 +540,7 @@ final class ConceptDataTypeFilter(underlyingResource: tqa.dom.NonStandardResourc
 /**
  * A cf:conceptSubstitutionGroup filter.
  */
-final class ConceptSubstitutionGroupFilter(underlyingResource: tqa.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
+final class ConceptSubstitutionGroupFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ConceptFilter(underlyingResource) {
   requireResolvedName(ENames.CfConceptSubstitutionGroupEName)
 
   def conceptSubstitutionGroup: ConceptFilterSubstitutionGroup = {
@@ -555,26 +555,26 @@ final class ConceptSubstitutionGroupFilter(underlyingResource: tqa.dom.NonStanda
 /**
  * A boolean filter.
  */
-sealed abstract class BooleanFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class BooleanFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource)
 
 /**
  * A bf:andFilter filter.
  */
-final class AndFilter(underlyingResource: tqa.dom.NonStandardResource) extends BooleanFilter(underlyingResource) {
+final class AndFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends BooleanFilter(underlyingResource) {
   requireResolvedName(ENames.BfAndFilterEName)
 }
 
 /**
  * A bf:orFilter filter.
  */
-final class OrFilter(underlyingResource: tqa.dom.NonStandardResource) extends BooleanFilter(underlyingResource) {
+final class OrFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends BooleanFilter(underlyingResource) {
   requireResolvedName(ENames.BfOrFilterEName)
 }
 
 /**
  * A dimension filter.
  */
-sealed abstract class DimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+sealed abstract class DimensionFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource) {
 
   final def dimension: DimensionFilterDimension = {
     findAllNonXLinkChildElemsOfType(classTag[DimensionFilterDimension]).head
@@ -584,7 +584,7 @@ sealed abstract class DimensionFilter(underlyingResource: tqa.dom.NonStandardRes
 /**
  * A df:explicitDimension filter.
  */
-final class ExplicitDimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends DimensionFilter(underlyingResource) {
+final class ExplicitDimensionFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends DimensionFilter(underlyingResource) {
   requireResolvedName(ENames.DfExplicitDimensionEName)
 
   def members: immutable.IndexedSeq[DimensionFilterMember] = {
@@ -595,7 +595,7 @@ final class ExplicitDimensionFilter(underlyingResource: tqa.dom.NonStandardResou
 /**
  * A df:typedDimension filter.
  */
-final class TypedDimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends DimensionFilter(underlyingResource) {
+final class TypedDimensionFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends DimensionFilter(underlyingResource) {
   requireResolvedName(ENames.DfTypedDimensionEName)
 
   /**
@@ -610,12 +610,12 @@ final class TypedDimensionFilter(underlyingResource: tqa.dom.NonStandardResource
 /**
  * An entity filter.
  */
-sealed abstract class EntityFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class EntityFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource)
 
 /**
  * An ef:identifier filter.
  */
-final class IdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
+final class IdentifierFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfIdentifierEName)
 
   /**
@@ -630,7 +630,7 @@ final class IdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) ex
 /**
  * An ef:specificScheme filter.
  */
-final class SpecificSchemeFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
+final class SpecificSchemeFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfSpecificSchemeEName)
 
   /**
@@ -645,7 +645,7 @@ final class SpecificSchemeFilter(underlyingResource: tqa.dom.NonStandardResource
 /**
  * An ef:regexpScheme filter.
  */
-final class RegexpSchemeFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
+final class RegexpSchemeFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfRegexpSchemeEName)
 
   def pattern: String = {
@@ -656,7 +656,7 @@ final class RegexpSchemeFilter(underlyingResource: tqa.dom.NonStandardResource) 
 /**
  * An ef:specificIdentifier filter.
  */
-final class SpecificIdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
+final class SpecificIdentifierFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfSpecificIdentifierEName)
 
   /**
@@ -679,7 +679,7 @@ final class SpecificIdentifierFilter(underlyingResource: tqa.dom.NonStandardReso
 /**
  * An ef:regexpIdentifier filter.
  */
-final class RegexpIdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
+final class RegexpIdentifierFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends EntityFilter(underlyingResource) {
   requireResolvedName(ENames.EfRegexpIdentifierEName)
 
   def pattern: String = {
@@ -690,7 +690,7 @@ final class RegexpIdentifierFilter(underlyingResource: tqa.dom.NonStandardResour
 /**
  * A general filter (gf:general).
  */
-final class GeneralFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+final class GeneralFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.GfGeneralEName)
 
   /**
@@ -705,7 +705,7 @@ final class GeneralFilter(underlyingResource: tqa.dom.NonStandardResource) exten
 /**
  * A match filter.
  */
-sealed abstract class MatchFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+sealed abstract class MatchFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource) {
 
   /**
    * Returns the variable attribute, as expanded name.
@@ -723,70 +723,70 @@ sealed abstract class MatchFilter(underlyingResource: tqa.dom.NonStandardResourc
 /**
  * An mf:matchConcept filter.
  */
-final class MatchConceptFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchConceptFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchConceptEName)
 }
 
 /**
  * An mf:matchLocation filter.
  */
-final class MatchLocationFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchLocationFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchLocationEName)
 }
 
 /**
  * An mf:matchUnit filter.
  */
-final class MatchUnitFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchUnitFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchUnitEName)
 }
 
 /**
  * An mf:matchEntityIdentifier filter.
  */
-final class MatchEntityIdentifierFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchEntityIdentifierFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchEntityIdentifierEName)
 }
 
 /**
  * An mf:matchPeriod filter.
  */
-final class MatchPeriodFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchPeriodFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchPeriodEName)
 }
 
 /**
  * An mf:matchSegment filter.
  */
-final class MatchSegmentFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchSegmentFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchSegmentEName)
 }
 
 /**
  * An mf:matchScenario filter.
  */
-final class MatchScenarioFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchScenarioFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchScenarioEName)
 }
 
 /**
  * An mf:matchNonXDTSegment filter.
  */
-final class MatchNonXDTSegmentFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchNonXDTSegmentFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchNonXDTSegmentEName)
 }
 
 /**
  * An mf:matchNonXDTScenario filter.
  */
-final class MatchNonXDTScenarioFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchNonXDTScenarioFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchNonXDTScenarioEName)
 }
 
 /**
  * An mf:matchDimension filter.
  */
-final class MatchDimensionFilter(underlyingResource: tqa.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
+final class MatchDimensionFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends MatchFilter(underlyingResource) {
   requireResolvedName(ENames.MfMatchDimensionEName)
 
   def dimension: EName = {
@@ -797,12 +797,12 @@ final class MatchDimensionFilter(underlyingResource: tqa.dom.NonStandardResource
 /**
  * A period aspect filter.
  */
-sealed abstract class PeriodAspectFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class PeriodAspectFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource)
 
 /**
  * A pf:period filter.
  */
-final class PeriodFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
+final class PeriodFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodEName)
 
   /**
@@ -817,7 +817,7 @@ final class PeriodFilter(underlyingResource: tqa.dom.NonStandardResource) extend
 /**
  * A pf:periodStart filter.
  */
-final class PeriodStartFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
+final class PeriodStartFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodStartEName)
 
   /**
@@ -840,7 +840,7 @@ final class PeriodStartFilter(underlyingResource: tqa.dom.NonStandardResource) e
 /**
  * A pf:periodEnd filter.
  */
-final class PeriodEndFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
+final class PeriodEndFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodEndEName)
 
   /**
@@ -863,7 +863,7 @@ final class PeriodEndFilter(underlyingResource: tqa.dom.NonStandardResource) ext
 /**
  * A pf:periodInstant filter.
  */
-final class PeriodInstantFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
+final class PeriodInstantFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfPeriodInstantEName)
 
   /**
@@ -886,14 +886,14 @@ final class PeriodInstantFilter(underlyingResource: tqa.dom.NonStandardResource)
 /**
  * A pf:forever filter.
  */
-final class ForeverFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
+final class ForeverFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfForeverEName)
 }
 
 /**
  * A pf:instantDuration filter.
  */
-final class InstantDurationFilter(underlyingResource: tqa.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
+final class InstantDurationFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends PeriodAspectFilter(underlyingResource) {
   requireResolvedName(ENames.PfInstantDurationEName)
 
   /**
@@ -912,7 +912,7 @@ final class InstantDurationFilter(underlyingResource: tqa.dom.NonStandardResourc
 /**
  * A relative filter (rf:relativeFilter).
  */
-final class RelativeFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+final class RelativeFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.RfRelativeFilterEName)
 
   /**
@@ -927,7 +927,7 @@ final class RelativeFilter(underlyingResource: tqa.dom.NonStandardResource) exte
 /**
  * A segment scenario filter.
  */
-sealed abstract class SegmentScenarioFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+sealed abstract class SegmentScenarioFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource) {
 
   /**
    * Returns the optional test attribute as optional ScopedXPathString.
@@ -941,26 +941,26 @@ sealed abstract class SegmentScenarioFilter(underlyingResource: tqa.dom.NonStand
 /**
  * An ssf:segment filter.
  */
-final class SegmentFilter(underlyingResource: tqa.dom.NonStandardResource) extends SegmentScenarioFilter(underlyingResource) {
+final class SegmentFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends SegmentScenarioFilter(underlyingResource) {
   requireResolvedName(ENames.SsfSegmentEName)
 }
 
 /**
  * An ssf:scenario filter.
  */
-final class ScenarioFilter(underlyingResource: tqa.dom.NonStandardResource) extends SegmentScenarioFilter(underlyingResource) {
+final class ScenarioFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends SegmentScenarioFilter(underlyingResource) {
   requireResolvedName(ENames.SsfScenarioEName)
 }
 
 /**
  * A tuple filter.
  */
-sealed abstract class TupleFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class TupleFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource)
 
 /**
  * A tf:parentFilter filter.
  */
-final class ParentFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
+final class ParentFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfParentFilterEName)
 
   def parent: TupleFilterParent = {
@@ -971,7 +971,7 @@ final class ParentFilter(underlyingResource: tqa.dom.NonStandardResource) extend
 /**
  * A tf:ancestorFilter filter.
  */
-final class AncestorFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
+final class AncestorFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfAncestorFilterEName)
 
   def ancestor: TupleFilterAncestor = {
@@ -982,7 +982,7 @@ final class AncestorFilter(underlyingResource: tqa.dom.NonStandardResource) exte
 /**
  * A tf:siblingFilter filter.
  */
-final class SiblingFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
+final class SiblingFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfSiblingFilterEName)
 
   /**
@@ -997,7 +997,7 @@ final class SiblingFilter(underlyingResource: tqa.dom.NonStandardResource) exten
 /**
  * A tf:locationFilter filter.
  */
-final class LocationFilter(underlyingResource: tqa.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
+final class LocationFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends TupleFilter(underlyingResource) {
   requireResolvedName(ENames.TfLocationFilterEName)
 
   /**
@@ -1020,12 +1020,12 @@ final class LocationFilter(underlyingResource: tqa.dom.NonStandardResource) exte
 /**
  * A unit filter.
  */
-sealed abstract class UnitFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class UnitFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource)
 
 /**
  * An uf:singleMeasure filter.
  */
-final class SingleMeasureFilter(underlyingResource: tqa.dom.NonStandardResource) extends UnitFilter(underlyingResource) {
+final class SingleMeasureFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends UnitFilter(underlyingResource) {
   requireResolvedName(ENames.UfSingleMeasureEName)
 
   def measure: UnitFilterMeasure = {
@@ -1036,7 +1036,7 @@ final class SingleMeasureFilter(underlyingResource: tqa.dom.NonStandardResource)
 /**
  * An uf:generalMeasures filter.
  */
-final class GeneralMeasuresFilter(underlyingResource: tqa.dom.NonStandardResource) extends UnitFilter(underlyingResource) {
+final class GeneralMeasuresFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends UnitFilter(underlyingResource) {
   requireResolvedName(ENames.UfGeneralMeasuresEName)
 
   /**
@@ -1051,19 +1051,19 @@ final class GeneralMeasuresFilter(underlyingResource: tqa.dom.NonStandardResourc
 /**
  * A value filter.
  */
-sealed abstract class ValueFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource)
+sealed abstract class ValueFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource)
 
 /**
  * A vf:nil filter.
  */
-final class NilFilter(underlyingResource: tqa.dom.NonStandardResource) extends ValueFilter(underlyingResource) {
+final class NilFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ValueFilter(underlyingResource) {
   requireResolvedName(ENames.VfNilEName)
 }
 
 /**
  * A vf:precision filter.
  */
-final class PrecisionFilter(underlyingResource: tqa.dom.NonStandardResource) extends ValueFilter(underlyingResource) {
+final class PrecisionFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends ValueFilter(underlyingResource) {
   requireResolvedName(ENames.VfPrecisionEName)
 
   /**
@@ -1078,7 +1078,7 @@ final class PrecisionFilter(underlyingResource: tqa.dom.NonStandardResource) ext
 /**
  * An aspect cover filter (acf:aspectCover).
  */
-final class AspectCoverFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+final class AspectCoverFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.AcfAspectCoverEName)
 
   def aspects: immutable.IndexedSeq[AspectCoverFilterAspect] = {
@@ -1097,7 +1097,7 @@ final class AspectCoverFilter(underlyingResource: tqa.dom.NonStandardResource) e
 /**
  * A concept relation filter (crf:conceptRelation).
  */
-final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResource) extends Filter(underlyingResource) {
+final class ConceptRelationFilter(underlyingResource: tqa.base.dom.NonStandardResource) extends Filter(underlyingResource) {
   requireResolvedName(ENames.CrfConceptRelationEName)
 
   /**
@@ -1242,9 +1242,9 @@ final class ConceptRelationFilter(underlyingResource: tqa.dom.NonStandardResourc
 object FormulaResource {
 
   /**
-   * Lenient method to optionally create a FormulaResource from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a FormulaResource from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[FormulaResource] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[FormulaResource] = {
     underlyingResource.resolvedName match {
       case ENames.FormulaFormulaEName             => Some(new Formula(underlyingResource))
       case ENames.VaValueAssertionEName           => Some(new ValueAssertion(underlyingResource))
@@ -1273,9 +1273,9 @@ object FormulaResource {
 object Filter {
 
   /**
-   * Lenient method to optionally create a Filter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a Filter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[Filter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[Filter] = {
     underlyingResource.resolvedName.namespaceUriOption.getOrElse("") match {
       case Namespaces.CfNamespace  => ConceptFilter.opt(underlyingResource)
       case Namespaces.BfNamespace  => BooleanFilter.opt(underlyingResource)
@@ -1299,9 +1299,9 @@ object Filter {
 object ConceptFilter {
 
   /**
-   * Lenient method to optionally create a ConceptFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a ConceptFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[ConceptFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[ConceptFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.CfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.CfConceptNameEName              => Some(new ConceptNameFilter(underlyingResource))
@@ -1321,9 +1321,9 @@ object ConceptFilter {
 object BooleanFilter {
 
   /**
-   * Lenient method to optionally create a BooleanFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a BooleanFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[BooleanFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[BooleanFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.BfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.BfAndFilterEName => Some(new AndFilter(underlyingResource))
@@ -1339,9 +1339,9 @@ object BooleanFilter {
 object DimensionFilter {
 
   /**
-   * Lenient method to optionally create a DimensionFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a DimensionFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[DimensionFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[DimensionFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.DfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.DfExplicitDimensionEName => Some(new ExplicitDimensionFilter(underlyingResource))
@@ -1357,9 +1357,9 @@ object DimensionFilter {
 object EntityFilter {
 
   /**
-   * Lenient method to optionally create an EntityFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create an EntityFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[EntityFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[EntityFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.EfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.EfIdentifierEName         => Some(new IdentifierFilter(underlyingResource))
@@ -1378,9 +1378,9 @@ object EntityFilter {
 object GeneralFilter {
 
   /**
-   * Lenient method to optionally create a GeneralFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a GeneralFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[GeneralFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[GeneralFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.GfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.GfGeneralEName => Some(new GeneralFilter(underlyingResource))
@@ -1395,9 +1395,9 @@ object GeneralFilter {
 object MatchFilter {
 
   /**
-   * Lenient method to optionally create a MatchFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a MatchFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[MatchFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[MatchFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.MfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.MfMatchConceptEName          => Some(new MatchConceptFilter(underlyingResource))
@@ -1421,9 +1421,9 @@ object MatchFilter {
 object PeriodAspectFilter {
 
   /**
-   * Lenient method to optionally create a PeriodAspectFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a PeriodAspectFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[PeriodAspectFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[PeriodAspectFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.PfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.PfPeriodEName          => Some(new PeriodFilter(underlyingResource))
@@ -1443,9 +1443,9 @@ object PeriodAspectFilter {
 object RelativeFilter {
 
   /**
-   * Lenient method to optionally create a RelativeFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a RelativeFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[RelativeFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[RelativeFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.RfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.RfRelativeFilterEName => Some(new RelativeFilter(underlyingResource))
@@ -1460,9 +1460,9 @@ object RelativeFilter {
 object SegmentScenarioFilter {
 
   /**
-   * Lenient method to optionally create a SegmentScenarioFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a SegmentScenarioFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[SegmentScenarioFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[SegmentScenarioFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.SsfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.SsfSegmentEName  => Some(new SegmentFilter(underlyingResource))
@@ -1478,9 +1478,9 @@ object SegmentScenarioFilter {
 object TupleFilter {
 
   /**
-   * Lenient method to optionally create a TupleFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a TupleFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[TupleFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[TupleFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.TfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.TfParentFilterEName   => Some(new ParentFilter(underlyingResource))
@@ -1498,9 +1498,9 @@ object TupleFilter {
 object UnitFilter {
 
   /**
-   * Lenient method to optionally create a UnitFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a UnitFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[UnitFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[UnitFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.UfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.UfSingleMeasureEName   => Some(new SingleMeasureFilter(underlyingResource))
@@ -1516,9 +1516,9 @@ object UnitFilter {
 object ValueFilter {
 
   /**
-   * Lenient method to optionally create a ValueFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a ValueFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[ValueFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[ValueFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.VfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.VfNilEName       => Some(new NilFilter(underlyingResource))
@@ -1534,9 +1534,9 @@ object ValueFilter {
 object AspectCoverFilter {
 
   /**
-   * Lenient method to optionally create a AspectCoverFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a AspectCoverFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[AspectCoverFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[AspectCoverFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.AcfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.AcfAspectCoverEName => Some(new AspectCoverFilter(underlyingResource))
@@ -1551,9 +1551,9 @@ object AspectCoverFilter {
 object ConceptRelationFilter {
 
   /**
-   * Lenient method to optionally create a ConceptRelationFilter from an underlying tqa.dom.StandardResource.
+   * Lenient method to optionally create a ConceptRelationFilter from an underlying tqa.base.dom.StandardResource.
    */
-  def opt(underlyingResource: tqa.dom.NonStandardResource): Option[ConceptRelationFilter] = {
+  def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[ConceptRelationFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.CrfNamespace)) {
       underlyingResource.resolvedName match {
         case ENames.CrfConceptRelationEName => Some(new ConceptRelationFilter(underlyingResource))

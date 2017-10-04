@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.tqa.extension.formula.model
 
-import eu.cdevreeze.tqa.common.Use
+import eu.cdevreeze.tqa.base.common.Use
 
 /**
  * Common relationship attributes, such as ELR, order, priority and use.

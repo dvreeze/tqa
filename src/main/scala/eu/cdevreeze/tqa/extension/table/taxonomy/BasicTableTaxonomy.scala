@@ -20,17 +20,17 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.XmlFragmentKey
-import eu.cdevreeze.tqa.dom.NonStandardArc
-import eu.cdevreeze.tqa.dom.NonStandardResource
-import eu.cdevreeze.tqa.dom.OtherNonXLinkElem
+import eu.cdevreeze.tqa.base.dom.NonStandardArc
+import eu.cdevreeze.tqa.base.dom.NonStandardResource
+import eu.cdevreeze.tqa.base.dom.OtherNonXLinkElem
+import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
+import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.extension.table.dom.OtherTableElem
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.dom.TableArc
 import eu.cdevreeze.tqa.extension.table.dom.TableResource
 import eu.cdevreeze.tqa.extension.table.queryapi.TableRelationshipContainerLike
 import eu.cdevreeze.tqa.extension.table.relationship.TableRelationship
-import eu.cdevreeze.tqa.queryapi.TaxonomyApi
-import eu.cdevreeze.tqa.relationship.NonStandardRelationship
 
 /**
  * Basic implementation of a taxonomy that offers the TableRelationshipContainerApi query API, while wrapping
