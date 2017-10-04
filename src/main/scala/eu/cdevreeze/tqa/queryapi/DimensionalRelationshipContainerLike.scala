@@ -475,11 +475,10 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   }
 
   private def findAllDomainElrPairsPerDimension(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[(EName, String)]] = {
-    val hypercubeDimensionRelationships =
-      filterOutgoingHypercubeDimensionRelationshipsOnElr(hasHypercubeRelationship.hypercube, hasHypercubeRelationship.effectiveTargetRole)
+    val hypercubeDimensionRelationships = findAllConsecutiveHypercubeDimensionRelationships(hasHypercubeRelationship)
 
     val dimensionDomainRelationships =
-      hypercubeDimensionRelationships.flatMap(hd => filterOutgoingDimensionDomainRelationshipsOnElr(hd.dimension, hd.effectiveTargetRole))
+      hypercubeDimensionRelationships.flatMap(hd => findAllConsecutiveDimensionDomainRelationships(hd))
 
     val dimensionDomainRelationshipsByDimension = dimensionDomainRelationships.groupBy(_.dimension)
 
