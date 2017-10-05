@@ -18,10 +18,10 @@ package eu.cdevreeze.tqa.extension.formula.model
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.Aspect
-import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENameValueOrExpr
 import eu.cdevreeze.tqa.ScopedXPathString
+import eu.cdevreeze.tqa.aspect.Aspect
+import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.extension.formula.common.Occ
 import eu.cdevreeze.yaidom.core.EName

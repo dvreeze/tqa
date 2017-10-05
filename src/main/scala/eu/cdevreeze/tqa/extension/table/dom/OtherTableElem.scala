@@ -23,11 +23,11 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
-import eu.cdevreeze.tqa.Aspect
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.aspect.Aspect
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes

@@ -18,8 +18,8 @@ package eu.cdevreeze.tqa.extension.formula.model
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ScopedXPathString
+import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.yaidom.core.EName
 
 /**

@@ -23,8 +23,6 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
-import eu.cdevreeze.tqa.Aspect
-import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.ENameValueOrExpr
@@ -32,6 +30,8 @@ import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.aspect.Aspect
+import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.extension.formula.common.AspectCoverFilters
 import eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters

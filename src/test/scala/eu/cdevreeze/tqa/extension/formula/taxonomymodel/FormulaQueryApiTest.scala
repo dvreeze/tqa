@@ -20,9 +20,9 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem

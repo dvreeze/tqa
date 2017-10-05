@@ -23,7 +23,6 @@ import scala.reflect.ClassTag
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa
-import eu.cdevreeze.tqa.AspectModel
 import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.ENameValueOrExpr
@@ -34,6 +33,7 @@ import eu.cdevreeze.tqa.StringExpr
 import eu.cdevreeze.tqa.StringValue
 import eu.cdevreeze.tqa.StringValueOrExpr
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import javax.xml.bind.DatatypeConverter

@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.tqa.extension.table.model
 
-import eu.cdevreeze.tqa.Aspect
+import eu.cdevreeze.tqa.aspect.Aspect
 import eu.cdevreeze.yaidom.core.EName
 
 /**
