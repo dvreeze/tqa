@@ -2,9 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.LoadDts"
 
-// Taking TQA version 0.4.7
+// Taking TQA version 0.4.8
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.4.7`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.4.8`
 
 // Imports that (must) remain available after this initialization script
 
@@ -21,10 +21,11 @@ import eu.cdevreeze.yaidom
 import net.sf.saxon.s9api.Processor
 
 import eu.cdevreeze.tqa._
-import eu.cdevreeze.tqa.taxonomy._
-import eu.cdevreeze.tqa.queryapi._
-import eu.cdevreeze.tqa.relationship._
-import eu.cdevreeze.tqa.dom._
+import eu.cdevreeze.tqa.base._
+import eu.cdevreeze.tqa.base.taxonomy._
+import eu.cdevreeze.tqa.base.queryapi._
+import eu.cdevreeze.tqa.base.relationship._
+import eu.cdevreeze.tqa.base.dom._
 
 // Yaidom: Easy creation of ENames and QNames
 
