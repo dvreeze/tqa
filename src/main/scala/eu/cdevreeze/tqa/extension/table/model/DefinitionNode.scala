@@ -36,6 +36,26 @@ sealed trait DefinitionNode {
   def tagSelectorOption: Option[String]
 
   def definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]
+
+  final def findAllOwnOrDescendantDefinitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree] = {
+    definitionNodeSubtrees flatMap { defNodeSubtree =>
+      // Recursive call
+      defNodeSubtree +: (defNodeSubtree.target.findAllOwnOrDescendantDefinitionNodeSubtrees)
+    }
+  }
+
+  final def children: immutable.IndexedSeq[DefinitionNode] = {
+    definitionNodeSubtrees.map(_.target)
+  }
+
+  final def descendantsOrSelf: immutable.IndexedSeq[DefinitionNode] = {
+    // Recursive calls
+    this +: (children.flatMap(_.descendantsOrSelf))
+  }
+
+  final def descendants: immutable.IndexedSeq[DefinitionNode] = {
+    children.flatMap(_.descendantsOrSelf)
+  }
 }
 
 sealed trait ClosedDefinitionNode extends DefinitionNode {

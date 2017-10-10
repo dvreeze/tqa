@@ -118,7 +118,6 @@ object PeriodAspectRule {
 
   sealed trait Period {
 
-    // TODO PeriodType should not be in DOM package, and we should not depend on DOM package here
     def periodType: PeriodType
   }
 
