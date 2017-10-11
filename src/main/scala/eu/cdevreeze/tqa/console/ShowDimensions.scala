@@ -20,8 +20,6 @@ import java.io.File
 import java.net.URI
 import java.util.logging.Logger
 
-import scala.reflect.classTag
-
 import eu.cdevreeze.tqa.backingelem.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
