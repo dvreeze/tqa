@@ -44,6 +44,11 @@ trait DimensionalRelationshipContainerApi {
 
   // Finding and filtering relationships without looking at source or target concept
 
+  def findAllDimensionalRelationships: immutable.IndexedSeq[DimensionalRelationship]
+
+  def filterDimensionalRelationships(
+    p: DimensionalRelationship => Boolean): immutable.IndexedSeq[DimensionalRelationship]
+
   def findAllDimensionalRelationshipsOfType[A <: DimensionalRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 

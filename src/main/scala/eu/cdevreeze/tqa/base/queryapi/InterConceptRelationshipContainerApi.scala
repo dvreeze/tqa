@@ -36,6 +36,11 @@ import eu.cdevreeze.yaidom.core.EName
  */
 trait InterConceptRelationshipContainerApi {
 
+  def findAllInterConceptRelationships: immutable.IndexedSeq[InterConceptRelationship]
+
+  def filterInterConceptRelationships(
+    p: InterConceptRelationship => Boolean): immutable.IndexedSeq[InterConceptRelationship]
+
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 

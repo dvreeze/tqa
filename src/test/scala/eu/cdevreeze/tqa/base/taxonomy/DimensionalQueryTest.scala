@@ -193,7 +193,7 @@ class DimensionalQueryTest extends FunSuite {
     }
 
     assertResult(true) {
-      taxo.filterDimensionalRelationshipsOfType(classTag[DimensionalRelationship])(_.elr == expectedTargetRole).nonEmpty
+      taxo.filterDimensionalRelationships(_.elr == expectedTargetRole).nonEmpty
     }
   }
 

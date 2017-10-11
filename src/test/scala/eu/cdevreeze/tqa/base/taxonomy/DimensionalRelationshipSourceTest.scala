@@ -31,7 +31,6 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
 
@@ -259,7 +258,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
       hasHypercubes.size
     }
     assertResult(6) {
-      taxo.findAllDimensionalRelationshipsOfType(classTag[DimensionalRelationship]).size
+      taxo.findAllDimensionalRelationships.size
     }
 
     assertResult(true) {
@@ -285,7 +284,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
       hasHypercubes.size
     }
     assertResult(6) {
-      taxo.findAllDimensionalRelationshipsOfType(classTag[DimensionalRelationship]).size
+      taxo.findAllDimensionalRelationships.size
     }
 
     assertResult(true) {
@@ -318,7 +317,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
       hasHypercubes.size
     }
     assertResult(2) {
-      taxo.findAllDimensionalRelationshipsOfType(classTag[DimensionalRelationship]).size
+      taxo.findAllDimensionalRelationships.size
     }
 
     assertResult(Some(sourceName)) {

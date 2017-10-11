@@ -27,7 +27,6 @@ import eu.cdevreeze.tqa.backingelem.UriConverters
 import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.yaidom.core.EName
@@ -74,7 +73,7 @@ object ShowDimensions {
 
     logger.info(s"The taxonomy has ${rootElems.size} taxonomy root elements")
     logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")
-    logger.info(s"The taxonomy has ${basicTaxo.findAllDimensionalRelationshipsOfType(classTag[DimensionalRelationship]).size} dimensional relationships")
+    logger.info(s"The taxonomy has ${basicTaxo.findAllDimensionalRelationships.size} dimensional relationships")
 
     val hasHypercubes = basicTaxo.findAllHasHypercubeRelationships
 

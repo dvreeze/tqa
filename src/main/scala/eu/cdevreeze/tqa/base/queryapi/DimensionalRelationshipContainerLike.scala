@@ -38,6 +38,16 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   // Finding and filtering relationships without looking at source or target concept
 
+  final def findAllDimensionalRelationships: immutable.IndexedSeq[DimensionalRelationship] = {
+    findAllInterConceptRelationshipsOfType(classTag[DimensionalRelationship])
+  }
+
+  final def filterDimensionalRelationships(
+    p: DimensionalRelationship => Boolean): immutable.IndexedSeq[DimensionalRelationship] = {
+
+    filterInterConceptRelationshipsOfType(classTag[DimensionalRelationship])(p)
+  }
+
   final def findAllDimensionalRelationshipsOfType[A <: DimensionalRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 

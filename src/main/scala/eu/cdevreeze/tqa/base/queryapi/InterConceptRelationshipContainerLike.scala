@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.base.queryapi
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
@@ -46,6 +47,16 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
+
+  final def findAllInterConceptRelationships: immutable.IndexedSeq[InterConceptRelationship] = {
+    findAllInterConceptRelationshipsOfType(classTag[InterConceptRelationship])
+  }
+
+  final def filterInterConceptRelationships(
+    p: InterConceptRelationship => Boolean): immutable.IndexedSeq[InterConceptRelationship] = {
+
+    filterInterConceptRelationshipsOfType(classTag[InterConceptRelationship])(p)
+  }
 
   final def filterInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {

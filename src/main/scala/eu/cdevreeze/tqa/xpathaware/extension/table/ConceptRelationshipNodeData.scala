@@ -186,7 +186,7 @@ object ConceptRelationshipNodeData {
     taxo: BasicTableTaxonomy): Set[EName] = {
 
     val relationships =
-      taxo.underlyingTaxonomy.filterInterConceptRelationshipsOfType(classTag[InterConceptRelationship]) { rel =>
+      taxo.underlyingTaxonomy filterInterConceptRelationships { rel =>
         relationshipMatchesCriteria(rel, linkroleOption, arcrole, linknameOption, arcnameOption)
       }
 
