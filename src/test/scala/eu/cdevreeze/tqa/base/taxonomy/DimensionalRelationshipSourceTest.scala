@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.base.taxonomy
 import java.io.File
 
 import scala.collection.immutable
-import scala.reflect.classTag
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
