@@ -39,7 +39,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final class DimensionalForest(
+final class DimensionalForest private (
     val hasHypercubesByElrAndPrimary: Map[String, Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]],
     val hypercubeDimensionsByElrAndHypercube: Map[String, Map[EName, immutable.IndexedSeq[HypercubeDimensionRelationship]]],
     val dimensionDomainsByElrAndDimension: Map[String, Map[EName, immutable.IndexedSeq[DimensionalForest.DimensionDomain]]],
@@ -74,8 +74,22 @@ final class DimensionalForest(
 
 object DimensionalForest {
 
+  def apply(
+    hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
+    hypercubeDimensions: immutable.IndexedSeq[HypercubeDimensionRelationship],
+    dimensionDomains: immutable.IndexedSeq[DimensionalForest.DimensionDomain],
+    dimensionDefaults: immutable.IndexedSeq[DimensionDefaultRelationship]): DimensionalForest = {
+
+    new DimensionalForest(
+      hasHypercubes.groupBy(_.elr).mapValues(_.groupBy(_.primary)),
+      hypercubeDimensions.groupBy(_.elr).mapValues(_.groupBy(_.hypercube)),
+      dimensionDomains.groupBy(_.elr).mapValues(_.groupBy(_.dimension)),
+      dimensionDefaults)
+  }
+
   final class DimensionDomain(
       val dimension: EName,
+      val elr: String,
       val domain: DimensionalForest.Member,
       val domainMembers: Map[EName, DimensionalForest.Member]) {
 
