@@ -45,6 +45,13 @@ final class DimensionalForest private (
     val dimensionDomainsByElrAndDimension: Map[String, Map[EName, immutable.IndexedSeq[DimensionalForest.DimensionDomain]]],
     val dimensionDefaultRelationships: immutable.IndexedSeq[DimensionDefaultRelationship]) {
 
+  def filterHasHypercubesOnElrAndPrimaries(
+    elr: String,
+    primaries: Set[EName]): immutable.IndexedSeq[HasHypercubeRelationship] = {
+
+    hasHypercubesByElrAndPrimary.getOrElse(elr, Map()).filterKeys(primaries).values.flatten.toIndexedSeq
+  }
+
   def filterHasHypercubesOnElrAndPrimary(
     elr: String,
     primary: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
