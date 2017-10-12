@@ -35,6 +35,11 @@ import eu.cdevreeze.yaidom.core.EName
  */
 trait StandardRelationshipContainerApi {
 
+  def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship]
+
+  def filterStandardRelationships(
+    p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship]
+
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 

@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.base.queryapi
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.base.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
@@ -40,6 +41,16 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
+
+  final def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship] = {
+    findAllStandardRelationshipsOfType(classTag[StandardRelationship])
+  }
+
+  final def filterStandardRelationships(
+    p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
+
+    filterStandardRelationshipsOfType(classTag[StandardRelationship])(p)
+  }
 
   final def filterStandardRelationshipsOfType[A <: StandardRelationship](
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {

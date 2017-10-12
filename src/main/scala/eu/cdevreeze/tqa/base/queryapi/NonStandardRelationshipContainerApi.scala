@@ -35,6 +35,11 @@ import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
  */
 trait NonStandardRelationshipContainerApi {
 
+  def findAllNonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship]
+
+  def filterNonStandardRelationships(
+    p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
+
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 

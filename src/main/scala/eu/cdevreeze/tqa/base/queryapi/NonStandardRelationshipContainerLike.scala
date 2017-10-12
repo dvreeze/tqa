@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.base.queryapi
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
@@ -40,6 +41,16 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
+
+  final def findAllNonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship] = {
+    findAllNonStandardRelationshipsOfType(classTag[NonStandardRelationship])
+  }
+
+  final def filterNonStandardRelationships(
+    p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
+
+    filterNonStandardRelationshipsOfType(classTag[NonStandardRelationship])(p)
+  }
 
   final def filterNonStandardRelationshipsOfType[A <: NonStandardRelationship](
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
