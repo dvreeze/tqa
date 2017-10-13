@@ -131,9 +131,32 @@ def loadDts(localRootDir: File, entrypointUri: URI): BasicTaxonomy = {
   loadDts(localRootDir, Set(entrypointUri), 10000, false)
 }
 
+def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
+  val documentBuilder =
+    new backingelem.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), (uri => uri))
+    
+  val documentCollector = new taxonomybuilder.DocumentCollector {
+
+    def collectTaxonomyRootElems(docBuilder: backingelem.DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+      localDocUris.toIndexedSeq.map(uri => TaxonomyRootElem.build(docBuilder.build(uri)))
+    }
+  }
+
+  val taxoBuilder =
+    taxonomybuilder.TaxonomyBuilder.
+      withDocumentBuilder(documentBuilder).
+      withDocumentCollector(documentCollector).
+      withRelationshipFactory(DefaultRelationshipFactory.LenientInstance).
+      withArcFilter(RelationshipFactory.AnyArcHavingArcrole)
+
+  val basicTaxo = taxoBuilder.build()
+  basicTaxo
+}
+
 // Now the REPL has been set up for ad-hoc DTS querying (combined with ad-hoc yaidom usage)
 // Do not forget to provide an implicit Scope if we want to create ENames with the "en" or "an" postfix operator!
 
 println(s"Use loadDts(localRootDir, entrypointUri) to get a DTS as BasicTaxonomy")
 println(s"If needed, use loadDts(localRootDir, entrypointUris, docCacheSize, lenient) instead")
+println(s"If you want to load only a few local taxonomy documents, use loadLocalTaxonomyDocs(localDocUris) instead")
 println(s"Store the result in val taxo, and import taxo._")
