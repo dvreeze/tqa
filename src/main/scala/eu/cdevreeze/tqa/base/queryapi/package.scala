@@ -16,6 +16,11 @@
 
 package eu.cdevreeze.tqa.base
 
+import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
+import eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship
+import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
+
 /**
  * Traits offering parts of a '''taxonomy query API'''. They can be assembled into "taxonomy classes".
  * There are purely abstract query API traits, and partial implementations of those traits.
@@ -191,4 +196,11 @@ package eu.cdevreeze.tqa.base
  *
  * @author Chris de Vreeze
  */
-package object queryapi
+package object queryapi {
+
+  type ParentChildRelationshipPath = InterConceptRelationshipPath[ParentChildRelationship]
+
+  type DomainMemberRelationshipPath = InterConceptRelationshipPath[DomainMemberRelationship]
+
+  type DomainAwareRelationshipPath = InterConceptRelationshipPath[DomainAwareRelationship]
+}

@@ -20,6 +20,7 @@ import scala.collection.immutable
 import scala.util.Success
 import scala.util.Try
 
+import eu.cdevreeze.tqa.base.queryapi.DomainAwareRelationshipPath
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.base.relationship.AllRelationship
 import eu.cdevreeze.tqa.base.relationship.DimensionDefaultRelationship
@@ -288,7 +289,7 @@ object DimensionalTaxonomy {
     val domainAwarePaths =
       dimensions.toIndexedSeq.flatMap(dim => taxonomy.filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dim)(path => !path.hasCycle))
 
-    val domainAwarePathsByDimensionDomain: Map[(EName, String), immutable.IndexedSeq[taxonomy.DomainAwareRelationshipPath]] =
+    val domainAwarePathsByDimensionDomain: Map[(EName, String), immutable.IndexedSeq[DomainAwareRelationshipPath]] =
       domainAwarePaths.groupBy(path => (path.firstRelationship.sourceConceptEName -> path.firstRelationship.elr))
 
     val dimensionDomains: immutable.IndexedSeq[DimensionDomain] = domainAwarePathsByDimensionDomain.toIndexedSeq map {

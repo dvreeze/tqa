@@ -26,7 +26,6 @@ import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -37,10 +36,6 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 trait DimensionalRelationshipContainerApi {
-
-  type DomainMemberRelationshipPath = InterConceptRelationshipPath[DomainMemberRelationship]
-
-  type DomainAwareRelationshipPath = InterConceptRelationshipPath[DomainAwareRelationship]
 
   // Finding and filtering relationships without looking at source or target concept
 

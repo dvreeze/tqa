@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.base.queryapi
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
 import eu.cdevreeze.tqa.base.relationship.PresentationRelationship
 import eu.cdevreeze.yaidom.core.EName
@@ -32,8 +31,6 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 trait PresentationRelationshipContainerApi {
-
-  type ParentChildRelationshipPath = InterConceptRelationshipPath[ParentChildRelationship]
 
   // Finding and filtering relationships without looking at source or target concept
 
