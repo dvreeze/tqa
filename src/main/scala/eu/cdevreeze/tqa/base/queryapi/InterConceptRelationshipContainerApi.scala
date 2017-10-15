@@ -126,19 +126,5 @@ trait InterConceptRelationshipContainerApi {
     targetConcept: EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
 
-  /**
-   * Calls filterLongestOutgoingInterConceptRelationshipPaths, but adds cycle detection to the predicate.
-   */
-  def filterLongestOutgoingNonCyclicInterConceptRelationshipPaths[A <: InterConceptRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
-
-  /**
-   * Calls filterLongestIncomingInterConceptRelationshipPaths, but adds cycle detection to the predicate.
-   */
-  def filterLongestIncomingNonCyclicInterConceptRelationshipPaths[A <: InterConceptRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
-
   // TODO Methods to validate some closure properties, such as closure under DTS discovery rules
 }

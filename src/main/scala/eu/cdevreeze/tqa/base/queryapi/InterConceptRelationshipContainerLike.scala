@@ -123,20 +123,6 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     paths
   }
 
-  final def filterLongestOutgoingNonCyclicInterConceptRelationshipPaths[A <: InterConceptRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
-
-    filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, relationshipType)(path => !path.hasCycle && p(path))
-  }
-
-  final def filterLongestIncomingNonCyclicInterConceptRelationshipPaths[A <: InterConceptRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
-
-    filterLongestIncomingInterConceptRelationshipPaths(targetConcept, relationshipType)(path => !path.hasCycle && p(path))
-  }
-
   // Private methods
 
   private def filterLongestOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
