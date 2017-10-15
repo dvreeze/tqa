@@ -17,18 +17,15 @@
 package eu.cdevreeze.tqa.base.taxonomy
 
 import scala.collection.immutable
-import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-import eu.cdevreeze.tqa.base.dom.DimensionDeclaration
-import eu.cdevreeze.tqa.base.dom.HypercubeDeclaration
+import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.base.relationship.AllRelationship
 import eu.cdevreeze.tqa.base.relationship.DimensionDefaultRelationship
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.base.relationship.NotAllRelationship
-import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -38,7 +35,7 @@ import eu.cdevreeze.yaidom.core.EName
  * Instances of this class are expensive to create, and should be created only once per DTS and then
  * retained in memory.
  *
- * This class is most useful if the taxonomy from which it is instantiated is XBRL Core and Dimensions
+ * This class is most useful if the taxonomy from which it is instantiated is known to be XBRL Core and Dimensions
  * valid.
  *
  * This class does not offer any schema validation queries, so typed dimension validation queries miss
@@ -51,14 +48,12 @@ final class DimensionalTaxonomy private (
     val hasHypercubesByElrAndPrimary: Map[String, Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]],
     val hypercubeDimensionsByElrAndHypercube: Map[String, Map[EName, immutable.IndexedSeq[HypercubeDimensionRelationship]]],
     val dimensionDomainsByElrAndDimension: Map[String, Map[EName, immutable.IndexedSeq[DimensionalTaxonomy.DimensionDomain]]],
-    val dimensionDefaultRelationships: immutable.IndexedSeq[DimensionDefaultRelationship],
-    val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]],
-    val hypercubeDeclarationsByEName: Map[EName, HypercubeDeclaration],
-    val dimensionDeclarationsByEName: Map[EName, DimensionDeclaration]) {
+    val dimensionDefaults: Map[EName, EName],
+    val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]]) {
 
   import DimensionalTaxonomy._
 
-  def dimensionsWithDefault: Set[EName] = findAllDefaultDimensionMembers.keySet
+  def dimensionsHavingDefault: Set[EName] = dimensionDefaults.keySet
 
   def filterHasHypercubesOnElrAndPrimaries(
     elr: String,
@@ -86,11 +81,6 @@ final class DimensionalTaxonomy private (
 
     dimensionDomainsByElrAndDimension.getOrElse(hypercubeDimension.effectiveTargetRole, Map()).
       getOrElse(hypercubeDimension.dimension, immutable.IndexedSeq())
-  }
-
-  def findAllDefaultDimensionMembers: Map[EName, EName] = {
-    // Assuming no more than 1 dimension-default per dimension
-    dimensionDefaultRelationships.map(rel => (rel.dimension, rel.defaultOfDimension)).toMap
   }
 
   // Instance dimensional validation support
@@ -180,10 +170,11 @@ final class DimensionalTaxonomy private (
     dimensionalContext: DimensionalContext,
     hasHypercube: HasHypercubeRelationship): Try[Boolean] = {
 
+    val hypercubeDimensions = filterHypercubeDimensionsOnHasHypercube(hasHypercube)
+
     // TODO Is this correct?
 
-    val dimensionsToValidate: Set[EName] =
-      filterHypercubeDimensionsOnHasHypercube(hasHypercube).map(_.dimension).toSet
+    val dimensionsToValidate: Set[EName] = hypercubeDimensions.map(_.dimension).toSet
 
     val dimensionalContextToValidate =
       if (hasHypercube.closed) {
@@ -201,11 +192,9 @@ final class DimensionalTaxonomy private (
         dimensionalContextToValidate.dimensionalScenario
       }
 
-    if (dimensionalContextElementToValidate.dimensions.union(dimensionsWithDefault) != dimensionsToValidate) {
+    if (dimensionalContextElementToValidate.dimensions.union(dimensionsHavingDefault) != dimensionsToValidate) {
       Success(false)
     } else {
-      val hypercubeDimensions = filterHypercubeDimensionsOnHasHypercube(hasHypercube)
-
       val dimensionDomains: immutable.IndexedSeq[DimensionDomain] =
         hypercubeDimensions.flatMap(hd => filterDimensionDomainsOnHypercubeDimension(hd))
 
@@ -234,7 +223,7 @@ final class DimensionalTaxonomy private (
       s"Expected non-empty dimension-domain collection, all for dimension $dimension")
 
     val dimensionValueOption: Option[EName] =
-      dimensionalContextElement.explicitDimensionMembers.get(dimension).orElse(findAllDefaultDimensionMembers.get(dimension))
+      dimensionalContextElement.explicitDimensionMembers.get(dimension).orElse(dimensionDefaults.get(dimension))
 
     if (dimensionValueOption.isEmpty) {
       false
@@ -276,19 +265,15 @@ object DimensionalTaxonomy {
     val hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship] = taxonomy.findAllHasHypercubeRelationships
     val hypercubeDimensions: immutable.IndexedSeq[HypercubeDimensionRelationship] = taxonomy.findAllHypercubeDimensionRelationships
 
-    // TODO Implement
-    val dimensionDomains: immutable.IndexedSeq[DimensionDomain] = ???
+    val dimensions = hypercubeDimensions.map(_.dimension).toSet
+    val dimensionDomains: immutable.IndexedSeq[DimensionDomain] = extractDimensionDomains(taxonomy, dimensions)
 
-    val dimensionDefaults: immutable.IndexedSeq[DimensionDefaultRelationship] = taxonomy.findAllDimensionDefaultRelationships
+    val dimensionDefaultRelationships: immutable.IndexedSeq[DimensionDefaultRelationship] = taxonomy.findAllDimensionDefaultRelationships
+    // Assuming no more than 1 dimension-default per dimension
+    val dimensionDefaults = dimensionDefaultRelationships.map(rel => (rel.dimension, rel.defaultOfDimension)).toMap
 
     val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]] =
       taxonomy.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
-
-    val hypercubeDeclarationsByEName: Map[EName, HypercubeDeclaration] =
-      taxonomy.findAllHypercubeDeclarations.groupBy(_.targetEName).mapValues(_.head)
-
-    val dimensionDeclarationsByEName: Map[EName, DimensionDeclaration] =
-      taxonomy.findAllDimensionDeclarations.groupBy(_.targetEName).mapValues(_.head)
 
     new DimensionalTaxonomy(
       taxonomy,
@@ -296,9 +281,26 @@ object DimensionalTaxonomy {
       hypercubeDimensions.groupBy(_.elr).mapValues(_.groupBy(_.hypercube)),
       dimensionDomains.groupBy(_.dimensionDomainElr).mapValues(_.groupBy(_.dimension)),
       dimensionDefaults,
-      hasHypercubeInheritanceOrSelf,
-      hypercubeDeclarationsByEName,
-      dimensionDeclarationsByEName)
+      hasHypercubeInheritanceOrSelf)
+  }
+
+  private def extractDimensionDomains(taxonomy: TaxonomyApi, dimensions: Set[EName]): immutable.IndexedSeq[DimensionDomain] = {
+    val domainAwarePaths =
+      dimensions.toIndexedSeq.flatMap(dim => taxonomy.filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dim)(path => !path.hasCycle))
+
+    val domainAwarePathsByDimensionDomain: Map[(EName, String), immutable.IndexedSeq[taxonomy.DomainAwareRelationshipPath]] =
+      domainAwarePaths.groupBy(path => (path.firstRelationship.sourceConceptEName -> path.firstRelationship.elr))
+
+    val dimensionDomains: immutable.IndexedSeq[DimensionDomain] = domainAwarePathsByDimensionDomain.toIndexedSeq map {
+      case ((dimension, dimensionDomainElr), paths) =>
+        val domainMembers: Map[EName, Member] =
+          paths.flatMap(_.relationships).map(rel => Member(rel.targetConceptEName, rel.usable)).groupBy(_.ename).
+            mapValues(mems => mems.find(m => !m.usable).getOrElse(mems.head))
+
+        new DimensionDomain(dimension, dimensionDomainElr, domainMembers)
+    }
+
+    dimensionDomains
   }
 
   final class DimensionDomain(
@@ -385,11 +387,8 @@ object DimensionalTaxonomy {
 
         explicitDimensionMembers.toSeq.foreach(dimMem => validateExplicitDimensionMember(dimMem._2, taxonomy))
 
-        val defaultDimensionMembers =
-          taxonomy.dimensionDefaultRelationships.map(rel => (rel.dimension, rel.defaultOfDimension)).toSet
-
         val usedDefaultDimensionMembers =
-          defaultDimensionMembers.intersect(explicitDimensionMembers.toSet)
+          taxonomy.dimensionDefaults.toSet.intersect(explicitDimensionMembers.toSet)
 
         if (usedDefaultDimensionMembers.nonEmpty) {
           throw DefaultValueUsedInInstanceError(usedDefaultDimensionMembers.head._1)
