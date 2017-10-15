@@ -110,7 +110,7 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
       p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
     filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship]) { path =>
-      path.isElrValid && p(path)
+      path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
@@ -124,7 +124,7 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
     targetConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
     filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[ParentChildRelationship]) { path =>
-      path.isElrValid && p(path)
+      path.isConsecutiveRelationshipPath && p(path)
     }
   }
 }

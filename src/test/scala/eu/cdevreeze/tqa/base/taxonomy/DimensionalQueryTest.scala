@@ -1347,7 +1347,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1393,7 +1393,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1422,7 +1422,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1453,7 +1453,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1485,7 +1485,7 @@ class DimensionalQueryTest extends FunSuite {
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
         // The check isMinimalIfHavingCycle is essential as stopping condition
-        path.isMinimalIfHavingCycle && path.isElrValid
+        path.isMinimalIfHavingCycle && path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1520,7 +1520,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1555,7 +1555,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(2)(outgoingDimPaths.size)
@@ -1593,17 +1593,17 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPathsFromPrimary =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     val outgoingDimPathsFromDomain =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     val outgoingDimPathsFromDomainMember =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(domainMember, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(1) {
@@ -1649,7 +1649,7 @@ class DimensionalQueryTest extends FunSuite {
 
     val outgoingDimPaths =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
-        path.isElrValid
+        path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1686,7 +1686,7 @@ class DimensionalQueryTest extends FunSuite {
     val outgoingDimPathsFromDomain =
       taxo.filterLongestOutgoingInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship]) { path =>
         // The check isMinimalIfHavingCycle is essential as stopping condition
-        path.isMinimalIfHavingCycle && path.isElrValid
+        path.isMinimalIfHavingCycle && path.isConsecutiveRelationshipPath
       }
 
     assertResult(1)(outgoingDimPathsFromDomain.size)

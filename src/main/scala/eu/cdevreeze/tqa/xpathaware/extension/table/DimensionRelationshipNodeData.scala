@@ -147,7 +147,7 @@ object DimensionRelationshipNodeData {
       taxo.underlyingTaxonomy.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
         treeWalkSpec.startMemberName) { path =>
           treeWalkSpec.startMember.incomingRelationshipOption.forall(_.isFollowedBy(path.firstRelationship)) &&
-            path.isElrValid &&
+            path.isConsecutiveRelationshipPath &&
             treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
             treeWalkSpec.linkroleOption.forall(lr => treeWalkSpec.elrToCheck(path) == lr)
         }

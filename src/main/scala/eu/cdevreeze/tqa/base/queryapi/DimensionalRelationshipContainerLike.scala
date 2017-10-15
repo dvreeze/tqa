@@ -265,7 +265,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
       p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship]) { path =>
-      path.isElrValid && p(path)
+      path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
@@ -280,7 +280,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
       p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
     filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship]) { path =>
-      path.isElrValid && p(path)
+      path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
@@ -294,7 +294,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship]) { path =>
-      path.isElrValid && p(path)
+      path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
@@ -308,7 +308,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
     filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship]) { path =>
-      path.isElrValid && p(path)
+      path.isConsecutiveRelationshipPath && p(path)
     }
   }
 

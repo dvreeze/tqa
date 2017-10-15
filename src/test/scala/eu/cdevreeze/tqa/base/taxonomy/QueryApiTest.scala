@@ -208,7 +208,7 @@ class QueryApiTest extends FunSuite {
     val hypercubes = richTaxo.findAllHypercubeDeclarations.map(_.targetEName).distinct
 
     val paths =
-      hypercubes.flatMap(hc => richTaxo.filterLongestOutgoingInterConceptRelationshipPaths(hc, classTag[DimensionalRelationship])(_.isElrValid))
+      hypercubes.flatMap(hc => richTaxo.filterLongestOutgoingInterConceptRelationshipPaths(hc, classTag[DimensionalRelationship])(_.isConsecutiveRelationshipPath))
 
     assertResult(richTaxo.findAllHypercubeDimensionRelationships.toSet) {
       paths.map(_.firstRelationship).toSet

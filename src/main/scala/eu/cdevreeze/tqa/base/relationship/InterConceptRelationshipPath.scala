@@ -94,7 +94,7 @@ final case class InterConceptRelationshipPath[A <: InterConceptRelationship] pri
    * Returns true if all subsequent relationships in the path "follow each other".
    * For dimensional relationships this means that they are consecutive relationships.
    */
-  def isElrValid: Boolean = {
+  def isConsecutiveRelationshipPath: Boolean = {
     relationships.sliding(2).filter(_.size == 2).forall(pair => pair(0).isFollowedBy(pair(1)))
   }
 }

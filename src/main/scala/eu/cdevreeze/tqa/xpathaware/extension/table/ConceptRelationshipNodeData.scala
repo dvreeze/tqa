@@ -166,7 +166,7 @@ object ConceptRelationshipNodeData {
       taxo.underlyingTaxonomy.filterLongestOutgoingNonCyclicInterConceptRelationshipPaths(
         treeWalkSpec.startConcept,
         classTag[InterConceptRelationship]) { path =>
-          path.isElrValid &&
+          path.isConsecutiveRelationshipPath &&
             treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
             treeWalkSpec.linkroleOption.forall(lr => path.relationships.head.elr == lr) &&
             (path.firstRelationship.arcrole == treeWalkSpec.arcrole) &&
