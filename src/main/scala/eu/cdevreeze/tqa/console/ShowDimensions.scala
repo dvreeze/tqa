@@ -118,7 +118,7 @@ object ShowDimensions {
 
     val inheritingPrimaries =
       (hasHypercubes flatMap { hh =>
-        basicTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary) { path =>
+        basicTaxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary) { path =>
           path.firstRelationship.elr == hh.elr
         }
       } flatMap (_.relationships.map(_.member))).toSet

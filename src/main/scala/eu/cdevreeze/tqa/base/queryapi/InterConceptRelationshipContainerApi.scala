@@ -95,34 +95,28 @@ trait InterConceptRelationshipContainerApi {
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
-   * Filters the longest inter-concept relationship paths that are outgoing from the given concept and
+   * Filters the inter-concept relationship paths that are outgoing from the given concept and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "inits"
-   * pass the predicate are accepted by the filter!
+   * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
+   * but on encountering a cycle in a path it stops growing.
    *
    * This is a very general method that is used to implement specific methods in more specific
    * relationship query API traits.
-   *
-   * It is also a dangerous method in that termination is not guaranteed, but may depend on the passed
-   * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
-   * false on detecting them.
    */
-  def filterLongestOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
+  def filterOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     sourceConcept: EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
 
   /**
-   * Filters the longest inter-concept relationship paths that are incoming to the given concept and
+   * Filters the inter-concept relationship paths that are incoming to the given concept and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "tails"
-   * pass the predicate are accepted by the filter!
+   * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
+   * but on encountering a cycle in a path it stops growing.
    *
    * This is a very general method that is used to implement specific methods in more specific
    * relationship query API traits.
-   *
-   * It is also a dangerous method in that termination is not guaranteed, but may depend on the passed
-   * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
-   * false on detecting them.
    */
-  def filterLongestIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](
+  def filterIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     targetConcept: EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
 

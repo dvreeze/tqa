@@ -287,7 +287,7 @@ object DimensionalTaxonomy {
 
   private def extractDimensionDomains(taxonomy: TaxonomyApi, dimensions: Set[EName]): immutable.IndexedSeq[DimensionDomain] = {
     val domainAwarePaths =
-      dimensions.toIndexedSeq.flatMap(dim => taxonomy.filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dim)(path => !path.hasCycle))
+      dimensions.toIndexedSeq.flatMap(dim => taxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(dim)(path => !path.hasCycle))
 
     val domainAwarePathsByDimensionDomain: Map[(EName, String), immutable.IndexedSeq[DomainAwareRelationshipPath]] =
       domainAwarePaths.groupBy(path => (path.firstRelationship.sourceConceptEName -> path.firstRelationship.elr))

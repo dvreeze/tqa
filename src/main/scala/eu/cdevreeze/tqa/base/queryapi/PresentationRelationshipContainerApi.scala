@@ -95,9 +95,9 @@ trait PresentationRelationshipContainerApi {
   // Filtering outgoing and incoming relationship paths
 
   /**
-   * Returns `filterLongestOutgoingConsecutiveParentChildRelationshipPaths(sourceConcept)(_ => true)`.
+   * Returns `filterOutgoingConsecutiveParentChildRelationshipPaths(sourceConcept)(_ => true)`.
    */
-  def findAllLongestOutgoingConsecutiveParentChildRelationshipPaths(
+  def findAllOutgoingConsecutiveParentChildRelationshipPaths(
     sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
@@ -108,14 +108,14 @@ trait PresentationRelationshipContainerApi {
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
-  def filterLongestOutgoingConsecutiveParentChildRelationshipPaths(
+  def filterOutgoingConsecutiveParentChildRelationshipPaths(
     sourceConcept: EName)(
       p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
-   * Returns `filterLongestIncomingConsecutiveParentChildRelationshipPaths(targetConcept)(_ => true)`.
+   * Returns `filterIncomingConsecutiveParentChildRelationshipPaths(targetConcept)(_ => true)`.
    */
-  def findAllLongestIncomingConsecutiveParentChildRelationshipPaths(
+  def findAllIncomingConsecutiveParentChildRelationshipPaths(
     targetConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
@@ -126,6 +126,6 @@ trait PresentationRelationshipContainerApi {
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
-  def filterLongestIncomingConsecutiveParentChildRelationshipPaths(
+  def filterIncomingConsecutiveParentChildRelationshipPaths(
     targetConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath]
 }

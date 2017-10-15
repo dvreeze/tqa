@@ -235,9 +235,9 @@ trait DimensionalRelationshipContainerApi {
   // Filtering outgoing and incoming relationship paths
 
   /**
-   * Returns `filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(sourceConcept)(_ => true)`.
+   * Returns `filterOutgoingConsecutiveDomainAwareRelationshipPaths(sourceConcept)(_ => true)`.
    */
-  def findAllLongestOutgoingConsecutiveDomainAwareRelationshipPaths(
+  def findAllOutgoingConsecutiveDomainAwareRelationshipPaths(
     sourceConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
@@ -248,14 +248,14 @@ trait DimensionalRelationshipContainerApi {
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
-  def filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(
+  def filterOutgoingConsecutiveDomainAwareRelationshipPaths(
     sourceConcept: EName)(
       p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
-   * Returns `filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(sourceConcept)(_ => true)`.
+   * Returns `filterOutgoingConsecutiveDomainMemberRelationshipPaths(sourceConcept)(_ => true)`.
    */
-  def findAllLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+  def findAllOutgoingConsecutiveDomainMemberRelationshipPaths(
     sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   /**
@@ -266,14 +266,14 @@ trait DimensionalRelationshipContainerApi {
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
-  def filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+  def filterOutgoingConsecutiveDomainMemberRelationshipPaths(
     sourceConcept: EName)(
       p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   /**
-   * Returns `filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept)(_ => true)`.
+   * Returns `filterIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept)(_ => true)`.
    */
-  def findAllLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+  def findAllIncomingConsecutiveDomainAwareRelationshipPaths(
     targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
@@ -284,13 +284,13 @@ trait DimensionalRelationshipContainerApi {
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
-  def filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+  def filterIncomingConsecutiveDomainAwareRelationshipPaths(
     targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
-   * Returns `filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)`.
+   * Returns `filterIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)`.
    */
-  def findAllLongestIncomingConsecutiveDomainMemberRelationshipPaths(
+  def findAllIncomingConsecutiveDomainMemberRelationshipPaths(
     targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   /**
@@ -301,7 +301,7 @@ trait DimensionalRelationshipContainerApi {
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
    * false on detecting them.
    */
-  def filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(
+  def filterIncomingConsecutiveDomainMemberRelationshipPaths(
     targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   // Other query methods

@@ -99,31 +99,31 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
 
   // Filtering outgoing and incoming relationship paths
 
-  final def findAllLongestOutgoingConsecutiveParentChildRelationshipPaths(
+  final def findAllOutgoingConsecutiveParentChildRelationshipPaths(
     sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterLongestOutgoingConsecutiveParentChildRelationshipPaths(sourceConcept)(_ => true)
+    filterOutgoingConsecutiveParentChildRelationshipPaths(sourceConcept)(_ => true)
   }
 
-  final def filterLongestOutgoingConsecutiveParentChildRelationshipPaths(
+  final def filterOutgoingConsecutiveParentChildRelationshipPaths(
     sourceConcept: EName)(
       p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship]) { path =>
+    filterOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship]) { path =>
       path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
-  final def findAllLongestIncomingConsecutiveParentChildRelationshipPaths(
+  final def findAllIncomingConsecutiveParentChildRelationshipPaths(
     targetConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterLongestIncomingConsecutiveParentChildRelationshipPaths(targetConcept)(_ => true)
+    filterIncomingConsecutiveParentChildRelationshipPaths(targetConcept)(_ => true)
   }
 
-  final def filterLongestIncomingConsecutiveParentChildRelationshipPaths(
+  final def filterIncomingConsecutiveParentChildRelationshipPaths(
     targetConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[ParentChildRelationship]) { path =>
+    filterIncomingInterConceptRelationshipPaths(targetConcept, classTag[ParentChildRelationship]) { path =>
       path.isConsecutiveRelationshipPath && p(path)
     }
   }

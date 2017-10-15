@@ -90,21 +90,21 @@ class QueryApiTest extends FunSuite {
       topENames
     }
     assertResult(prels.map(_.targetConceptEName).toSet) {
-      val paths = richTaxo.findAllLongestOutgoingConsecutiveParentChildRelationshipPaths(plinkTop)
+      val paths = richTaxo.findAllOutgoingConsecutiveParentChildRelationshipPaths(plinkTop)
       paths.flatMap(_.relationships.map(_.targetConceptEName)).toSet
     }
     assertResult(prels.map(_.targetConceptEName).toSet.union(Set(plinkTop))) {
-      val paths = richTaxo.findAllLongestOutgoingConsecutiveParentChildRelationshipPaths(plinkTop)
+      val paths = richTaxo.findAllOutgoingConsecutiveParentChildRelationshipPaths(plinkTop)
       paths.flatMap(_.concepts).toSet
     }
 
     assertResult(Nil) {
-      richTaxo.findAllLongestIncomingConsecutiveParentChildRelationshipPaths(plinkTop)
+      richTaxo.findAllIncomingConsecutiveParentChildRelationshipPaths(plinkTop)
     }
 
     assertResult(Set(plinkTop)) {
       val paths = prels.map(_.targetConceptEName).distinct flatMap { concept =>
-        richTaxo.findAllLongestIncomingConsecutiveParentChildRelationshipPaths(concept)
+        richTaxo.findAllIncomingConsecutiveParentChildRelationshipPaths(concept)
       }
 
       paths.map(_.sourceConcept).toSet
@@ -112,7 +112,7 @@ class QueryApiTest extends FunSuite {
 
     assertResult(true) {
       val nonTopConcepts = prels.map(_.targetConceptEName).toSet
-      nonTopConcepts.forall(c => richTaxo.findAllLongestIncomingConsecutiveParentChildRelationshipPaths(c).nonEmpty)
+      nonTopConcepts.forall(c => richTaxo.findAllIncomingConsecutiveParentChildRelationshipPaths(c).nonEmpty)
     }
   }
 
@@ -208,7 +208,7 @@ class QueryApiTest extends FunSuite {
     val hypercubes = richTaxo.findAllHypercubeDeclarations.map(_.targetEName).distinct
 
     val paths =
-      hypercubes.flatMap(hc => richTaxo.filterLongestOutgoingInterConceptRelationshipPaths(hc, classTag[DimensionalRelationship])(_.isConsecutiveRelationshipPath))
+      hypercubes.flatMap(hc => richTaxo.filterOutgoingInterConceptRelationshipPaths(hc, classTag[DimensionalRelationship])(_.isConsecutiveRelationshipPath))
 
     assertResult(richTaxo.findAllHypercubeDimensionRelationships.toSet) {
       paths.map(_.firstRelationship).toSet
@@ -272,14 +272,14 @@ class QueryApiTest extends FunSuite {
 
     val hdRel = hdRelsForElr.head
 
-    val ddPathsForElr = richTaxo.filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(hdRel.targetConceptEName) { path =>
+    val ddPathsForElr = richTaxo.filterOutgoingConsecutiveDomainAwareRelationshipPaths(hdRel.targetConceptEName) { path =>
       hdRel.isFollowedBy(path.firstRelationship)
     }
 
     val ddPathLeaves = ddPathsForElr.map(_.targetConcept).toSet
 
     val incomingPaths = ddPathLeaves.toIndexedSeq.flatMap(c =>
-      richTaxo.filterLongestIncomingInterConceptRelationshipPaths(c, classTag[DimensionalRelationship])(_ => true))
+      richTaxo.filterIncomingInterConceptRelationshipPaths(c, classTag[DimensionalRelationship])(_ => true))
 
     assertResult(true) {
       incomingPaths.exists(_.firstRelationship == hhRel)
@@ -299,7 +299,7 @@ class QueryApiTest extends FunSuite {
       val (elr, primaries) = elrToPrimaryMap.iterator.next
       val rootPrimary = primaries.iterator.next
 
-      val dmRelPaths = richTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(rootPrimary) {
+      val dmRelPaths = richTaxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(rootPrimary) {
         _.firstRelationship.elr == elr
       }
 
@@ -309,7 +309,7 @@ class QueryApiTest extends FunSuite {
     // Testing has-hypercube inheritance in bulk
 
     val inheritingPrimaries =
-      hhRels.flatMap(hh => richTaxo.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary)(_.firstRelationship.elr == hh.elr)).
+      hhRels.flatMap(hh => richTaxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary)(_.firstRelationship.elr == hh.elr)).
         flatMap(_.concepts).toSet
 
     assertResult(true) {

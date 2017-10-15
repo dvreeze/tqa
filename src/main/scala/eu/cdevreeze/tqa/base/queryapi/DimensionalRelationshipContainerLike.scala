@@ -254,60 +254,60 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   // Filtering outgoing and incoming relationship paths
 
-  final def findAllLongestOutgoingConsecutiveDomainAwareRelationshipPaths(
+  final def findAllOutgoingConsecutiveDomainAwareRelationshipPaths(
     sourceConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(sourceConcept)(_ => true)
+    filterOutgoingConsecutiveDomainAwareRelationshipPaths(sourceConcept)(_ => true)
   }
 
-  final def filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(
+  final def filterOutgoingConsecutiveDomainAwareRelationshipPaths(
     sourceConcept: EName)(
       p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship]) { path =>
+    filterOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship]) { path =>
       path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
-  final def findAllLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+  final def findAllOutgoingConsecutiveDomainMemberRelationshipPaths(
     sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(sourceConcept)(_ => true)
+    filterOutgoingConsecutiveDomainMemberRelationshipPaths(sourceConcept)(_ => true)
   }
 
-  final def filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+  final def filterOutgoingConsecutiveDomainMemberRelationshipPaths(
     sourceConcept: EName)(
       p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterLongestOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship]) { path =>
+    filterOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship]) { path =>
       path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
-  final def findAllLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+  final def findAllIncomingConsecutiveDomainAwareRelationshipPaths(
     targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept)(_ => true)
+    filterIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept)(_ => true)
   }
 
-  final def filterLongestIncomingConsecutiveDomainAwareRelationshipPaths(
+  final def filterIncomingConsecutiveDomainAwareRelationshipPaths(
     targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship]) { path =>
+    filterIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship]) { path =>
       path.isConsecutiveRelationshipPath && p(path)
     }
   }
 
-  final def findAllLongestIncomingConsecutiveDomainMemberRelationshipPaths(
+  final def findAllIncomingConsecutiveDomainMemberRelationshipPaths(
     targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)
+    filterIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)
   }
 
-  final def filterLongestIncomingConsecutiveDomainMemberRelationshipPaths(
+  final def filterIncomingConsecutiveDomainMemberRelationshipPaths(
     targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterLongestIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship]) { path =>
+    filterIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship]) { path =>
       path.isConsecutiveRelationshipPath && p(path)
     }
   }
@@ -316,7 +316,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   final def findAllOwnOrInheritedHasHypercubes(concept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
     val incomingRelationshipPaths =
-      findAllLongestIncomingConsecutiveDomainMemberRelationshipPaths(concept)
+      findAllIncomingConsecutiveDomainMemberRelationshipPaths(concept)
 
     val domainMemberRelationships = incomingRelationshipPaths.flatMap(_.relationships)
 
@@ -345,7 +345,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   final def findAllInheritedHasHypercubes(concept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
     val incomingRelationshipPaths =
-      findAllLongestIncomingConsecutiveDomainMemberRelationshipPaths(concept)
+      findAllIncomingConsecutiveDomainMemberRelationshipPaths(concept)
 
     val domainMemberRelationships = incomingRelationshipPaths.flatMap(_.relationships)
 
@@ -373,7 +373,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
       hasHypercubes flatMap { hasHypercube =>
         val domainMemberPaths =
-          filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
+          filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
 
         val inheritingConcepts = domainMemberPaths.flatMap(_.relationships).map(_.targetConceptEName).distinct
         val ownOrInheritingConcepts = hasHypercube.primary +: inheritingConcepts
@@ -396,7 +396,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
       hasHypercubes flatMap { hasHypercube =>
         val domainMemberPaths =
-          filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
+          filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
 
         val inheritingConcepts = domainMemberPaths.flatMap(_.relationships).map(_.targetConceptEName).distinct
 
@@ -414,7 +414,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   final def findAllMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
     val dimensionDomainPaths =
-      filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
+      filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
         path.firstRelationship.isInstanceOf[DimensionDomainRelationship] &&
           path.firstRelationship.targetConceptEName == domain &&
           path.firstRelationship.elr == dimensionDomainElr
@@ -426,7 +426,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
 
   final def findAllUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName] = {
     val dimensionDomainPaths =
-      filterLongestOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
+      filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
         path.firstRelationship.isInstanceOf[DimensionDomainRelationship] &&
           path.firstRelationship.targetConceptEName == domain &&
           path.firstRelationship.elr == dimensionDomainElr

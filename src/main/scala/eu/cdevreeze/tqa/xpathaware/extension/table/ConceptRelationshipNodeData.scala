@@ -163,7 +163,7 @@ object ConceptRelationshipNodeData {
     taxo: BasicTableTaxonomy): Set[EName] = {
 
     val relationshipPaths =
-      taxo.underlyingTaxonomy.filterLongestOutgoingInterConceptRelationshipPaths(
+      taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationshipPaths(
         treeWalkSpec.startConcept,
         classTag[InterConceptRelationship]) { path =>
           path.isConsecutiveRelationshipPath && !path.hasCycle &&

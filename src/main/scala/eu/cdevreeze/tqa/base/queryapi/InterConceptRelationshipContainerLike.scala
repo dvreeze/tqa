@@ -103,33 +103,36 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     interConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()) collect { case relationship: A if p(relationship) => relationship }
   }
 
-  final def filterLongestOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
+  final def filterOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     sourceConcept: EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
 
     val nextRelationships = filterOutgoingInterConceptRelationshipsOfType(sourceConcept, relationshipType)(rel => p(InterConceptRelationshipPath(rel)))
 
-    val paths = nextRelationships.flatMap(rel => filterLongestOutgoingInterConceptRelationshipPaths(InterConceptRelationshipPath(rel), relationshipType)(p))
+    val paths = nextRelationships.flatMap(rel => filterOutgoingInterConceptRelationshipPaths(InterConceptRelationshipPath(rel), relationshipType)(p))
     paths
   }
 
-  final def filterLongestIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](
+  final def filterIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     targetConcept: EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
 
     val prevRelationships = filterIncomingInterConceptRelationshipsOfType(targetConcept, relationshipType)(rel => p(InterConceptRelationshipPath(rel)))
 
-    val paths = prevRelationships.flatMap(rel => filterLongestIncomingInterConceptRelationshipPaths(InterConceptRelationshipPath(rel), relationshipType)(p))
+    val paths = prevRelationships.flatMap(rel => filterIncomingInterConceptRelationshipPaths(InterConceptRelationshipPath(rel), relationshipType)(p))
     paths
   }
 
   // Private methods
 
-  private def filterLongestOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
+  private def filterOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     path: InterConceptRelationshipPath[A],
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
 
-    val nextRelationships = filterOutgoingInterConceptRelationshipsOfType(path.targetConcept, relationshipType)(relationship => p(path.append(relationship)))
+    val nextRelationships =
+      filterOutgoingInterConceptRelationshipsOfType(
+        path.targetConcept, relationshipType)(relationship => !path.hasCycle && p(path.append(relationship)))
+
     val nextPaths = nextRelationships.map(rel => path.append(rel))
 
     if (nextPaths.isEmpty) {
@@ -137,16 +140,19 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     } else {
       nextPaths flatMap { nextPath =>
         // Recursive calls
-        filterLongestOutgoingInterConceptRelationshipPaths(nextPath, relationshipType)(p)
+        filterOutgoingInterConceptRelationshipPaths(nextPath, relationshipType)(p)
       }
     }
   }
 
-  private def filterLongestIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](
+  private def filterIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     path: InterConceptRelationshipPath[A],
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
 
-    val prevRelationships = filterIncomingInterConceptRelationshipsOfType(path.sourceConcept, relationshipType)(relationship => p(path.prepend(relationship)))
+    val prevRelationships =
+      filterIncomingInterConceptRelationshipsOfType(
+        path.sourceConcept, relationshipType)(relationship => !path.hasCycle && p(path.prepend(relationship)))
+
     val prevPaths = prevRelationships.map(rel => path.prepend(rel))
 
     if (prevPaths.isEmpty) {
@@ -154,7 +160,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     } else {
       prevPaths flatMap { prevPath =>
         // Recursive calls
-        filterLongestIncomingInterConceptRelationshipPaths(prevPath, relationshipType)(p)
+        filterIncomingInterConceptRelationshipPaths(prevPath, relationshipType)(p)
       }
     }
   }

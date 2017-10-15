@@ -144,7 +144,7 @@ object DimensionRelationshipNodeData {
     // Ignoring unusable members without any usable descendants
 
     val relationshipPaths =
-      taxo.underlyingTaxonomy.filterLongestOutgoingConsecutiveDomainMemberRelationshipPaths(
+      taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainMemberRelationshipPaths(
         treeWalkSpec.startMemberName) { path =>
           treeWalkSpec.startMember.incomingRelationshipOption.forall(_.isFollowedBy(path.firstRelationship)) &&
             path.isConsecutiveRelationshipPath &&
