@@ -95,13 +95,33 @@ trait InterConceptRelationshipContainerApi {
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
+   * Calls method `filterOutgoingInterConceptRelationshipPaths`, adding sub-predicate
+   * `isConsecutiveRelationshipPath` to the relationship path predicate.
+   *
+   * Typically this method should be preferred over method `filterOutgoingInterConceptRelationshipPaths`.
+   */
+  def filterOutgoingConsecutiveInterConceptRelationshipPaths[A <: InterConceptRelationship](
+    sourceConcept: EName,
+    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
+
+  /**
+   * Calls method `filterIncomingInterConceptRelationshipPaths`, adding sub-predicate
+   * `isConsecutiveRelationshipPath` to the relationship path predicate.
+   *
+   * Typically this method should be preferred over method `filterIncomingInterConceptRelationshipPaths`.
+   */
+  def filterIncomingConsecutiveInterConceptRelationshipPaths[A <: InterConceptRelationship](
+    targetConcept: EName,
+    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
+
+  /**
    * Filters the inter-concept relationship paths that are outgoing from the given concept and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "inits"
    * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
    * but on encountering a cycle in a path it stops growing.
    *
    * This is a very general method that is used to implement specific methods in more specific
-   * relationship query API traits.
+   * relationship query API traits. Typically prefer method `filterOutgoingConsecutiveInterConceptRelationshipPaths` instead.
    */
   def filterOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     sourceConcept: EName,
@@ -114,7 +134,7 @@ trait InterConceptRelationshipContainerApi {
    * but on encountering a cycle in a path it stops growing.
    *
    * This is a very general method that is used to implement specific methods in more specific
-   * relationship query API traits.
+   * relationship query API traits. Typically prefer method `filterIncomingConsecutiveInterConceptRelationshipPaths` instead.
    */
   def filterIncomingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     targetConcept: EName,

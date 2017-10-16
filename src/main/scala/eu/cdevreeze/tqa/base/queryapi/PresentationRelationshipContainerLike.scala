@@ -109,9 +109,7 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
     sourceConcept: EName)(
       p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship]) { path =>
-      path.isConsecutiveRelationshipPath && p(path)
-    }
+    filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship])(p)
   }
 
   final def findAllIncomingConsecutiveParentChildRelationshipPaths(
@@ -123,8 +121,6 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
   final def filterIncomingConsecutiveParentChildRelationshipPaths(
     targetConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterIncomingInterConceptRelationshipPaths(targetConcept, classTag[ParentChildRelationship]) { path =>
-      path.isConsecutiveRelationshipPath && p(path)
-    }
+    filterIncomingConsecutiveInterConceptRelationshipPaths(targetConcept, classTag[ParentChildRelationship])(p)
   }
 }

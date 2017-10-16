@@ -101,8 +101,9 @@ trait PresentationRelationshipContainerApi {
     sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
-   * Filters the longest consecutive (!) parent-child relationship paths that are outgoing from the given concept.
+   * Filters the consecutive (!) parent-child relationship paths that are outgoing from the given concept.
    * Only relationship paths for which all (non-empty) "inits" pass the predicate are accepted by the filter!
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
    *
    * It is a dangerous method in that termination is not guaranteed, but may depend on the passed
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns
@@ -119,8 +120,9 @@ trait PresentationRelationshipContainerApi {
     targetConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
-   * Filters the longest consecutive (!) parent-child relationship paths that are incoming to the given concept.
+   * Filters the consecutive (!) parent-child relationship paths that are incoming to the given concept.
    * Only relationship paths for which all (non-empty) "tails" pass the predicate are accepted by the filter!
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
    *
    * It is a dangerous method in that termination is not guaranteed, but may depend on the passed
    * relationship path predicate. For safety, make sure that the predicate detects cycles and returns

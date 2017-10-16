@@ -264,9 +264,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     sourceConcept: EName)(
       p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship]) { path =>
-      path.isConsecutiveRelationshipPath && p(path)
-    }
+    filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship])(p)
   }
 
   final def findAllOutgoingConsecutiveDomainMemberRelationshipPaths(
@@ -279,9 +277,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     sourceConcept: EName)(
       p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterOutgoingInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship]) { path =>
-      path.isConsecutiveRelationshipPath && p(path)
-    }
+    filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship])(p)
   }
 
   final def findAllIncomingConsecutiveDomainAwareRelationshipPaths(
@@ -293,9 +289,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def filterIncomingConsecutiveDomainAwareRelationshipPaths(
     targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship]) { path =>
-      path.isConsecutiveRelationshipPath && p(path)
-    }
+    filterIncomingConsecutiveInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship])(p)
   }
 
   final def findAllIncomingConsecutiveDomainMemberRelationshipPaths(
@@ -307,9 +301,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def filterIncomingConsecutiveDomainMemberRelationshipPaths(
     targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterIncomingInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship]) { path =>
-      path.isConsecutiveRelationshipPath && p(path)
-    }
+    filterIncomingConsecutiveInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship])(p)
   }
 
   // Other query methods

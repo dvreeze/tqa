@@ -103,6 +103,24 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     interConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()) collect { case relationship: A if p(relationship) => relationship }
   }
 
+  final def filterOutgoingConsecutiveInterConceptRelationshipPaths[A <: InterConceptRelationship](
+    sourceConcept: EName,
+    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+
+    filterOutgoingInterConceptRelationshipPaths(sourceConcept, relationshipType) { path =>
+      path.isConsecutiveRelationshipPath && p(path)
+    }
+  }
+
+  final def filterIncomingConsecutiveInterConceptRelationshipPaths[A <: InterConceptRelationship](
+    targetConcept: EName,
+    relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+
+    filterIncomingInterConceptRelationshipPaths(targetConcept, relationshipType) { path =>
+      path.isConsecutiveRelationshipPath && p(path)
+    }
+  }
+
   final def filterOutgoingInterConceptRelationshipPaths[A <: InterConceptRelationship](
     sourceConcept: EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
