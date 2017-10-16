@@ -294,7 +294,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     }
 
     assertResult("segment") {
-      hasHypercubes.head.contextElement
+      hasHypercubes.head.contextElement.toString
     }
     assertResult("http://www.xbrl.org/2003/role/Cube") {
       hasHypercubes.head.effectiveTargetRole

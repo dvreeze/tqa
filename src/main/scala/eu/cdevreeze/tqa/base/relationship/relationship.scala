@@ -35,6 +35,7 @@ import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
+import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.CalculationArc
@@ -379,9 +380,11 @@ sealed abstract class HasHypercubeRelationship(
     arc.attributeOption(XbrldtClosedEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
   }
 
-  final def contextElement: String = {
-    arc.attributeOption(XbrldtContextElementEName).getOrElse(
+  final def contextElement: ContextElement = {
+    val attrValue = arc.attributeOption(XbrldtContextElementEName).getOrElse(
       sys.error(s"Missing attribute @xbrldt:contextElement on has-hypercube arc in $docUri."))
+
+    ContextElement.fromString(attrValue)
   }
 
   final override def effectiveTargetRole: String = {

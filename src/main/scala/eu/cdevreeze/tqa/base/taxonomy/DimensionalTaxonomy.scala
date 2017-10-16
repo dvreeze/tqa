@@ -20,6 +20,7 @@ import scala.collection.immutable
 import scala.util.Success
 import scala.util.Try
 
+import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.queryapi.DomainAwareRelationshipPath
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.base.relationship.AllRelationship
@@ -184,10 +185,8 @@ final class DimensionalTaxonomy private (
         dimensionalContext.filterDimensions(dimensionsToValidate)
       }
 
-    // TODO Type for ContextElement "enumeration"
-
     val dimensionalContextElementToValidate =
-      if (hasHypercube.contextElement == "segment") {
+      if (hasHypercube.contextElement == ContextElement.Segment) {
         dimensionalContextToValidate.dimensionalSegment
       } else {
         dimensionalContextToValidate.dimensionalScenario
