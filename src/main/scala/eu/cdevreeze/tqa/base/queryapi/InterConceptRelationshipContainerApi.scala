@@ -76,7 +76,7 @@ trait InterConceptRelationshipContainerApi {
    * }
    * }}}
    */
-  def findAllConsecutiveInterConceptRelationships[A <: InterConceptRelationship](
+  def findAllConsecutiveInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationship: InterConceptRelationship,
     resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 

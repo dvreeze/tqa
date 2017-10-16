@@ -79,7 +79,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     interConceptRelationshipsBySource.getOrElse(sourceConcept, Vector()) collect { case relationship: A if p(relationship) => relationship }
   }
 
-  final def findAllConsecutiveInterConceptRelationships[A <: InterConceptRelationship](
+  final def findAllConsecutiveInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationship: InterConceptRelationship,
     resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
