@@ -261,8 +261,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   }
 
   final def filterOutgoingConsecutiveDomainAwareRelationshipPaths(
-    sourceConcept: EName)(
-      p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
+    sourceConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship])(p)
   }
@@ -274,8 +273,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   }
 
   final def filterOutgoingConsecutiveDomainMemberRelationshipPaths(
-    sourceConcept: EName)(
-      p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
+    sourceConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
     filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship])(p)
   }

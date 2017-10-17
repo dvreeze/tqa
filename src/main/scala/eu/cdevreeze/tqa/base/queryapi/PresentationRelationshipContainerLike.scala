@@ -106,8 +106,7 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
   }
 
   final def filterOutgoingConsecutiveParentChildRelationshipPaths(
-    sourceConcept: EName)(
-      p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
+    sourceConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
     filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship])(p)
   }
