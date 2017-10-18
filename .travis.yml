@@ -1,6 +1,13 @@
+
 language: scala
-scala:
- - 2.11.11
- - 2.12.3
-jdk:
-  - oraclejdk8
+
+matrix:
+  include:
+  - jdk: oraclejdk8
+    scala: 2.12.3
+  - jdk: oraclejdk8
+    scala: 2.11.11
+
+script:
+ - sbt ++$TRAVIS_SCALA_VERSION -J-Xmx2G test
+

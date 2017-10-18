@@ -14,14 +14,20 @@ crossScalaVersions := Seq("2.11.11", "2.12.3")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint")
 
-(unmanagedSourceDirectories in Compile) <++= (scalaBinaryVersion, baseDirectory) apply { case (version, base) =>
-  if (version.contains("2.12")) Seq(base / "src" / "main" / "scala-2.12")
-  else if (version.contains("2.11")) Seq(base / "src" / "main" / "scala-2.11") else Seq()
+(unmanagedSourceDirectories in Compile) ++= {
+  val vers = scalaBinaryVersion.value
+  val base = baseDirectory.value
+
+  if (vers.contains("2.12")) Seq(base / "src" / "main" / "scala-2.12")
+  else if (vers.contains("2.11")) Seq(base / "src" / "main" / "scala-2.11") else Seq()
 }
 
-(unmanagedSourceDirectories in Test) <++= (scalaBinaryVersion, baseDirectory) apply { case (version, base) =>
-  if (version.contains("2.12")) Seq(base / "src" / "test" / "scala-2.12")
-  else if (version.contains("2.11")) Seq(base / "src" / "test" / "scala-2.11") else Seq()
+(unmanagedSourceDirectories in Test) ++= {
+  val vers = scalaBinaryVersion.value
+  val base = baseDirectory.value
+
+  if (vers.contains("2.12")) Seq(base / "src" / "test" / "scala-2.12")
+  else if (vers.contains("2.11")) Seq(base / "src" / "test" / "scala-2.11") else Seq()
 }
 
 libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.6.4"
@@ -51,12 +57,16 @@ libraryDependencies += ("org.joda" % "joda-convert" % "1.8.1" % "test").intransi
 
 publishMavenStyle := true
 
-publishTo <<= version { (v: String) =>
+publishTo := {
+  val vers = version.value
+
   val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
+
+  if (vers.trim.endsWith("SNAPSHOT")) {
     Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
+  } else {
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+  }
 }
 
 publishArtifact in Test := false
