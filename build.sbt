@@ -5,9 +5,9 @@ organization := "eu.cdevreeze.tqa"
 
 version := "0.4.9-SNAPSHOT"
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.12.3"
 
-crossScalaVersions := Seq("2.11.11", "2.12.3")
+crossScalaVersions := Seq("2.12.3", "2.11.11")
 
 // See: Toward a safer Scala
 // http://downloads.typesafe.com/website/presentations/ScalaDaysSF2015/Toward%20a%20Safer%20Scala%20@%20Scala%20Days%20SF%202015.pdf
