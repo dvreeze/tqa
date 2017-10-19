@@ -547,6 +547,11 @@ final class XbrliContext private[instance] (
     entity.segmentOption.map(_.explicitDimensionMembers).getOrElse(Map.empty) ++
       scenarioOption.map(_.explicitDimensionMembers).getOrElse(Map.empty)
   }
+
+  def typedDimensions: Set[EName] = {
+    entity.segmentOption.map(_.typedDimensions).getOrElse(Set.empty) union
+      scenarioOption.map(_.typedDimensions).getOrElse(Set.empty)
+  }
 }
 
 /**
@@ -958,6 +963,14 @@ sealed trait MayContainDimensions extends XbrliElem {
 
       (dim -> mem)
     }).toMap
+  }
+
+  final def typedMembers: immutable.IndexedSeq[TypedMember] = {
+    findAllChildElemsOfType(classTag[TypedMember])
+  }
+
+  final def typedDimensions: Set[EName] = {
+    typedMembers.map(_.dimension).toSet
   }
 
   // TODO Typed dimension members

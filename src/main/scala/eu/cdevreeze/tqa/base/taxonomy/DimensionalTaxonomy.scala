@@ -316,37 +316,48 @@ object DimensionalTaxonomy {
   // Dimensional instance data
 
   sealed abstract class DimensionalContextElement(
-      val explicitDimensionMembers: Map[EName, EName],
-      val typedDimensions: Set[EName]) {
+      val explicitDimensionMemberSeq: immutable.IndexedSeq[(EName, EName)],
+      val typedDimensionSeq: immutable.IndexedSeq[EName]) {
+
+    final def explicitDimensionMembers: Map[EName, EName] = {
+      explicitDimensionMemberSeq.toMap
+    }
+
+    final def typedDimensions: Set[EName] = {
+      typedDimensionSeq.toSet
+    }
 
     def filterDimensions(dimensions: Set[EName]): DimensionalContextElement
 
-    def dimensions: Set[EName] = {
+    final def dimensions: Set[EName] = {
       explicitDimensionMembers.keySet.union(typedDimensions)
     }
 
-    final def hasRepeatedDimensions: Boolean = explicitDimensionMembers.keySet.intersect(typedDimensions).nonEmpty
+    final def hasRepeatedDimensions: Boolean = {
+      val dimensionSeq = explicitDimensionMemberSeq.map(_._1) ++ typedDimensionSeq
+      dimensionSeq.distinct.size < dimensionSeq.size
+    }
   }
 
   final case class DimensionalSegment(
-      override val explicitDimensionMembers: Map[EName, EName],
-      override val typedDimensions: Set[EName]) extends DimensionalContextElement(explicitDimensionMembers, typedDimensions) {
+      override val explicitDimensionMemberSeq: immutable.IndexedSeq[(EName, EName)],
+      override val typedDimensionSeq: immutable.IndexedSeq[EName]) extends DimensionalContextElement(explicitDimensionMemberSeq, typedDimensionSeq) {
 
     final def filterDimensions(dimensions: Set[EName]): DimensionalSegment = {
       DimensionalSegment(
-        explicitDimensionMembers.filterKeys(dimensions),
-        typedDimensions.intersect(dimensions))
+        explicitDimensionMemberSeq.filter(dimMem => dimensions.contains(dimMem._1)),
+        typedDimensionSeq.filter(dim => dimensions.contains(dim)))
     }
   }
 
   final case class DimensionalScenario(
-      override val explicitDimensionMembers: Map[EName, EName],
-      override val typedDimensions: Set[EName]) extends DimensionalContextElement(explicitDimensionMembers, typedDimensions) {
+      override val explicitDimensionMemberSeq: immutable.IndexedSeq[(EName, EName)],
+      override val typedDimensionSeq: immutable.IndexedSeq[EName]) extends DimensionalContextElement(explicitDimensionMemberSeq, typedDimensionSeq) {
 
     final def filterDimensions(dimensions: Set[EName]): DimensionalScenario = {
       DimensionalScenario(
-        explicitDimensionMembers.filterKeys(dimensions),
-        typedDimensions.intersect(dimensions))
+        explicitDimensionMemberSeq.filter(dimMem => dimensions.contains(dimMem._1)),
+        typedDimensionSeq.filter(dim => dimensions.contains(dim)))
     }
   }
 
