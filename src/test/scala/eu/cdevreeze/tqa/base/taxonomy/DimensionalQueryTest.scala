@@ -1475,9 +1475,9 @@ class DimensionalQueryTest extends FunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship]) { path =>
-        // The check isMinimalIfHavingCycle is essential as stopping condition; it is implicitly checked but still explicitly mentioned here
-        path.isMinimalIfHavingCycle
+      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
+        // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
+        paths.forall(_.isMinimalIfHavingCycle)
       }
 
     assertResult(1)(outgoingDimPaths.size)
@@ -1664,9 +1664,9 @@ class DimensionalQueryTest extends FunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPathsFromDomain =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship]) { path =>
-        // The check isMinimalIfHavingCycle is essential as stopping condition; see above for a similar case
-        path.isMinimalIfHavingCycle
+      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
+        // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
+        paths.forall(_.isMinimalIfHavingCycle)
       }
 
     assertResult(1)(outgoingDimPathsFromDomain.size)
