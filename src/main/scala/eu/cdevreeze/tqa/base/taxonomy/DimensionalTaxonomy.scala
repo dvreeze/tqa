@@ -218,10 +218,6 @@ final class DimensionalTaxonomy private (
     dimensionalContextElement: DimensionalContextElement,
     dimensionDomains: immutable.IndexedSeq[DimensionDomain]): Boolean = {
 
-    require(
-      dimensionDomains.map(_.dimension).toSet == Set(dimension),
-      s"Expected non-empty dimension-domain collection, all for dimension $dimension")
-
     val dimensionValueOption: Option[EName] =
       dimensionalContextElement.explicitDimensionMembers.get(dimension).orElse(dimensionDefaults.get(dimension))
 

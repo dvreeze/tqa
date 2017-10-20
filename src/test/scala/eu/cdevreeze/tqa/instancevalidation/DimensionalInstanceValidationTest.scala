@@ -19,6 +19,8 @@ package eu.cdevreeze.tqa.instancevalidation
 import java.io.File
 
 import scala.collection.immutable
+import scala.util.Success
+import scala.util.Try
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -36,6 +38,7 @@ import eu.cdevreeze.tqa.base.taxonomy.DimensionalTaxonomy.DimensionalSegment
 import eu.cdevreeze.tqa.base.taxonomy.DimensionalTaxonomy.RepeatedDimensionInInstanceError
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.instance.ItemFact
 import eu.cdevreeze.tqa.instance.XbrliContext
 import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.yaidom.core.EName
@@ -48,6 +51,8 @@ import net.sf.saxon.s9api.Processor
  */
 @RunWith(classOf[JUnitRunner])
 class DimensionalInstanceValidationTest extends FunSuite {
+
+  // 202-DefaultValueUsedInInstanceError
 
   test("testDefaultValueInInstanceOK") {
     val taxo = makeTestDts(Vector("200-xbrldie/202-DefaultValueUsedInInstanceError/defaultValueInInstance.xsd"))
@@ -102,6 +107,82 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
   }
 
+  // 203-PrimaryItemDimensionallyInvalidError
+
+  test("testCombinationOfCubesCase1Segment") {
+    val taxo = makeTestDts(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase1Segment.xsd"))
+    val instance = makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase1Segment.xbrl")
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, taxo))
+    }
+  }
+
+  test("testCombinationOfCubesCase6Segment") {
+    val taxo = makeTestDts(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase6Segment.xsd"))
+    val instance = makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase6Segment.xbrl")
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, taxo))
+    }
+  }
+
+  test("testCombinationOfCubesCase2Segment") {
+    val taxo = makeTestDts(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase2Segment.xsd"))
+    val instance = makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase2Segment.xbrl")
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, taxo))
+    }
+  }
+
+  test("testCombinationOfCubesCase3Segment") {
+    val taxo = makeTestDts(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase3Segment.xsd"))
+    val instance = makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase3Segment.xbrl")
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, taxo))
+    }
+  }
+
+  test("testCombinationOfCubesCase4Segment") {
+    val taxo = makeTestDts(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase4Segment.xsd"))
+    val instance = makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase4Segment.xbrl")
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, taxo))
+    }
+  }
+
+  test("testCombinationOfCubesCase5Segment") {
+    val taxo = makeTestDts(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase5Segment.xsd"))
+    val instance = makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase5Segment.xbrl")
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, taxo))
+    }
+  }
+
+  // 204-RepeatedDimensionInInstanceError
+
   test("testContextContainsTypedDimensionValid") {
     val taxo = makeTestDts(Vector("200-xbrldie/204-RepeatedDimensionInInstanceError/contextContainsRepeatedDimension.xsd"))
     val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/contextContainsTypedDimensionValid.xbrl")
@@ -120,6 +201,9 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
     assertResult(1) {
       instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).map(_.dimension).distinct.size
+    }
+    assertResult(List(false)) {
+      dimContexts.map(_.hasRepeatedDimensions)
     }
 
     assertResult(1) {
@@ -142,6 +226,9 @@ class DimensionalInstanceValidationTest extends FunSuite {
     assertResult(1) {
       instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).map(_.dimension).distinct.size
     }
+    assertResult(List(true)) {
+      dimContexts.map(_.hasRepeatedDimensions)
+    }
 
     assertResult(1) {
       dimContexts.map(ctx => taxo.validateDimensionalContext(ctx)).count(_.isFailure)
@@ -151,7 +238,98 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
   }
 
+  test("testBiLocatableExplicitDimInSeg") {
+    val taxo = makeTestDts(Vector("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-dim-concepts.xsd"))
+    val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-seg-explicit-instance.xml")
+
+    assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
+      taxo.taxonomy.findAllHasHypercubeRelationships.map(_.contextElement).toSet
+    }
+
+    assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
+      instance.allTopLevelItems.flatMap(fact => taxo.taxonomy.findAllOwnOrInheritedHasHypercubes(fact.resolvedName)).
+        map(_.contextElement).toSet
+    }
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    assertResult(1) {
+      instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.explicitMembers).size
+    }
+    assertResult(List(false)) {
+      dimContexts.map(_.hasRepeatedDimensions)
+    }
+
+    assertResult(1) {
+      dimContexts.map(ctx => taxo.validateDimensionalContext(ctx)).count(_.isSuccess)
+    }
+  }
+
+  test("testBiLocatableExplicitDimInSegAndScen") {
+    val taxo = makeTestDts(Vector("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-dim-concepts.xsd"))
+    val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-dual-explicit-instance.xml")
+
+    assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
+      taxo.taxonomy.findAllHasHypercubeRelationships.map(_.contextElement).toSet
+    }
+
+    assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
+      instance.allTopLevelItems.flatMap(fact => taxo.taxonomy.findAllOwnOrInheritedHasHypercubes(fact.resolvedName)).
+        map(_.contextElement).toSet
+    }
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    assertResult(List(true)) {
+      dimContexts.map(_.hasRepeatedDimensions)
+    }
+
+    assertResult(1) {
+      dimContexts.map(ctx => taxo.validateDimensionalContext(ctx)).count(_.isFailure)
+    }
+    intercept[RepeatedDimensionInInstanceError.type] {
+      dimContexts.map(ctx => taxo.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  test("testRepeatedDimensionInScenario") {
+    val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/repeatedDimensionInScenario.xbrl")
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    assertResult(List(true)) {
+      dimContexts.map(_.hasRepeatedDimensions)
+    }
+    assertResult(List(true)) {
+      dimContexts.map(_.dimensionalScenario).map(_.hasRepeatedDimensions)
+    }
+    assertResult(List(false)) {
+      dimContexts.map(_.dimensionalSegment).map(_.hasRepeatedDimensions)
+    }
+  }
+
   // Helper methods
+
+  private def validateDimensionally(
+    itemFact: ItemFact,
+    instance: XbrlInstance,
+    taxonomy: DimensionalTaxonomy): Try[Boolean] = {
+
+    val ctxRef = itemFact.contextRef
+    val context = instance.allContextsById(ctxRef)
+    val dimensionalContext = contextToDimensionalContext(context)
+
+    taxonomy.validateDimensionally(itemFact.resolvedName, dimensionalContext)
+  }
 
   private def makeTestDts(relativeDocPaths: immutable.IndexedSeq[String]): DimensionalTaxonomy = {
     val rootDir = new File(classOf[DimensionalInstanceValidationTest].getResource("/conf-suite-dim").toURI)
