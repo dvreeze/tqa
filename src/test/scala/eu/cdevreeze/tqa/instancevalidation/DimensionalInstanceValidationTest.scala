@@ -17,8 +17,8 @@
 package eu.cdevreeze.tqa.instancevalidation
 
 import java.io.File
+import java.net.URI
 
-import scala.collection.immutable
 import scala.util.Success
 
 import org.junit.runner.RunWith
@@ -48,8 +48,8 @@ class DimensionalInstanceValidationTest extends FunSuite {
   // 202-DefaultValueUsedInInstanceError
 
   test("testDefaultValueInInstanceOK") {
-    val validator = makeValidator(Vector("200-xbrldie/202-DefaultValueUsedInInstanceError/defaultValueInInstance.xsd"))
     val instance = makeTestInstance("200-xbrldie/202-DefaultValueUsedInInstanceError/defaultValueInInstanceOK.xbrl")
+    val validator = makeValidator(instance)
 
     val tns = "http://xbrl.org/dims/conformance"
     val productTns = "http://www.xbrl.org/dim/conf/product"
@@ -73,8 +73,8 @@ class DimensionalInstanceValidationTest extends FunSuite {
   }
 
   test("testDefaultValueInInstance") {
-    val validator = makeValidator(Vector("200-xbrldie/202-DefaultValueUsedInInstanceError/defaultValueInInstance.xsd"))
     val instance = makeTestInstance("200-xbrldie/202-DefaultValueUsedInInstanceError/defaultValueInInstance.xbrl")
+    val validator = makeValidator(instance)
 
     val tns = "http://xbrl.org/dims/conformance"
     val productTns = "http://www.xbrl.org/dim/conf/product"
@@ -106,10 +106,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-01.
    */
   test("testCombinationOfCubesCase1Segment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase1Segment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase1Segment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -123,10 +123,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-02.
    */
   test("testCombinationOfCubesCase6Segment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase6Segment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase6Segment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -140,10 +140,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-03.
    */
   test("testCombinationOfCubesCase2Segment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase2Segment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase2Segment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -157,10 +157,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-04.
    */
   test("testCombinationOfCubesCase3Segment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase3Segment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase3Segment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -174,10 +174,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-05.
    */
   test("testCombinationOfCubesCase4Segment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase4Segment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase4Segment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -191,10 +191,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-06.
    */
   test("testCombinationOfCubesCase5Segment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase5Segment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase5Segment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -208,10 +208,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-07.
    */
   test("testContextForbiddenExplicitDimInSegment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextForbiddenExplicitDimInSegment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextForbiddenExplicitDimInSegment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(2) {
       instance.allTopLevelItems.size
@@ -225,10 +225,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-08.
    */
   test("testContextForbiddenExplicitDimMemberInScenario") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextForbiddenExplicitDimInScenario.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextForbiddenExplicitDimInScenario.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(2) {
       instance.allTopLevelItems.size
@@ -242,10 +242,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-09.
    */
   test("testContextImplicitDimNotInSegment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextImplicitDimNotInSegment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextImplicitDimNotInSegment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -259,10 +259,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-10.
    */
   test("testContextImplicitDimNotInScenario") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextImplicitDimNotInScenario.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextImplicitDimNotInScenario.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -276,10 +276,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-11.
    */
   test("testContextExplicitDimNotInSegment") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextExplicitDimNotInSegment.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextExplicitDimNotInSegment.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -293,10 +293,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-12.
    */
   test("testContextExplicitDimNotInScenario") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextExplicitDimNotInScenario.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/contextExplicitDimNotInScenario.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -310,10 +310,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-13.
    */
   test("testCombinationOfCubesUnusableMemberInvalid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesUnusableMemberInvalid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesUnusableMemberInvalid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -327,10 +327,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-14.
    */
   test("testCombinationOfCubesUnusableDomainInvalid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesUnusableDomainInvalid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesUnusableDomainInvalid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -344,10 +344,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-15.
    */
   test("testClosedEmptyHypercubeIsValid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedEmptyHypercubeIsValid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedEmptyHypercubeIsValid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -361,10 +361,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-16.
    */
   test("testOpenEmptyHypercubeIsValid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/openEmptyHypercubeIsValid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/openEmptyHypercubeIsValid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -378,10 +378,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-17.
    */
   test("testClosedEmptyHypercubeIsInvalid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedEmptyHypercubeIsInvalid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedEmptyHypercubeIsInvalid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -395,10 +395,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-18.
    */
   test("testClosedNotEmptyHypercubeIsValid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedNotEmptyHypercubeIsValid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedNotEmptyHypercubeIsValid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -412,10 +412,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-19.
    */
   test("testClosedNotEmptyHypercubeIsInvalid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedNotEmptyHypercubeIsValid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedNotEmptyHypercubeIsInvalid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -429,10 +429,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-20.
    */
   test("testOpenNotEmptyHypercubeIsValid") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/openNotEmptyHypercubeIsValid.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/openNotEmptyHypercubeIsValid.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -446,14 +446,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-21.
    */
   test("testInstanceValidAccordingToTwoDimensionalTaxonomies") {
-    val validator = makeValidator(Vector(
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/PrimaryItemTaxonomy.xsd",
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceValidAccordingToTwoDimensionalTaxonomiesTaxonomy1.xsd",
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceValidAccordingToTwoDimensionalTaxonomiesTaxonomy2.xsd",
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceValidAccordingToTwoDimensionalTaxonomiesExtra-definition.xml"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceValidAccordingToTwoDimensionalTaxonomies.xbrl").
         ensuring(_.findAllSchemaRefs.size == 3).ensuring(_.findAllLinkbaseRefs.size == 1)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -467,14 +463,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-22.
    */
   test("testInstanceInvalidAccordingToTwoDimensionalTaxonomies") {
-    val validator = makeValidator(Vector(
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/PrimaryItemTaxonomy.xsd",
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceValidAccordingToTwoDimensionalTaxonomiesTaxonomy1.xsd",
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceValidAccordingToTwoDimensionalTaxonomiesTaxonomy2.xsd",
-      "200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceInvalidAccordingToTwoDimensionalTaxonomiesExtra-definition.xml"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceInvalidAccordingToTwoDimensionalTaxonomies.xbrl").
         ensuring(_.findAllSchemaRefs.size == 3).ensuring(_.findAllLinkbaseRefs.size == 1)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -488,10 +480,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-23.
    */
   test("testInstanceInvalidTheValueIsNotADomainMember") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceInvalidTheValueIsNotADomainMember.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceInvalidTheValueIsNotADomainMember.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -505,10 +497,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-24.
    */
   test("testInstanceInvalidTheValueIsNotADomainMemberCase2") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceInvalidTheValueIsNotADomainMemberCase2.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/InstanceInvalidTheValueIsNotADomainMemberCase2.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -522,10 +514,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-25.
    */
   test("testComplexHypercubeInheritance") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/ComplexHypercubeInheritance.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/complexHypercubeInheritance_ValidLink1.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(4) {
       instance.allTopLevelItems.size
@@ -539,10 +531,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-26.
    */
   test("testComplexHypercubeInheritance2") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/ComplexHypercubeInheritance.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/complexHypercubeInheritance_ValidLink2.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(4) {
       instance.allTopLevelItems.size
@@ -556,10 +548,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-27.
    */
   test("testComplexHypercubeInheritance3") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/ComplexHypercubeInheritance.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/complexHypercubeInheritance_Invalid3.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(4) {
       instance.allTopLevelItems.size
@@ -573,10 +565,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-28.
    */
   test("testMemberExcludedFromValidDomain1") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/memberExcludedFromValidDomain1.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/memberExcludedFromValidDomain1.xbrl").
         ensuring(_.findAllSchemaRefs.size == 2).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -590,10 +582,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-29.
    */
   test("testMemberExcludedFromValidDomain2") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/memberExcludedFromValidDomain2.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/memberExcludedFromValidDomain2.xbrl").
         ensuring(_.findAllSchemaRefs.size == 2).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -607,10 +599,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-30.
    */
   test("testPrimaryItemValidContainsNoHypercubes") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/primaryItemValidContainsNoHypercubes.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/primaryItemValidContainsNoHypercubes.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -624,10 +616,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-31.
    */
   test("testCombinationOfCubesCase7BothOpen") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase7BothOpen.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase7BothOpen.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -641,10 +633,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-32.
    */
   test("testCombinationOfCubesCase8NotAllClosed") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase8NotAllClosed.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/combinationOfCubesCase8NotAllClosed.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -658,10 +650,231 @@ class DimensionalInstanceValidationTest extends FunSuite {
    * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-33.
    */
   test("testClosedHypercubeAndDefaultMembers") {
-    val validator = makeValidator(Vector("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedHypercubeAndDefaultMembers.xsd"))
     val instance =
       makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/closedHypercubeAndDefaultMembers.xbrl").
         ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-34.
+   */
+  test("testInheritanceEdgeUseCase-p1-c1") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p1-c1.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-35.
+   */
+  test("testInheritanceEdgeUseCase-p1-c2") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p1-c2.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-36.
+   */
+  test("testInheritanceEdgeUseCase-p2-c1") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p2-c1.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-37.
+   */
+  test("testInheritanceEdgeUseCase-p2-c2") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p2-c2.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-38.
+   */
+  test("testInheritanceEdgeUseCase-p3-c1") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p3-c1.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-39.
+   */
+  test("testInheritanceEdgeUseCase-p3-c2") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p3-c2.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-40.
+   */
+  test("testInheritanceEdgeUseCase-p5-c1") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p5-c1.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-41.
+   */
+  test("testInheritanceEdgeUseCase-p5-c2") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p5-c2.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-42.
+   */
+  test("testInheritanceEdgeUseCase-p9-c1") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p9-c1.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-43.
+   */
+  test("testInheritanceEdgeUseCase-p9-c2") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p9-c2.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-44.
+   */
+  test("testInheritanceEdgeUseCase-p10-c1") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p10-c1.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(false))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-45.
+   */
+  test("testInheritanceEdgeUseCase-p10-c2") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p10-c2.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
+
+    assertResult(1) {
+      instance.allTopLevelItems.size
+    }
+    assertResult(List(Success(true))) {
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
+    }
+  }
+
+  /**
+   * Test 203-TestCase-PrimaryItemDimensionallyInvalidError, variation V-46.
+   */
+  test("testInheritanceEdgeUseCase-p11-c1") {
+    val instance =
+      makeTestInstance("200-xbrldie/203-PrimaryItemDimensionallyInvalidError/inheritanceEdgeUseCase-p11-c1.xbrl").
+        ensuring(_.findAllSchemaRefs.size == 1).ensuring(_.findAllLinkbaseRefs.size == 0)
+    val validator = makeValidator(instance)
 
     assertResult(1) {
       instance.allTopLevelItems.size
@@ -674,8 +887,8 @@ class DimensionalInstanceValidationTest extends FunSuite {
   // 204-RepeatedDimensionInInstanceError
 
   test("testContextContainsTypedDimensionValid") {
-    val validator = makeValidator(Vector("200-xbrldie/204-RepeatedDimensionInInstanceError/contextContainsRepeatedDimension.xsd"))
     val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/contextContainsTypedDimensionValid.xbrl")
+    val validator = makeValidator(instance)
 
     assertResult(List(ContextElement.Segment)) {
       validator.taxonomy.findAllHasHypercubeRelationships.map(_.contextElement)
@@ -702,8 +915,8 @@ class DimensionalInstanceValidationTest extends FunSuite {
   }
 
   test("testContextContainsRepeatedDimension") {
-    val validator = makeValidator(Vector("200-xbrldie/204-RepeatedDimensionInInstanceError/contextContainsRepeatedDimension.xsd"))
     val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/contextContainsRepeatedDimension.xbrl")
+    val validator = makeValidator(instance)
 
     val dimContexts = instance.allContexts.map(contextToDimensionalContext)
 
@@ -729,8 +942,8 @@ class DimensionalInstanceValidationTest extends FunSuite {
   }
 
   test("testBiLocatableExplicitDimInSeg") {
-    val validator = makeValidator(Vector("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-dim-concepts.xsd"))
     val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-seg-explicit-instance.xml")
+    val validator = makeValidator(instance)
 
     assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
       validator.taxonomy.findAllHasHypercubeRelationships.map(_.contextElement).toSet
@@ -759,8 +972,8 @@ class DimensionalInstanceValidationTest extends FunSuite {
   }
 
   test("testBiLocatableExplicitDimInSegAndScen") {
-    val validator = makeValidator(Vector("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-dim-concepts.xsd"))
     val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/bi-locational-dual-explicit-instance.xml")
+    val validator = makeValidator(instance)
 
     assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
       validator.taxonomy.findAllHasHypercubeRelationships.map(_.contextElement).toSet
@@ -809,12 +1022,21 @@ class DimensionalInstanceValidationTest extends FunSuite {
 
   // Helper methods
 
-  private def makeValidator(relativeDocPaths: immutable.IndexedSeq[String]): DimensionalValidator = {
+  private def makeValidator(xbrlInstance: XbrlInstance): DimensionalValidator = {
+    val entrypointHrefs =
+      xbrlInstance.findAllSchemaRefs.map(_.resolvedHref) ++ xbrlInstance.findAllLinkbaseRefs.map(_.resolvedHref)
+
+    doMakeValidator(entrypointHrefs.toSet.filterNot(Set(URI.create("http://www.xbrl.org/2006/xbrldi-2006.xsd"))))
+  }
+
+  private def makeTestInstance(relativeDocPath: String): XbrlInstance = {
     val rootDir = new File(classOf[DimensionalInstanceValidationTest].getResource("/conf-suite-dim").toURI)
-    val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
+    val docFile = new File(rootDir, relativeDocPath)
 
-    val entrypointUris = docFiles.map(_.toURI).toSet
+    XbrlInstance(docBuilder.build(docFile.toURI))
+  }
 
+  private def doMakeValidator(entrypointUris: Set[URI]): DimensionalValidator = {
     val documentCollector = DefaultDtsCollector(entrypointUris)
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
@@ -829,13 +1051,6 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val effectiveTaxo = basicTaxo.resolveProhibitionAndOverriding(relationshipFactory)
 
     DimensionalValidator.build(effectiveTaxo)
-  }
-
-  private def makeTestInstance(relativeDocPath: String): XbrlInstance = {
-    val rootDir = new File(classOf[DimensionalInstanceValidationTest].getResource("/conf-suite-dim").toURI)
-    val docFile = new File(rootDir, relativeDocPath)
-
-    XbrlInstance(docBuilder.build(docFile.toURI))
   }
 
   private val processor = new Processor(false)
