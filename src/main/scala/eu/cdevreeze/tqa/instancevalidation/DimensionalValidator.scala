@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.taxonomy
+package eu.cdevreeze.tqa.instancevalidation
 
 import scala.collection.immutable
 import scala.util.Success
@@ -31,8 +31,7 @@ import eu.cdevreeze.tqa.base.relationship.NotAllRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Dimensional taxonomy, geared towards fast dimensional instance validation queries. It wraps a normal
- * taxonomy as `TaxonomyApi`.
+ * Dimensional instance validator. It wraps a taxonomy as `TaxonomyApi` instance.
  *
  * Instances of this class are expensive to create, and should be created only once per DTS and then
  * retained in memory.
@@ -45,15 +44,13 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final class DimensionalTaxonomy private (
+final class DimensionalValidator private (
     val taxonomy: TaxonomyApi,
     val hasHypercubesByElrAndPrimary: Map[String, Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]],
     val hypercubeDimensionsByElrAndHypercube: Map[String, Map[EName, immutable.IndexedSeq[HypercubeDimensionRelationship]]],
-    val dimensionDomainsByElrAndDimension: Map[String, Map[EName, immutable.IndexedSeq[DimensionalTaxonomy.DimensionDomain]]],
+    val dimensionDomainsByElrAndDimension: Map[String, Map[EName, immutable.IndexedSeq[DimensionDomain]]],
     val dimensionDefaults: Map[EName, EName],
     val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]]) {
-
-  import DimensionalTaxonomy._
 
   def dimensionsHavingDefault: Set[EName] = dimensionDefaults.keySet
 
@@ -125,12 +122,27 @@ final class DimensionalTaxonomy private (
   }
 
   /**
-   * Calls `dimensionalContext.validate(this)`.
+   * Validates the dimensional context in isolation.
    */
   def validateDimensionalContext(
     dimensionalContext: DimensionalContext): Try[Unit] = {
 
-    dimensionalContext.validate(this)
+    Try {
+      if (dimensionalContext.hasRepeatedDimensions) throw RepeatedDimensionInInstanceError
+
+      dimensionalContext.explicitDimensionMembers.keySet.toSeq.foreach(dim => validateExplicitDimension(dim))
+
+      dimensionalContext.typedDimensions.toSeq.foreach(dim => validateTypedDimension(dim))
+
+      dimensionalContext.explicitDimensionMembers.toSeq.foreach(dimMem => validateExplicitDimensionMember(dimMem._2))
+
+      val usedDefaultDimensionMembers =
+        dimensionDefaults.toSet.intersect(dimensionalContext.explicitDimensionMembers.toSet)
+
+      if (usedDefaultDimensionMembers.nonEmpty) {
+        throw DefaultValueUsedInInstanceError(usedDefaultDimensionMembers.head._1)
+      }
+    }
   }
 
   def validateDimensionallyForElr(
@@ -226,11 +238,29 @@ final class DimensionalTaxonomy private (
     } else {
       val dimensionValue = dimensionValueOption.get
 
-      val foundMembers: immutable.IndexedSeq[Member] =
+      val foundMembers: immutable.IndexedSeq[DimensionDomain.Member] =
         dimensionDomains.flatMap(_.domainMembers.get(dimensionValue)).ensuring(_.forall(_.ename == dimensionValue))
 
       foundMembers.nonEmpty && foundMembers.forall(_.usable)
     }
+  }
+
+  private def validateExplicitDimension(ename: EName): Unit = {
+    val isExplicitDimension = taxonomy.findExplicitDimensionDeclaration(ename).nonEmpty
+
+    if (!isExplicitDimension) throw ExplicitMemberNotExplicitDimensionError(ename)
+  }
+
+  private def validateTypedDimension(ename: EName): Unit = {
+    val isTypedDimension = taxonomy.findTypedDimensionDeclaration(ename).nonEmpty
+
+    if (!isTypedDimension) throw TypedMemberNotTypedDimensionError(ename)
+  }
+
+  private def validateExplicitDimensionMember(ename: EName): Unit = {
+    val isMember = taxonomy.findGlobalElementDeclaration(ename).nonEmpty
+
+    if (!isMember) throw ExplicitMemberUndefinedQNameError(ename)
   }
 
   private def filterHasHypercubes(
@@ -255,9 +285,9 @@ final class DimensionalTaxonomy private (
   }
 }
 
-object DimensionalTaxonomy {
+object DimensionalValidator {
 
-  def build(taxonomy: TaxonomyApi): DimensionalTaxonomy = {
+  def build(taxonomy: TaxonomyApi): DimensionalValidator = {
     val hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship] = taxonomy.findAllHasHypercubeRelationships
     val hypercubeDimensions: immutable.IndexedSeq[HypercubeDimensionRelationship] = taxonomy.findAllHypercubeDimensionRelationships
 
@@ -271,7 +301,7 @@ object DimensionalTaxonomy {
     val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]] =
       taxonomy.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
 
-    new DimensionalTaxonomy(
+    new DimensionalValidator(
       taxonomy,
       hasHypercubes.groupBy(_.elr).mapValues(_.groupBy(_.primary)),
       hypercubeDimensions.groupBy(_.elr).mapValues(_.groupBy(_.hypercube)),
@@ -289,8 +319,8 @@ object DimensionalTaxonomy {
 
     val dimensionDomains: immutable.IndexedSeq[DimensionDomain] = domainAwarePathsByDimensionDomain.toIndexedSeq map {
       case ((dimension, dimensionDomainElr), paths) =>
-        val domainMembers: Map[EName, Member] =
-          paths.flatMap(_.relationships).map(rel => Member(rel.targetConceptEName, rel.usable)).groupBy(_.ename).
+        val domainMembers: Map[EName, DimensionDomain.Member] =
+          paths.flatMap(_.relationships).map(rel => DimensionDomain.Member(rel.targetConceptEName, rel.usable)).groupBy(_.ename).
             mapValues(mems => mems.find(m => !m.usable).getOrElse(mems.head))
 
         new DimensionDomain(dimension, dimensionDomainElr, domainMembers)
@@ -298,143 +328,4 @@ object DimensionalTaxonomy {
 
     dimensionDomains
   }
-
-  final class DimensionDomain(
-      val dimension: EName,
-      val dimensionDomainElr: String,
-      val domainMembers: Map[EName, Member]) {
-
-    require(domainMembers.forall(kv => kv._2.ename == kv._1), s"Corrupt dimension domain")
-  }
-
-  final case class Member(ename: EName, usable: Boolean)
-
-  // Dimensional instance data
-
-  sealed abstract class DimensionalContextElement(
-      val explicitDimensionMemberSeq: immutable.IndexedSeq[(EName, EName)],
-      val typedDimensionSeq: immutable.IndexedSeq[EName]) {
-
-    final def explicitDimensionMembers: Map[EName, EName] = {
-      explicitDimensionMemberSeq.toMap
-    }
-
-    final def typedDimensions: Set[EName] = {
-      typedDimensionSeq.toSet
-    }
-
-    def filterDimensions(dimensions: Set[EName]): DimensionalContextElement
-
-    final def dimensions: Set[EName] = {
-      explicitDimensionMembers.keySet.union(typedDimensions)
-    }
-
-    final def hasRepeatedDimensions: Boolean = {
-      val dimensionSeq = explicitDimensionMemberSeq.map(_._1) ++ typedDimensionSeq
-      dimensionSeq.distinct.size < dimensionSeq.size
-    }
-  }
-
-  final case class DimensionalSegment(
-      override val explicitDimensionMemberSeq: immutable.IndexedSeq[(EName, EName)],
-      override val typedDimensionSeq: immutable.IndexedSeq[EName]) extends DimensionalContextElement(explicitDimensionMemberSeq, typedDimensionSeq) {
-
-    final def filterDimensions(dimensions: Set[EName]): DimensionalSegment = {
-      DimensionalSegment(
-        explicitDimensionMemberSeq.filter(dimMem => dimensions.contains(dimMem._1)),
-        typedDimensionSeq.filter(dim => dimensions.contains(dim)))
-    }
-  }
-
-  final case class DimensionalScenario(
-      override val explicitDimensionMemberSeq: immutable.IndexedSeq[(EName, EName)],
-      override val typedDimensionSeq: immutable.IndexedSeq[EName]) extends DimensionalContextElement(explicitDimensionMemberSeq, typedDimensionSeq) {
-
-    final def filterDimensions(dimensions: Set[EName]): DimensionalScenario = {
-      DimensionalScenario(
-        explicitDimensionMemberSeq.filter(dimMem => dimensions.contains(dimMem._1)),
-        typedDimensionSeq.filter(dim => dimensions.contains(dim)))
-    }
-  }
-
-  final case class DimensionalContext(
-      dimensionalSegment: DimensionalSegment,
-      dimensionalScenario: DimensionalScenario) {
-
-    def explicitDimensionMembers: Map[EName, EName] = {
-      dimensionalSegment.explicitDimensionMembers ++ dimensionalScenario.explicitDimensionMembers
-    }
-
-    def typedDimensions: Set[EName] = {
-      dimensionalSegment.typedDimensions.union(dimensionalScenario.typedDimensions)
-    }
-
-    def dimensions: Set[EName] = {
-      explicitDimensionMembers.keySet.union(typedDimensions)
-    }
-
-    def filterDimensions(dimensions: Set[EName]): DimensionalContext = {
-      DimensionalContext(
-        dimensionalSegment.filterDimensions(dimensions),
-        dimensionalScenario.filterDimensions(dimensions))
-    }
-
-    def hasRepeatedDimensions: Boolean = {
-      dimensionalSegment.hasRepeatedDimensions || dimensionalScenario.hasRepeatedDimensions ||
-        dimensionalSegment.dimensions.intersect(dimensionalScenario.dimensions).nonEmpty
-    }
-
-    def validate(taxonomy: DimensionalTaxonomy): Try[Unit] = {
-      Try {
-        if (hasRepeatedDimensions) throw RepeatedDimensionInInstanceError
-
-        explicitDimensionMembers.keySet.toSeq.foreach(dim => validateExplicitDimension(dim, taxonomy))
-
-        typedDimensions.toSeq.foreach(dim => validateTypedDimension(dim, taxonomy))
-
-        explicitDimensionMembers.toSeq.foreach(dimMem => validateExplicitDimensionMember(dimMem._2, taxonomy))
-
-        val usedDefaultDimensionMembers =
-          taxonomy.dimensionDefaults.toSet.intersect(explicitDimensionMembers.toSet)
-
-        if (usedDefaultDimensionMembers.nonEmpty) {
-          throw DefaultValueUsedInInstanceError(usedDefaultDimensionMembers.head._1)
-        }
-      }
-    }
-
-    private def validateExplicitDimension(ename: EName, taxonomy: DimensionalTaxonomy): Unit = {
-      val isExplicitDimension = taxonomy.taxonomy.findExplicitDimensionDeclaration(ename).nonEmpty
-
-      if (!isExplicitDimension) throw ExplicitMemberNotExplicitDimensionError(ename)
-    }
-
-    private def validateTypedDimension(ename: EName, taxonomy: DimensionalTaxonomy): Unit = {
-      val isTypedDimension = taxonomy.taxonomy.findTypedDimensionDeclaration(ename).nonEmpty
-
-      if (!isTypedDimension) throw TypedMemberNotTypedDimensionError(ename)
-    }
-
-    private def validateExplicitDimensionMember(ename: EName, taxonomy: DimensionalTaxonomy): Unit = {
-      val isMember = taxonomy.taxonomy.findGlobalElementDeclaration(ename).nonEmpty
-
-      if (!isMember) throw ExplicitMemberUndefinedQNameError(ename)
-    }
-  }
-
-  // Exceptions encountered during validation. Error xbrldie:PrimaryItemDimensionallyInvalidError does not count
-  // as an exception here, but is treated as a normal Boolean validation result. Error xbrldie:IllegalTypedDimensionContentError
-  // is absent due to the lack of schema validation (for typed dimension members) in this context.
-
-  sealed trait ValidationException extends RuntimeException
-
-  final case class DefaultValueUsedInInstanceError(dimension: EName) extends ValidationException
-
-  case object RepeatedDimensionInInstanceError extends ValidationException
-
-  final case class ExplicitMemberNotExplicitDimensionError(ename: EName) extends ValidationException
-
-  final case class TypedMemberNotTypedDimensionError(ename: EName) extends ValidationException
-
-  final case class ExplicitMemberUndefinedQNameError(ename: EName) extends ValidationException
 }
