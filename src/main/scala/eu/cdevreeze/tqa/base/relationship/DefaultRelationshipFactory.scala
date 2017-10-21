@@ -220,8 +220,9 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
       val relationshipsWithHighestPriority =
         equivalentRelationships.filter(_.arc.priority == highestPriority)
 
-      if (relationshipsWithHighestPriority.exists(rel => rel.arc.use == Use.Prohibited)) None
-      else {
+      if (relationshipsWithHighestPriority.exists(rel => rel.arc.use == Use.Prohibited)) {
+        None
+      } else {
         // Pick one of these equivalent relationships with the same priority, if any
         relationshipsWithHighestPriority.headOption
       }

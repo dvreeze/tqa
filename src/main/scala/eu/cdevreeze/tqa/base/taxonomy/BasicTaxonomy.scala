@@ -185,6 +185,22 @@ final class BasicTaxonomy private (
    * if any. If different root element Scopes are conflicting, it is undetermined which one wins.
    */
   def guessedScope: Scope = taxonomyBase.guessedScope
+
+  /**
+   * Returns the effective taxonomy, after resolving prohibition and overriding.
+   */
+  def resolveProhibitionAndOverriding(relationshipFactory: RelationshipFactory): BasicTaxonomy = {
+    val baseSetRelationshipsMap = relationshipFactory.computeNetworks(relationships, taxonomyBase)
+
+    val baseSetArcKeysMap = baseSetRelationshipsMap.mapValues(_.map(_.arc.key).toSet)
+
+    def acceptRelationship(rel: Relationship): Boolean = {
+      baseSetArcKeysMap.getOrElse(rel.baseSetKey, Set()).contains(rel.arc.key)
+    }
+
+    val outputTaxo = filterRelationships(acceptRelationship)
+    outputTaxo
+  }
 }
 
 object BasicTaxonomy {

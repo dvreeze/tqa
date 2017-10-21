@@ -26,9 +26,9 @@ import eu.cdevreeze.yaidom.core.EName
 final class DimensionDomain(
     val dimension: EName,
     val dimensionDomainElr: String,
-    val domainMembers: Map[EName, DimensionDomain.Member]) {
+    val members: Map[EName, DimensionDomain.Member]) {
 
-  require(domainMembers.forall(kv => kv._2.ename == kv._1), s"Corrupt dimension domain")
+  require(members.forall(kv => kv._2.ename == kv._1), s"Corrupt dimension domain")
 }
 
 object DimensionDomain {

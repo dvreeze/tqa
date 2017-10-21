@@ -162,7 +162,7 @@ final class DimensionalValidator private (
       case hh: AllRelationship =>
         validateDimensionallyAsIfForAllRelationship(dimensionalContext, hh)
       case hh: NotAllRelationship =>
-        validateDimensionallyAsIfForAllRelationship(dimensionalContext, hh).map(res => !res) // TODO Correct?
+        validateDimensionallyAsIfForAllRelationship(dimensionalContext, hh).map(res => !res)
     }
   }
 
@@ -190,7 +190,11 @@ final class DimensionalValidator private (
         dimensionalContextToValidate.dimensionalScenario
       }
 
-    if (dimensionalContextElementToValidate.dimensions.union(dimensionDefaults.keySet) != dimensionsToValidate) {
+    val dimensionsInContext = dimensionalContextElementToValidate.dimensions union {
+      dimensionDefaults.keySet.filter(dimensionsToValidate)
+    }
+
+    if (dimensionsInContext != dimensionsToValidate) {
       Success(false)
     } else {
       val dimensionDomains: immutable.IndexedSeq[DimensionDomain] =
@@ -201,7 +205,10 @@ final class DimensionalValidator private (
       val explicitDimValidationResult =
         dimensionalContextElementToValidate.explicitDimensionMembers.keySet forall {
           case dim =>
-            validateExplicitDimensionValue(dim, dimensionalContextElementToValidate, dimensionDomains)
+            validateExplicitDimensionValue(
+              dim,
+              dimensionalContextElementToValidate,
+              dimensionDomains.filter(_.dimension == dim))
         }
 
       Success(explicitDimValidationResult)
@@ -216,8 +223,14 @@ final class DimensionalValidator private (
     dimensionalContextElement: DimensionalContextElement,
     dimensionDomains: immutable.IndexedSeq[DimensionDomain]): Boolean = {
 
+    require(
+      dimensionDomains.forall(_.dimension == dimension),
+      s"Dimension domains not all for dimension $dimension")
+
     val dimensionValueOption: Option[EName] =
-      dimensionalContextElement.explicitDimensionMembers.get(dimension).orElse(dimensionDefaults.get(dimension))
+      dimensionalContextElement.explicitDimensionMembers.get(dimension) orElse {
+        dimensionDefaults.get(dimension)
+      }
 
     if (dimensionValueOption.isEmpty) {
       false
@@ -225,7 +238,7 @@ final class DimensionalValidator private (
       val dimensionValue = dimensionValueOption.get
 
       val foundMembers: immutable.IndexedSeq[DimensionDomain.Member] =
-        dimensionDomains.flatMap(_.domainMembers.get(dimensionValue)).ensuring(_.forall(_.ename == dimensionValue))
+        dimensionDomains.flatMap(_.members.get(dimensionValue)).ensuring(_.forall(_.ename == dimensionValue))
 
       foundMembers.nonEmpty && foundMembers.forall(_.usable)
     }
