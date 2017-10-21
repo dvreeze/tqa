@@ -20,7 +20,6 @@ import java.io.File
 
 import scala.collection.immutable
 import scala.util.Success
-import scala.util.Try
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -32,9 +31,7 @@ import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
-import eu.cdevreeze.tqa.instance.ItemFact
 import eu.cdevreeze.tqa.instance.XbrlInstance
-import eu.cdevreeze.tqa.instance.XbrliContext
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
 
@@ -45,6 +42,8 @@ import net.sf.saxon.s9api.Processor
  */
 @RunWith(classOf[JUnitRunner])
 class DimensionalInstanceValidationTest extends FunSuite {
+
+  import DimensionalContext.contextToDimensionalContext
 
   // 202-DefaultValueUsedInInstanceError
 
@@ -111,7 +110,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
       instance.allTopLevelItems.size
     }
     assertResult(List(Success(true))) {
-      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, validator))
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
     }
   }
 
@@ -123,7 +122,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
       instance.allTopLevelItems.size
     }
     assertResult(List(Success(false))) {
-      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, validator))
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
     }
   }
 
@@ -135,7 +134,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
       instance.allTopLevelItems.size
     }
     assertResult(List(Success(false))) {
-      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, validator))
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
     }
   }
 
@@ -147,7 +146,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
       instance.allTopLevelItems.size
     }
     assertResult(List(Success(true))) {
-      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, validator))
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
     }
   }
 
@@ -159,7 +158,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
       instance.allTopLevelItems.size
     }
     assertResult(List(Success(true))) {
-      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, validator))
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
     }
   }
 
@@ -171,7 +170,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
       instance.allTopLevelItems.size
     }
     assertResult(List(Success(false))) {
-      instance.allTopLevelItems.map(fact => validateDimensionally(fact, instance, validator))
+      instance.allTopLevelItems.map(fact => validator.validateDimensionally(fact, instance))
     }
   }
 
@@ -313,18 +312,6 @@ class DimensionalInstanceValidationTest extends FunSuite {
 
   // Helper methods
 
-  private def validateDimensionally(
-    itemFact: ItemFact,
-    instance: XbrlInstance,
-    validator: DimensionalValidator): Try[Boolean] = {
-
-    val ctxRef = itemFact.contextRef
-    val context = instance.allContextsById(ctxRef)
-    val dimensionalContext = contextToDimensionalContext(context)
-
-    validator.validateDimensionally(itemFact.resolvedName, dimensionalContext)
-  }
-
   private def makeValidator(relativeDocPaths: immutable.IndexedSeq[String]): DimensionalValidator = {
     val rootDir = new File(classOf[DimensionalInstanceValidationTest].getResource("/conf-suite-dim").toURI)
     val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
@@ -350,16 +337,6 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val docFile = new File(rootDir, relativeDocPath)
 
     XbrlInstance(docBuilder.build(docFile.toURI))
-  }
-
-  private def contextToDimensionalContext(ctx: XbrliContext): DimensionalContext = {
-    DimensionalContext(
-      DimensionalSegment(
-        ctx.entity.segmentOption.toIndexedSeq.flatMap(_.explicitMembers).map(e => (e.dimension -> e.member)),
-        ctx.entity.segmentOption.toIndexedSeq.flatMap(_.typedMembers).map(_.dimension)),
-      DimensionalScenario(
-        ctx.scenarioOption.toIndexedSeq.flatMap(_.explicitMembers).map(e => (e.dimension -> e.member)),
-        ctx.scenarioOption.toIndexedSeq.flatMap(_.typedMembers).map(_.dimension)))
   }
 
   private val processor = new Processor(false)

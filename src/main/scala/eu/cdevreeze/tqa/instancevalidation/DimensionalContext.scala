@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.tqa.instancevalidation
 
+import eu.cdevreeze.tqa.instance.XbrliContext
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -48,5 +49,18 @@ final case class DimensionalContext(
   def hasRepeatedDimensions: Boolean = {
     dimensionalSegment.hasRepeatedDimensions || dimensionalScenario.hasRepeatedDimensions ||
       dimensionalSegment.dimensions.intersect(dimensionalScenario.dimensions).nonEmpty
+  }
+}
+
+object DimensionalContext {
+
+  def contextToDimensionalContext(ctx: XbrliContext): DimensionalContext = {
+    DimensionalContext(
+      DimensionalSegment(
+        ctx.entity.segmentOption.toIndexedSeq.flatMap(_.explicitMembers).map(e => (e.dimension -> e.member)),
+        ctx.entity.segmentOption.toIndexedSeq.flatMap(_.typedMembers).map(_.dimension)),
+      DimensionalScenario(
+        ctx.scenarioOption.toIndexedSeq.flatMap(_.explicitMembers).map(e => (e.dimension -> e.member)),
+        ctx.scenarioOption.toIndexedSeq.flatMap(_.typedMembers).map(_.dimension)))
   }
 }

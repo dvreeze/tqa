@@ -28,6 +28,8 @@ import eu.cdevreeze.tqa.base.relationship.DimensionDefaultRelationship
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.base.relationship.NotAllRelationship
+import eu.cdevreeze.tqa.instance.ItemFact
+import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -54,35 +56,21 @@ final class DimensionalValidator private (
 
   def dimensionsHavingDefault: Set[EName] = dimensionDefaults.keySet
 
-  def filterHasHypercubesOnElrAndPrimaries(
-    elr: String,
-    primaries: Set[EName]): immutable.IndexedSeq[HasHypercubeRelationship] = {
+  /**
+   * Validates the given item fact in the given XBRL instance dimensionally. It invokes the
+   * equally named validation method taking the fact's concept as first argument and its XBRL context
+   * converted to a DimensionalContext as second argument.
+   */
+  def validateDimensionally(
+    itemFact: ItemFact,
+    instance: XbrlInstance): Try[Boolean] = {
 
-    hasHypercubesByElrAndPrimary.getOrElse(elr, Map()).filterKeys(primaries).values.flatten.toIndexedSeq
+    val ctxRef = itemFact.contextRef
+    val context = instance.allContextsById(ctxRef)
+    val dimensionalContext = DimensionalContext.contextToDimensionalContext(context)
+
+    validateDimensionally(itemFact.resolvedName, dimensionalContext)
   }
-
-  def filterHasHypercubesOnElrAndPrimary(
-    elr: String,
-    primary: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
-
-    hasHypercubesByElrAndPrimary.getOrElse(elr, Map()).getOrElse(primary, immutable.IndexedSeq())
-  }
-
-  def filterHypercubeDimensionsOnHasHypercube(
-    hasHypercube: HasHypercubeRelationship): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
-
-    hypercubeDimensionsByElrAndHypercube.getOrElse(hasHypercube.effectiveTargetRole, Map()).
-      getOrElse(hasHypercube.hypercube, immutable.IndexedSeq())
-  }
-
-  def filterDimensionDomainsOnHypercubeDimension(
-    hypercubeDimension: HypercubeDimensionRelationship): immutable.IndexedSeq[DimensionDomain] = {
-
-    dimensionDomainsByElrAndDimension.getOrElse(hypercubeDimension.effectiveTargetRole, Map()).
-      getOrElse(hypercubeDimension.dimension, immutable.IndexedSeq())
-  }
-
-  // Instance dimensional validation support
 
   /**
    * Validates the given concept and dimensional context dimensionally. Validation does not include
@@ -243,6 +231,20 @@ final class DimensionalValidator private (
 
       foundMembers.nonEmpty && foundMembers.forall(_.usable)
     }
+  }
+
+  private def filterHypercubeDimensionsOnHasHypercube(
+    hasHypercube: HasHypercubeRelationship): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
+
+    hypercubeDimensionsByElrAndHypercube.getOrElse(hasHypercube.effectiveTargetRole, Map()).
+      getOrElse(hasHypercube.hypercube, immutable.IndexedSeq())
+  }
+
+  private def filterDimensionDomainsOnHypercubeDimension(
+    hypercubeDimension: HypercubeDimensionRelationship): immutable.IndexedSeq[DimensionDomain] = {
+
+    dimensionDomainsByElrAndDimension.getOrElse(hypercubeDimension.effectiveTargetRole, Map()).
+      getOrElse(hypercubeDimension.dimension, immutable.IndexedSeq())
   }
 
   private def validateExplicitDimension(ename: EName): Unit = {
