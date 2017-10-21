@@ -54,8 +54,6 @@ final class DimensionalValidator private (
     val dimensionDefaults: Map[EName, EName],
     val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]]) {
 
-  def dimensionsHavingDefault: Set[EName] = dimensionDefaults.keySet
-
   /**
    * Validates the given item fact in the given XBRL instance dimensionally. It invokes the
    * equally named validation method taking the fact's concept as first argument and its XBRL context
@@ -192,7 +190,7 @@ final class DimensionalValidator private (
         dimensionalContextToValidate.dimensionalScenario
       }
 
-    if (dimensionalContextElementToValidate.dimensions.union(dimensionsHavingDefault) != dimensionsToValidate) {
+    if (dimensionalContextElementToValidate.dimensions.union(dimensionDefaults.keySet) != dimensionsToValidate) {
       Success(false)
     } else {
       val dimensionDomains: immutable.IndexedSeq[DimensionDomain] =
