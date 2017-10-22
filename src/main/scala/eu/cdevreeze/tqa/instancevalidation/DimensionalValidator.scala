@@ -172,8 +172,6 @@ final class DimensionalValidator private (
 
     val hypercubeDimensions = filterHypercubeDimensionsOnHasHypercube(hasHypercube)
 
-    // TODO Is this correct?
-
     val dimensionsToValidate: Set[EName] = hypercubeDimensions.map(_.dimension).toSet
 
     val dimensionalContextToValidate =
@@ -190,9 +188,9 @@ final class DimensionalValidator private (
         dimensionalContextToValidate.dimensionalScenario
       }
 
-    val dimensionsInContext = dimensionalContextElementToValidate.dimensions union {
-      dimensionDefaults.keySet.filter(dimensionsToValidate)
-    }
+    val dimensionsInContext =
+      dimensionalContextElementToValidate.dimensions.union(
+        dimensionDefaults.keySet.filter(dimensionsToValidate))
 
     if (dimensionsInContext != dimensionsToValidate) {
       Success(false)
@@ -200,10 +198,10 @@ final class DimensionalValidator private (
       val dimensionDomains: immutable.IndexedSeq[DimensionDomain] =
         hypercubeDimensions.flatMap(hd => filterDimensionDomainsOnHypercubeDimension(hd))
 
-      // Valid if valid for all dimensions
+      // Valid if valid for all dimensions that must be validated
 
       val explicitDimValidationResult =
-        dimensionalContextElementToValidate.explicitDimensionMembers.keySet forall {
+        dimensionsToValidate forall {
           case dim =>
             validateExplicitDimensionValue(
               dim,
