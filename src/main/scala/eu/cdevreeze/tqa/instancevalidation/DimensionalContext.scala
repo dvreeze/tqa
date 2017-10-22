@@ -32,8 +32,12 @@ final case class DimensionalContext(
     dimensionalSegment.explicitDimensionMembers ++ dimensionalScenario.explicitDimensionMembers
   }
 
+  def typedDimensionMembers: Map[EName, TypedDimensionMember] = {
+    dimensionalSegment.typedDimensionMembers ++ dimensionalScenario.typedDimensionMembers
+  }
+
   def typedDimensions: Set[EName] = {
-    dimensionalSegment.typedDimensions.union(dimensionalScenario.typedDimensions)
+    typedDimensionMembers.keySet
   }
 
   def dimensions: Set[EName] = {
@@ -58,9 +62,11 @@ object DimensionalContext {
     DimensionalContext(
       DimensionalSegment(
         ctx.entity.segmentOption.toIndexedSeq.flatMap(_.explicitMembers).map(e => (e.dimension -> e.member)),
-        ctx.entity.segmentOption.toIndexedSeq.flatMap(_.typedMembers).map(_.dimension)),
+        ctx.entity.segmentOption.toIndexedSeq.flatMap(_.typedMembers).
+          map(e => (e.dimension -> new TypedDimensionMember(e.member.backingElem)))),
       DimensionalScenario(
         ctx.scenarioOption.toIndexedSeq.flatMap(_.explicitMembers).map(e => (e.dimension -> e.member)),
-        ctx.scenarioOption.toIndexedSeq.flatMap(_.typedMembers).map(_.dimension)))
+        ctx.scenarioOption.toIndexedSeq.flatMap(_.typedMembers).
+          map(e => (e.dimension -> new TypedDimensionMember(e.member.backingElem)))))
   }
 }

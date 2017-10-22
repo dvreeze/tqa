@@ -36,3 +36,5 @@ final case class ExplicitMemberNotExplicitDimensionError(ename: EName) extends V
 final case class TypedMemberNotTypedDimensionError(ename: EName) extends ValidationException
 
 final case class ExplicitMemberUndefinedQNameError(ename: EName) extends ValidationException
+
+final case class IllegalTypedDimensionContentError(ename: EName) extends ValidationException

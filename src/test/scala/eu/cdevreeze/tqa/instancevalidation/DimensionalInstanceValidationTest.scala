@@ -234,6 +234,182 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
   }
 
+  // 205-TypedMemberNotTypedDimensionError
+
+  test("testTypedMemberIsExplicitInvalid") {
+    val instance = makeTestInstance("200-xbrldie/205-TypedMemberNotTypedDimensionError/typedMemberIsExplicitInvalid.xbrl")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[TypedMemberNotTypedDimensionError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  // 206-ExplicitMemberNotExplicitDimensionError
+
+  test("testContextMemberNotExplicitDimension") {
+    val instance = makeTestInstance("200-xbrldie/206-ExplicitMemberNotExplicitDimensionError/contextMemberNotExplicitDimension.xbrl")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[ExplicitMemberNotExplicitDimensionError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  // 207-ExplicitMemberUndefinedQNameError
+
+  test("testContextExplicitDimDomainMemberNotFound") {
+    val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/contextExplicitDimDomainMemberNotFound.xbrl")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[ExplicitMemberUndefinedQNameError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  test("testEmptyDimensionAndNotAllHypercube-1") {
+    val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/contextExplicitDimDomainMemberNotFound.xbrl")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[ExplicitMemberUndefinedQNameError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  test("testEmptyDimensionAndNotAllHypercube-4") {
+    val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/EmptyDimensionAndNotAllHypercube-4.xbrl")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[ExplicitMemberUndefinedQNameError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  test("testEmptyDimensionAndNotAllHypercube-5") {
+    val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/EmptyDimensionAndNotAllHypercube-5.xbrl")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    assertResult(1) {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).count(_.isSuccess)
+    }
+  }
+
+  // 208-IllegalTypedDimensionContentError
+
+  test("testTypedDimSegIsValid") {
+    val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimSegValid-instance.xml")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    assertResult(1) {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).count(_.isSuccess)
+    }
+  }
+
+  test("testTypedDimScenIsValid") {
+    val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimScenValid-instance.xml")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    assertResult(1) {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).count(_.isSuccess)
+    }
+  }
+
+  test("testTypedDimSegIsInvalid") {
+    val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimSegInvalid-instance.xml")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[IllegalTypedDimensionContentError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  test("testTypedDimScenIsInvalid") {
+    val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimScenInvalid-instance.xml")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[IllegalTypedDimensionContentError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  test("testUnusedTypedDimSegIsInvalid") {
+    val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimSegUnused-instance.xml")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[IllegalTypedDimensionContentError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
+  test("testUnusedTypedDimScenIsInvalid") {
+    val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimScenUnused-instance.xml")
+    val validator = makeValidator(instance)
+
+    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+
+    assertResult(1) {
+      dimContexts.size
+    }
+    intercept[IllegalTypedDimensionContentError] {
+      dimContexts.map(ctx => validator.validateDimensionalContext(ctx)).find(_.isFailure).get.get
+    }
+  }
+
   // Helper methods
 
   private def makeValidator(xbrlInstance: XbrlInstance): DimensionalValidator = {

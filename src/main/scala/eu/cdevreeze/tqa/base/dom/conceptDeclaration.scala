@@ -150,6 +150,16 @@ final class TypedDimensionDeclaration private[dom] (globalElementDeclaration: Gl
     val rawUri = URI.create(globalElementDeclaration.attribute(XbrldtTypedDomainRefEName))
     globalElementDeclaration.baseUri.resolve(rawUri)
   }
+
+  /**
+   * Returns the optional value of the xbrldt:typedDomainRef attribute, as optional absolute (!) URI.
+   * Consider calling this method if the "typed dimension declaration" is not known to be schema-valid.
+   */
+  def typedDomainRefOption: Option[URI] = {
+    val rawUriOption =
+      globalElementDeclaration.attributeOption(XbrldtTypedDomainRefEName).map(u => URI.create(u))
+    rawUriOption.map(u => globalElementDeclaration.baseUri.resolve(u))
+  }
 }
 
 object ConceptDeclaration {

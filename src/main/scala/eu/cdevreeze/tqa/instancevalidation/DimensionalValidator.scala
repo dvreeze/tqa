@@ -128,6 +128,8 @@ final class DimensionalValidator private (
       if (usedDefaultDimensionMembers.nonEmpty) {
         throw DefaultValueUsedInInstanceError(usedDefaultDimensionMembers.head._1)
       }
+
+      dimensionalContext.typedDimensionMembers.toSeq.foreach(dimMem => validateTypedDimensionMember(dimMem._1, dimMem._2))
     }
   }
 
@@ -272,6 +274,22 @@ final class DimensionalValidator private (
     val isMember = taxonomy.findGlobalElementDeclaration(ename).nonEmpty
 
     if (!isMember) throw ExplicitMemberUndefinedQNameError(ename)
+  }
+
+  private def validateTypedDimensionMember(dimension: EName, typedDimensionMember: TypedDimensionMember): Unit = {
+    val typedDimOption = taxonomy.findTypedDimensionDeclaration(dimension)
+    val typedDomainRefOption = typedDimOption.flatMap(_.typedDomainRefOption)
+
+    val typedMemberOption =
+      typedDomainRefOption.flatMap(uri => taxonomy.findGlobalElementDeclarationByUri(uri))
+
+    if (typedMemberOption.isEmpty) {
+      throw IllegalTypedDimensionContentError(dimension)
+    } else {
+      if (typedMemberOption.get.targetEName != typedDimensionMember.backingElem.resolvedName) {
+        throw IllegalTypedDimensionContentError(dimension)
+      }
+    }
   }
 
   private def filterHasHypercubes(

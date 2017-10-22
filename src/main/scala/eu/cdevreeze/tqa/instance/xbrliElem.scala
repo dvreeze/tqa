@@ -548,6 +548,11 @@ final class XbrliContext private[instance] (
       scenarioOption.map(_.explicitDimensionMembers).getOrElse(Map.empty)
   }
 
+  def typedDimensionMembers: Map[EName, XbrliElem] = {
+    entity.segmentOption.map(_.typedDimensionMembers).getOrElse(Map.empty) ++
+      scenarioOption.map(_.typedDimensionMembers).getOrElse(Map.empty)
+  }
+
   def typedDimensions: Set[EName] = {
     entity.segmentOption.map(_.typedDimensions).getOrElse(Set.empty) union
       scenarioOption.map(_.typedDimensions).getOrElse(Set.empty)
@@ -969,11 +974,18 @@ sealed trait MayContainDimensions extends XbrliElem {
     findAllChildElemsOfType(classTag[TypedMember])
   }
 
+  final def typedDimensionMembers: Map[EName, XbrliElem] = {
+    (typedMembers flatMap { e =>
+      val dim = e.attributeAsResolvedQName(DimensionEName)
+      val memOption = e.findAllChildElems.headOption
+
+      memOption.map(mem => (dim -> mem))
+    }).toMap
+  }
+
   final def typedDimensions: Set[EName] = {
     typedMembers.map(_.dimension).toSet
   }
-
-  // TODO Typed dimension members
 }
 
 /**
@@ -1063,6 +1075,11 @@ final class TypedMember private[instance] (
 
   def dimension: EName = {
     attributeAsResolvedQName(DimensionEName)
+  }
+
+  def member: XbrliElem = {
+    findAllChildElems.headOption.getOrElse(
+      sys.error(s"Missing typed dimension member in element ${backingElem.key}"))
   }
 }
 
