@@ -30,6 +30,7 @@ import eu.cdevreeze.tqa.extension.formula.dom.FormulaArc
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.tqa.extension.formula.dom.ValueAssertion
+import eu.cdevreeze.tqa.extension.formula.dom.VariableSetAssertion
 import eu.cdevreeze.tqa.extension.formula.dom.VariableSet
 import eu.cdevreeze.tqa.extension.formula.queryapi.FormulaRelationshipContainerLike
 import eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship
@@ -58,6 +59,10 @@ final class BasicFormulaTaxonomy private (
 
   def findAllExistenceAssertions: immutable.IndexedSeq[ExistenceAssertion] = {
     findAllVariableSets collect { case vs: ExistenceAssertion => vs }
+  }
+
+  def findAllVariableSetAssertions: immutable.IndexedSeq[VariableSetAssertion] = {
+    findAllVariableSets collect { case vs: VariableSetAssertion => vs }
   }
 }
 
