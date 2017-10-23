@@ -209,6 +209,8 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
   /**
    * Resolves prohibition and overriding, given some equivalent relationships as parameter.
    * The returned optional relationship is one of the input relationships.
+   * 
+   * TODO Fix this method. The performance of this method is extremely bad.
    */
   private def resolveProhibitionAndOverridingForEquivalentRelationships(
     equivalentRelationships: immutable.IndexedSeq[Relationship]): Option[Relationship] = {
