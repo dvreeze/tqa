@@ -9,5 +9,5 @@ matrix:
     scala: 2.11.11
 
 script:
- - sbt ++$TRAVIS_SCALA_VERSION -J-Xmx2G test
+ - sbt ++$TRAVIS_SCALA_VERSION -J-Xmx3G test
 
