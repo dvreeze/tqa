@@ -80,7 +80,7 @@ trait RelationshipFactory {
    */
   def computeNetworks(
     relationships: immutable.IndexedSeq[Relationship],
-    taxonomyBase: TaxonomyBase): Map[BaseSetKey, immutable.IndexedSeq[Relationship]]
+    taxonomyBase: TaxonomyBase): Map[BaseSetKey, RelationshipFactory.NetworkComputationResult]
 
   /**
    * Gets the key of the relationship that is the same (only) for equivalent relationships.
@@ -100,6 +100,10 @@ object RelationshipFactory {
    * Note that it is an error for an XLink arc (in XBRL) not to have an XLink arcrole attribute.
    */
   val AnyArcHavingArcrole: XLinkArc => Boolean = (_.attributeOption(ENames.XLinkArcroleEName).nonEmpty)
+
+  final case class NetworkComputationResult(
+    val retainedRelationships: immutable.IndexedSeq[Relationship],
+    val removedRelationships: immutable.IndexedSeq[Relationship])
 
   /**
    * Configuration object used by a RelationshipFactory. It says to what extent the RelationshipFactory

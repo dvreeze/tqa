@@ -142,9 +142,9 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
 
   def computeNetworks(
     relationships: immutable.IndexedSeq[Relationship],
-    taxonomyBase: TaxonomyBase): Map[BaseSetKey, immutable.IndexedSeq[Relationship]] = {
+    taxonomyBase: TaxonomyBase): Map[BaseSetKey, RelationshipFactory.NetworkComputationResult] = {
 
-    val baseSets = relationships.groupBy(_.arc.baseSetKey)
+    val baseSets = relationships.groupBy(_.baseSetKey)
 
     baseSets.toSeq.map({
       case (baseSetKey, rels) =>
@@ -192,9 +192,9 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
   private def computeNetwork(
     baseSetKey: BaseSetKey,
     relationships: immutable.IndexedSeq[Relationship],
-    taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship] = {
+    taxonomyBase: TaxonomyBase): RelationshipFactory.NetworkComputationResult = {
 
-    val filteredRelationships = relationships.filter(_.arc.baseSetKey == baseSetKey)
+    val filteredRelationships = relationships.filter(_.baseSetKey == baseSetKey)
 
     val equivalentRelationshipsByKey =
       filteredRelationships.groupBy(rel => getRelationshipKey(rel, taxonomyBase))
@@ -203,14 +203,13 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     val resolvedRelationshipsByKey =
       optResolvedRelationshipsByKey.filter(_._2.nonEmpty).mapValues(_.head)
 
-    filteredRelationships.filter(resolvedRelationshipsByKey.values.toSet)
+    val result = filteredRelationships.partition(resolvedRelationshipsByKey.values.toSet)
+    RelationshipFactory.NetworkComputationResult(result._1, result._2)
   }
 
   /**
    * Resolves prohibition and overriding, given some equivalent relationships as parameter.
    * The returned optional relationship is one of the input relationships.
-   * 
-   * TODO Fix this method. The performance of this method is extremely bad.
    */
   private def resolveProhibitionAndOverridingForEquivalentRelationships(
     equivalentRelationships: immutable.IndexedSeq[Relationship]): Option[Relationship] = {

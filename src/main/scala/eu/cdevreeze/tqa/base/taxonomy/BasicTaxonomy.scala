@@ -190,12 +190,19 @@ final class BasicTaxonomy private (
    * Returns the effective taxonomy, after resolving prohibition and overriding.
    */
   def resolveProhibitionAndOverriding(relationshipFactory: RelationshipFactory): BasicTaxonomy = {
-    val baseSetRelationshipsMap = relationshipFactory.computeNetworks(relationships, taxonomyBase)
+    val baseSetNetworkComputationMap =
+      relationshipFactory.computeNetworks(relationships, taxonomyBase)
 
-    val baseSetArcKeysMap = baseSetRelationshipsMap.mapValues(_.map(_.arc.key).toSet)
+    // Relationships are bad Set members or Map keys, but within this local method scope they
+    // should cause no problem. Moreover, typically at most a few relationships are removed
+    // by network computation (by prohibition/overriding resolution), so the set membership tests
+    // should be relatively efficient.
+
+    val removedRelationships: Set[Relationship] =
+      baseSetNetworkComputationMap.values.flatMap(_.removedRelationships).toSet
 
     def acceptRelationship(rel: Relationship): Boolean = {
-      baseSetArcKeysMap.getOrElse(rel.baseSetKey, Set()).contains(rel.arc.key)
+      !removedRelationships.contains(rel)
     }
 
     val outputTaxo = filterRelationships(acceptRelationship)

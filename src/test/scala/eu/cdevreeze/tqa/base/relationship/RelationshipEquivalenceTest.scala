@@ -97,7 +97,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
@@ -157,7 +157,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     val nonProhibitedRelationships = relationships.filter(_.arc.use == Use.Optional)
 
@@ -226,7 +226,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
@@ -291,7 +291,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     val floatingAssetsRels =
       calcRelationships.filter(_.targetConceptEName.localPart == "floatingAssets")
@@ -363,7 +363,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     val floatingAssetsRels =
       calcRelationships.filter(_.targetConceptEName.localPart == "floatingAssets")
@@ -408,7 +408,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships)) {
       networkMap
@@ -446,7 +446,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     val filteredRelationships = relationships.filter(_.arc.priority == 2)
 
@@ -500,7 +500,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     // Useless network computation, because one arc is not allowed
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships.filter(_.arc.priority == 2))) {
       networkMap
@@ -538,7 +538,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     assertResult(Map(BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> relationships)) {
       networkMap
@@ -576,7 +576,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     val filteredRelationships =
       relationships.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
@@ -621,7 +621,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
 
     val filteredRequiresElementRelationships =
       relationships collect {
