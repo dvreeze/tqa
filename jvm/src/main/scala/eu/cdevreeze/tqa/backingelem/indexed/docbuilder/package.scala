@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.docbuilder
+package eu.cdevreeze.tqa.backingelem.indexed
 
 /**
  * Document builders for native yaidom "indexed" BackingElemApi implementation that can be used as
@@ -23,4 +23,4 @@ package eu.cdevreeze.tqa.backingelem.docbuilder
  *
  * @author Chris de Vreeze
  */
-package object indexed
+package object docbuilder

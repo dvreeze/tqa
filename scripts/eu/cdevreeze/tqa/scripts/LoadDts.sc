@@ -2,9 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.LoadDts"
 
-// Taking TQA version 0.4.10
+// Taking TQA version 0.4.11-SNAPSHOT
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.4.10`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.4.11-SNAPSHOT`
 
 // Imports that (must) remain available after this initialization script
 
@@ -103,9 +103,9 @@ val processor = new Processor(false)
 
 def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
   val docBuilder =
-    new backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), backingelem.docbuilder.UriConverters.uriToLocalUri(_, localRootDir))
+    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(processor.newDocumentBuilder(), docbuilder.jvm.UriConverters.uriToLocalUri(_, localRootDir))
   val documentBuilder =
-    new backingelem.docbuilder.CachingDocumentBuilder(backingelem.docbuilder.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
+    new docbuilder.jvm.CachingDocumentBuilder(docbuilder.jvm.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
 
   val documentCollector = taxonomybuilder.DefaultDtsCollector(entrypointUris)
 
@@ -133,11 +133,11 @@ def loadDts(localRootDir: File, entrypointUri: URI): BasicTaxonomy = {
 
 def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
   val documentBuilder =
-    new backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), (uri => uri))
+    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(processor.newDocumentBuilder(), (uri => uri))
     
   val documentCollector = new taxonomybuilder.DocumentCollector {
 
-    def collectTaxonomyRootElems(docBuilder: backingelem.docbuilder.DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+    def collectTaxonomyRootElems(docBuilder: docbuilder.DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
       localDocUris.toIndexedSeq.map(uri => TaxonomyRootElem.build(docBuilder.build(uri)))
     }
   }

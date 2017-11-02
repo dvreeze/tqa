@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.docbuilder.indexed
+package eu.cdevreeze.tqa.backingelem.indexed.docbuilder
 
 import java.net.URI
 
-import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.yaidom.indexed.Document
 import eu.cdevreeze.yaidom.indexed.Elem
 import eu.cdevreeze.yaidom.parse.DocumentParser

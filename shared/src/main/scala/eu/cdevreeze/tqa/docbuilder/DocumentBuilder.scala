@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.docbuilder
+package eu.cdevreeze.tqa.docbuilder
 
 import java.net.URI
 
@@ -30,13 +30,15 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
  * such a post-processing step can fix that before the backing element is used to build a type-safe
  * taxonomy DOM tree from it.
  *
- * Note that document builders backed by typical XML parsers are not thread-safe!
+ * Note that document builders backed by typical XML parsers are not thread-safe in the JVM!
  *
  * Note that these builders return root elements and not documents, so top-level comments and processing
  * instructions are lost. It should be possible to parse the document later again, given the document URI,
  * if needed using StAX in order to get only the top-level comments, processing instructions and XML
  * declaration. Retrieval of these information items can be hidden behind strategy interfaces, so only
  * "application wiring" needs to worry about how to obtain this data.
+ *
+ * Note that this document builder abstraction is useful both in the JVM and in JavaScript runtimes.
  *
  * @author Chris de Vreeze
  */

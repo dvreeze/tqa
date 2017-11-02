@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem
+package eu.cdevreeze.tqa.base.taxonomybuilder
+
+import scala.collection.immutable
+
+import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
- * Document builders for yaidom `BackingElemApi` implementations that can be used as underlying element
- * implementation in the TQA taxonomy DOM.
+ * Strategy for collecting taxonomy document root elements. Typically implemented as DTS discovery, although
+ * file search under a given root directory is also possible.
  *
  * @author Chris de Vreeze
  */
-package object docbuilder
+trait DocumentCollector {
+
+  def collectTaxonomyRootElems(documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem]
+}

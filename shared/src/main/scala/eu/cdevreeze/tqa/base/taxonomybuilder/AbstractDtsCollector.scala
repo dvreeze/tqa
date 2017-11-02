@@ -21,8 +21,8 @@ import java.net.URI
 import scala.annotation.tailrec
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
  * Abstract partially implemented DTS discovery as document collector. It is memory-hungry in that

@@ -25,12 +25,12 @@ import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
-import eu.cdevreeze.tqa.backingelem.docbuilder.UriConverters
-import eu.cdevreeze.tqa.backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonNode
 import eu.cdevreeze.tqa.backingelem.nodeinfo.YaidomSaxonToSimpleElemConverter
 import eu.cdevreeze.tqa.backingelem.nodeinfo.YaidomSimpleToSaxonElemConverter
+import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope

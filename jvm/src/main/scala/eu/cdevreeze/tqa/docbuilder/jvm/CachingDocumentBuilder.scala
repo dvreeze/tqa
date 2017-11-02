@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.docbuilder
+package eu.cdevreeze.tqa.docbuilder.jvm
 
 import java.net.URI
 
@@ -22,6 +22,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 
 /**

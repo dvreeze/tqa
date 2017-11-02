@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.docbuilder
+package eu.cdevreeze.tqa.docbuilder.jvm
 
 import java.io.File
 import java.net.URI

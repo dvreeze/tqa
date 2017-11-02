@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.docbuilder.nodeinfo
+package eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder
 
 import java.io.File
 import java.net.URI
 
-import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocument
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import net.sf.saxon.s9api
 
 /**

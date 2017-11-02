@@ -17,12 +17,12 @@
 package eu.cdevreeze.tqa.base.taxonomybuilder
 
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
  * Fluent interface for bootstrapping a taxonomy. The type system helps in getting bootstrapping right,

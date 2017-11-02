@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.base
 
 /**
- * TQA bootstrapping.
+ * TQA bootstrapping. It works both in the JVM and in JavaScript runtime environments.
  *
  * First of all, bootstrapping needs an URI converter, that converts original (http or https) URIs to
  * local file system URIs. Next, we need that URI converter and a Saxon or yaidom document parser to

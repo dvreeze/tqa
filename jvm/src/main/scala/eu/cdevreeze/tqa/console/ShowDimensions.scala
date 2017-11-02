@@ -20,13 +20,13 @@ import java.io.File
 import java.net.URI
 import java.util.logging.Logger
 
-import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
-import eu.cdevreeze.tqa.backingelem.docbuilder.UriConverters
-import eu.cdevreeze.tqa.backingelem.docbuilder.indexed.IndexedDocumentBuilder
-import eu.cdevreeze.tqa.backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
