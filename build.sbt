@@ -94,7 +94,9 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
         case "2.13.0-M2" => Seq()
         case _           => Seq("org.scala-js" %%% "scalajs-dom" % "0.9.2")
       }
-    }
+    },
+
+    parallelExecution in Test := false
   )
 
 lazy val tqaJVM = tqa.jvm
