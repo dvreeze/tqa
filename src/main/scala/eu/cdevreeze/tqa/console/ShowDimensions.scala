@@ -20,10 +20,10 @@ import java.io.File
 import java.net.URI
 import java.util.logging.Logger
 
-import eu.cdevreeze.tqa.backingelem.DocumentBuilder
-import eu.cdevreeze.tqa.backingelem.UriConverters
-import eu.cdevreeze.tqa.backingelem.indexed.IndexedDocumentBuilder
-import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
+import eu.cdevreeze.tqa.backingelem.docbuilder.UriConverters
+import eu.cdevreeze.tqa.backingelem.docbuilder.indexed.IndexedDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder

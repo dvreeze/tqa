@@ -74,7 +74,7 @@ package eu.cdevreeze
  * ==Backing XML DOM implementations==
  *
  * TQA is flexible in the DOM implementation used. It is pluggable, as long as it offers a yaidom `BackingElemApi`
- * facade and we have a [[eu.cdevreeze.tqa.backingelem.DocumentBuilder]] for it.
+ * facade and we have a `eu.cdevreeze.tqa.backingelem.DocumentBuilder` for it.
  *
  * Out of the box, 2 backing DOM implementations are available:
  * <ul>

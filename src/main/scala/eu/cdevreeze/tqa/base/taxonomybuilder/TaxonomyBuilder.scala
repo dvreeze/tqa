@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.base.taxonomybuilder
 
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.backingelem.DocumentBuilder
+import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory

@@ -21,7 +21,7 @@ import java.net.URI
 import scala.annotation.tailrec
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.backingelem.DocumentBuilder
+import eu.cdevreeze.tqa.backingelem.docbuilder.DocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
 
 /**

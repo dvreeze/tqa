@@ -23,8 +23,8 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.backingelem.UriConverters
-import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.docbuilder.UriConverters
+import eu.cdevreeze.tqa.backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector

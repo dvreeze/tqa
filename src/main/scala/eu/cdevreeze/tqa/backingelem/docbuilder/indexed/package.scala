@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem
+package eu.cdevreeze.tqa.backingelem.docbuilder
 
 /**
- * Native yaidom "indexed" BackingElemApi implementation that can be used as underlying element implementation in
- * the TQA taxonomy DOM. It is not very efficient, in particular in memory footprint.
+ * Document builders for native yaidom "indexed" BackingElemApi implementation that can be used as
+ * underlying element implementation in the TQA taxonomy DOM. It is not very efficient, in particular in
+ * memory footprint.
  *
  * @author Chris de Vreeze
  */

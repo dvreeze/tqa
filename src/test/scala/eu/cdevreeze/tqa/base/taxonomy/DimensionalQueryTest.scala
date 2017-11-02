@@ -26,8 +26,8 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.backingelem.UriConverters
-import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocumentBuilder
+import eu.cdevreeze.tqa.backingelem.docbuilder.UriConverters
+import eu.cdevreeze.tqa.backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.LocalElementDeclaration
 import eu.cdevreeze.tqa.base.dom.RoleRef
 import eu.cdevreeze.tqa.base.dom.RoleType
