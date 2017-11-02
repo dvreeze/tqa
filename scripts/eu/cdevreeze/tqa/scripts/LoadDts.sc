@@ -103,9 +103,9 @@ val processor = new Processor(false)
 
 def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
   val docBuilder =
-    new backingelem.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), backingelem.UriConverters.uriToLocalUri(_, localRootDir))
+    new backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), backingelem.docbuilder.UriConverters.uriToLocalUri(_, localRootDir))
   val documentBuilder =
-    new backingelem.CachingDocumentBuilder(backingelem.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
+    new backingelem.docbuilder.CachingDocumentBuilder(backingelem.docbuilder.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
 
   val documentCollector = taxonomybuilder.DefaultDtsCollector(entrypointUris)
 
@@ -133,11 +133,11 @@ def loadDts(localRootDir: File, entrypointUri: URI): BasicTaxonomy = {
 
 def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
   val documentBuilder =
-    new backingelem.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), (uri => uri))
+    new backingelem.docbuilder.nodeinfo.SaxonDocumentBuilder(processor.newDocumentBuilder(), (uri => uri))
     
   val documentCollector = new taxonomybuilder.DocumentCollector {
 
-    def collectTaxonomyRootElems(docBuilder: backingelem.DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+    def collectTaxonomyRootElems(docBuilder: backingelem.docbuilder.DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
       localDocUris.toIndexedSeq.map(uri => TaxonomyRootElem.build(docBuilder.build(uri)))
     }
   }

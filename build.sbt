@@ -1,86 +1,113 @@
 
-name := "tqa"
+// Building both for JVM and JavaScript runtimes.
 
-organization := "eu.cdevreeze.tqa"
-
-version := "0.4.11-SNAPSHOT"
-
-scalaVersion := "2.12.3"
-
-crossScalaVersions := Seq("2.12.3", "2.11.11")
-
-// See: Toward a safer Scala
-// http://downloads.typesafe.com/website/presentations/ScalaDaysSF2015/Toward%20a%20Safer%20Scala%20@%20Scala%20Days%20SF%202015.pdf
-
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint")
-
-(unmanagedSourceDirectories in Compile) ++= {
-  val vers = scalaBinaryVersion.value
-  val base = baseDirectory.value
-
-  if (vers.contains("2.12")) Seq(base / "src" / "main" / "scala-2.12")
-  else if (vers.contains("2.11")) Seq(base / "src" / "main" / "scala-2.11") else Seq()
-}
-
-(unmanagedSourceDirectories in Test) ++= {
-  val vers = scalaBinaryVersion.value
-  val base = baseDirectory.value
-
-  if (vers.contains("2.12")) Seq(base / "src" / "test" / "scala-2.12")
-  else if (vers.contains("2.11")) Seq(base / "src" / "test" / "scala-2.11") else Seq()
-}
-
-libraryDependencies += "eu.cdevreeze.yaidom" %% "yaidom" % "1.6.4"
-
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.3"
-
-libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-18"
-
-libraryDependencies += "com.google.guava" % "guava" % "22.0"
-
-libraryDependencies += "com.google.code.findbugs" % "jsr305" % "1.3.9"
-
-libraryDependencies += "junit" % "junit" % "4.12" % "test"
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test"
-
-libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.5" % "test"
-
-libraryDependencies += ("joda-time" % "joda-time" % "2.9.9" % "test").intransitive()
-
-libraryDependencies += ("org.joda" % "joda-convert" % "1.8.1" % "test").intransitive()
+// To convince SBT not to publish any root level artifacts, I had a look at how scala-java-time does it.
+// See https://github.com/cquiroz/scala-java-time/blob/master/build.sbt as a "template" for this build file.
 
 
-// resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
+val scalaVer = "2.12.4"
+val crossScalaVer = Seq(scalaVer, "2.11.11", "2.13.0-M2")
 
-// addCompilerPlugin("com.artima.supersafe" %% "supersafe" % "1.0.3")
+lazy val commonSettings = Seq(
+  name         := "tqa",
+  description  := "Extensible XBRL taxonomy query API",
+  organization := "eu.cdevreeze.tqa",
+  version      := "0.4.11-SNAPSHOT",
 
-publishMavenStyle := true
+  scalaVersion       := scalaVer,
+  crossScalaVersions := crossScalaVer,
 
-publishTo := {
-  val vers = version.value
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint"),
 
-  val nexus = "https://oss.sonatype.org/"
+  publishArtifact in Test := false,
+  publishMavenStyle := true,
 
-  if (vers.trim.endsWith("SNAPSHOT")) {
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  } else {
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-  }
-}
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+    },
 
-publishArtifact in Test := false
+  pomExtra := pomData,
+  pomIncludeRepository := { _ => false },
 
-pomIncludeRepository := { repo => false }
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.7.0-M6",
 
-pomExtra := {
+  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.4",
+
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.4" % "test"
+)
+
+lazy val root = project.in(file("."))
+  .aggregate(tqaJVM, tqaJS)
+  .settings(commonSettings: _*)
+  .settings(
+    name                 := "tqa",
+    // Thanks, scala-java-time, for showing us how to prevent any publishing of root level artifacts:
+    // No, SBT, we don't want any artifacts for root. No, not even an empty jar.
+    publish              := {},
+    publishLocal         := {},
+    publishArtifact      := false,
+    Keys.`package`       := file(""))
+
+lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
+  .settings(commonSettings: _*)
+  .jvmSettings(
+    // This is the HE release of Saxon. You may want to use the EE release instead.
+
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-18",
+
+    libraryDependencies += "com.google.guava" % "guava" % "22.0",
+
+    libraryDependencies += "com.google.code.findbugs" % "jsr305" % "1.3.9",
+
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.0.6",
+
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.8.0" % "optional",
+
+    libraryDependencies += "junit" % "junit" % "4.12" % "test"
+  )
+  .jsSettings(
+    // Do we need this jsEnv?
+    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+
+    excludeFilter in (Compile, unmanagedSources) := {
+      if (scalaBinaryVersion.value == "2.13.0-M2") {
+        new SimpleFileFilter(f => true)
+      } else {
+        NothingFilter
+      }
+    },
+
+    excludeFilter in (Test, unmanagedSources) := {
+      if (scalaBinaryVersion.value == "2.13.0-M2") {
+        new SimpleFileFilter(f => true)
+      } else {
+        NothingFilter
+      }
+    },
+
+    libraryDependencies ++= {
+      scalaBinaryVersion.value match {
+        case "2.13.0-M2" => Seq()
+        case _           => Seq("org.scala-js" %%% "scalajs-dom" % "0.9.2")
+      }
+    }
+  )
+
+lazy val tqaJVM = tqa.jvm
+lazy val tqaJS = tqa.js
+
+lazy val pomData =
   <url>https://github.com/dvreeze/tqa</url>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
-      <comments>Yaidom is licensed under Apache License, Version 2.0</comments>
+      <comments>TQA is licensed under Apache License, Version 2.0</comments>
     </license>
   </licenses>
   <scm>
@@ -95,4 +122,3 @@ pomExtra := {
       <email>chris.de.vreeze@caiway.net</email>
     </developer>
   </developers>
-}

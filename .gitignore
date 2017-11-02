@@ -1,10 +1,19 @@
-.cache*
+.cache
+.cache-main
+.cache-tests
 .classpath
 .project
+.worksheet/
 .settings/
-project/
 target/
 temp/
 .history
-.worksheet
 scalastyle-config.xml
+node_modules/
+
+# /project/
+/project/boot
+/project/project/
+/project/target/
+/project/build/target
+
