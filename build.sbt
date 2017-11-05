@@ -84,6 +84,8 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda-as-java-time" % "1.1.1",
 
+    jsDependencies += "org.webjars.npm" % "js-joda" % "1.1.8" / "dist/js-joda.js" minified "dist/js-joda.min.js",
+
     parallelExecution in Test := false
   )
 

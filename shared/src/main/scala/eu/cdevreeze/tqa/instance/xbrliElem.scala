@@ -77,7 +77,10 @@ sealed class XbrliElem private[instance] (
     val backingElem: BackingElemApi,
     childElems: immutable.IndexedSeq[XbrliElem]) extends ScopedElemLike with SubtypeAwareElemLike {
 
-  require(childElems.map(_.backingElem) == backingElem.findAllChildElems)
+  // TODO Restore old equality on the backing elements themselves (after JS DOM wrappers have appropriate equality)
+  assert(
+    childElems.map(_.backingElem).map(_.resolvedName) == backingElem.findAllChildElems.map(_.resolvedName),
+    msg("Corrupt element!"))
 
   type ThisElem = XbrliElem
 
@@ -106,6 +109,8 @@ sealed class XbrliElem private[instance] (
   }
 
   final override def hashCode: Int = backingElem.hashCode
+
+  private def msg(s: String): String = s"${s} (${backingElem.key})"
 }
 
 /**
