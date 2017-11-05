@@ -27,5 +27,6 @@ object XsdBooleans {
   def parseBoolean(s: String): Boolean = s.trim match {
     case "true" | "1"  => true
     case "false" | "0" => false
+    case _             => sys.error(s"Not an xs:boolean value: '$s'")
   }
 }
