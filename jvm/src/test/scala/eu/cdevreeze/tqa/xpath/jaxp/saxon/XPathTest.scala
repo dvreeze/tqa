@@ -34,6 +34,7 @@ import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.core.jvm.JavaQNames
 import eu.cdevreeze.yaidom.resolved
 import eu.cdevreeze.yaidom.simple
 import javax.xml.xpath.XPathFunction
@@ -87,9 +88,9 @@ class XPathTest extends FunSuite {
   xpathEvaluatorFactory.underlyingEvaluatorFactory.setXPathFunctionResolver(new XPathFunctionResolver {
 
     def resolveFunction(functionName: javax.xml.namespace.QName, arity: Int): XPathFunction = {
-      if (arity == 1 && (functionName == EName(MyFuncNamespace, "contexts").toJavaQName(None))) {
+      if (arity == 1 && (functionName == JavaQNames.enameToJavaQName(EName(MyFuncNamespace, "contexts"), None))) {
         new FindAllXbrliContexts
-      } else if (arity == 2 && (functionName == EName(MyFuncNamespace, "transform").toJavaQName(None))) {
+      } else if (arity == 2 && (functionName == JavaQNames.enameToJavaQName(EName(MyFuncNamespace, "transform"), None))) {
         new TransformElem
       } else {
         sys.error(s"Unknown function with name $functionName and arity $arity")
@@ -100,13 +101,13 @@ class XPathTest extends FunSuite {
   xpathEvaluatorFactory.underlyingEvaluatorFactory.setXPathVariableResolver(new XPathVariableResolver {
 
     def resolveVariable(variableName: javax.xml.namespace.QName): AnyRef = {
-      if (variableName == EName("contextPosition").toJavaQName(None)) {
+      if (variableName == JavaQNames.enameToJavaQName(EName("contextPosition"), None)) {
         java.lang.Integer.valueOf(4)
-      } else if (variableName == EName(MyVarNamespace, "contextPosition").toJavaQName(None)) {
+      } else if (variableName == JavaQNames.enameToJavaQName(EName(MyVarNamespace, "contextPosition"), None)) {
         java.lang.Integer.valueOf(4)
-      } else if (variableName == EName(MyVarNamespace, "identity").toJavaQName(None)) {
+      } else if (variableName == JavaQNames.enameToJavaQName(EName(MyVarNamespace, "identity"), None)) {
         { e: SaxonElem => e }
-      } else if (variableName == EName(MyVarNamespace, "useXbrliPrefix").toJavaQName(None)) {
+      } else if (variableName == JavaQNames.enameToJavaQName(EName(MyVarNamespace, "useXbrliPrefix"), None)) {
         { e: SaxonElem => useXbrliPrefix(e) }
       } else {
         sys.error(s"Unknown variable with name $variableName")
