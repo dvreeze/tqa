@@ -116,7 +116,10 @@ sealed abstract class TaxonomyElem private[dom] (
 
   type ThisElem = TaxonomyElem
 
-  assert(childElems.map(_.backingElem) == backingElem.findAllChildElems, msg("Corrupt element!"))
+  // TODO Restore old equality on the backing elements themselves (after JS DOM wrappers have appropriate equality)
+  assert(
+    childElems.map(_.backingElem).map(_.resolvedName) == backingElem.findAllChildElems.map(_.resolvedName),
+    msg("Corrupt element!"))
 
   // Implementations of abstract query API methods, and overridden equals and hashCode methods
 

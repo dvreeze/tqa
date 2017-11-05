@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.dom
+package eu.cdevreeze.tqa.base.dom.js
 
 import scala.reflect.classTag
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+
+import org.scalajs.dom.{ raw => sjsdom }
 
 import eu.cdevreeze.tqa.ENames.TypeEName
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
+import eu.cdevreeze.tqa.base.dom._
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.indexed
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import eu.cdevreeze.yaidom.jsdom.JsDomDocument
+import eu.cdevreeze.yaidom.jsdom.JsDomElem
+import org.scalajs.dom.experimental.domparser.DOMParser
+import org.scalajs.dom.experimental.domparser.SupportedType
 
 /**
  * Schema content test case.
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class SchemaContentTest extends FunSuite {
 
   test("testSchemaContent") {
-    val docParser = DocumentParserUsingStax.newInstance()
+    val db = new DOMParser()
+    val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(shiporderXsdString, SupportedType.`text/xml`))
 
-    val docUri = classOf[SchemaContentTest].getResource("shiporder.xsd").toURI
+    val rootElem: JsDomElem = domDoc.documentElement
 
-    val doc = indexed.Document(docParser.parse(docUri).withUriOption(Some(docUri)))
-
-    val xsdSchema = XsdSchema.build(doc.documentElement)
+    val xsdSchema = XsdSchema.build(rootElem)
 
     val schemas = xsdSchema.findAllElemsOrSelfOfType(classTag[XsdSchema])
 
@@ -84,8 +85,8 @@ class SchemaContentTest extends FunSuite {
 
     val topmostComplexTypeDef = topmostComplexTypeDefs.head
 
-    assertResult(Some(globalElemDecl)) {
-      topmostComplexTypeDef.backingElem.parentOption.map(e => TaxonomyElem.build(e))
+    assertResult(Some(underlyingElem(globalElemDecl))) {
+      topmostComplexTypeDef.backingElem.parentOption.map(e => underlyingElem(TaxonomyElem.build(e)))
     }
 
     val sequenceModelGroupOption = xsdSchema.findElemOfType(classTag[SequenceModelGroup])(_ => true)
@@ -94,8 +95,46 @@ class SchemaContentTest extends FunSuite {
       sequenceModelGroupOption.isDefined
     }
 
-    assertResult(Some(topmostComplexTypeDef)) {
-      sequenceModelGroupOption.get.backingElem.parentOption.map(e => TaxonomyElem.build(e))
+    assertResult(Some(underlyingElem(topmostComplexTypeDef))) {
+      sequenceModelGroupOption.get.backingElem.parentOption.map(e => underlyingElem(TaxonomyElem.build(e)))
     }
   }
+
+  // This function is only needed as long as the JS DOM wrapper has no good equality!
+  private def underlyingElem(taxoElem: TaxonomyElem): sjsdom.Element = {
+    taxoElem.backingElem.asInstanceOf[JsDomElem].wrappedNode
+  }
+
+  private val shiporderXsdString =
+    """<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="shiporder">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="orderperson" type="xs:string"/>
+      <xs:element name="shipto">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="address" type="xs:string"/>
+            <xs:element name="city" type="xs:string"/>
+            <xs:element name="country" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="item" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="title" type="xs:string"/>
+            <xs:element name="note" type="xs:string" minOccurs="0"/>
+            <xs:element name="quantity" type="xs:positiveInteger"/>
+            <xs:element name="price" type="xs:decimal"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="orderid" type="xs:string" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>"""
 }
