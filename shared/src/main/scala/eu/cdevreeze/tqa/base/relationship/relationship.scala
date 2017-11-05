@@ -21,6 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 import scala.reflect.classTag
 
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.ENames.GplPreferredLabelEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
@@ -53,7 +54,6 @@ import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.dom.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Path
-import javax.xml.bind.DatatypeConverter
 
 /**
  * Any '''relationship'''. Relationships are like their underlying arcs, but resolving the locators.
@@ -377,7 +377,7 @@ sealed abstract class HasHypercubeRelationship(
   final def isNotAllRelationship: Boolean = !isAllRelationship
 
   final def closed: Boolean = {
-    arc.attributeOption(XbrldtClosedEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
+    arc.attributeOption(XbrldtClosedEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
   }
 
   final def contextElement: ContextElement = {
@@ -448,7 +448,7 @@ sealed abstract class DomainAwareRelationship(
     resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
   final def usable: Boolean = {
-    arc.attributeOption(XbrldtUsableEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(true)
+    arc.attributeOption(XbrldtUsableEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(true)
   }
 
   final override def effectiveTargetRole: String = {

@@ -22,10 +22,10 @@ import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
-import javax.xml.bind.DatatypeConverter
 
 /**
  * XLink arc in a formula link. In other words, a generic XLink arc defined by one of the formula specifications.
@@ -90,7 +90,7 @@ final class VariableFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) ex
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def complement: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingArc.attribute(ENames.ComplementEName))
+    XsdBooleans.parseBoolean(underlyingArc.attribute(ENames.ComplementEName))
   }
 
   /**
@@ -98,7 +98,7 @@ final class VariableFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) ex
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def cover: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingArc.attribute(ENames.CoverEName))
+    XsdBooleans.parseBoolean(underlyingArc.attribute(ENames.CoverEName))
   }
 }
 
@@ -113,7 +113,7 @@ final class VariableSetFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc)
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def complement: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingArc.attribute(ENames.ComplementEName))
+    XsdBooleans.parseBoolean(underlyingArc.attribute(ENames.ComplementEName))
   }
 }
 

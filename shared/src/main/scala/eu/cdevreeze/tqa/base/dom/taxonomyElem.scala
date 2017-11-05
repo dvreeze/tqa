@@ -28,6 +28,7 @@ import eu.cdevreeze.tqa.Namespaces.XsNamespace
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.base.common.CyclesAllowed
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.base.common.Use
@@ -41,7 +42,6 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
-import javax.xml.bind.DatatypeConverter
 
 /**
  * Any element in a taxonomy schema or linkbase document. The classes in this class hierarchy offer the yaidom query API,
@@ -513,7 +513,7 @@ sealed trait CanBeAbstract extends XsdElem {
    * Returns the boolean "abstract" attribute (defaulting to false). This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def isAbstract: Boolean = {
-    attributeOption(ENames.AbstractEName).map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
+    attributeOption(ENames.AbstractEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
   }
 
   final def isConcrete: Boolean = {

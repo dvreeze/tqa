@@ -6,7 +6,10 @@
 
 
 val scalaVer = "2.12.4"
-val crossScalaVer = Seq(scalaVer, "2.11.11", "2.13.0-M2")
+
+// I wanted to cross-build for Scala 2.13.0-M2 as well, but then miss library scalajs-jsjoda-as-java-time
+
+val crossScalaVer = Seq(scalaVer, "2.11.11")
 
 lazy val commonSettings = Seq(
   name         := "tqa",
@@ -73,28 +76,13 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
     // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    excludeFilter in (Compile, unmanagedSources) := {
-      if (scalaBinaryVersion.value == "2.13.0-M2") {
-        new SimpleFileFilter(f => true)
-      } else {
-        NothingFilter
-      }
-    },
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.3",
 
-    excludeFilter in (Test, unmanagedSources) := {
-      if (scalaBinaryVersion.value == "2.13.0-M2") {
-        new SimpleFileFilter(f => true)
-      } else {
-        NothingFilter
-      }
-    },
+    // We use some JDK 8 java.time classes in shared code ...
 
-    libraryDependencies ++= {
-      scalaBinaryVersion.value match {
-        case "2.13.0-M2" => Seq()
-        case _           => Seq("org.scala-js" %%% "scalajs-dom" % "0.9.2")
-      }
-    },
+    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda" % "1.1.1",
+
+    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda-as-java-time" % "1.1.1",
 
     parallelExecution in Test := false
   )

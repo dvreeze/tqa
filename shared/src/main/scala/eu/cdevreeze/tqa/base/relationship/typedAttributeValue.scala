@@ -16,10 +16,10 @@
 
 package eu.cdevreeze.tqa.base.relationship
 
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import javax.xml.bind.DatatypeConverter
 
 /**
  * Typed attribute value, as used in the non-exempt attributes in a relationship key. The sub-classes are designed
@@ -69,7 +69,7 @@ final case class StringAttributeValue(val value: String) extends TypedAttributeV
 object BooleanAttributeValue {
 
   def parse(s: String): BooleanAttributeValue = {
-    val value = DatatypeConverter.parseBoolean(s)
+    val value = XsdBooleans.parseBoolean(s)
     BooleanAttributeValue(value)
   }
 }
@@ -77,7 +77,8 @@ object BooleanAttributeValue {
 object FloatAttributeValue {
 
   def parse(s: String): FloatAttributeValue = {
-    val value = DatatypeConverter.parseFloat(s)
+    // In Scala.js we cannot use JAXB class DatatypeConverter
+    val value = java.lang.Float.parseFloat(s.trim)
     FloatAttributeValue(value)
   }
 }
@@ -85,7 +86,8 @@ object FloatAttributeValue {
 object DoubleAttributeValue {
 
   def parse(s: String): DoubleAttributeValue = {
-    val value = DatatypeConverter.parseDouble(s)
+    // In Scala.js we cannot use JAXB class DatatypeConverter
+    val value = java.lang.Double.parseDouble(s.trim)
     DoubleAttributeValue(value)
   }
 }
@@ -93,7 +95,8 @@ object DoubleAttributeValue {
 object DecimalAttributeValue {
 
   def parse(s: String): DecimalAttributeValue = {
-    val value = DatatypeConverter.parseDecimal(s)
+    // In Scala.js we cannot use JAXB class DatatypeConverter
+    val value = BigDecimal(s.trim)
     DecimalAttributeValue(value)
   }
 }

@@ -33,10 +33,10 @@ import eu.cdevreeze.tqa.StringExpr
 import eu.cdevreeze.tqa.StringValue
 import eu.cdevreeze.tqa.StringValueOrExpr
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
-import javax.xml.bind.DatatypeConverter
 
 /**
  * XLink resource in a formula link. In other words, a variable:resource. See variable.xsd.
@@ -98,7 +98,7 @@ sealed abstract class VariableSet(val underlyingResource: tqa.base.dom.NonStanda
    */
   final def implicitFiltering: Boolean = {
     val attrValue = underlyingResource.attribute(ENames.ImplicitFilteringEName)
-    DatatypeConverter.parseBoolean(attrValue)
+    XsdBooleans.parseBoolean(attrValue)
   }
 
   /**
@@ -219,7 +219,7 @@ final class ConsistencyAssertion(val underlyingResource: tqa.base.dom.NonStandar
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def strict: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
+    XsdBooleans.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
   }
 
   def absoluteAcceptanceRadiusOption: Option[ScopedXPathString] = {
@@ -274,7 +274,7 @@ sealed class Parameter(underlyingResource: tqa.base.dom.NonStandardResource) ext
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def requiredOption: Option[Boolean] = {
-    underlyingResource.attributeOption(ENames.RequiredEName).map(v => DatatypeConverter.parseBoolean(v))
+    underlyingResource.attributeOption(ENames.RequiredEName).map(v => XsdBooleans.parseBoolean(v))
   }
 
   /**
@@ -297,7 +297,7 @@ final class FactVariable(underlyingResource: tqa.base.dom.NonStandardResource) e
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def nilsOption: Option[Boolean] = {
-    underlyingResource.attributeOption(ENames.NilsEName).map(v => DatatypeConverter.parseBoolean(v))
+    underlyingResource.attributeOption(ENames.NilsEName).map(v => XsdBooleans.parseBoolean(v))
   }
 
   /**
@@ -305,7 +305,7 @@ final class FactVariable(underlyingResource: tqa.base.dom.NonStandardResource) e
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def matchesOption: Option[Boolean] = {
-    underlyingResource.attributeOption(ENames.MatchesEName).map(v => DatatypeConverter.parseBoolean(v))
+    underlyingResource.attributeOption(ENames.MatchesEName).map(v => XsdBooleans.parseBoolean(v))
   }
 
   /**
@@ -321,7 +321,7 @@ final class FactVariable(underlyingResource: tqa.base.dom.NonStandardResource) e
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def bindAsSequence: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.BindAsSequenceEName))
+    XsdBooleans.parseBoolean(underlyingResource.attribute(ENames.BindAsSequenceEName))
   }
 }
 
@@ -344,7 +344,7 @@ final class GeneralVariable(underlyingResource: tqa.base.dom.NonStandardResource
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def bindAsSequence: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.BindAsSequenceEName))
+    XsdBooleans.parseBoolean(underlyingResource.attribute(ENames.BindAsSequenceEName))
   }
 }
 
@@ -533,7 +533,7 @@ final class ConceptDataTypeFilter(underlyingResource: tqa.base.dom.NonStandardRe
   }
 
   def strict: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
+    XsdBooleans.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
   }
 }
 
@@ -548,7 +548,7 @@ final class ConceptSubstitutionGroupFilter(underlyingResource: tqa.base.dom.NonS
   }
 
   def strict: Boolean = {
-    DatatypeConverter.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
+    XsdBooleans.parseBoolean(underlyingResource.attribute(ENames.StrictEName))
   }
 }
 
@@ -716,7 +716,7 @@ sealed abstract class MatchFilter(underlyingResource: tqa.base.dom.NonStandardRe
   }
 
   final def matchAny: Boolean = {
-    underlyingResource.attributeOption(ENames.MatchAnyEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
+    underlyingResource.attributeOption(ENames.MatchAnyEName).map(s => XsdBooleans.parseBoolean(s)).getOrElse(false)
   }
 }
 

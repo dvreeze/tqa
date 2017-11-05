@@ -35,13 +35,13 @@ import eu.cdevreeze.tqa.StringExpr
 import eu.cdevreeze.tqa.StringValue
 import eu.cdevreeze.tqa.StringValueOrExpr
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaOrTableResource
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
-import javax.xml.bind.DatatypeConverter
 
 /**
  * XLink resource in a table link.
@@ -204,7 +204,7 @@ final class RuleNode(underlyingResource: tqa.base.dom.NonStandardResource) exten
    */
   def isAbstract: Boolean =
     underlyingResource.attributeOption(ENames.AbstractEName).
-      map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
+      map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
 
   /**
    * Returns the merge attribute as boolean, returning false if absent.
@@ -212,7 +212,7 @@ final class RuleNode(underlyingResource: tqa.base.dom.NonStandardResource) exten
    */
   def isMerged: Boolean =
     underlyingResource.attributeOption(ENames.MergeEName).
-      map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
+      map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
 }
 
 /**

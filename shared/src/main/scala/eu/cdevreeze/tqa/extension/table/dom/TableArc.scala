@@ -22,11 +22,11 @@ import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.extension.table.common.TableAxis
 import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
-import javax.xml.bind.DatatypeConverter
 
 /**
  * XLink arc in a table link.
@@ -106,7 +106,7 @@ final class TableFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) exten
    * TODO Is the complement attribute mandatory? In that case, why has a TableFilterRelationship a default complement value (false)?
    */
   def complement: Boolean = {
-    underlyingArc.attributeOption(ENames.ComplementEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
+    underlyingArc.attributeOption(ENames.ComplementEName).map(s => XsdBooleans.parseBoolean(s)).getOrElse(false)
   }
 }
 
@@ -137,7 +137,7 @@ final class AspectNodeFilterArc(val underlyingArc: tqa.base.dom.NonStandardArc) 
    * This may fail with an exception if the taxonomy is not schema-valid.
    */
   def complement: Boolean = {
-    underlyingArc.attributeOption(ENames.ComplementEName).map(s => DatatypeConverter.parseBoolean(s)).getOrElse(false)
+    underlyingArc.attributeOption(ENames.ComplementEName).map(s => XsdBooleans.parseBoolean(s)).getOrElse(false)
   }
 }
 

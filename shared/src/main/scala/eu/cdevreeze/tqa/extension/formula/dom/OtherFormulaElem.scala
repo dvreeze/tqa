@@ -30,6 +30,7 @@ import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.aspect.Aspect
 import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.tqa.base.common.PeriodType
@@ -37,7 +38,6 @@ import eu.cdevreeze.tqa.extension.formula.common.AspectCoverFilters
 import eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters
 import eu.cdevreeze.tqa.extension.formula.common.Occ
 import eu.cdevreeze.yaidom.core.EName
-import javax.xml.bind.DatatypeConverter
 
 /**
  * Non-XLink element in a formula (or table) link and in one of the formula-related namespaces.
@@ -912,7 +912,7 @@ final class UnitAspect(underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends F
    * Returns the optional boolean augment attribute. This may fail with an exception if the taxonomy is not schema-valid.
    */
   def augmentOption: Option[Boolean] = {
-    underlyingElem.attributeOption(ENames.AugmentEName).map(v => DatatypeConverter.parseBoolean(v))
+    underlyingElem.attributeOption(ENames.AugmentEName).map(v => XsdBooleans.parseBoolean(v))
   }
 }
 

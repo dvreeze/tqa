@@ -27,13 +27,13 @@ import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.ScopedXPathString
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.aspect.Aspect
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaAspect
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.yaidom.core.EName
-import javax.xml.bind.DatatypeConverter
 
 /**
  * Non-XLink element in a table link.
@@ -138,7 +138,7 @@ final class DimensionAspectSpec(underlyingElem: tqa.base.dom.OtherNonXLinkElem) 
    */
   def isIncludeUnreportedValue: Boolean = {
     underlyingElem.attributeOption(ENames.IncludeUnreportedValueEName).
-      map(v => DatatypeConverter.parseBoolean(v)).getOrElse(false)
+      map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
   }
 }
 
