@@ -393,7 +393,7 @@ class DimensionalRelationshipTargetTest extends FunSuite {
         val db = new DOMParser()
         val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(xmlString, SupportedType.`text/xml`))
 
-        // We have to convert to indexed elements, in order to keep the document URI with the elements
+        // We have to convert to indexed elements, in order to keep the document URI with the elements.
         // Without those document URIs that are known to the elements themselves, TQA does not work!
 
         val simpleDoc: simple.Document =
