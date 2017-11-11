@@ -36,7 +36,7 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.7.0-M7",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.7.0-M8",
 
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.4",
 
@@ -83,6 +83,8 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
     libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda" % "1.1.1",
 
     libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda-as-java-time" % "1.1.1",
+
+    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.6.7" % "optional",
 
     jsDependencies += "org.webjars.npm" % "js-joda" % "1.1.8" / "dist/js-joda.js" minified "dist/js-joda.min.js",
 
