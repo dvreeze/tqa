@@ -36,7 +36,7 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.7.0-M8",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.7.0",
 
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.4",
 
