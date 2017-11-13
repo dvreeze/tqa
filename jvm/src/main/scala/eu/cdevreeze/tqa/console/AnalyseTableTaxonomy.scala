@@ -25,6 +25,7 @@ import scala.collection.immutable
 import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
@@ -49,9 +50,45 @@ object AnalyseTableTaxonomy {
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
 
     val entrypointUris = args.drop(1).map(u => URI.create(u)).toSet
-
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
+    val basicTaxo = buildTaxonomy(rootDir, entrypointUris, useSaxon)
+
+    logger.info(s"Starting building the table-aware taxonomy with entrypoint(s) ${entrypointUris.mkString(", ")}")
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val tableRelationships = tableTaxo.tableRelationships
+
+    logger.info(s"The taxonomy has ${tableRelationships.size} table relationships")
+
+    val tableRelationshipGroups: Map[String, immutable.IndexedSeq[TableRelationship]] =
+      tableRelationships.groupBy(_.getClass.getSimpleName)
+
+    // scalastyle:off magic.number
+    logger.info(
+      s"Table relationship group sizes (topmost 15): ${tableRelationshipGroups.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(15).mkString(", ")}")
+
+    val sortedTableRelationshipGroups = tableRelationshipGroups.toIndexedSeq.sortBy(_._2.size).reverse
+
+    sortedTableRelationshipGroups foreach {
+      case (relationshipName, relationships) =>
+        val relationshipsByUri: Map[URI, immutable.IndexedSeq[TableRelationship]] = relationships.groupBy(_.docUri)
+
+        val uris = relationshipsByUri.keySet.toSeq.sortBy(_.toString)
+
+        uris foreach { uri =>
+          val currentRelationships = relationshipsByUri.getOrElse(uri, Vector())
+          val elrs = currentRelationships.map(_.elr).distinct.sorted
+          val arcroles = currentRelationships.map(_.arcrole).distinct.sorted
+
+          logger.info(
+            s"Found ${currentRelationships.size} ${relationshipName}s in doc '${uri}'. ELRs: ${elrs.mkString(", ")}. Arcroles: ${arcroles.mkString(", ")}.")
+        }
+    }
+  }
+
+  private def buildTaxonomy(rootDir: File, entrypointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
     val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
     val documentCollector = DefaultDtsCollector(entrypointUris)
 
@@ -69,36 +106,7 @@ object AnalyseTableTaxonomy {
     logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUris.mkString(", ")}")
 
     val basicTaxo = taxoBuilder.build()
-
-    logger.info(s"Starting building the table-aware taxonomy with entrypoint(s) ${entrypointUris.mkString(", ")}")
-
-    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
-
-    val tableRelationships = tableTaxo.tableRelationships
-
-    logger.info(s"The taxonomy has ${tableRelationships.size} table relationships")
-
-    val tableRelationshipGroups: Map[String, immutable.IndexedSeq[TableRelationship]] =
-      tableRelationships.groupBy(_.getClass.getSimpleName)
-
-    logger.info(s"Table relationship group sizes (topmost 15): ${tableRelationshipGroups.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(15).mkString(", ")}")
-
-    val sortedTableRelationshipGroups = tableRelationshipGroups.toIndexedSeq.sortBy(_._2.size).reverse
-
-    sortedTableRelationshipGroups foreach {
-      case (relationshipName, relationships) =>
-        val relationshipsByUri: Map[URI, immutable.IndexedSeq[TableRelationship]] = relationships.groupBy(_.docUri)
-
-        val uris = relationshipsByUri.keySet.toSeq.sortBy(_.toString)
-
-        uris foreach { uri =>
-          val currentRelationships = relationshipsByUri.getOrElse(uri, Vector())
-          val elrs = currentRelationships.map(_.elr).distinct.sorted
-          val arcroles = currentRelationships.map(_.arcrole).distinct.sorted
-
-          logger.info(s"Found ${currentRelationships.size} ${relationshipName}s in doc '${uri}'. ELRs: ${elrs.mkString(", ")}. Arcroles: ${arcroles.mkString(", ")}.")
-        }
-    }
+    basicTaxo
   }
 
   private def getDocumentBuilder(useSaxon: Boolean, rootDir: File): DocumentBuilder = {

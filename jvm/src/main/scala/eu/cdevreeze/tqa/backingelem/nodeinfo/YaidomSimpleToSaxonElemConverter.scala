@@ -35,7 +35,7 @@ import net.sf.saxon.tree.tiny.TinyBuilder
  * @author Chris de Vreeze
  */
 final class YaidomSimpleToSaxonElemConverter(val processor: Processor) {
-  require(processor ne null)
+  require(processor ne null) // scalastyle:off null
 
   def convertSimpleDocument(doc: simple.Document): SaxonDocument = {
     // See http://saxon-xslt-and-xquery-processor.13853.n7.nabble.com/Constructing-a-tiny-tree-from-SAX-events-td5192.html.

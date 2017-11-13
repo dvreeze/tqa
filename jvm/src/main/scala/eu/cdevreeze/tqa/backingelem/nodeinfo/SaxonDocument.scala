@@ -31,6 +31,7 @@ import net.sf.saxon.om.TreeInfo
  *
  * @author Chris de Vreeze
  */
+// scalastyle:off null
 final class SaxonDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.DOCUMENT, s"Expected document but got node kind ${wrappedNode.getNodeKind}")

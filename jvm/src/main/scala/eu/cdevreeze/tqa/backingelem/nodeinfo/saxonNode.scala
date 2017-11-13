@@ -43,6 +43,7 @@ import net.sf.saxon.pattern.NodeKindTest
  *
  * @author Chris de Vreeze
  */
+// scalastyle:off null
 sealed abstract class SaxonNode(val wrappedNode: NodeInfo) extends ResolvedNodes.Node {
 
   final override def toString: String = wrappedNode.toString
@@ -106,6 +107,7 @@ sealed abstract class SaxonNode(val wrappedNode: NodeInfo) extends ResolvedNodes
 /**
  * Saxon NodeInfo element wrapper. It is efficient, because of an entirely custom query API implementation tailored to Saxon.
  */
+// scalastyle:off number.of.methods
 final class SaxonElem(
     override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with ResolvedNodes.Elem with BackingElemApi {
 
@@ -120,14 +122,17 @@ final class SaxonElem(
 
   // ClarkElemApi: ElemApi part
 
+  // scalastyle:off method.name
   def \(p: ThisElem => Boolean): immutable.IndexedSeq[ThisElem] = {
     filterChildElems(p)
   }
 
+  // scalastyle:off method.name
   def \\(p: ThisElem => Boolean): immutable.IndexedSeq[ThisElem] = {
     filterElemsOrSelf(p)
   }
 
+  // scalastyle:off method.name
   def \\!(p: ThisElem => Boolean): immutable.IndexedSeq[ThisElem] = {
     findTopmostElemsOrSelf(p)
   }
@@ -270,6 +275,7 @@ final class SaxonElem(
     nodes map { nodeInfo => nodeInfo2EName(nodeInfo) -> nodeInfo.getStringValue }
   }
 
+  // scalastyle:off method.name
   def \@(expandedName: EName): Option[String] = {
     attributeOption(expandedName)
   }

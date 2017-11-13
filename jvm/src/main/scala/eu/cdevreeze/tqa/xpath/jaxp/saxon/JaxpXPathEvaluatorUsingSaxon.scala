@@ -57,6 +57,7 @@ import net.sf.saxon.value.AtomicValue
  *
  * @author Chris de Vreeze
  */
+// scalastyle:off null
 final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XPathEvaluator) extends XPathEvaluator {
   require(
     underlyingEvaluator.getConfiguration.getTreeModel == Builder.TINY_TREE,
@@ -151,7 +152,9 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
       } else {
         val qname = QName(stringResult)
 
-        val msg = s"Could not resolve QName $qname. Expression: '${toString(expr)}'. Base URI: ${underlyingEvaluator.getStaticContext.getStaticBaseURI}.\n\tScope: $scope"
+        val msg =
+          s"Could not resolve QName $qname. Expression: '${toString(expr)}'. " +
+            s"Base URI: ${underlyingEvaluator.getStaticContext.getStaticBaseURI}.\n\tScope: $scope"
         scope.resolveQNameOption(qname) getOrElse {
           sys.error(msg)
         }

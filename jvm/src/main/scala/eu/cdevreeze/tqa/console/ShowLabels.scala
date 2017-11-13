@@ -26,6 +26,7 @@ import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.ConceptLabelRelationship
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
@@ -50,26 +51,9 @@ object ShowLabels {
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
 
     val entrypointUris = args.drop(1).map(u => URI.create(u)).toSet
-
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
-    val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
-    val documentCollector = DefaultDtsCollector(entrypointUris)
-
-    val lenient = System.getProperty("lenient", "false").toBoolean
-
-    val relationshipFactory =
-      if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
-
-    val taxoBuilder =
-      TaxonomyBuilder.
-        withDocumentBuilder(documentBuilder).
-        withDocumentCollector(documentCollector).
-        withRelationshipFactory(relationshipFactory)
-
-    logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUris.mkString(", ")}")
-
-    val basicTaxo = taxoBuilder.build()
+    val basicTaxo = buildTaxonomy(rootDir, entrypointUris, useSaxon)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -95,6 +79,27 @@ object ShowLabels {
     }
 
     logger.info("Ready")
+  }
+
+  private def buildTaxonomy(rootDir: File, entrypointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
+    val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
+    val documentCollector = DefaultDtsCollector(entrypointUris)
+
+    val lenient = System.getProperty("lenient", "false").toBoolean
+
+    val relationshipFactory =
+      if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
+
+    val taxoBuilder =
+      TaxonomyBuilder.
+        withDocumentBuilder(documentBuilder).
+        withDocumentCollector(documentCollector).
+        withRelationshipFactory(relationshipFactory)
+
+    logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUris.mkString(", ")}")
+
+    val basicTaxo = taxoBuilder.build()
+    basicTaxo
   }
 
   private def getDocumentBuilder(useSaxon: Boolean, rootDir: File): DocumentBuilder = {

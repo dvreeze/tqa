@@ -86,6 +86,7 @@ object ConceptRelationshipNodeData {
   /**
    * Finds all concepts referred to by the given concept relationship node in the given taxonomy.
    */
+  // scalastyle:off method.length
   def findAllConceptsInConceptRelationshipNode(
     conceptRelationshipNode: ConceptRelationshipNode,
     taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
