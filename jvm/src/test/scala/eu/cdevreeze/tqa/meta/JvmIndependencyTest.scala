@@ -49,9 +49,9 @@ class JvmIndependencyTest extends FunSuite {
     val sharedResultDir = new File(sharedProjectDir, "src/main/scala")
 
     val jsProjectDir = new File(projDir.getParentFile, "js")
-    val jsResultDir = new File(jsProjectDir, "src/main/scala")
+    // val jsResultDir = new File(jsProjectDir, "src/main/scala")
 
-    immutable.IndexedSeq(sharedResultDir, jsResultDir).ensuring(_.forall(_.isDirectory))
+    immutable.IndexedSeq(sharedResultDir /*, jsResultDir */ ).ensuring(_.forall(_.isDirectory))
   }
 
   test("testJvmIndependency") {
