@@ -20,9 +20,12 @@ import java.io.File
 import java.net.URI
 import java.util.logging.Logger
 
+import scala.collection.immutable
+
 import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
@@ -63,6 +66,16 @@ object ShowDimensions {
 
     logger.info(s"Number of has_hypercube groups with more than 1 has-hypercube for the same primary and ELR: ${hasHypercubeGroupsWithSameKey.size}")
 
+    showHasHypercubeTrees(hasHypercubes, basicTaxo)
+
+    // Concrete primary items and inheritance of has-hypercubes
+
+    showHasHypercubeInheritance(hasHypercubes, basicTaxo)
+
+    logger.info("Ready")
+  }
+
+  private def showHasHypercubeTrees(hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship], basicTaxo: BasicTaxonomy): Unit = {
     hasHypercubes foreach { hasHypercube =>
       println(s"Has-hypercube found for primary ${hasHypercube.primary} and ELR ${hasHypercube.elr}")
 
@@ -81,9 +94,10 @@ object ShowDimensions {
           }
       }
     }
+  }
 
-    // Concrete primary items and inheritance of has-hypercubes
-
+  // scalastyle:off method.length
+  private def showHasHypercubeInheritance(hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship], basicTaxo: BasicTaxonomy): Unit = {
     val concretePrimaryItemDecls = basicTaxo.findAllPrimaryItemDeclarations.filter(_.isConcrete)
 
     val concretePrimariesNotInheritingOrHavingHasHypercube = concretePrimaryItemDecls filter { itemDecl =>
@@ -109,9 +123,7 @@ object ShowDimensions {
       } flatMap (_.relationships.map(_.member))).toSet
 
     val ownPrimaries = hasHypercubes.map(_.sourceConceptEName).toSet
-
     val inheritingOrOwnPrimaries = inheritingPrimaries.union(ownPrimaries)
-
     val inheritingOrOwnConcretePrimaries =
       inheritingOrOwnPrimaries filter (item => basicTaxo.findPrimaryItemDeclaration(item).exists(_.isConcrete))
 
@@ -138,8 +150,6 @@ object ShowDimensions {
             s"Concrete item $item inherits or has has-hypercubes for ELR $elr and with primaries ${primaries.distinct.sortBy(_.toString).mkString(", ")}")
       }
     }
-
-    logger.info("Ready")
   }
 
   private def buildTaxonomy(rootDir: File, entrypointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
