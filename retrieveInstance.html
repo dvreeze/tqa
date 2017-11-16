@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>XBRL instance viewer</title>
+<style>
+table {
+	font-family: arial, sans-serif;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+td, th {
+	border: 1px solid #dddddd;
+	text-align: left;
+	padding: 8px;
+}
+
+tr:nth-child(even) {
+	background-color: aliceblue;
+}
+</style>
+</head>
+<body>
+	<!-- Include Scala.js compiled code -->
+	<script type="text/javascript"
+		src="./js/target/scala-2.12/tqa-fastopt.js"></script>
+
+	<script type="text/javascript" src="./js-joda.min.js"></script>
+
+	<h1>XBRL instance viewer</h1>
+
+	<div style="padding: 25px;">
+		<h3>XBRL Instance URL</h3>
+
+		<input id="urlInput" type="text" size="100" maxlength="300" />
+
+		<button
+			onclick="XbrlInstanceViewer.retrieveInstance(document.getElementById('urlInput').value, document.getElementById('outputDiv'))">Retrieve
+			XBRL instance</button>
+	</div>
+
+
+	<div style="padding: 25px;">
+		<h3>XBRL Instance Table</h3>
+
+		<div id="outputDiv"></div>
+	</div>
+
+</body>
+</html>
