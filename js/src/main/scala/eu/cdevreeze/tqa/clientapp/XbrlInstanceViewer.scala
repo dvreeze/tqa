@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.clientapp
 
+import java.time.LocalDateTime
+
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.annotation.JSExportTopLevel
@@ -37,7 +39,6 @@ import eu.cdevreeze.tqa.instance.XbrliContext
 import eu.cdevreeze.yaidom.convert.JsDomConversions
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.jsdom.JsDomElem
-import scalatags.JsDom.all.OptionNode
 import scalatags.JsDom.all.SeqFrag
 import scalatags.JsDom.all.bindNode
 import scalatags.JsDom.all.pre
@@ -96,24 +97,33 @@ object XbrlInstanceViewer {
     val headerRow: HTMLTableRowElement =
       tr(
         th("concept"),
-        th("period"),
+        th("period start/instant"),
+        th("period end"),
         dimensions.map(dim => th(dim.toString))).render
 
     val detailRows: Seq[HTMLTableRowElement] =
       xbrlInstance.findAllFacts map { fact =>
         val contextOption = findContext(fact, xbrlInstance)
 
+        val (periodStartOption: Option[LocalDateTime], periodEndOption: Option[LocalDateTime]) =
+          contextOption.map(_.period) map {
+            case p if p.isInstantPeriod =>
+              (Some(p.asInstantPeriod.instantDateTime), None)
+            case p if p.isStartEndDatePeriod =>
+              (Some(p.asStartEndDatePeriod.startDateTime), Some(p.asStartEndDatePeriod.endDateTime))
+            case p =>
+              (None, None)
+          } getOrElse {
+            (None, None)
+          }
+
+        val periodStartString = periodStartOption.map(_.toString).getOrElse("")
+        val periodEndString = periodEndOption.map(_.toString).getOrElse("")
+
         tr(
           td(fact.resolvedName.toString),
-          td(
-            contextOption.map(_.period) map {
-              case p if p.isInstantPeriod =>
-                p.asInstantPeriod.instantDateTime.toString
-              case p if p.isStartEndDatePeriod =>
-                p.asStartEndDatePeriod.startDateTime + " - " + p.asStartEndDatePeriod.endDateTime.toString
-              case p =>
-                ""
-            }),
+          td(periodStartString),
+          td(periodEndString),
           dimensions map { dim =>
             val dimMemberOption: Option[String] = contextOption flatMap { context =>
               context.explicitDimensionMembers.get(dim).map(_.toString)
