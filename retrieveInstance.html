@@ -1,51 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>XBRL instance viewer</title>
-<style>
-table {
-	font-family: arial, sans-serif;
-	border-collapse: collapse;
-	width: 100%;
-}
-
-td, th {
-	border: 1px solid #dddddd;
-	text-align: left;
-	padding: 8px;
-	white-space: nowrap;
-}
-
-tr:nth-child(even) {
-	background-color: aliceblue;
-}
-</style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" />
 </head>
 <body>
 	<!-- Include Scala.js compiled code -->
-	<script type="text/javascript"
-		src="./js/target/scala-2.12/tqa-fastopt.js"></script>
+	<script type="text/javascript" src="./js/target/scala-2.12/tqa-fastopt.js"></script>
 
 	<script type="text/javascript" src="./js/target/scala-2.12/tqa-jsdeps.js"></script>
 
-	<h1>XBRL instance viewer</h1>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
-	<div style="padding: 25px;">
-		<h3>XBRL Instance URL</h3>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-		<input id="urlInput" type="text" size="100" maxlength="300" />
+	<div class="container">
+		<div class="page-header">
+			<h1>XBRL instance viewer</h1>
+		</div>
 
-		<button
-			onclick="XbrlInstanceViewer.retrieveInstance(document.getElementById('urlInput').value, document.getElementById('outputDiv'))">Retrieve
-			XBRL instance</button>
-	</div>
+		<form>
+			<div class="form-group">
+				<label for="urlInput">XBRL Instance URL</label> <input type="url" class="form-control" id="urlInput"
+					placeholder="XBRL Instance URL" />
+			</div>
 
+			<button type="button" class="btn btn-success btn-lg"
+				onclick="XbrlInstanceViewer.retrieveInstance(document.getElementById('urlInput').value, document.getElementById('outputDiv'))">Retrieve
+				XBRL instance</button>
+		</form>
 
-	<div style="padding: 25px;">
-		<h3>XBRL Instance Table</h3>
+		<hr />
 
-		<div id="outputDiv"></div>
+		<div class="row">
+			<div class="col-md-12">
+				<div id="outputDiv"></div>
+			</div>
+		</div>
 	</div>
 
 </body>

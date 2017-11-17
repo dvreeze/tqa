@@ -30,6 +30,7 @@ import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.HTMLDivElement
 import org.scalajs.dom.raw.HTMLTableElement
 import org.scalajs.dom.raw.HTMLTableRowElement
+import org.scalajs.dom.raw.HTMLTableSectionElement
 
 import eu.cdevreeze.tqa.instance.Fact
 import eu.cdevreeze.tqa.instance.ItemFact
@@ -41,11 +42,16 @@ import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.jsdom.JsDomElem
 import scalatags.JsDom.all.SeqFrag
 import scalatags.JsDom.all.bindNode
+import scalatags.JsDom.all.caption
+import scalatags.JsDom.all.cls
 import scalatags.JsDom.all.pre
 import scalatags.JsDom.all.stringFrag
+import scalatags.JsDom.all.stringAttr
 import scalatags.JsDom.all.table
+import scalatags.JsDom.all.tbody
 import scalatags.JsDom.all.td
 import scalatags.JsDom.all.th
+import scalatags.JsDom.all.thead
 import scalatags.JsDom.all.tr
 
 /**
@@ -91,15 +97,19 @@ object XbrlInstanceViewer {
     }
   }
 
+  /**
+   * Converts the XBRL instance to an HTML table, using Bootstrap for styling.
+   */
   private def convertInstanceToTable(xbrlInstance: XbrlInstance): HTMLTableElement = {
     val dimensions = xbrlInstance.allContexts.flatMap(_.explicitDimensionMembers.keySet).distinct
 
-    val headerRow: HTMLTableRowElement =
-      tr(
-        th("concept"),
-        th("period start/instant"),
-        th("period end"),
-        dimensions.map(dim => th(dim.toString))).render
+    val tableHead: HTMLTableSectionElement =
+      thead(
+        tr(
+          th("concept"),
+          th("period start/instant"),
+          th("period end"),
+          dimensions.map(dim => th(dim.toString)))).render
 
     val detailRows: Seq[HTMLTableRowElement] =
       xbrlInstance.findAllFacts map { fact =>
@@ -134,7 +144,10 @@ object XbrlInstanceViewer {
           }).render
       }
 
-    table(headerRow +: detailRows).render
+    table(cls := "table table-bordered table-condensed")(
+      caption("XBRL Instance"),
+      tableHead,
+      tbody(detailRows)).render
   }
 
   private def findContext(fact: Fact, xbrlInstance: XbrlInstance): Option[XbrliContext] = {
