@@ -31,15 +31,30 @@ object Aspect {
 
   // First the required aspects, for both aspect models (dimensional and non-dimensional)
 
-  case object LocationAspect extends Aspect
+  case object LocationAspect extends Aspect {
 
-  case object ConceptAspect extends Aspect
+    override def toString: String = "location"
+  }
 
-  case object EntityIdentifierAspect extends Aspect
+  case object ConceptAspect extends Aspect {
 
-  case object PeriodAspect extends Aspect
+    override def toString: String = "concept"
+  }
 
-  case object UnitAspect extends Aspect
+  case object EntityIdentifierAspect extends Aspect {
+
+    override def toString: String = "entityIdentifier"
+  }
+
+  case object PeriodAspect extends Aspect {
+
+    override def toString: String = "period"
+  }
+
+  case object UnitAspect extends Aspect {
+
+    override def toString: String = "unit"
+  }
 
   // Next the aspects that belong to one of the aspect models
 
@@ -51,25 +66,40 @@ object Aspect {
   /**
    * NonXDTSegmentAspect, in the dimensional aspect model
    */
-  case object NonXDTSegmentAspect extends OccAspect
+  case object NonXDTSegmentAspect extends OccAspect {
+
+    override def toString: String = "nonXDTSegment"
+  }
 
   /**
    * CompleteSegmentAspect, in the non-dimensional aspect model
    */
-  case object CompleteSegmentAspect extends OccAspect
+  case object CompleteSegmentAspect extends OccAspect {
+
+    override def toString: String = "completeSegment"
+  }
 
   /**
    * NonXDTScenarioAspect, in the dimensional aspect model
    */
-  case object NonXDTScenarioAspect extends OccAspect
+  case object NonXDTScenarioAspect extends OccAspect {
+
+    override def toString: String = "nonXDTScenario"
+  }
 
   /**
    * CompleteScenarioAspect, in the non-dimensional aspect model
    */
-  case object CompleteScenarioAspect extends OccAspect
+  case object CompleteScenarioAspect extends OccAspect {
+
+    override def toString: String = "completeScenario"
+  }
 
   /**
    * A dimensional aspect (for either an explicit or typed dimension), in the dimensional aspect model
    */
-  final case class DimensionAspect(dimension: EName) extends Aspect
+  final case class DimensionAspect(dimension: EName) extends Aspect {
+
+    override def toString: String = dimension.toString
+  }
 }

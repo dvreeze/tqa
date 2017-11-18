@@ -581,11 +581,21 @@ final class XbrliUnit private[instance] (
     filterChildElems(XbrliMeasureEName) map (e => e.textAsResolvedQName)
   }
 
+  def findDivide: Option[Divide] = {
+    findChildElemOfType(classTag[Divide])(anyElem)
+  }
+
   def divide: Divide = {
     getChildElemOfType(classTag[Divide])(anyElem)
   }
 
-  // TODO Lists of numerators and denominators
+  def numeratorMeasures: immutable.IndexedSeq[EName] = {
+    findDivide.map(_.numerator).getOrElse(measures)
+  }
+
+  def denominatorMeasures: immutable.IndexedSeq[EName] = {
+    findDivide.map(_.denominator).getOrElse(immutable.IndexedSeq())
+  }
 }
 
 /**
