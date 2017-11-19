@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.tqa.clientapp
 
+import java.net.URI
 import java.time.LocalDateTime
 
 import scala.collection.immutable
@@ -53,7 +54,6 @@ import scalatags.JsDom.all.a
 import scalatags.JsDom.all.caption
 import scalatags.JsDom.all.cls
 import scalatags.JsDom.all.href
-import scalatags.JsDom.all._
 import scalatags.JsDom.all.onclick
 import scalatags.JsDom.all.pre
 import scalatags.JsDom.all.stringAttr
@@ -64,6 +64,7 @@ import scalatags.JsDom.all.td
 import scalatags.JsDom.all.th
 import scalatags.JsDom.all.thead
 import scalatags.JsDom.all.tr
+import scalatags.JsDom.all._
 
 /**
  * Program that retrieves and shows an XBRL instance.
@@ -88,7 +89,12 @@ object XbrlInstanceViewer {
 
         val db = new DOMParser()
         val parsedDoc = db.parseFromString(responseXml, SupportedType.`text/xml`)
-        val idoc = indexed.Document(JsDomConversions.convertToDocument(parsedDoc))
+
+        // Converting the JS DOM tree to a native yaidom indexed tree improves performance,
+        // because of much faster Path computations, which are used under the hood all the time
+        // when querying the instance (for facts, for example).
+
+        val idoc = indexed.Document(URI.create(xbrlInstanceUri), JsDomConversions.convertToDocument(parsedDoc))
         val xbrlInstance = XbrlInstance(idoc.documentElement)
 
         val facts = xbrlInstance.findAllFacts
