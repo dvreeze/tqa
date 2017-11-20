@@ -20,6 +20,7 @@ import java.net.URI
 import java.time.LocalDateTime
 
 import scala.collection.immutable
+import scala.reflect.classTag
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.annotation.JSExportTopLevel
@@ -36,6 +37,8 @@ import org.scalajs.dom.raw.HTMLTableSectionElement
 import org.scalajs.dom.raw.MouseEvent
 import org.scalajs.dom.window
 
+import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.aspect.Aspect
 import eu.cdevreeze.tqa.instance.Fact
 import eu.cdevreeze.tqa.instance.ItemFact
@@ -43,11 +46,15 @@ import eu.cdevreeze.tqa.instance.NumericItemFact
 import eu.cdevreeze.tqa.instance.TupleFact
 import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.tqa.instance.XbrliContext
+import eu.cdevreeze.tqa.instance.XbrliElem
 import eu.cdevreeze.tqa.instance.XbrliUnit
 import eu.cdevreeze.yaidom.convert.JsDomConversions
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.jsdom.JsDomElem
+import eu.cdevreeze.yaidom.simple
 import scalatags.JsDom.all.SeqFrag
 import scalatags.JsDom.all.bindNode
 import scalatags.JsDom.all.a
@@ -130,12 +137,25 @@ object XbrlInstanceViewer {
         val unitOption = findUnit(fact, xbrlInstance)
 
         val onclickHandler = { ev: MouseEvent =>
-          window.alert(s"TODO Show minimal XBRL instance containing fact ${fact.resolvedName} in a popup")
+          val div = window.document.getElementById("myModal-body")
+
+          val minimalInstance = createMinimalInstanceContainingFact(fact, xbrlInstance)
+          val minimalInstanceAsSimpleElem = minimalInstance.backingElem.asInstanceOf[indexed.Elem].underlyingElem
+
+          val xmlString = SimpleNodePrinting.printElem(minimalInstanceAsSimpleElem, Scope.Empty)
+          val editedXmlString = scala.io.Source.fromString(xmlString).getLines.filter(_.trim.nonEmpty).mkString("\n")
+
+          val content = pre(editedXmlString).render
+
+          // Yaidom can also help in manipulating the browser DOM
+          JsDomElem(div).children.reverse.foreach(e => div.removeChild(e.wrappedNode))
+
+          div.appendChild(content)
         }
 
         tr(
           td(
-            a(href := "#", onclick := onclickHandler)(fact.resolvedName.localPart)),
+            a(href := "#myModal", attr("data-toggle") := "modal", onclick := onclickHandler)(fact.resolvedName.localPart)),
           td(convertAspectsToTable(fact, contextOption, unitOption))).render
       }
 
@@ -314,6 +334,66 @@ object XbrlInstanceViewer {
       UnitAspect -> numsDenoms)
   }
 
+  private def createMinimalInstanceContainingFact(fact: Fact, xbrlInstance: XbrlInstance): XbrlInstance = {
+    require(
+      xbrlInstance.backingElem.isInstanceOf[indexed.IndexedScopedNode.Elem[_]],
+      s"Expected indexed.Elem as backing element")
+
+    val topLevelFactPath = fact.path.ancestorOrSelfPaths.find(_.entries.size == 1).get
+    val topLevelFact: Fact = xbrlInstance.getElemOrSelfByPath(topLevelFactPath).asInstanceOf[Fact]
+    val topLevelFactAsSimpleElem: simple.Elem =
+      topLevelFact.backingElem.asInstanceOf[indexed.Elem].underlyingElem
+
+    def isTopLevelFact(e: simple.Elem): Boolean = {
+      !e.resolvedName.namespaceUriOption.contains(Namespaces.XbrliNamespace) &&
+        !e.resolvedName.namespaceUriOption.contains(Namespaces.LinkNamespace)
+    }
+
+    def isTopLevelFactToRemove(e: simple.Elem): Boolean = {
+      isTopLevelFact(e) && (e != topLevelFactAsSimpleElem)
+    }
+
+    def isContext(e: simple.Elem): Boolean = {
+      e.resolvedName == XbrliElem.XbrliContextEName
+    }
+
+    def isUnit(e: simple.Elem): Boolean = {
+      e.resolvedName == XbrliElem.XbrliUnitEName
+    }
+
+    def isOtherXbrliOrLinkElem(e: simple.Elem): Boolean = {
+      Set(Namespaces.XbrliNamespace, Namespaces.LinkNamespace).exists(ns => e.resolvedName.namespaceUriOption.contains(ns)) &&
+        !isContext(e) && !isUnit(e)
+    }
+
+    val contextsToKeep: Set[String] = topLevelFact.findAllElemsOrSelfOfType(classTag[ItemFact]).map(_.contextRef).toSet
+    val unitsToKeep: Set[String] = topLevelFact.findAllElemsOrSelfOfType(classTag[NumericItemFact]).map(_.unitRef).toSet
+
+    def isContextToRemove(e: simple.Elem): Boolean = {
+      isContext(e) && !contextsToKeep.contains(e.attribute(ENames.IdEName))
+    }
+
+    def isUnitToRemove(e: simple.Elem): Boolean = {
+      isUnit(e) && !unitsToKeep.contains(e.attribute(ENames.IdEName))
+    }
+
+    val xbrlInstanceAsSimpleElem: simple.Elem = xbrlInstance.backingElem.asInstanceOf[indexed.Elem].underlyingElem
+
+    val minimizedInstanceAsSimpleElem: simple.Elem = xbrlInstanceAsSimpleElem transformChildElemsToNodeSeq {
+      case e if isTopLevelFactToRemove(e) => immutable.IndexedSeq()
+      case e if isTopLevelFact(e) => immutable.IndexedSeq(e)
+      case e if isContextToRemove(e) => immutable.IndexedSeq()
+      case e if isContext(e) => immutable.IndexedSeq(e)
+      case e if isUnitToRemove(e) => immutable.IndexedSeq()
+      case e if isUnit(e) => immutable.IndexedSeq(e)
+      case e if e.resolvedName == XbrliElem.LinkFootnoteLinkEName => immutable.IndexedSeq()
+      case e if isOtherXbrliOrLinkElem(e) => immutable.IndexedSeq(e)
+      case e => immutable.IndexedSeq(e)
+    }
+
+    XbrlInstance(indexed.Elem(minimizedInstanceAsSimpleElem.prettify(2)))
+  }
+
   // TODO Add missing core aspects
 
   private val coreAspects: immutable.IndexedSeq[Aspect] = {
@@ -325,5 +405,60 @@ object XbrlInstanceViewer {
       EntityIdentifierAspect,
       PeriodAspect,
       UnitAspect)
+  }
+
+  private object SimpleNodePrinting {
+
+    // Quick and dirty implementation
+
+    def printElem(e: simple.Elem, parentScope: Scope): String = {
+      val sb = new StringBuilder
+      printElem(e, parentScope, sb)
+      sb.toString
+    }
+
+    def printNode(n: simple.Node, parentScope: Scope, sb: StringBuilder): Unit = {
+      n match {
+        case e: simple.Elem => printElem(e, parentScope, sb)
+        case t: simple.Text => printText(t, sb)
+        case n              => ()
+      }
+    }
+
+    def printElem(e: simple.Elem, parentScope: Scope, sb: StringBuilder): Unit = {
+      val decls = parentScope.relativize(e.scope)
+
+      sb.append("<")
+      sb.append(e.qname.toString)
+
+      if (decls.nonEmpty) {
+        sb.append(" ").append(decls.toStringInXml)
+      }
+
+      e.attributes foreach {
+        case (attrName, attrValue) =>
+          sb.append(" ").append(printAttribute(attrName, attrValue))
+      }
+
+      sb.append(">")
+
+      // Recursive calls
+
+      e.children.foreach(n => printNode(n, e.scope, sb))
+
+      sb.append("</")
+      sb.append(e.qname.toString)
+      sb.append(">")
+    }
+
+    def printText(t: simple.Text, sb: StringBuilder): Unit = {
+      val stringValue = t.text.replace("<", "&lt;").replace(">", "&gt;")
+      sb.append(stringValue)
+    }
+
+    private def printAttribute(attrName: QName, attrValue: String): String = {
+      val quotedAttrValue = attrValue.replace("\"", "&quot;")
+      s"""$attrName="$quotedAttrValue""""
+    }
   }
 }
