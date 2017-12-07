@@ -55,9 +55,14 @@ object IndexedDocumentBuilder {
     new IndexedDocumentBuilder(docParser, uriResolver)
   }
 
+  /**
+   * Creates an IndexedDocumentBuilder from a DocumentParser and URI converter.
+   * The URI converter must return a local file URI.
+   */
   def usingUriConverter(docParser: DocumentParser, uriConverter: URI => URI): IndexedDocumentBuilder = {
     def resolveUri(uri: URI): InputSource = {
       val localUri = uriConverter(uri)
+      require(localUri.getScheme == "file", s"Expected local file URI but found $localUri")
 
       new InputSource(new FileInputStream(new File(localUri)))
     }

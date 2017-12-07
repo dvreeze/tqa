@@ -75,6 +75,10 @@ object SaxonDocumentBuilder {
     new SaxonDocumentBuilder(docBuilder, uriResolver)
   }
 
+  /**
+   * Creates a SaxonDocumentBuilder from an s9api.DocumentBuilder and URI converter.
+   * The URI converter must return a local file URI.
+   */
   def usingUriConverter(docBuilder: s9api.DocumentBuilder, uriConverter: URI => URI): SaxonDocumentBuilder = {
     def resolveUri(uri: URI): InputSource = {
       val localUri = uriConverter(uri)
