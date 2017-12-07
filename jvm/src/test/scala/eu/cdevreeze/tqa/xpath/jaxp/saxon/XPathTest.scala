@@ -490,7 +490,7 @@ class XPathTest extends FunSuite {
   }
 
   private def getDocumentBuilder(rootDir: File): SaxonDocumentBuilder = {
-    new SaxonDocumentBuilder(
+    SaxonDocumentBuilder.usingUriConverter(
       processor.newDocumentBuilder(),
       { u => if (u.getScheme == "file") u else UriConverters.uriToLocalUri(u, rootDir) })
   }

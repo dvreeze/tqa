@@ -1797,7 +1797,7 @@ class DimensionalQueryTest extends FunSuite {
   private val docBuilder = {
     val otherRootDir = new File(classOf[DimensionalQueryTest].getResource("/xbrl-and-w3").toURI)
 
-    new SaxonDocumentBuilder(processor.newDocumentBuilder(), { uri =>
+    SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), { uri =>
       if (uri.getScheme == "http" || uri.getScheme == "https") {
         UriConverters.uriToLocalUri(uri, otherRootDir)
       } else {

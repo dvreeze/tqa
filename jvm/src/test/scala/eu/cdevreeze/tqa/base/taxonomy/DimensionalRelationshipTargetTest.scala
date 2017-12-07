@@ -378,5 +378,5 @@ class DimensionalRelationshipTargetTest extends FunSuite {
 
   private val processor = new Processor(false)
 
-  private val docBuilder = new SaxonDocumentBuilder(processor.newDocumentBuilder(), (uri => uri))
+  private val docBuilder = SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), (uri => uri))
 }

@@ -45,7 +45,7 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
   private val docBuilder = {
     val otherRootDir = new File(classOf[PrimaryItemDimensionalValidation270Test].getResource("/xbrl-and-w3").toURI)
 
-    new SaxonDocumentBuilder(processor.newDocumentBuilder(), { uri =>
+    SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), { uri =>
       if (uri.getScheme == "http" || uri.getScheme == "https") {
         UriConverters.uriToLocalUri(uri, otherRootDir)
       } else {

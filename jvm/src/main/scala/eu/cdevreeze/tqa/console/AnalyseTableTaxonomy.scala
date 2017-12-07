@@ -113,9 +113,9 @@ object AnalyseTableTaxonomy {
     if (useSaxon) {
       val processor = new Processor(false)
 
-      new SaxonDocumentBuilder(processor.newDocumentBuilder(), UriConverters.uriToLocalUri(_, rootDir))
+      SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), UriConverters.uriToLocalUri(_, rootDir))
     } else {
-      new IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), UriConverters.uriToLocalUri(_, rootDir))
+      IndexedDocumentBuilder.usingUriConverter(DocumentParserUsingStax.newInstance(), UriConverters.uriToLocalUri(_, rootDir))
     }
   }
 }
