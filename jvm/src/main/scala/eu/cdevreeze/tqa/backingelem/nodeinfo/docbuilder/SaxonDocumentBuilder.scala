@@ -53,13 +53,13 @@ final class SaxonDocumentBuilder(
   }
 
   private def convertInputSourceToSource(is: InputSource): Source = {
-    if (is.getCharacterStream != null) {
+    if (is.getCharacterStream != null) { // scalastyle:ignore null
       val src = new StreamSource(is.getCharacterStream)
       Option(is.getSystemId).foreach(v => src.setSystemId(v))
       Option(is.getPublicId).foreach(v => src.setPublicId(v))
       src
     } else {
-      require(is.getByteStream != null, s"Neither InputStream nor Reader set on InputSource")
+      require(is.getByteStream != null, s"Neither InputStream nor Reader set on InputSource") // scalastyle:ignore null
       val src = new StreamSource(is.getByteStream)
       Option(is.getSystemId).foreach(v => src.setSystemId(v))
       Option(is.getPublicId).foreach(v => src.setPublicId(v))
