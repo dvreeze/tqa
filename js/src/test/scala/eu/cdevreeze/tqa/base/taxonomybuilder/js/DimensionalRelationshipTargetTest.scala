@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.taxonomy.js
+package eu.cdevreeze.tqa.base.taxonomybuilder.js
 
 import java.net.URI
 
 import scala.collection.immutable
 import scala.reflect.classTag
 
+import org.scalajs.dom.experimental.domparser.DOMParser
+import org.scalajs.dom.experimental.domparser.SupportedType
 import org.scalatest.FunSuite
 
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
-import eu.cdevreeze.tqa.base.dom.TaxonomyBase
-import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
+import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.base.taxonomybuilder.TrivialDocumentCollector
+import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.yaidom.convert.JsDomConversions
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.jsdom.JsDomDocument
 import eu.cdevreeze.yaidom.simple
-import org.scalajs.dom.experimental.domparser.DOMParser
-import org.scalajs.dom.experimental.domparser.SupportedType
 
 /**
  * Dimensional relationship target querying test case. It uses test data from the XBRL Dimensions conformance suite.
@@ -366,17 +365,13 @@ class DimensionalRelationshipTargetTest extends FunSuite {
   }
 
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
-    val rootElems =
-      relativeDocPaths.map(path => dummyRootDirUri.resolve(path)).map(u => docBuilder.build(u))
+    val taxoBuilder =
+      TaxonomyBuilder.
+        withDocumentBuilder(docBuilder).
+        withDocumentCollector(TrivialDocumentCollector).
+        withRelationshipFactory(DefaultRelationshipFactory.StrictInstance)
 
-    val taxoRootElems = rootElems.map(e => TaxonomyElem.build(e))
-
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
-    val richTaxo =
-      BasicTaxonomy.build(
-        underlyingTaxo,
-        SubstitutionGroupMap.Empty,
-        DefaultRelationshipFactory.StrictInstance)
+    val richTaxo = taxoBuilder.build(relativeDocPaths.map(path => dummyRootDirUri.resolve(path)).toSet)
 
     richTaxo.ensuring(_.relationships.nonEmpty)
   }

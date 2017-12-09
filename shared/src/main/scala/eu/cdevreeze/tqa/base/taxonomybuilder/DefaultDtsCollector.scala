@@ -35,6 +35,9 @@ import eu.cdevreeze.tqa.base.dom.XsdSchema
  * Default DTS discovery implementation. It will fail for all found URIs that cannot be resolved to
  * taxonomy documents.
  *
+ * This document collector works well with XBRL Taxonomy Packages, passing an entry point in such a
+ * taxonomy package, and using a document builder that uses the XML catalog of the taxonomy package.
+ *
  * @author Chris de Vreeze
  */
 final class DefaultDtsCollector extends AbstractDtsCollector {

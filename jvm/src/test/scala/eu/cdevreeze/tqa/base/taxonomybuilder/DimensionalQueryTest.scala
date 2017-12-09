@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.taxonomy
+package eu.cdevreeze.tqa.base.taxonomybuilder
 
 import java.io.File
 
@@ -32,8 +32,7 @@ import eu.cdevreeze.tqa.base.dom.RoleRef
 import eu.cdevreeze.tqa.base.dom.RoleType
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
-import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor

@@ -48,14 +48,6 @@ final class TaxonomyBuilder(
   }
 
   /**
-   * Returns an updated TaxonomyBuilder with the given document collector. This can be handy if we want
-   * to reuse an existing taxonomy builder except for the entry points of the DTS to discover.
-   */
-  def withDocumentCollector(newDocumentCollector: DocumentCollector): TaxonomyBuilder = {
-    new TaxonomyBuilder(documentBuilder, newDocumentCollector, extraSubstitutionGroupMap, relationshipFactory, arcFilter)
-  }
-
-  /**
    * Builds a `BasicTaxonomy`, passing the entry point URIs to the document collector of this taxonomy builder.
    */
   def build(entryPointUris: Set[URI]): BasicTaxonomy = {
