@@ -142,7 +142,7 @@ final class BasicTaxonomy private (
 
   /**
    * Creates a "sub-taxonomy" in which only the given document URIs occur.
-   * It can be used for a specific entrypoint DTS, or to make query methods (not taking an EName) cheaper.
+   * It can be used for a specific entry point DTS, or to make query methods (not taking an EName) cheaper.
    * In order to keep the same net substitution groups, they are passed as the extra substitution groups
    * to the subset BasicTaxonomy.
    */

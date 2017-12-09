@@ -43,16 +43,16 @@ object ShowUsedElements {
   private val logger = Logger.getGlobal
 
   def main(args: Array[String]): Unit = {
-    require(args.size >= 2, s"Usage: ShowUsedElements <taxo root dir> <entrypoint URI 1> ...")
+    require(args.size >= 2, s"Usage: ShowUsedElements <taxo root dir> <entry point URI 1> ...")
     val rootDir = new File(args(0))
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
 
-    val entrypointUris = args.drop(1).map(u => URI.create(u)).toSet
+    val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
 
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
     val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
-    val documentCollector = DefaultDtsCollector(entrypointUris)
+    val documentCollector = DefaultDtsCollector()
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
@@ -65,9 +65,9 @@ object ShowUsedElements {
         withDocumentCollector(documentCollector).
         withRelationshipFactory(relationshipFactory)
 
-    logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUris.mkString(", ")}")
+    logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val basicTaxo = taxoBuilder.build()
+    val basicTaxo = taxoBuilder.build(entryPointUris)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 

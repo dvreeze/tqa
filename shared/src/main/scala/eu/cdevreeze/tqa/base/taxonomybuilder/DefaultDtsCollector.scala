@@ -37,8 +37,7 @@ import eu.cdevreeze.tqa.base.dom.XsdSchema
  *
  * @author Chris de Vreeze
  */
-final class DefaultDtsCollector(
-    entrypointUris: Set[URI]) extends AbstractDtsCollector(entrypointUris) {
+final class DefaultDtsCollector extends AbstractDtsCollector {
 
   def findAllUsedDocUris(rootElem: TaxonomyRootElem): Set[URI] = {
     rootElem match {
@@ -100,7 +99,7 @@ final class DefaultDtsCollector(
 
 object DefaultDtsCollector {
 
-  def apply(entrypointUris: Set[URI]): DefaultDtsCollector = {
-    new DefaultDtsCollector(entrypointUris)
+  def apply(): DefaultDtsCollector = {
+    new DefaultDtsCollector()
   }
 }

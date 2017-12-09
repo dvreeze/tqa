@@ -48,7 +48,7 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  * Also note that the package-private constructor contains redundant data, in order to speed up (yaidom-based) querying.
  *
  * These XBRL instance elements are just an XBRL instance view on the underlying "backing element" tree, and
- * therefore do not know about the taxonomy describing the XBRL instance (other than the href to the DTS entrypoint).
+ * therefore do not know about the taxonomy describing the XBRL instance (other than the href to the DTS entry point).
  * It is not even required that the XBRL instance is schema-valid. Construction of an instance is indeed quite lenient.
  *
  * As a consequence, this model must recognize facts by only looking at the elements and their ancestry, without knowing
@@ -117,7 +117,7 @@ sealed class XbrliElem private[instance] (
  * XBRL instance.
  *
  * It does not check validity of the XBRL instance. Neither does it know about the DTS describing the XBRL instance.
- * It does, however, contain the entrypoint URI(s) to the DTS.
+ * It does, however, contain the entry point URI(s) to the DTS.
  *
  * Without any knowledge about the DTS, this class only recognizes (item and tuple) facts by looking at the
  * structure of the element and its ancestry. Attribute @contextRef is only allowed for item facts, and tuple facts can be

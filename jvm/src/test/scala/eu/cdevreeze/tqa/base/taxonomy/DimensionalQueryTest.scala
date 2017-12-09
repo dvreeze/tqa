@@ -1776,9 +1776,9 @@ class DimensionalQueryTest extends FunSuite {
     val rootDir = new File(classOf[DimensionalQueryTest].getResource("/conf-suite-dim").toURI)
     val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
 
-    val entrypointUris = docFiles.map(_.toURI).toSet
+    val entryPointUris = docFiles.map(_.toURI).toSet
 
-    val documentCollector = DefaultDtsCollector(entrypointUris)
+    val documentCollector = DefaultDtsCollector()
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -1788,7 +1788,7 @@ class DimensionalQueryTest extends FunSuite {
         withDocumentCollector(documentCollector).
         withRelationshipFactory(relationshipFactory)
 
-    val basicTaxo = taxoBuilder.build()
+    val basicTaxo = taxoBuilder.build(entryPointUris)
     basicTaxo
   }
 

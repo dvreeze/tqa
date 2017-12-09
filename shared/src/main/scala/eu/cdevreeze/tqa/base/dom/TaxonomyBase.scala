@@ -163,7 +163,7 @@ final class TaxonomyBase private (
 
   /**
    * Creates a "sub-taxonomy" in which only the given document URIs occur.
-   * It can be used for a specific entrypoint DTS, or to make query methods (not taking an EName) cheaper.
+   * It can be used for a specific entry point DTS, or to make query methods (not taking an EName) cheaper.
    */
   def filterDocumentUris(docUris: Set[URI]): TaxonomyBase = {
     new TaxonomyBase(

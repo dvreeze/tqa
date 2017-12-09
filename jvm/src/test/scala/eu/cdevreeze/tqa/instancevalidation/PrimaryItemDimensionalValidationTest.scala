@@ -154,11 +154,11 @@ class PrimaryItemDimensionalValidationTest extends FunSuite {
   // Helper methods
 
   private def makeValidator(xbrlInstance: XbrlInstance, doResolveProhibitionAndOverriding: Boolean = false): DimensionalValidator = {
-    val entrypointHrefs =
+    val entryPointHrefs =
       xbrlInstance.findAllSchemaRefs.map(_.resolvedHref) ++ xbrlInstance.findAllLinkbaseRefs.map(_.resolvedHref)
 
     doMakeValidator(
-      entrypointHrefs.toSet.filterNot(Set(URI.create("http://www.xbrl.org/2006/xbrldi-2006.xsd"))),
+      entryPointHrefs.toSet.filterNot(Set(URI.create("http://www.xbrl.org/2006/xbrldi-2006.xsd"))),
       doResolveProhibitionAndOverriding)
   }
 
@@ -169,8 +169,8 @@ class PrimaryItemDimensionalValidationTest extends FunSuite {
     XbrlInstance(docBuilder.build(docFile.toURI))
   }
 
-  private def doMakeValidator(entrypointUris: Set[URI], doResolveProhibitionAndOverriding: Boolean): DimensionalValidator = {
-    val documentCollector = DefaultDtsCollector(entrypointUris)
+  private def doMakeValidator(entryPointUris: Set[URI], doResolveProhibitionAndOverriding: Boolean): DimensionalValidator = {
+    val documentCollector = DefaultDtsCollector()
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -180,7 +180,7 @@ class PrimaryItemDimensionalValidationTest extends FunSuite {
         withDocumentCollector(documentCollector).
         withRelationshipFactory(relationshipFactory)
 
-    val basicTaxo = taxoBuilder.build()
+    val basicTaxo = taxoBuilder.build(entryPointUris)
     val effectiveTaxo =
       if (doResolveProhibitionAndOverriding) {
         basicTaxo.resolveProhibitionAndOverriding(relationshipFactory)

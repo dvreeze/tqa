@@ -33,11 +33,15 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
  *
  * @author Chris de Vreeze
  */
-abstract class AbstractDtsCollector(val entrypointUris: Set[URI]) extends DocumentCollector {
-  require(entrypointUris.nonEmpty, s"At least one entrypoint URI must be provided")
+abstract class AbstractDtsCollector extends DocumentCollector {
 
-  final def collectTaxonomyRootElems(documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
-    val dts = findDts(entrypointUris, Map())(documentBuilder)
+  final def collectTaxonomyRootElems(
+    entryPointUris: Set[URI],
+    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+
+    require(entryPointUris.nonEmpty, s"At least one entryPoint URI must be provided")
+
+    val dts = findDts(entryPointUris, Map(), documentBuilder)
 
     dts.values.toIndexedSeq.sortBy(_.docUri.toString)
   }
@@ -52,7 +56,8 @@ abstract class AbstractDtsCollector(val entrypointUris: Set[URI]) extends Docume
   @tailrec
   private def findDts(
     docUris: Set[URI],
-    processedDocs: Map[URI, TaxonomyRootElem])(documentBuilder: DocumentBuilder): Map[URI, TaxonomyRootElem] = {
+    processedDocs: Map[URI, TaxonomyRootElem],
+    documentBuilder: DocumentBuilder): Map[URI, TaxonomyRootElem] = {
 
     val processedDocUris = processedDocs.keySet
 
@@ -81,7 +86,7 @@ abstract class AbstractDtsCollector(val entrypointUris: Set[URI]) extends Docume
       assert(newDocUris.diff(docUris).nonEmpty)
 
       // Recursive call
-      findDts(newDocUris, newProcessedDocs)(documentBuilder)
+      findDts(newDocUris, newProcessedDocs, documentBuilder)
     }
   }
 

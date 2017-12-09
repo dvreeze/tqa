@@ -45,14 +45,14 @@ object ShowDimensions {
   private val logger = Logger.getGlobal
 
   def main(args: Array[String]): Unit = {
-    require(args.size >= 2, s"Usage: ShowDimensions <taxo root dir> <entrypoint URI 1> ...")
+    require(args.size >= 2, s"Usage: ShowDimensions <taxo root dir> <entry point URI 1> ...")
     val rootDir = new File(args(0))
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
 
-    val entrypointUris = args.drop(1).map(u => URI.create(u)).toSet
+    val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
-    val basicTaxo = buildTaxonomy(rootDir, entrypointUris, useSaxon)
+    val basicTaxo = buildTaxonomy(rootDir, entryPointUris, useSaxon)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -152,9 +152,9 @@ object ShowDimensions {
     }
   }
 
-  private def buildTaxonomy(rootDir: File, entrypointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
+  private def buildTaxonomy(rootDir: File, entryPointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
     val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
-    val documentCollector = DefaultDtsCollector(entrypointUris)
+    val documentCollector = DefaultDtsCollector()
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
@@ -167,9 +167,9 @@ object ShowDimensions {
         withDocumentCollector(documentCollector).
         withRelationshipFactory(relationshipFactory)
 
-    logger.info(s"Starting building the DTS with entrypoint(s) ${entrypointUris.mkString(", ")}")
+    logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val basicTaxo = taxoBuilder.build()
+    val basicTaxo = taxoBuilder.build(entryPointUris)
     basicTaxo
   }
 

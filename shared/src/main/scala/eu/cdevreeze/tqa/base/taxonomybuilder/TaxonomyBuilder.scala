@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.base.taxonomybuilder
 
+import java.net.URI
+
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XLinkArc
@@ -47,14 +49,17 @@ final class TaxonomyBuilder(
 
   /**
    * Returns an updated TaxonomyBuilder with the given document collector. This can be handy if we want
-   * to reuse an existing taxonomy builder except for the entrypoints of the DTS to discover.
+   * to reuse an existing taxonomy builder except for the entry points of the DTS to discover.
    */
   def withDocumentCollector(newDocumentCollector: DocumentCollector): TaxonomyBuilder = {
     new TaxonomyBuilder(documentBuilder, newDocumentCollector, extraSubstitutionGroupMap, relationshipFactory, arcFilter)
   }
 
-  def build(): BasicTaxonomy = {
-    val taxoRootElems = documentCollector.collectTaxonomyRootElems(documentBuilder)
+  /**
+   * Builds a `BasicTaxonomy`, passing the entry point URIs to the document collector of this taxonomy builder.
+   */
+  def build(entryPointUris: Set[URI]): BasicTaxonomy = {
+    val taxoRootElems = documentCollector.collectTaxonomyRootElems(entryPointUris, documentBuilder)
 
     val taxonomyBase = TaxonomyBase.build(taxoRootElems)
 
