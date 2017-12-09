@@ -25,7 +25,7 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
  * Strategy for collecting taxonomy document root elements. Typically implemented as DTS discovery, although
- * it is also possible that all document URIs are explicitly mentioned.
+ * it is also possible that all document URIs must be explicitly mentioned, as is the case for TrivialDocumentCollector.
  *
  * @author Chris de Vreeze
  */
@@ -37,7 +37,7 @@ trait DocumentCollector {
    * If this document collector performs DTS discovery, the entry point URIs are the entry points for
    * DTS discovery. If this document collector does not perform any DTS discovery, and expects all
    * document URIs to be explicitly passed, then those document URIs are considered the "entry points"
-   * as far as this method is concerned.
+   * as far as this method is concerned (see TrivialDocumentCollector).
    *
    * The entry point URIs should normally be the canonical, published document locations.
    */
