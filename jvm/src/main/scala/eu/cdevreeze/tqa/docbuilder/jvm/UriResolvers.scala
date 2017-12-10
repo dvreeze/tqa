@@ -111,7 +111,7 @@ object UriResolvers {
     forZipFile(zipFile, UriConverters.fromCatalog(catalog))
   }
 
-  def computeZipEntryMap(zipFile: File): Map[URI, ZipEntry] = {
+  private def computeZipEntryMap(zipFile: File): Map[URI, ZipEntry] = {
     val zipFileAsZipFile = new ZipFile(zipFile)
 
     val zipEntries = zipFileAsZipFile.entries().asScala.toIndexedSeq
