@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.backingelem.indexed.docbuilder
 
-import java.io.File
-import java.io.FileInputStream
 import java.net.URI
 
 import org.xml.sax.InputSource
@@ -53,20 +51,5 @@ object IndexedDocumentBuilder {
 
   def apply(docParser: DocumentParser, uriResolver: URI => InputSource): IndexedDocumentBuilder = {
     new IndexedDocumentBuilder(docParser, uriResolver)
-  }
-
-  /**
-   * Creates an IndexedDocumentBuilder from a DocumentParser and URI converter.
-   * The URI converter must return a local file URI.
-   */
-  def usingUriConverter(docParser: DocumentParser, uriConverter: URI => URI): IndexedDocumentBuilder = {
-    def resolveUri(uri: URI): InputSource = {
-      val localUri = uriConverter(uri)
-      require(localUri.getScheme == "file", s"Expected local file URI but found $localUri")
-
-      new InputSource(new FileInputStream(new File(localUri)))
-    }
-
-    new IndexedDocumentBuilder(docParser, resolveUri _)
   }
 }

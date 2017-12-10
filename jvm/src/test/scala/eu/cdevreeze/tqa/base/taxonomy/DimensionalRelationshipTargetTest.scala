@@ -33,6 +33,8 @@ import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
+import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
 
@@ -378,5 +380,9 @@ class DimensionalRelationshipTargetTest extends FunSuite {
 
   private val processor = new Processor(false)
 
-  private val docBuilder = SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), (uri => uri))
+  private val docBuilder = {
+    SaxonDocumentBuilder(
+      processor.newDocumentBuilder(),
+      UriResolvers.fromUriConverter(UriConverters.identity))
+  }
 }

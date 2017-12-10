@@ -28,6 +28,7 @@ import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
@@ -45,13 +46,19 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
   private val docBuilder = {
     val otherRootDir = new File(classOf[PrimaryItemDimensionalValidation270Test].getResource("/xbrl-and-w3").toURI)
 
-    SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), { uri =>
+    val xbrlAndW3UriConverter = UriConverters.fromLocalMirrorRootDirectory(otherRootDir)
+
+    def convertUri(uri: URI): URI = {
       if (uri.getScheme == "http" || uri.getScheme == "https") {
-        UriConverters.uriToLocalUri(uri, otherRootDir)
+        xbrlAndW3UriConverter(uri)
       } else {
         uri
       }
-    })
+    }
+
+    SaxonDocumentBuilder(
+      processor.newDocumentBuilder(),
+      UriResolvers.fromUriConverter(convertUri _))
   }
 
   private val testCaseFile =

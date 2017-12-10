@@ -30,7 +30,7 @@ import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
@@ -46,14 +46,13 @@ object ShowLabels {
   private val logger = Logger.getGlobal
 
   def main(args: Array[String]): Unit = {
-    require(args.size >= 2, s"Usage: ShowLabels <taxo root dir> <entry point URI 1> ...")
-    val rootDir = new File(args(0))
-    require(rootDir.isDirectory, s"Not a directory: $rootDir")
+    require(args.size >= 2, s"Usage: ShowLabels <taxo root dir or ZIP file> <entry point URI 1> ...")
+    val rootDirOrZipFile = new File(args(0))
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
-    val basicTaxo = buildTaxonomy(rootDir, entryPointUris, useSaxon)
+    val basicTaxo = buildTaxonomy(rootDirOrZipFile, entryPointUris, useSaxon)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -81,8 +80,8 @@ object ShowLabels {
     logger.info("Ready")
   }
 
-  private def buildTaxonomy(rootDir: File, entryPointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
-    val documentBuilder = getDocumentBuilder(useSaxon, rootDir)
+  private def buildTaxonomy(rootDirOrZipFile: File, entryPointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
+    val documentBuilder = getDocumentBuilder(useSaxon, rootDirOrZipFile)
     val documentCollector = DefaultDtsCollector()
 
     val lenient = System.getProperty("lenient", "false").toBoolean
@@ -102,13 +101,20 @@ object ShowLabels {
     basicTaxo
   }
 
-  private def getDocumentBuilder(useSaxon: Boolean, rootDir: File): DocumentBuilder = {
+  private def getDocumentBuilder(useSaxon: Boolean, rootDirOrZipFile: File): DocumentBuilder = {
+    val uriResolver =
+      if (rootDirOrZipFile.isDirectory) {
+        UriResolvers.fromLocalMirrorRootDirectory(rootDirOrZipFile)
+      } else {
+        UriResolvers.forZipFileContainingLocalMirror(rootDirOrZipFile)
+      }
+
     if (useSaxon) {
       val processor = new Processor(false)
 
-      SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), UriConverters.uriToLocalUri(_, rootDir))
+      SaxonDocumentBuilder(processor.newDocumentBuilder(), uriResolver)
     } else {
-      IndexedDocumentBuilder.usingUriConverter(DocumentParserUsingStax.newInstance(), UriConverters.uriToLocalUri(_, rootDir))
+      IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriResolver)
     }
   }
 }

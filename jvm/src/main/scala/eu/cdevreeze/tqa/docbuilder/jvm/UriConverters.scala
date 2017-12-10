@@ -29,6 +29,14 @@ import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
  */
 object UriConverters {
 
+  type UriConverter = (URI => URI)
+
+  def identity: UriConverter = {
+    def convertUri(uri: URI): URI = uri
+
+    convertUri _
+  }
+
   /**
    * Converts HTTP and HTTPS URIs to file URIs and otherwise returns the parameter URI.
    * Such a conversion assumes the existence of a local mirror of one or more internet sites,
@@ -38,25 +46,67 @@ object UriConverters {
    *
    * For example, if the URI is "http://www.example.com/a/b/c.xml", then the URI is rewritten using
    * a `SimpleCatalog` which rewrites URI start "http://www.example.com/" to the rewrite prefix,
-   * as file protocol URI, for sub-directory "www.example.com" of the root directory.
+   * as file protocol URI, for sub-directory "www.example.com" of the given root directory.
    */
-  def uriToLocalUri(uri: URI, rootDir: File): URI = {
+  // scalastyle:off null
+  def fromLocalMirrorRootDirectory(rootDir: File): UriConverter = {
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
     require(rootDir.isAbsolute, s"Not an absolute path: $rootDir")
 
-    if ((uri.getHost == null) || ((uri.getScheme != "http") && (uri.getScheme != "https"))) {
-      uri
-    } else {
-      val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-      val rewritePrefix = returnWithTrailingSlash((new File(rootDir, uri.getHost)).toURI)
+    def convertUri(uri: URI): URI = {
+      if ((uri.getHost == null) || ((uri.getScheme != "http") && (uri.getScheme != "https"))) {
+        uri
+      } else {
+        val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
+        val rewritePrefix = returnWithTrailingSlash((new File(rootDir, uri.getHost)).toURI)
 
-      val catalog =
-        SimpleCatalog(
-          None,
-          Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+        val catalog =
+          SimpleCatalog(
+            None,
+            Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
+        catalog.findMappedUri(uri).getOrElse(uri)
+      }
+    }
+
+    convertUri _
+  }
+
+  /**
+   * Like `fromLocalMirrorRootDirectory`, but the resulting URI converter returns relative URIs.
+   * Such an URI converter is useful in ZIP files that contain mirrored sites.
+   */
+  // scalastyle:off null
+  def fromLocalMirror: UriConverter = {
+    def convertUri(uri: URI): URI = {
+      if ((uri.getHost == null) || ((uri.getScheme != "http") && (uri.getScheme != "https"))) {
+        uri
+      } else {
+        val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
+        val rewritePrefix = returnWithTrailingSlash(URI.create(uri.getHost))
+
+        val catalog =
+          SimpleCatalog(
+            None,
+            Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+
+        catalog.findMappedUri(uri).getOrElse(uri)
+      }
+    }
+
+    convertUri _
+  }
+
+  /**
+   * Turns the given catalog into an URI converter. The URI converter can return absolute and/or relative
+   * URIs. Relative URIs are typically meant to be resolved inside ZIP files.
+   */
+  def fromCatalog(catalog: SimpleCatalog): UriConverter = {
+    def convertUri(uri: URI): URI = {
       catalog.findMappedUri(uri).getOrElse(uri)
     }
+
+    convertUri _
   }
 
   private def returnWithTrailingSlash(uri: URI): String = {

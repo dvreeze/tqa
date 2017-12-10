@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.base.taxonomybuilder
 
 import java.io.File
+import java.net.URI
 
 import scala.collection.immutable
 import scala.reflect.classTag
@@ -34,6 +35,7 @@ import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
 
@@ -1796,12 +1798,18 @@ class DimensionalQueryTest extends FunSuite {
   private val docBuilder = {
     val otherRootDir = new File(classOf[DimensionalQueryTest].getResource("/xbrl-and-w3").toURI)
 
-    SaxonDocumentBuilder.usingUriConverter(processor.newDocumentBuilder(), { uri =>
+    val xbrlAndW3UriConverter = UriConverters.fromLocalMirrorRootDirectory(otherRootDir)
+
+    def convertUri(uri: URI): URI = {
       if (uri.getScheme == "http" || uri.getScheme == "https") {
-        UriConverters.uriToLocalUri(uri, otherRootDir)
+        xbrlAndW3UriConverter(uri)
       } else {
         uri
       }
-    })
+    }
+
+    SaxonDocumentBuilder(
+      processor.newDocumentBuilder(),
+      UriResolvers.fromUriConverter(convertUri _))
   }
 }

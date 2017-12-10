@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder
 
-import java.io.File
-import java.io.FileInputStream
 import java.net.URI
 
 import org.xml.sax.InputSource
@@ -73,20 +71,5 @@ object SaxonDocumentBuilder {
 
   def apply(docBuilder: s9api.DocumentBuilder, uriResolver: URI => InputSource): SaxonDocumentBuilder = {
     new SaxonDocumentBuilder(docBuilder, uriResolver)
-  }
-
-  /**
-   * Creates a SaxonDocumentBuilder from an s9api.DocumentBuilder and URI converter.
-   * The URI converter must return a local file URI.
-   */
-  def usingUriConverter(docBuilder: s9api.DocumentBuilder, uriConverter: URI => URI): SaxonDocumentBuilder = {
-    def resolveUri(uri: URI): InputSource = {
-      val localUri = uriConverter(uri)
-      require(localUri.getScheme == "file", s"Expected local file URI but found $localUri")
-
-      new InputSource(new FileInputStream(new File(localUri)))
-    }
-
-    new SaxonDocumentBuilder(docBuilder, resolveUri _)
   }
 }
