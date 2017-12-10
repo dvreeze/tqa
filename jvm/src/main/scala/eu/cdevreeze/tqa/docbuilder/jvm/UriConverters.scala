@@ -19,8 +19,11 @@ package eu.cdevreeze.tqa.docbuilder.jvm
 import java.io.File
 import java.net.URI
 
+import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+
 /**
- * URI converters, typically converting an HTTP or HTTPS URI to a local file URI.
+ * URI converters, typically converting an HTTP or HTTPS URI to a local file URI. The implementations
+ * use `SimpleCatalog` objects to perform the actual URI conversions.
  *
  * @author Chris de Vreeze
  */
@@ -32,17 +35,32 @@ object UriConverters {
    * where the host name in the parameter URI is an immediate sub-directory of the local root directory,
    * and where the URI scheme (such as HTTP) and port number, if any, do not occur in the local mirror.
    * The conversion then returns the URI in the local mirror that corresponds to the parameter URI.
+   *
+   * For example, if the URI is "http://www.example.com/a/b/c.xml", then the URI is rewritten using
+   * a `SimpleCatalog` which rewrites URI start "http://www.example.com/" to the rewrite prefix,
+   * as file protocol URI, for sub-directory "www.example.com" of the root directory.
    */
   def uriToLocalUri(uri: URI, rootDir: File): URI = {
-    val relativePathOption: Option[String] = uri.getScheme match {
-      case "http"  => Some(uri.toString.drop("http://".size))
-      case "https" => Some(uri.toString.drop("https://".size))
-      case _       => None
-    }
+    require(rootDir.isDirectory, s"Not a directory: $rootDir")
+    require(rootDir.isAbsolute, s"Not an absolute path: $rootDir")
 
-    relativePathOption map { relativePath =>
-      val f = new File(rootDir, relativePath.dropWhile(_ == '/'))
-      f.toURI
-    } getOrElse (uri)
+    if ((uri.getHost == null) || ((uri.getScheme != "http") && (uri.getScheme != "https"))) {
+      uri
+    } else {
+      val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
+      val rewritePrefix = returnWithTrailingSlash((new File(rootDir, uri.getHost)).toURI)
+
+      val catalog =
+        SimpleCatalog(
+          None,
+          Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+
+      catalog.findMappedUri(uri).getOrElse(uri)
+    }
+  }
+
+  private def returnWithTrailingSlash(uri: URI): String = {
+    val s = uri.toString
+    if (s.endsWith("/")) s else s + "/"
   }
 }
