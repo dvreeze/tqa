@@ -23,12 +23,15 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 /**
  * Any builder of a document root backing element. Typical document builders convert the document URI
  * to a local URI, parse the document using that local URI, and after parsing store the original
- * URI as document URI in the returned backing element.
+ * URI as document URI in the returned backing element. Some document builders are capable of parsing
+ * documents inside ZIP files.
  *
  * Document builders can be stacked, for example to perform some "post-processing".
  * For example, some taxonomy document may have a broken link in the schema location attribute, and
  * such a post-processing step can fix that before the backing element is used to build a type-safe
  * taxonomy DOM tree from it.
+ *
+ * Other "decorating" document builders can cache parsed documents, for example.
  *
  * Note that document builders backed by typical XML parsers are not thread-safe in the JVM!
  *
@@ -46,6 +49,12 @@ trait DocumentBuilder {
 
   type BackingElem <: BackingElemApi
 
+  /**
+   * Returns the document that has the given URI as BackingElem. The URI is typically the canonical,
+   * published URI of the document. This URI is also typically stored in the resulting root element as
+   * document URI. If the document builder uses an XML catalog, the document is typically parsed from
+   * a local (mirror) URI.
+   */
   def build(uri: URI): BackingElem
 }
 
