@@ -46,7 +46,7 @@ object UriResolvers {
     resolveUri _
   }
 
-  def fromPartialUriResolversFallingBackToIdentity(
+  def fromPartialUriResolversWithFallback(
     partialUriResolvers: immutable.IndexedSeq[PartialUriResolvers.PartialUriResolver]): UriResolver = {
 
     def resolveUri(uri: URI): InputSource = {
