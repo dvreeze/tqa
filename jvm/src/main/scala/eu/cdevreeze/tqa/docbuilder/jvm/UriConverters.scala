@@ -63,7 +63,7 @@ object UriConverters {
         val catalog =
           SimpleCatalog(
             None,
-            Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+            Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
 
         catalog.findMappedUri(uri).getOrElse(uri)
       }
@@ -88,7 +88,7 @@ object UriConverters {
         val catalog =
           SimpleCatalog(
             None,
-            Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+            Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
 
         catalog.findMappedUri(uri).getOrElse(uri)
       }

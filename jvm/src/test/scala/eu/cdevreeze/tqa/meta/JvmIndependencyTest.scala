@@ -325,7 +325,7 @@ class JvmIndependencyTest extends FunSuite {
 
     // Rather ad-hoc, but all related to TQA or yaidom
     val allowedFirstTermNames =
-      List("ResolvedLocatorOrResource", "Namespaces", "FormulaAxis", "Axis", "Aspect", "XbrliElem", "ENames").map(n => Term.Name(n).structure)
+      List("ResolvedLocatorOrResource", "Namespaces", "FormulaAxis", "Axis", "Aspect", "XbrliElem", "ENames", "simple").map(n => Term.Name(n).structure)
 
     allowedFirstTermNames.contains(termNames.head.structure) ||
       (importedNames.map(_.names.map(_.structure)) ==
