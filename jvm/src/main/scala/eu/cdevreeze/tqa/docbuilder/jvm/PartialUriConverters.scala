@@ -38,11 +38,13 @@ object PartialUriConverters {
   }
 
   /**
-   * Returns a URI converter that converts HTTP and HTTPS URIs to file URIs.
+   * Returns a partial URI converter that converts (absolute) HTTP and HTTPS URIs to file URIs.
    * Such a conversion assumes the existence of a local mirror of one or more internet sites,
    * where the host name in the parameter URI is an immediate sub-directory of the local root directory,
    * and where the URI scheme (such as HTTP) and port number, if any, do not occur in the local mirror.
    * The conversion then returns the URI in the local mirror that corresponds to the parameter URI.
+   *
+   * The partial URI converter is defined for all URIs that are HTTP(S) URIs (with host).
    *
    * For example, if the URI is "http://www.example.com/a/b/c.xml", then the URI is rewritten using
    * a `SimpleCatalog` which rewrites URI start "http://www.example.com/" to the rewrite prefix,
@@ -100,6 +102,8 @@ object PartialUriConverters {
   /**
    * Turns the given catalog into a partial URI converter. It can return absolute and/or relative
    * URIs. Relative URIs are typically meant to be resolved inside ZIP files.
+   *
+   * The partial URI converter is only defined for URIs matching URI start strings in the catalog.
    */
   def fromCatalog(catalog: SimpleCatalog): PartialUriConverter = {
     def convertUri(uri: URI): Option[URI] = {

@@ -40,13 +40,17 @@ object PartialUriResolvers {
 
   /**
    * Creates a PartialUriResolver from a partial URI converter. Typically the URI converter converts HTTP(S) URIs
-   * to file protocol URIs.
+   * to file protocol URIs, but it must in any case return only absolute URIs.
+   *
+   * The created PartialUriResolver is defined for the same URIs as the input PartialUriConverter.
    */
   def fromPartialUriConverter(partialUriConverter: URI => Option[URI]): PartialUriResolver = {
     def resolveUri(uri: URI): Option[InputSource] = {
       val mappedUriOption = partialUriConverter(uri)
 
       mappedUriOption map { mappedUri =>
+        require(mappedUri.isAbsolute, s"Cannot resolve relative URI '$mappedUri'")
+
         val is: InputStream =
           if (mappedUri.getScheme == "file") {
             new FileInputStream(new File(mappedUri))
@@ -62,9 +66,10 @@ object PartialUriResolvers {
   }
 
   /**
-   * Creates a PartialUriResolver for a ZIP file, using the given partial URI converter. For each mapped URI that is
-   * relative, resolution takes place inside the ZIP file. Otherwise resolution takes place outside the
-   * ZIP file.
+   * Creates a PartialUriResolver for a ZIP file, using the given partial URI converter. This partial URI
+   * converter must return only relative URIs.
+   *
+   * The created PartialUriResolver is defined for the same URIs as the input PartialUriConverter.
    */
   def forZipFile(zipFile: File, partialUriConverter: URI => Option[URI]): PartialUriResolver = {
     val zipFileAsZipFile = new ZipFile(zipFile)
@@ -75,44 +80,47 @@ object PartialUriResolvers {
       val mappedUriOption = partialUriConverter(uri)
 
       mappedUriOption map { mappedUri =>
-        if (mappedUri.isAbsolute) {
-          val is: InputStream =
-            if (mappedUri.getScheme == "file") {
-              new FileInputStream(new File(mappedUri))
-            } else {
-              mappedUri.toURL.openStream()
-            }
+        require(!mappedUri.isAbsolute, s"Cannot resolve absolute URI '$mappedUri'")
 
-          new InputSource(is)
-        } else {
-          val optionalZipEntry: Option[ZipEntry] = zipEntriesByRelativeUri.get(mappedUri)
+        val optionalZipEntry: Option[ZipEntry] = zipEntriesByRelativeUri.get(mappedUri)
 
-          require(optionalZipEntry.isDefined, s"Missing ZIP entry in ZIP file $zipFile with URI $mappedUri")
+        require(optionalZipEntry.isDefined, s"Missing ZIP entry in ZIP file $zipFile with URI $mappedUri")
 
-          val is = zipFileAsZipFile.getInputStream(optionalZipEntry.get)
+        val is = zipFileAsZipFile.getInputStream(optionalZipEntry.get)
 
-          new InputSource(is)
-        }
+        new InputSource(is)
       }
     }
 
     resolveUri _
   }
 
+  /**
+   * Returns `fromPartialUriConverter(PartialUriConverters.fromCatalog(catalog))`.
+   */
   def fromCatalog(catalog: SimpleCatalog): PartialUriResolver = {
     fromPartialUriConverter(PartialUriConverters.fromCatalog(catalog))
   }
 
+  /**
+   * Returns `fromPartialUriConverter(PartialUriConverters.fromLocalMirrorRootDirectory(rootDir))`.
+   */
   def fromLocalMirrorRootDirectory(rootDir: File): PartialUriResolver = {
     fromPartialUriConverter(PartialUriConverters.fromLocalMirrorRootDirectory(rootDir))
   }
 
-  def forZipFileContainingLocalMirror(zipFile: File): PartialUriResolver = {
-    forZipFile(zipFile, PartialUriConverters.fromLocalMirror)
-  }
-
+  /**
+   * Returns `forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))`.
+   */
   def forZipFileUsingCatalog(zipFile: File, catalog: SimpleCatalog): PartialUriResolver = {
     forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))
+  }
+
+  /**
+   * Returns `forZipFile(zipFile, PartialUriConverters.fromLocalMirror)`.
+   */
+  def forZipFileContainingLocalMirror(zipFile: File): PartialUriResolver = {
+    forZipFile(zipFile, PartialUriConverters.fromLocalMirror)
   }
 
   private def computeZipEntryMap(zipFile: File): Map[URI, ZipEntry] = {

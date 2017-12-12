@@ -33,11 +33,21 @@ object UriConverters {
 
   type UriConverter = (URI => URI)
 
+  /**
+   * Returns the URI converter that for each input URI tries all given partial URI converters until a
+   * matching one is found, returning the conversion result. If for an URI no matching partial URI
+   * converter is found, an exception is thrown.
+   */
   def fromPartialUriConvertersWithoutFallback(
     partialUriConverters: immutable.IndexedSeq[PartialUriConverters.PartialUriConverter]): UriConverter = {
 
+    require(partialUriConverters.nonEmpty, s"No partial URI converters given")
+
     def convertUri(uri: URI): URI = {
-      partialUriConverters collectFirst { case f if f(uri).isDefined => f(uri).get } getOrElse {
+      partialUriConverters.drop(1).foldLeft(partialUriConverters.head(uri)) {
+        case (accOptUri, puc) =>
+          accOptUri.orElse(puc(uri))
+      } getOrElse {
         sys.error(s"Could not convert URI $uri")
       }
     }
@@ -45,11 +55,21 @@ object UriConverters {
     convertUri _
   }
 
+  /**
+   * Returns the URI converter that for each input URI tries all given partial URI converters until a
+   * matching one is found, returning the conversion result. If for an URI no matching partial URI
+   * converter is found, the URI itself is returned.
+   */
   def fromPartialUriConvertersFallingBackToIdentity(
     partialUriConverters: immutable.IndexedSeq[PartialUriConverters.PartialUriConverter]): UriConverter = {
 
+    require(partialUriConverters.nonEmpty, s"No partial URI converters given")
+
     def convertUri(uri: URI): URI = {
-      partialUriConverters collectFirst { case f if f(uri).isDefined => f(uri).get } getOrElse (uri)
+      partialUriConverters.drop(1).foldLeft(partialUriConverters.head(uri)) {
+        case (accOptUri, puc) =>
+          accOptUri.orElse(puc(uri))
+      } getOrElse (uri)
     }
 
     convertUri _
@@ -63,41 +83,23 @@ object UriConverters {
    * Like `PartialUriConverters.fromLocalMirrorRootDirectory(rootDir)`, but otherwise the identity function.
    */
   def fromLocalMirrorRootDirectory(rootDir: File): UriConverter = {
-    val delegate: PartialUriConverters.PartialUriConverter =
-      PartialUriConverters.fromLocalMirrorRootDirectory(rootDir)
-
-    def convertUri(uri: URI): URI = {
-      delegate(uri).getOrElse(uri)
-    }
-
-    convertUri _
+    fromPartialUriConvertersFallingBackToIdentity(
+      Vector(PartialUriConverters.fromLocalMirrorRootDirectory(rootDir)))
   }
 
   /**
    * Like `PartialUriConverters.fromLocalMirror`, but otherwise the identity function.
    */
   def fromLocalMirror: UriConverter = {
-    val delegate: PartialUriConverters.PartialUriConverter =
-      PartialUriConverters.fromLocalMirror
-
-    def convertUri(uri: URI): URI = {
-      delegate(uri).getOrElse(uri)
-    }
-
-    convertUri _
+    fromPartialUriConvertersFallingBackToIdentity(
+      Vector(PartialUriConverters.fromLocalMirror))
   }
 
   /**
    * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise the identity function.
    */
   def fromCatalog(catalog: SimpleCatalog): UriConverter = {
-    val delegate: PartialUriConverters.PartialUriConverter =
-      PartialUriConverters.fromCatalog(catalog)
-
-    def convertUri(uri: URI): URI = {
-      delegate(uri).getOrElse(uri)
-    }
-
-    convertUri _
+    fromPartialUriConvertersFallingBackToIdentity(
+      Vector(PartialUriConverters.fromCatalog(catalog)))
   }
 }
