@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.base.taxonomy
 
 import java.io.File
+import java.net.URI
 
 import scala.collection.immutable
 
@@ -30,7 +31,8 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
@@ -792,9 +794,24 @@ class DimensionalRelationshipSourceTest extends FunSuite {
 
   private val processor = new Processor(false)
 
-  private val docBuilder = {
+  private val dummyUriPrefix: URI = URI.create("http://www.example.com/")
+
+  private val docBuilder: SaxonDocumentBuilder = {
+    val otherRootDir = new File(classOf[DimensionalRelationshipSourceTest].getResource("/xbrl-and-w3").toURI)
+    val zipFile = new File(classOf[DimensionalRelationshipSourceTest].getResource("/xdt-conf-cr4-2009-10-06.zip").toURI)
+
+    val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromLocalMirrorRootDirectory(otherRootDir)
+
+    val catalog =
+      SimpleCatalog(
+        None,
+        Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
+
+    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      UriResolvers.fromUriConverter(UriConverters.identity))
+      UriResolvers.fromPartialUriResolversWithFallback(
+        Vector(zipFilePartialResolver, xbrlAndW3UriPartialResolver)))
   }
 }

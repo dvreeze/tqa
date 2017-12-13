@@ -34,7 +34,8 @@ import eu.cdevreeze.tqa.base.dom.RoleType
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
-import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
@@ -1795,21 +1796,24 @@ class DimensionalQueryTest extends FunSuite {
 
   private val processor = new Processor(false)
 
-  private val docBuilder = {
+  private val dummyUriPrefix: URI = URI.create("http://www.example.com/")
+
+  private val docBuilder: SaxonDocumentBuilder = {
     val otherRootDir = new File(classOf[DimensionalQueryTest].getResource("/xbrl-and-w3").toURI)
+    val zipFile = new File(classOf[DimensionalQueryTest].getResource("/xdt-conf-cr4-2009-10-06.zip").toURI)
 
-    val xbrlAndW3UriConverter = UriConverters.fromLocalMirrorRootDirectory(otherRootDir)
+    val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromLocalMirrorRootDirectory(otherRootDir)
 
-    def convertUri(uri: URI): URI = {
-      if (uri.getScheme == "http" || uri.getScheme == "https") {
-        xbrlAndW3UriConverter(uri)
-      } else {
-        uri
-      }
-    }
+    val catalog =
+      SimpleCatalog(
+        None,
+        Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
+
+    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(zipFile, catalog)
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      UriResolvers.fromUriConverter(convertUri _))
+      UriResolvers.fromPartialUriResolversWithFallback(
+        Vector(zipFilePartialResolver, xbrlAndW3UriPartialResolver)))
   }
 }

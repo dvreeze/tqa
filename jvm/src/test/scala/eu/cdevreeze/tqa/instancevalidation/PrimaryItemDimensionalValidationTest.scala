@@ -27,7 +27,8 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
-import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.yaidom.core.EName
@@ -43,22 +44,25 @@ class PrimaryItemDimensionalValidationTest extends FunSuite {
 
   private val processor = new Processor(false)
 
-  private val docBuilder = {
+  private val dummyUriPrefix: URI = URI.create("http://www.example.com/")
+
+  private val docBuilder: SaxonDocumentBuilder = {
     val otherRootDir = new File(classOf[PrimaryItemDimensionalValidationTest].getResource("/xbrl-and-w3").toURI)
+    val zipFile = new File(classOf[PrimaryItemDimensionalValidationTest].getResource("/xdt-conf-cr4-2009-10-06.zip").toURI)
 
-    val xbrlAndW3UriConverter = UriConverters.fromLocalMirrorRootDirectory(otherRootDir)
+    val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromLocalMirrorRootDirectory(otherRootDir)
 
-    def convertUri(uri: URI): URI = {
-      if (uri.getScheme == "http" || uri.getScheme == "https") {
-        xbrlAndW3UriConverter(uri)
-      } else {
-        uri
-      }
-    }
+    val catalog =
+      SimpleCatalog(
+        None,
+        Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
+
+    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(zipFile, catalog)
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      UriResolvers.fromUriConverter(convertUri _))
+      UriResolvers.fromPartialUriResolversWithFallback(
+        Vector(zipFilePartialResolver, xbrlAndW3UriPartialResolver)))
   }
 
   private val testCaseFile =
@@ -170,10 +174,11 @@ class PrimaryItemDimensionalValidationTest extends FunSuite {
   }
 
   private def makeTestInstance(relativeDocPath: String): XbrlInstance = {
-    val rootDir = new File(classOf[PrimaryItemDimensionalValidationTest].getResource("/conf-suite-dim").toURI)
-    val docFile = new File(rootDir, relativeDocPath)
+    // We expect no spaces in the path, so we can create a relative URI from it.
 
-    XbrlInstance(docBuilder.build(docFile.toURI))
+    val uri = dummyUriPrefix.resolve(relativeDocPath)
+
+    XbrlInstance(docBuilder.build(uri))
   }
 
   private def doMakeValidator(entryPointUris: Set[URI], doResolveProhibitionAndOverriding: Boolean): DimensionalValidator = {
