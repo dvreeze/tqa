@@ -779,10 +779,9 @@ class DimensionalRelationshipSourceTest extends FunSuite {
   }
 
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
-    val rootDir = new File(classOf[DimensionalRelationshipSourceTest].getResource("/conf-suite-dim").toURI)
-    val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
+    val uris = relativeDocPaths.map(relativeDocPath => dummyUriPrefix.resolve(relativeDocPath))
 
-    val rootElems = docFiles.map(f => docBuilder.build(f.toURI))
+    val rootElems = uris.map(uri => docBuilder.build(uri))
 
     val taxoRootElems = rootElems.map(e => TaxonomyElem.build(e))
 

@@ -1775,10 +1775,8 @@ class DimensionalQueryTest extends FunSuite {
   // No test for V-04 (typed-dimension-schema-uses-redefine-3). We cannot handle xs:redefine.
 
   private def makeTestDts(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
-    val rootDir = new File(classOf[DimensionalQueryTest].getResource("/conf-suite-dim").toURI)
-    val docFiles = relativeDocPaths.map(relativePath => new File(rootDir, relativePath))
-
-    val entryPointUris = docFiles.map(_.toURI).toSet
+    val entryPointUris =
+      relativeDocPaths.map(relativeDocPath => dummyUriPrefix.resolve(relativeDocPath)).toSet
 
     val documentCollector = DefaultDtsCollector()
 

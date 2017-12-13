@@ -32,6 +32,7 @@ import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import net.sf.saxon.s9api.Processor
 
 /**
@@ -65,19 +66,20 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
         Vector(zipFilePartialResolver, xbrlAndW3UriPartialResolver)))
   }
 
-  private val testCaseFile =
-    new File(classOf[PrimaryItemDimensionalValidation270Test].getResource(
-      "/conf-suite-dim/200-xbrldie/270-DefaultValueExamples/270-DefaultValueExamples.xml").toURI).
-      ensuring(_.isFile)
+  private val testCaseUri: URI = {
+    val relativeUri = URI.create("200-xbrldie/270-DefaultValueExamples/270-DefaultValueExamples.xml")
+    dummyUriPrefix.resolve(relativeUri)
+  }
 
   private val xbrldieNs = "http://xbrl.org/2005/xbrldi/errors"
   private val confNs = "http://xbrl.org/2005/conformance"
 
   private val ValidationErrorEName = EName(xbrldieNs, "PrimaryItemDimensionallyInvalidError")
 
-  private val testCaseDocElem =
-    docBuilder.build(testCaseFile.toURI).ensuring(_.resolvedName == EName(confNs, "testcase")).
+  private val testCaseDocElem: BackingElemApi = {
+    docBuilder.build(testCaseUri).ensuring(_.resolvedName == EName(confNs, "testcase")).
       ensuring(_.filterElems(_.resolvedName == EName(confNs, "error")).forall(_.textAsResolvedQName == ValidationErrorEName))
+  }
 
   private def skipTestVariation(id: String): Boolean = {
     Set().contains(id)
@@ -109,8 +111,8 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
       val fileNames = fileElems.map(_.text)
 
       val outputFileElems = fileNames map { fileName =>
-        val outputFile = new File(testCaseFile.getParentFile, s"out/$fileName")
-        val outputFileElem = docBuilder.build(outputFile.toURI)
+        val outputFileUri: URI = testCaseUri.resolve(s"out/$fileName")
+        val outputFileElem = docBuilder.build(outputFileUri)
 
         outputFileElem.ensuring(_.resolvedName == EName("facts"))
       }
