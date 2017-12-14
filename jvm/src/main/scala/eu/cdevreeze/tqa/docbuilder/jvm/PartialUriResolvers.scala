@@ -117,10 +117,13 @@ object PartialUriResolvers {
   }
 
   /**
-   * Returns `forZipFile(zipFile, PartialUriConverters.fromLocalMirror)`.
+   * Returns `forZipFile(zipFile, PartialUriConverters.fromLocalMirror(parentPathOption))`.
    */
-  def forZipFileContainingLocalMirror(zipFile: File): PartialUriResolver = {
-    forZipFile(zipFile, PartialUriConverters.fromLocalMirror)
+  def forZipFileContainingLocalMirror(
+    zipFile: File,
+    parentPathOption: Option[URI]): PartialUriResolver = {
+
+    forZipFile(zipFile, PartialUriConverters.fromLocalMirror(parentPathOption))
   }
 
   private def computeZipEntryMap(zipFile: File): Map[URI, ZipEntry] = {

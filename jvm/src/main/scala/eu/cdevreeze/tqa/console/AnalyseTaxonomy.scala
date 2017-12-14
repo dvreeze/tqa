@@ -43,6 +43,12 @@ object AnalyseTaxonomy {
 
   private val logger = Logger.getGlobal
 
+  /**
+   * The optional parent path as relative URI, if the taxonomy is in a ZIP file but not at the root.
+   */
+  private val parentPathOption: Option[URI] =
+    Option(System.getProperty("parentPath")).map(p => URI.create(p).ensuring(!_.isAbsolute))
+
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: AnalyseTaxonomy <taxo root dir or ZIP file> <entry point URI 1> ...")
     val rootDirOrZipFile = new File(args(0))
@@ -50,7 +56,7 @@ object AnalyseTaxonomy {
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
 
-    val basicTaxo = buildTaxonomy(rootDirOrZipFile, entryPointUris, useSaxon)
+    val basicTaxo = buildTaxonomy(rootDirOrZipFile, parentPathOption, entryPointUris, useSaxon)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -83,8 +89,8 @@ object AnalyseTaxonomy {
     }
   }
 
-  private def buildTaxonomy(rootDirOrZipFile: File, entryPointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
-    val documentBuilder = getDocumentBuilder(useSaxon, rootDirOrZipFile)
+  private def buildTaxonomy(rootDirOrZipFile: File, parentPathOption: Option[URI], entryPointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
+    val documentBuilder = getDocumentBuilder(useSaxon, rootDirOrZipFile, parentPathOption)
     val documentCollector = DefaultDtsCollector()
 
     val lenient = System.getProperty("lenient", "false").toBoolean
@@ -104,12 +110,12 @@ object AnalyseTaxonomy {
     basicTaxo
   }
 
-  private def getDocumentBuilder(useSaxon: Boolean, rootDirOrZipFile: File): DocumentBuilder = {
+  private def getDocumentBuilder(useSaxon: Boolean, rootDirOrZipFile: File, parentPathOption: Option[URI]): DocumentBuilder = {
     val uriResolver =
       if (rootDirOrZipFile.isDirectory) {
         UriResolvers.fromLocalMirrorRootDirectory(rootDirOrZipFile)
       } else {
-        UriResolvers.forZipFileContainingLocalMirror(rootDirOrZipFile)
+        UriResolvers.forZipFileContainingLocalMirror(rootDirOrZipFile, parentPathOption)
       }
 
     if (useSaxon) {

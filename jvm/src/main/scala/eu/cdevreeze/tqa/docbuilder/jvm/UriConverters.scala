@@ -90,9 +90,9 @@ object UriConverters {
   /**
    * Like `PartialUriConverters.fromLocalMirror`, but otherwise the identity function.
    */
-  def fromLocalMirror: UriConverter = {
+  def fromLocalMirror(parentPathOption: Option[URI]): UriConverter = {
     fromPartialUriConvertersFallingBackToIdentity(
-      Vector(PartialUriConverters.fromLocalMirror))
+      Vector(PartialUriConverters.fromLocalMirror(parentPathOption)))
   }
 
   /**

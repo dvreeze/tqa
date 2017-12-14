@@ -128,9 +128,9 @@ object UriResolvers {
   }
 
   /**
-   * Returns `forZipFile(zipFile, UriConverters.fromLocalMirror)`.
+   * Returns `forZipFile(zipFile, UriConverters.fromLocalMirror(parentPathOption))`.
    */
-  def forZipFileContainingLocalMirror(zipFile: File): UriResolver = {
-    forZipFile(zipFile, UriConverters.fromLocalMirror)
+  def forZipFileContainingLocalMirror(zipFile: File, parentPathOption: Option[URI]): UriResolver = {
+    forZipFile(zipFile, UriConverters.fromLocalMirror(parentPathOption))
   }
 }
