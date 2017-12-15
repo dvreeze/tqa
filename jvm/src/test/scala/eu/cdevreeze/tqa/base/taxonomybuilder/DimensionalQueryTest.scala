@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.base.taxonomybuilder
 
 import java.io.File
 import java.net.URI
+import java.util.zip.ZipFile
 
 import scala.collection.immutable
 import scala.reflect.classTag
@@ -1807,7 +1808,7 @@ class DimensionalQueryTest extends FunSuite {
         None,
         Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
 
-    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(new ZipFile(zipFile), catalog)
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),

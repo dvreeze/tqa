@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
+import java.util.zip.ZipFile
 
 import scala.collection.immutable
 
@@ -119,7 +120,7 @@ object AnalyseFormulaTaxonomy {
       if (rootDirOrZipFile.isDirectory) {
         UriResolvers.fromLocalMirrorRootDirectory(rootDirOrZipFile)
       } else {
-        UriResolvers.forZipFileContainingLocalMirror(rootDirOrZipFile, parentPathOption)
+        UriResolvers.forZipFileContainingLocalMirror(new ZipFile(rootDirOrZipFile), parentPathOption)
       }
 
     if (useSaxon) {

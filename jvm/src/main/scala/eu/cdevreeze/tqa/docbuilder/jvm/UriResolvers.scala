@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.docbuilder.jvm
 import java.io.File
 import java.io.FileInputStream
 import java.net.URI
+import java.util.zip.ZipFile
 
 import scala.collection.immutable
 
@@ -87,7 +88,7 @@ object UriResolvers {
   }
 
   /**
-   * Like `PartialUriResolvers.fromPartialUriConverter(liftedUriConverter).andThen(_.get)`, .
+   * Like `PartialUriResolvers.fromPartialUriConverter(liftedUriConverter).andThen(_.get)`.
    */
   def fromUriConverter(uriConverter: URI => URI): UriResolver = {
     val delegate: PartialUriResolvers.PartialUriResolver =
@@ -99,7 +100,7 @@ object UriResolvers {
   /**
    * Like `PartialUriResolvers.forZipFile(zipFile, liftedUriConverter).andThen(_.get)`, .
    */
-  def forZipFile(zipFile: File, uriConverter: URI => URI): UriResolver = {
+  def forZipFile(zipFile: ZipFile, uriConverter: URI => URI): UriResolver = {
     val delegate: PartialUriResolvers.PartialUriResolver =
       PartialUriResolvers.forZipFile(zipFile, uriConverter.andThen(u => Some(u)))
 
@@ -123,14 +124,14 @@ object UriResolvers {
   /**
    * Returns `forZipFile(zipFile, UriConverters.fromCatalog(catalog))`.
    */
-  def forZipFileUsingCatalog(zipFile: File, catalog: SimpleCatalog): UriResolver = {
+  def forZipFileUsingCatalog(zipFile: ZipFile, catalog: SimpleCatalog): UriResolver = {
     forZipFile(zipFile, UriConverters.fromCatalog(catalog))
   }
 
   /**
-   * Returns `forZipFile(zipFile, UriConverters.fromLocalMirror(parentPathOption))`.
+   * Returns `forZipFile(zipFile, UriConverters.fromLocalMirrorInZipFile(parentPathOption))`.
    */
-  def forZipFileContainingLocalMirror(zipFile: File, parentPathOption: Option[URI]): UriResolver = {
-    forZipFile(zipFile, UriConverters.fromLocalMirror(parentPathOption))
+  def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
+    forZipFile(zipFile, UriConverters.fromLocalMirrorInZipFile(parentPathOption))
   }
 }

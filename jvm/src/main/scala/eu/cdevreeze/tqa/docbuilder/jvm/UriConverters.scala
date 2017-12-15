@@ -88,11 +88,11 @@ object UriConverters {
   }
 
   /**
-   * Like `PartialUriConverters.fromLocalMirror`, but otherwise the identity function.
+   * Like `PartialUriConverters.fromLocalMirrorInZipFile`, but otherwise the identity function.
    */
-  def fromLocalMirror(parentPathOption: Option[URI]): UriConverter = {
+  def fromLocalMirrorInZipFile(parentPathOption: Option[URI]): UriConverter = {
     fromPartialUriConvertersFallingBackToIdentity(
-      Vector(PartialUriConverters.fromLocalMirror(parentPathOption)))
+      Vector(PartialUriConverters.fromLocalMirrorInZipFile(parentPathOption)))
   }
 
   /**

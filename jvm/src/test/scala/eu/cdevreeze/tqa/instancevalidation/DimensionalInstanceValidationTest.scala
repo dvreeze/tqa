@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.instancevalidation
 
 import java.io.File
 import java.net.URI
+import java.util.zip.ZipFile
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -469,7 +470,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
         None,
         Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
 
-    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(new ZipFile(zipFile), catalog)
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),

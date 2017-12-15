@@ -82,24 +82,20 @@ object PartialUriConverters {
    * used to specify the relative path of the local mirror.
    */
   // scalastyle:off null
-  def fromLocalMirror(parentPathOption: Option[URI]): PartialUriConverter = {
+  def fromLocalMirrorInZipFile(parentPathOption: Option[URI]): PartialUriConverter = {
     require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
 
     def convertUri(uri: URI): Option[URI] = {
       if ((uri.getHost == null) || ((uri.getScheme != "http") && (uri.getScheme != "https"))) {
         None
       } else {
-        val hostAsAbsoluteUri = new URI(uri.getScheme, uri.getHost, null, null)
-
-        val uriStart = returnWithTrailingSlash(hostAsAbsoluteUri)
+        val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
 
         val hostAsRelativeUri = URI.create(uri.getHost + "/")
 
-        val rawRewritePrefix =
+        val rewritePrefix =
           parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri)).
-            getOrElse(hostAsRelativeUri)
-
-        val rewritePrefix = returnWithTrailingSlash(rawRewritePrefix)
+            getOrElse(hostAsRelativeUri).toString.ensuring(_.endsWith("/"))
 
         val catalog =
           SimpleCatalog(

@@ -70,10 +70,11 @@ object PartialUriResolvers {
    * converter must return only relative URIs.
    *
    * The created PartialUriResolver is defined for the same URIs as the input PartialUriConverter.
+   *
+   * The ZIP file should be closed after use (typically when the taxonomy has been loaded), thus closing
+   * all its entry input streams.
    */
-  def forZipFile(zipFile: File, partialUriConverter: URI => Option[URI]): PartialUriResolver = {
-    val zipFileAsZipFile = new ZipFile(zipFile)
-
+  def forZipFile(zipFile: ZipFile, partialUriConverter: URI => Option[URI]): PartialUriResolver = {
     val zipEntriesByRelativeUri: Map[URI, ZipEntry] = computeZipEntryMap(zipFile)
 
     def resolveUri(uri: URI): Option[InputSource] = {
@@ -86,7 +87,7 @@ object PartialUriResolvers {
 
         require(optionalZipEntry.isDefined, s"Missing ZIP entry in ZIP file $zipFile with URI $mappedUri")
 
-        val is = zipFileAsZipFile.getInputStream(optionalZipEntry.get)
+        val is = zipFile.getInputStream(optionalZipEntry.get)
 
         new InputSource(is)
       }
@@ -112,26 +113,24 @@ object PartialUriResolvers {
   /**
    * Returns `forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))`.
    */
-  def forZipFileUsingCatalog(zipFile: File, catalog: SimpleCatalog): PartialUriResolver = {
+  def forZipFileUsingCatalog(zipFile: ZipFile, catalog: SimpleCatalog): PartialUriResolver = {
     forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))
   }
 
   /**
-   * Returns `forZipFile(zipFile, PartialUriConverters.fromLocalMirror(parentPathOption))`.
+   * Returns `forZipFile(zipFile, PartialUriConverters.fromLocalMirrorInZipFile(parentPathOption))`.
    */
   def forZipFileContainingLocalMirror(
-    zipFile: File,
+    zipFile: ZipFile,
     parentPathOption: Option[URI]): PartialUriResolver = {
 
-    forZipFile(zipFile, PartialUriConverters.fromLocalMirror(parentPathOption))
+    forZipFile(zipFile, PartialUriConverters.fromLocalMirrorInZipFile(parentPathOption))
   }
 
-  private def computeZipEntryMap(zipFile: File): Map[URI, ZipEntry] = {
-    val zipFileAsZipFile = new ZipFile(zipFile)
+  private def computeZipEntryMap(zipFile: ZipFile): Map[URI, ZipEntry] = {
+    val zipEntries = zipFile.entries().asScala.toIndexedSeq
 
-    val zipEntries = zipFileAsZipFile.entries().asScala.toIndexedSeq
-
-    val zipFileParent = zipFile.getParentFile
+    val zipFileParent = dummyDirectory
 
     zipEntries.map(e => (toRelativeUri(e, zipFileParent) -> e)).toMap
   }
@@ -149,4 +148,6 @@ object PartialUriResolvers {
     val s = uri.toString
     if (s.endsWith("/")) s else s + "/"
   }
+
+  private val dummyDirectory = new File("/dummyRoot")
 }

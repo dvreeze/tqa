@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.base.taxonomy
 
 import java.io.File
 import java.net.URI
+import java.util.zip.ZipFile
 
 import scala.collection.immutable
 
@@ -806,7 +807,7 @@ class DimensionalRelationshipSourceTest extends FunSuite {
         None,
         Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
 
-    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+    val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(new ZipFile(zipFile), catalog)
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
