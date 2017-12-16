@@ -13,10 +13,10 @@ The major changes are:
 
 * Redesign of ``DocumentBuilder`` implementations on the JVM
 
-  * Document builders targeting the JVM now take a URI resolver as extra argument, turning an URI into a SAX InputSource
-  * Such an URI resolver can parse documents in ZIP files, like the ones in a Taxonomy Package
-  * URI resolvers can also take an URI converter (function from URI to URI)
-  * An XML catalog (as restricted by Taxonomy Packages) can be offered as such an URI converter
+  * Document builders targeting the JVM now take a URI resolver as extra argument, turning a URI into a SAX InputSource
+  * Such a URI resolver can parse documents in ZIP files, like the ones in a Taxonomy Package
+  * URI resolvers can also take a URI converter (function from URI to URI)
+  * An XML catalog (as restricted by Taxonomy Packages) can be offered as such a URI converter
   * URI converters can be combined, and so can URI resolvers
   * A large portion of the test code now also uses ZIP files as test taxonomy document input
 
