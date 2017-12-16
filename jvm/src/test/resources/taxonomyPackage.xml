@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tp:taxonomyPackage xml:lang="nl" xmlns:tp="http://xbrl.org/2016/taxonomy-package" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xbrl.org/2016/taxonomy-package http://xbrl.org/2016/taxonomy-package.xsd">
+	<tp:identifier>urn:banken-taxonomie-12</tp:identifier>
+	<tp:name>Bankentaxonomie 12</tp:name>
+	<tp:description>De Bankentaxonomie bevat de bankenrapportages binnen Standard Business Reporting in Nederland.</tp:description>
+	<tp:version>20171201</tp:version>
+	<tp:publisher>Financiele Rapportage Cooperatief</tp:publisher>
+	<tp:publisherURL>https://www.sbrbanken.nl</tp:publisherURL>	
+	<tp:publisherCountry>NL</tp:publisherCountry>	
+	<tp:publicationDate>2017-12-01</tp:publicationDate>
+	<tp:entryPoints>
+		<tp:entryPoint>
+			<tp:name>IHZ-aangifte 2017</tp:name>
+			<tp:description>De inkomstenbelasting 2017 ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-aangifte-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>IHZ aangifte met winstbijlage 2017 (categoriaal)</tp:name>
+			<tp:description>De inkomstenbelasting 2017, met winstbijlage en de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-aangifte-met-winstbijlage-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>IHZ aangifte pp met winstbijlage 2017 (categoriaal)</tp:name>
+			<tp:description>De prognose en periodieke inkomstenbelasting 2017, met winstbijlage  en de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-prognose-periodiek-aangifte-met-winstbijlage-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>IHZ aangifte met winstbijlage 2017 (functioneel)</tp:name>
+			<tp:description>De inkomstenbelasting 2017 met winstbijlage en de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-aangifte-met-winstbijlage-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>IHZ aangifte met pp winstbijlage 2017 (functioneel)</tp:name>
+			<tp:description>De prognose en periodieke inkomstenbelasting 2017, met winstbijlage  en de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-prognose-periodiek-aangifte-met-winstbijlage-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage micro 2017 (categoriaal)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor microrechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-micro-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage micro 2017 (functioneel)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor microrechtsperonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-micro-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage klein 2017 (categoriaal)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor kleine rechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-klein-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage klein 2017 (functioneel)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor kleine rechtsperonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-klein-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage klein, natuurlijk persoon 2017 (categoriaal)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor natuurlijke personen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-klein-natuurlijk-persoon-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage klein, natuurlijk persoon 2017 (functioneel)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor natuurlijke personen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-klein-natuurlijk-persoon-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage groot 2017 (categoriaal)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor grote rechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-groot-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage groot 2017 (functioneel)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor grote rechtspersonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-groot-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage middelgroot 2017 (categoriaal)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor middelgrote rechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-middelgroot-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Kredietrapportage middelgroot 2017 (functioneel)</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor middelgrote rechtspersonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-middelgroot-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage micro 2017 (categoriaal)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor microrechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-micro-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage micro 2017 (functioneel)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor microrechtspersonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-micro-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage klein 2017 (categoriaal)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor kleine rechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-klein-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage klein 2017 (functioneel)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor kleine rechtspersonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-klein-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage klein, natuurlijk persoon 2017 (categoriaal)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor natuurlijke personen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-klein-natuurlijk-persoon-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage klein, natuurlijk persoon 2017 (functioneel)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor natuurlijke personen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-klein-natuurlijk-persoon-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage groot 2017 (categoriaal)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor grote rechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-groot-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage groot 2017 (functioneel)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor grote rechtspersonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-groot-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage middelgroot 2017 (categoriaal)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor middelgrote rechtspersonen, met de winst- en verliesrekening in categoriale indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-middelgroot-categoriaal-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Krediet pp rapportage middelgroot 2017 (functioneel)</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor middelgrote rechtspersonen, met de winst- en verliesrekening in functionele indeling, ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-middelgroot-functioneel-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>WOZ-rapportage 2017</tp:name>
+			<tp:description>De WOZ-rapportage 2017 ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-woz-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name> Kredietrapportage stichtingen en verenigingen 2017</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor stichtingen en verenigingen ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-stichtingen-verenigingen-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name> Kredietrapportage pp stichtingen en verenigingen 2017</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor stichtingen en verenigingen ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-stichtingen-verenigingen-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name> Kredietrapportage toegelaten instellingen volkshuisvesting 2017</tp:name>
+			<tp:description>De Kredietrapportage 2017 voor toegelaten instellingen volkshuisvesting ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-toegelaten-instellingen-volkshuisvesting-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name> Kredietrapportage pp toegelaten instellingen volkshuisvesting 2017</tp:name>
+			<tp:description>De prognose en periodiek kredietrapportage 2017 voor toegelaten instellingen volkshuisvesting ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-krediet-prognose-periodiek-toegelaten-instellingen-volkshuisvesting-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>VPB rapportage 2017</tp:name>
+			<tp:description>De vennootschapsbelastingsrapportage 2017 ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-vpb-2017.xsd"/>
+		</tp:entryPoint>
+		<tp:entryPoint>
+			<tp:name>Prognoserapportage 2017</tp:name>
+			<tp:description>De prognoserapportage 2017 ter deponering bij de banken.</tp:description>
+			<tp:version>20171201</tp:version>
+			<tp:entryPointDocument href="https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-prognose-2017.xsd"/>
+		</tp:entryPoint>
+	</tp:entryPoints>
+</tp:taxonomyPackage>
