@@ -2,9 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.LoadDts"
 
-// Taking TQA version 0.5.0
+// Taking TQA version 0.5.1-SNAPSHOT
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.5.0`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.5.1-SNAPSHOT`
 
 // Imports that (must) remain available after this initialization script
 
@@ -103,11 +103,14 @@ val processor = new Processor(false)
 
 def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
   val docBuilder =
-    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(processor.newDocumentBuilder(), docbuilder.jvm.UriConverters.uriToLocalUri(_, localRootDir))
+    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(
+      processor.newDocumentBuilder(),
+      docbuilder.jvm.UriResolvers.fromLocalMirrorRootDirectory(localRootDir))
+
   val documentBuilder =
     new docbuilder.jvm.CachingDocumentBuilder(docbuilder.jvm.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
 
-  val documentCollector = taxonomybuilder.DefaultDtsCollector(entrypointUris)
+  val documentCollector = taxonomybuilder.DefaultDtsCollector()
 
   val relationshipFactory =
     if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
@@ -123,7 +126,7 @@ def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, len
       withRelationshipFactory(relationshipFactory).
       withArcFilter(filterArc _)
 
-  val basicTaxo = taxoBuilder.build()
+  val basicTaxo = taxoBuilder.build(entrypointUris)
   basicTaxo
 }
 
@@ -133,14 +136,11 @@ def loadDts(localRootDir: File, entrypointUri: URI): BasicTaxonomy = {
 
 def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
   val documentBuilder =
-    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(processor.newDocumentBuilder(), (uri => uri))
-    
-  val documentCollector = new taxonomybuilder.DocumentCollector {
+    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(
+      processor.newDocumentBuilder(),
+      docbuilder.jvm.UriResolvers.fromUriConverter(docbuilder.jvm.UriConverters.identity))
 
-    def collectTaxonomyRootElems(docBuilder: docbuilder.DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
-      localDocUris.toIndexedSeq.map(uri => TaxonomyRootElem.build(docBuilder.build(uri)))
-    }
-  }
+  val documentCollector = taxonomybuilder.TrivialDocumentCollector
 
   val taxoBuilder =
     taxonomybuilder.TaxonomyBuilder.
@@ -149,7 +149,7 @@ def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
       withRelationshipFactory(DefaultRelationshipFactory.LenientInstance).
       withArcFilter(RelationshipFactory.AnyArcHavingArcrole)
 
-  val basicTaxo = taxoBuilder.build()
+  val basicTaxo = taxoBuilder.build(localDocUris)
   basicTaxo
 }
 
