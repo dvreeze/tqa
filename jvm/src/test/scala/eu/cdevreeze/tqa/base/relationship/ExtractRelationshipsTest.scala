@@ -16,17 +16,23 @@
 
 package eu.cdevreeze.tqa.base.relationship
 
+import java.io.File
+import java.net.URI
+import java.util.zip.ZipFile
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
+import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.LabelArc
 import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XsdSchema
+import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
 /**
@@ -40,16 +46,16 @@ class ExtractRelationshipsTest extends FunSuite {
   test("testExtractRelationships") {
     // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml").toURI
+    val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd")
+    val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml")
 
-    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
-    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+    val xsdDocElem = docBuilder.build(xsdDocUri)
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
-    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+    val xsdSchema = XsdSchema.build(xsdDocElem)
+    val linkbase = Linkbase.build(linkbaseDocElem)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
@@ -79,16 +85,16 @@ class ExtractRelationshipsTest extends FunSuite {
   test("testExtractRelationshipsUsingElementSchemeIdPointer") {
     // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-05-ElementLocatorExample.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-05-ElementLocatorExample-label.xml").toURI
+    val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-05-ElementLocatorExample.xsd")
+    val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-05-ElementLocatorExample-label.xml")
 
-    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
-    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+    val xsdDocElem = docBuilder.build(xsdDocUri)
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
-    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+    val xsdSchema = XsdSchema.build(xsdDocElem)
+    val linkbase = Linkbase.build(linkbaseDocElem)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
@@ -129,16 +135,16 @@ class ExtractRelationshipsTest extends FunSuite {
   test("testExtractRelationshipsUsingElementSchemePointer") {
     // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample-label.xml").toURI
+    val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample.xsd")
+    val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample-label.xml")
 
-    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
-    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+    val xsdDocElem = docBuilder.build(xsdDocUri)
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
-    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+    val xsdSchema = XsdSchema.build(xsdDocElem)
+    val linkbase = Linkbase.build(linkbaseDocElem)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
@@ -168,16 +174,16 @@ class ExtractRelationshipsTest extends FunSuite {
   test("testExtractRelationshipsUsingElementSchemePointerSeq") {
     // Using a simple linkbase and schema from the XBRL Core Conformance Suite.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample-label.xml").toURI
+    val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample.xsd")
+    val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample-label.xml")
 
-    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
-    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+    val xsdDocElem = docBuilder.build(xsdDocUri)
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
-    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+    val xsdSchema = XsdSchema.build(xsdDocElem)
+    val linkbase = Linkbase.build(linkbaseDocElem)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
@@ -207,16 +213,16 @@ class ExtractRelationshipsTest extends FunSuite {
   test("testExtractRelationshipsUsingXmlBase") {
     // Using a simple linkbase and schema from the XBRL Core Conformance Suite, both with XML base attributes.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val xsdDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-03-HrefResolutionXMLBase.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/base/202-03-HrefResolutionXMLBase-label.xml").toURI
+    val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-03-HrefResolutionXMLBase.xsd")
+    val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/base/202-03-HrefResolutionXMLBase-label.xml")
 
-    val xsdDoc = indexed.Document(docParser.parse(xsdDocUri).withUriOption(Some(xsdDocUri)))
-    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+    val xsdDocElem = docBuilder.build(xsdDocUri)
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
-    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+    val xsdSchema = XsdSchema.build(xsdDocElem)
+    val linkbase = Linkbase.build(linkbaseDocElem)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
@@ -246,13 +252,13 @@ class ExtractRelationshipsTest extends FunSuite {
   test("testExtractRelationshipsInEmbeddedLinkbase") {
     // Using an embedded linkbase from the XBRL Core Conformance Suite.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val docUri = classOf[ExtractRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd").toURI
+    val docUri = URI.create("file:///conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd")
 
-    val doc = indexed.Document(docParser.parse(docUri).withUriOption(Some(docUri)))
+    val xsdDocElem = docBuilder.build(docUri)
 
-    val xsdSchema = XsdSchema.build(doc.documentElement)
+    val xsdSchema = XsdSchema.build(xsdDocElem)
 
     val tns = "http://www.UBmatrix.com/Patterns/BasicCalculation"
 
@@ -339,5 +345,24 @@ class ExtractRelationshipsTest extends FunSuite {
         taxo,
         (arc => arc.isInstanceOf[LabelArc] && arc.from == "ci_ComputerEquipment")).map(_.arc).toSet
     }
+  }
+
+  private val zipFile: ZipFile = {
+    val uri = classOf[ExtractRelationshipsTest].getResource("/XBRL-CONF-2014-12-10.zip").toURI
+    new ZipFile(new File(uri))
+  }
+
+  private def getDocumentBuilder(): IndexedDocumentBuilder = {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val catalog: SimpleCatalog =
+      SimpleCatalog(
+        None,
+        Vector(
+          SimpleCatalog.UriRewrite(None, "file:///conf-suite/", "XBRL-CONF-2014-12-10/")))
+
+    val uriResolver = UriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+
+    IndexedDocumentBuilder(docParser, uriResolver)
   }
 }

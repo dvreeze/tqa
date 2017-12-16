@@ -16,6 +16,10 @@
 
 package eu.cdevreeze.tqa.base.dom
 
+import java.io.File
+import java.net.URI
+import java.util.zip.ZipFile
+
 import scala.reflect.classTag
 
 import org.junit.runner.RunWith
@@ -25,8 +29,10 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.Namespaces.XbrliNamespace
 import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
 /**
@@ -40,13 +46,13 @@ class TaxonomyElemTest extends FunSuite {
   test("testParseSchemaWithEmbeddedLinkbase") {
     // Using an embedded linkbase from the XBRL Core Conformance Suite.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val docUri = classOf[TaxonomyElemTest].getResource("/conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd").toURI
+    val docUri = URI.create("file:///conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd")
 
-    val doc = indexed.Document(docParser.parse(docUri).withUriOption(Some(docUri)))
+    val rootElem = docBuilder.build(docUri)
 
-    val xsdSchema = XsdSchema.build(doc.documentElement)
+    val xsdSchema = XsdSchema.build(rootElem)
 
     val embeddedLinks = xsdSchema.findAllElemsOfType(classTag[StandardExtendedLink])
 
@@ -114,5 +120,24 @@ class TaxonomyElemTest extends FunSuite {
     assertResult(conceptDecls) {
       conceptDecls collect { case primaryItemDecl: PrimaryItemDeclaration => primaryItemDecl }
     }
+  }
+
+  private val zipFile: ZipFile = {
+    val uri = classOf[TaxonomyElemTest].getResource("/XBRL-CONF-2014-12-10.zip").toURI
+    new ZipFile(new File(uri))
+  }
+
+  private def getDocumentBuilder(): IndexedDocumentBuilder = {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val catalog: SimpleCatalog =
+      SimpleCatalog(
+        None,
+        Vector(
+          SimpleCatalog.UriRewrite(None, "file:///conf-suite/", "XBRL-CONF-2014-12-10/")))
+
+    val uriResolver = UriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+
+    IndexedDocumentBuilder(docParser, uriResolver)
   }
 }

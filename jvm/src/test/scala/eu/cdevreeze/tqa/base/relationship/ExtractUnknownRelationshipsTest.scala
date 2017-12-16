@@ -16,6 +16,10 @@
 
 package eu.cdevreeze.tqa.base.relationship
 
+import java.io.File
+import java.net.URI
+import java.util.zip.ZipFile
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -23,11 +27,14 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.RefEName
 import eu.cdevreeze.tqa.ENames.XsElementEName
+import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.ConceptLabelResource
 import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.OtherXsdElem
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XsdSchema
+import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
@@ -47,26 +54,26 @@ class ExtractUnknownRelationshipsTest extends FunSuite {
   test("testExtractUnknownRelationships") {
     // Using a simple linkbase and schema from the XBRL Core Conformance Suite, but adapted.
 
-    val docParser = DocumentParserUsingStax.newInstance()
+    val docBuilder = getDocumentBuilder()
 
-    val xsdDocUri = classOf[ExtractUnknownRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd").toURI
-    val linkbaseDocUri = classOf[ExtractUnknownRelationshipsTest].getResource("/conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml").toURI
+    val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd")
+    val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml")
 
-    val parsedSchemaDoc = docParser.parse(xsdDocUri)
+    val parsedSchemaDocElem = docBuilder.build(xsdDocUri)
 
-    val editedSchemaDoc =
-      parsedSchemaDoc transformElemsOrSelf {
+    val editedSchemaDocSimpleElem =
+      parsedSchemaDocElem.underlyingElem transformElemsOrSelf {
         case e if e.attributeOption(NameEName).contains("changeInRetainedEarnings") =>
           e.plusAttribute(QName("ref"), "tns:changeInRetainedEarnings")
         case e =>
           e
       }
+    val xsdDocElem = indexed.Elem(parsedSchemaDocElem.docUri, editedSchemaDocSimpleElem)
 
-    val xsdDoc = indexed.Document(editedSchemaDoc.withUriOption(Some(xsdDocUri)))
-    val linkbaseDoc = indexed.Document(docParser.parse(linkbaseDocUri).withUriOption(Some(linkbaseDocUri)))
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDoc.documentElement)
-    val linkbase = Linkbase.build(linkbaseDoc.documentElement)
+    val xsdSchema = XsdSchema.build(xsdDocElem)
+    val linkbase = Linkbase.build(linkbaseDocElem)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
@@ -107,5 +114,24 @@ class ExtractUnknownRelationshipsTest extends FunSuite {
     assertResult(true) {
       unknownRelationships.head.targetElem.isInstanceOf[ConceptLabelResource]
     }
+  }
+
+  private val zipFile: ZipFile = {
+    val uri = classOf[ExtractUnknownRelationshipsTest].getResource("/XBRL-CONF-2014-12-10.zip").toURI
+    new ZipFile(new File(uri))
+  }
+
+  private def getDocumentBuilder(): IndexedDocumentBuilder = {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val catalog: SimpleCatalog =
+      SimpleCatalog(
+        None,
+        Vector(
+          SimpleCatalog.UriRewrite(None, "file:///conf-suite/", "XBRL-CONF-2014-12-10/")))
+
+    val uriResolver = UriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+
+    IndexedDocumentBuilder(docParser, uriResolver)
   }
 }
