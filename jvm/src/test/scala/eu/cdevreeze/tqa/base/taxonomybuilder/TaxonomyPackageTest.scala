@@ -43,8 +43,29 @@ class TaxonomyPackageTest extends FunSuite {
     assertResult(URI.create("urn:banken-taxonomie-12")) {
       taxonomyPackage.getIdentifier.value
     }
-    assertResult(Some("Bankentaxonomie 12")) {
-      taxonomyPackage.findAllDocumentationGroups.map(_.value).headOption
+    assertResult(List(
+      "Bankentaxonomie 12",
+      "De Bankentaxonomie bevat de bankenrapportages binnen Standard Business Reporting in Nederland.")) {
+
+      taxonomyPackage.findAllDocumentationGroups.map(_.value)
+    }
+    assertResult(List("Bankentaxonomie 12")) {
+      taxonomyPackage.findAllNames.map(_.value)
+    }
+    assertResult("20171201") {
+      taxonomyPackage.findVersion.map(_.value).getOrElse("")
+    }
+    assertResult(List("Financiele Rapportage Cooperatief")) {
+      taxonomyPackage.findAllPublishers.map(_.value)
+    }
+    assertResult(Some(URI.create("https://www.sbrbanken.nl"))) {
+      taxonomyPackage.findPublisherUrl.map(_.value)
+    }
+    assertResult(Some("NL")) {
+      taxonomyPackage.findPublisherCountry.map(_.value)
+    }
+    assertResult(Some("2017-12-01")) {
+      taxonomyPackage.findPublicationDate.map(_.value.toString)
     }
 
     assertResult(32) {
@@ -56,12 +77,30 @@ class TaxonomyPackageTest extends FunSuite {
     }
     assertResult(true) {
       taxonomyPackage.findEntryPoint(
-        _.findAllDocumentationGroups.map(_.value).contains("IHZ-aangifte 2017")).nonEmpty
+        _.findAllNames.map(_.value).contains("IHZ-aangifte 2017")).nonEmpty
     }
 
     assertResult(List(URI.create("https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-aangifte-2017.xsd"))) {
       taxonomyPackage.getEntryPoint(
-        _.findAllDocumentationGroups.map(_.value).contains("IHZ-aangifte 2017")).findAllEntryPointHrefs
+        _.findAllNames.map(_.value).contains("IHZ-aangifte 2017")).findAllEntryPointHrefs
+    }
+
+    val entryPoint = taxonomyPackage.getEntryPoint(_.findAllNames.headOption.map(_.value).contains("IHZ-aangifte 2017"))
+
+    assertResult("IHZ-aangifte 2017") {
+      entryPoint.findAllNames.headOption.map(_.value).getOrElse("")
+    }
+    assertResult("De inkomstenbelasting 2017 ter deponering bij de banken.") {
+      entryPoint.findAllDescriptions.headOption.map(_.value).getOrElse("")
+    }
+    assertResult("20171201") {
+      entryPoint.findVersion.map(_.value).getOrElse("")
+    }
+    assertResult(List(URI.create("https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-aangifte-2017.xsd"))) {
+      entryPoint.findAllEntryPointDocuments.map(_.href)
+    }
+    assertResult(List(URI.create("https://www.sbrbanken.nl/bt12/frc/20171201/entrypoints/frc-rpt-ihz-aangifte-2017.xsd"))) {
+      entryPoint.findAllEntryPointHrefs
     }
   }
 

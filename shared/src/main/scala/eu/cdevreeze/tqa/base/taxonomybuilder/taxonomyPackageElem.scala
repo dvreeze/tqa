@@ -123,6 +123,14 @@ final class TaxonomyPackage private[taxonomybuilder] (
     findAllChildElemsOfType(classTag[DocumentationGroup])
   }
 
+  def findAllNames: immutable.IndexedSeq[Name] = {
+    findAllChildElemsOfType(classTag[Name])
+  }
+
+  def findAllDescriptions: immutable.IndexedSeq[Description] = {
+    findAllChildElemsOfType(classTag[Description])
+  }
+
   def findVersion: Option[Version] = {
     findChildElemOfType(classTag[Version])(_ => true)
   }
@@ -366,6 +374,14 @@ final class EntryPoint private[taxonomybuilder] (
 
   def findAllDocumentationGroups: immutable.IndexedSeq[DocumentationGroup] = {
     findAllChildElemsOfType(classTag[DocumentationGroup])
+  }
+
+  def findAllNames: immutable.IndexedSeq[Name] = {
+    findAllChildElemsOfType(classTag[Name])
+  }
+
+  def findAllDescriptions: immutable.IndexedSeq[Description] = {
+    findAllChildElemsOfType(classTag[Description])
   }
 
   def findVersion: Option[Version] = {
