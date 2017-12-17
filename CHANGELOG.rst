@@ -6,8 +6,9 @@ CHANGELOG
 0.6.1
 =====
 
-Exactly the same as release 0.6.0. Release 0.6.0 could not be deployed to Maven Central, so release 0.6.1
-comes in its place.
+Exactly the same as release 0.6.0. At first, deployment of release 0.6.0 to Maven Central seemed unsuccessful,
+hence release 0.6.1. Both releases are now in Maven Central, and both releases can be used. They are
+interchangeable.
 
 
 0.6.0
