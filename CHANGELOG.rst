@@ -3,6 +3,13 @@ CHANGELOG
 =========
 
 
+0.6.1
+=====
+
+Exactly the same as release 0.6.0. Release 0.6.0 could not be deployed to Maven Central, so release 0.6.1
+comes in its place.
+
+
 0.6.0
 =====
 
