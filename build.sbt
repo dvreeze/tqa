@@ -72,7 +72,9 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "org.scalameta" %%% "scalameta" % "2.0.1" % "test",
 
-    libraryDependencies += "junit" % "junit" % "4.12" % "test"
+    libraryDependencies += "junit" % "junit" % "4.12" % "test",
+
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.5.0")
   )
   .jsSettings(
     // Do we need this jsEnv?
@@ -90,7 +92,9 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     jsDependencies += "org.webjars.npm" % "js-joda" % "1.1.8" / "dist/js-joda.js" minified "dist/js-joda.min.js",
 
-    parallelExecution in Test := false
+    parallelExecution in Test := false,
+
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.5.0")
   )
 
 lazy val tqaJVM = tqa.jvm
