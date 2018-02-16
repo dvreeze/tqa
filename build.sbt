@@ -80,7 +80,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
     // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.3",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.4",
 
     // We use some JDK 8 java.time classes in shared code ...
 
