@@ -20,7 +20,8 @@ import java.net.URI
 
 import scala.collection.immutable
 
-import eu.cdevreeze.yaidom.queryapi.DocumentApi
+import eu.cdevreeze.yaidom.core.XmlDeclaration
+import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 import net.sf.saxon.`type`.Type
 import net.sf.saxon.om.AxisInfo
 import net.sf.saxon.om.NodeInfo
@@ -32,7 +33,7 @@ import net.sf.saxon.om.TreeInfo
  * @author Chris de Vreeze
  */
 // scalastyle:off null
-final class SaxonDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
+final class SaxonDocument(val wrappedTreeInfo: TreeInfo) extends BackingDocumentApi {
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.DOCUMENT, s"Expected document but got node kind ${wrappedNode.getNodeKind}")
 
@@ -47,13 +48,23 @@ final class SaxonDocument(val wrappedTreeInfo: TreeInfo) extends DocumentApi {
   def documentElement: SaxonElem =
     (children collectFirst { case e: SaxonElem => e }).getOrElse(sys.error(s"Missing document element"))
 
-  final def children: immutable.IndexedSeq[SaxonNode] = {
+  def children: immutable.IndexedSeq[SaxonCanBeDocumentChild] = {
     val it = wrappedNode.iterateAxis(AxisInfo.CHILD)
 
     val nodes = Stream.continually(it.next()).takeWhile(_ ne null).toVector
 
-    nodes.flatMap(nodeInfo => SaxonNode.wrapNodeOption(nodeInfo))
+    nodes.flatMap(nodeInfo => SaxonNode.wrapNodeOption(nodeInfo)) collect {
+      case ch: SaxonCanBeDocumentChild => ch
+    }
   }
+
+  def processingInstructions: immutable.IndexedSeq[SaxonProcessingInstruction] =
+    children.collect({ case pi: SaxonProcessingInstruction => pi })
+
+  def comments: immutable.IndexedSeq[SaxonComment] =
+    children.collect({ case c: SaxonComment => c })
+
+  def xmlDeclarationOption: Option[XmlDeclaration] = None
 }
 
 object SaxonDocument {
