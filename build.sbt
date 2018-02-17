@@ -60,7 +60,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.7.0-18",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-8",
 
     libraryDependencies += "com.google.guava" % "guava" % "22.0",
 

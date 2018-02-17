@@ -46,6 +46,10 @@ final class YaidomSimpleToSaxonElemConverter(val processor: Processor) {
 
     val builder = new TinyBuilder(pipe)
 
+    if (doc.uriOption.isDefined) {
+      builder.setSystemId(doc.uriOption.get.toString)
+    }
+
     val receivingContentHandler = new ReceivingContentHandler()
     receivingContentHandler.setPipelineConfiguration(pipe)
     receivingContentHandler.setReceiver(builder)
@@ -57,8 +61,9 @@ final class YaidomSimpleToSaxonElemConverter(val processor: Processor) {
     val tree = builder.getTree
 
     if (doc.uriOption.isDefined) {
-      tree.setSystemId(doc.uriOption.get.toString)
-      tree.getRootNode.setSystemId(doc.uriOption.get.toString) // ??
+      require(
+        tree.getRootNode.getSystemId == doc.uriOption.get.toString,
+        s"Expected document URI '${doc.uriOption.get}' but encountered document URI '${tree.getRootNode.getSystemId}'")
     }
 
     val saxonDoc = SaxonDocument.wrapDocument(tree)

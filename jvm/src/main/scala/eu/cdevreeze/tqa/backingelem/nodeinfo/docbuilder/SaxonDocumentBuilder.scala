@@ -36,21 +36,24 @@ import net.sf.saxon.s9api
  * @author Chris de Vreeze
  */
 final class SaxonDocumentBuilder(
-    val docBuilder: s9api.DocumentBuilder,
-    val uriResolver: URI => InputSource) extends DocumentBuilder {
+  val docBuilder:  s9api.DocumentBuilder,
+  val uriResolver: URI => InputSource) extends DocumentBuilder {
 
   type BackingElem = SaxonElem
 
   def build(uri: URI): SaxonElem = {
     val is = uriResolver(uri)
-    val src = convertInputSourceToSource(is)
+    is.setSystemId(uri.toString)
 
-    val node = docBuilder.build(src).getUnderlyingNode
-    node.setSystemId(uri.toString)
+    val src = convertInputSourceToSource(is).ensuring(_.getSystemId == uri.toString)
+
+    val node = docBuilder.build(src).getUnderlyingNode.ensuring(_.getSystemId == uri.toString)
     SaxonDocument.wrapDocument(node.getTreeInfo).documentElement
   }
 
   private def convertInputSourceToSource(is: InputSource): Source = {
+    assert(is.getSystemId != null) // scalastyle:ignore null
+
     if (is.getCharacterStream != null) { // scalastyle:ignore null
       val src = new StreamSource(is.getCharacterStream)
       Option(is.getSystemId).foreach(v => src.setSystemId(v))
