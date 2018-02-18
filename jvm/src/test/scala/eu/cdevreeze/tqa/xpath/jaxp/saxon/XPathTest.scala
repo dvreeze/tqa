@@ -64,7 +64,7 @@ class XPathTest extends FunSuite {
 
   private val docBuilder = getDocumentBuilder(rootDir)
 
-  private val rootElem: SaxonElem = docBuilder.build(docUri)
+  private val rootElem: SaxonElem = docBuilder.build(docUri).documentElement
 
   private def useXbrliPrefix(e: SaxonElem): SaxonElem = {
     require(

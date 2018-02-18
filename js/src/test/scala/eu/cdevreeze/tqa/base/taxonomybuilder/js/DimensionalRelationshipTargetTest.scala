@@ -379,9 +379,9 @@ class DimensionalRelationshipTargetTest extends FunSuite {
   private val docBuilder: DocumentBuilder = {
     new DocumentBuilder {
 
-      type BackingElem = indexed.Elem
+      type BackingDoc = indexed.Document
 
-      def build(uri: URI): BackingElem = {
+      def build(uri: URI): BackingDoc = {
         require(uri.isAbsolute, s"Document URI '$uri' is not absolute so rejected")
         val xmlString = docsByUri.getOrElse(uri, sys.error(s"Missing document $uri"))
 
@@ -393,8 +393,7 @@ class DimensionalRelationshipTargetTest extends FunSuite {
 
         val simpleDoc: simple.Document =
           JsDomConversions.convertToDocument(domDoc.wrappedDocument).withUriOption(Some(uri))
-        val rootElem: indexed.Elem = indexed.Document(simpleDoc).documentElement
-        rootElem
+        indexed.Document(simpleDoc)
       }
     }
   }

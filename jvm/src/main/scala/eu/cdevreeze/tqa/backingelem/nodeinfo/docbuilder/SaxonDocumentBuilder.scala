@@ -21,7 +21,6 @@ import java.net.URI
 import org.xml.sax.InputSource
 
 import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocument
-import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import javax.xml.transform.Source
 import javax.xml.transform.stream.StreamSource
@@ -39,16 +38,16 @@ final class SaxonDocumentBuilder(
   val docBuilder:  s9api.DocumentBuilder,
   val uriResolver: URI => InputSource) extends DocumentBuilder {
 
-  type BackingElem = SaxonElem
+  type BackingDoc = SaxonDocument
 
-  def build(uri: URI): SaxonElem = {
+  def build(uri: URI): SaxonDocument = {
     val is = uriResolver(uri)
     is.setSystemId(uri.toString)
 
     val src = convertInputSourceToSource(is).ensuring(_.getSystemId == uri.toString)
 
     val node = docBuilder.build(src).getUnderlyingNode.ensuring(_.getSystemId == uri.toString)
-    SaxonDocument.wrapDocument(node.getTreeInfo).documentElement
+    SaxonDocument.wrapDocument(node.getTreeInfo)
   }
 
   private def convertInputSourceToSource(is: InputSource): Source = {

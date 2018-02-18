@@ -22,7 +22,6 @@ import org.xml.sax.InputSource
 
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.yaidom.indexed.Document
-import eu.cdevreeze.yaidom.indexed.Elem
 import eu.cdevreeze.yaidom.parse.DocumentParser
 
 /**
@@ -34,16 +33,16 @@ import eu.cdevreeze.yaidom.parse.DocumentParser
  * @author Chris de Vreeze
  */
 final class IndexedDocumentBuilder(
-    val docParser: DocumentParser,
-    val uriResolver: URI => InputSource) extends DocumentBuilder {
+  val docParser:   DocumentParser,
+  val uriResolver: URI => InputSource) extends DocumentBuilder {
 
-  type BackingElem = Elem
+  type BackingDoc = Document
 
-  def build(uri: URI): Elem = {
+  def build(uri: URI): Document = {
     val is = uriResolver(uri)
 
     val doc = docParser.parse(is).withUriOption(Some(uri))
-    Document(doc).documentElement
+    Document(doc)
   }
 }
 

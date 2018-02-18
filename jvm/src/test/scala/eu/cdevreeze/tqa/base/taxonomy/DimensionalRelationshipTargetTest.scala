@@ -370,7 +370,7 @@ class DimensionalRelationshipTargetTest extends FunSuite {
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
     val uris = relativeDocPaths.map(relativeDocPath => dummyUriPrefix.resolve(relativeDocPath))
 
-    val rootElems = uris.map(uri => docBuilder.build(uri))
+    val rootElems = uris.map(uri => docBuilder.build(uri).documentElement)
 
     val taxoRootElems = rootElems.map(e => TaxonomyElem.build(e))
 

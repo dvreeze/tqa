@@ -50,7 +50,7 @@ class TaxonomyElemTest extends FunSuite {
 
     val docUri = URI.create("file:///conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd")
 
-    val rootElem = docBuilder.build(docUri)
+    val rootElem = docBuilder.build(docUri).documentElement
 
     val xsdSchema = XsdSchema.build(rootElem)
 

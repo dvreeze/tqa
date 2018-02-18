@@ -38,7 +38,7 @@ class TaxonomyPackageTest extends FunSuite {
   test("testQueryTaxonomyPackage") {
     val taxoPkgFileUri = classOf[TaxonomyPackageTest].getResource("/taxonomyPackage.xml").toURI
 
-    val taxonomyPackage: TaxonomyPackage = TaxonomyPackage(docBuilder.build(taxoPkgFileUri))
+    val taxonomyPackage: TaxonomyPackage = TaxonomyPackage(docBuilder.build(taxoPkgFileUri).documentElement)
 
     assertResult(URI.create("urn:banken-taxonomie-12")) {
       taxonomyPackage.getIdentifier.value

@@ -36,7 +36,7 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 abstract class AbstractDtsCollector extends DocumentCollector {
 
   final def collectTaxonomyRootElems(
-    entryPointUris: Set[URI],
+    entryPointUris:  Set[URI],
     documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
 
     require(entryPointUris.nonEmpty, s"At least one entryPoint URI must be provided")
@@ -55,8 +55,8 @@ abstract class AbstractDtsCollector extends DocumentCollector {
 
   @tailrec
   private def findDts(
-    docUris: Set[URI],
-    processedDocs: Map[URI, TaxonomyRootElem],
+    docUris:         Set[URI],
+    processedDocs:   Map[URI, TaxonomyRootElem],
     documentBuilder: DocumentBuilder): Map[URI, TaxonomyRootElem] = {
 
     val processedDocUris = processedDocs.keySet
@@ -91,7 +91,7 @@ abstract class AbstractDtsCollector extends DocumentCollector {
   }
 
   private def buildRootElem(uri: URI, documentBuilder: DocumentBuilder): TaxonomyRootElem = {
-    val taxoRootElemOption = TaxonomyRootElem.buildOptionally(documentBuilder.build(uri))
+    val taxoRootElemOption = TaxonomyRootElem.buildOptionally(documentBuilder.build(uri).documentElement)
 
     taxoRootElemOption.getOrElse(sys.error(s"Could not find taxonomy root element for $uri during DTS discovery"))
   }

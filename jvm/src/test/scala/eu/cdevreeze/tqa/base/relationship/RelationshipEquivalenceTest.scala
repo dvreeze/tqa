@@ -55,9 +55,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/210-01-RelationshipEquivalence-calculation-1.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/210-01-RelationshipEquivalence-calculation-2.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -117,9 +117,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/210-02-DifferentOrder-calculation-1.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/210-02-DifferentOrder-calculation-2.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -183,9 +183,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/210-03-MissingOrder-calculation-1.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/210-03-MissingOrder-calculation-2.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -246,9 +246,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/210-04-RelationshipEquivalence-calculation-1.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/210-04-RelationshipEquivalence-calculation-2.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -318,9 +318,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/210-05-RelationshipEquivalence-calculation-1.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/210-05-RelationshipEquivalence-calculation-2.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -390,9 +390,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/291-01-ArcOverrideDisjointLinkbases-1-label.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/291-01-ArcOverrideDisjointLinkbases-2-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -428,9 +428,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/291-02-ArcOverrideLabelLinkbases-1-label.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/291-02-ArcOverrideLabelLinkbases-2-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -469,10 +469,10 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/291-03-ArcOverrideLabelLinkbases-2-label.xml")
     val linkbaseDocUri3 = URI.create("file:///conf-suite/Common/200-linkbase/291-03-ArcOverrideLabelLinkbases-3-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
-    val linkbaseDoc3Elem = docBuilder.build(linkbaseDocUri3)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
+    val linkbaseDoc3Elem = docBuilder.build(linkbaseDocUri3).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -520,9 +520,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/291-04-ArcOverrideLinkbases-1-def.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/291-04-ArcOverrideLinkbases-2-def.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -558,9 +558,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/291-05-ArcOverrideLinkbases-1-def.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/291-05-ArcOverrideLinkbases-2-def.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -600,10 +600,10 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/291-06-ArcOverrideLinkbases-2-def.xml")
     val linkbaseDocUri3 = URI.create("file:///conf-suite/Common/200-linkbase/291-06-ArcOverrideLinkbases-3-def.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
-    val linkbaseDoc3Elem = docBuilder.build(linkbaseDocUri3)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
+    val linkbaseDoc3Elem = docBuilder.build(linkbaseDocUri3).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)
@@ -653,9 +653,9 @@ class RelationshipEquivalenceTest extends FunSuite {
     val linkbaseDocUri1 = URI.create("file:///conf-suite/Common/200-linkbase/291-08-ArcOverrideLabelLinkbases-1-label.xml")
     val linkbaseDocUri2 = URI.create("file:///conf-suite/Common/200-linkbase/291-08-ArcOverrideLabelLinkbases-2-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1)
-    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDoc1Elem = docBuilder.build(linkbaseDocUri1).documentElement
+    val linkbaseDoc2Elem = docBuilder.build(linkbaseDocUri2).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase1 = Linkbase.build(linkbaseDoc1Elem)

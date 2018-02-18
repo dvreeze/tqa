@@ -18,28 +18,22 @@ package eu.cdevreeze.tqa.docbuilder
 
 import java.net.URI
 
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 
 /**
- * Any builder of a document root backing element. Typical document builders convert the document URI
+ * Any builder of a ("backing") document. Typical document builders convert the document URI
  * to a local URI, parse the document using that local URI, and after parsing store the original
- * URI as document URI in the returned backing element. Some document builders are capable of parsing
+ * URI as document URI in the returned document. Some document builders are capable of parsing
  * documents inside ZIP files.
  *
  * Document builders can be stacked, for example to perform some "post-processing".
- * For example, some taxonomy document may have a broken link in the schema location attribute, and
- * such a post-processing step can fix that before the backing element is used to build a type-safe
+ * For example, some taxonomy documents may have a broken link in the schema location attribute, and
+ * such a post-processing step can fix that before the document is used to build a type-safe
  * taxonomy DOM tree from it.
  *
  * Other "decorating" document builders can cache parsed documents, for example.
  *
  * Note that document builders backed by typical XML parsers are not thread-safe in the JVM!
- *
- * Note that these builders return root elements and not documents, so top-level comments and processing
- * instructions are lost. It should be possible to parse the document later again, given the document URI,
- * if needed using StAX in order to get only the top-level comments, processing instructions and XML
- * declaration. Retrieval of these information items can be hidden behind strategy interfaces, so only
- * "application wiring" needs to worry about how to obtain this data.
  *
  * Note that this document builder abstraction is useful both in the JVM and in JavaScript runtimes.
  *
@@ -47,18 +41,18 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
  */
 trait DocumentBuilder {
 
-  type BackingElem <: BackingElemApi
+  type BackingDoc <: BackingDocumentApi
 
   /**
-   * Returns the document that has the given URI as BackingElem. The URI is typically the canonical,
-   * published URI of the document. This URI is also typically stored in the resulting root element as
+   * Returns the document that has the given URI as BackingDoc. The URI is typically the canonical,
+   * published URI of the document. This URI is also typically stored in the resulting document as
    * document URI. If the document builder uses an XML catalog, the document is typically parsed from
    * a local (mirror) URI.
    */
-  def build(uri: URI): BackingElem
+  def build(uri: URI): BackingDoc
 }
 
 object DocumentBuilder {
 
-  type Aux[A] = DocumentBuilder { type BackingElem = A }
+  type Aux[A] = DocumentBuilder { type BackingDoc = A }
 }

@@ -78,7 +78,7 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
   private val ValidationErrorEName = EName(xbrldieNs, "PrimaryItemDimensionallyInvalidError")
 
   private val testCaseDocElem: BackingElemApi = {
-    docBuilder.build(testCaseUri).ensuring(_.resolvedName == EName(confNs, "testcase")).
+    docBuilder.build(testCaseUri).documentElement.ensuring(_.resolvedName == EName(confNs, "testcase")).
       ensuring(_.filterElems(_.resolvedName == EName(confNs, "error")).forall(_.textAsResolvedQName == ValidationErrorEName))
   }
 
@@ -113,7 +113,7 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
 
       val outputFileElems = fileNames map { fileName =>
         val outputFileUri: URI = testCaseUri.resolve(s"out/$fileName")
-        val outputFileElem = docBuilder.build(outputFileUri)
+        val outputFileElem = docBuilder.build(outputFileUri).documentElement
 
         outputFileElem.ensuring(_.resolvedName == EName("facts"))
       }
@@ -131,10 +131,10 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
   }
 
   final def performTestVariation(
-    id: String,
-    name: String,
-    instanceFileName: String,
-    expectedSuccessCount: Int,
+    id:                           String,
+    name:                         String,
+    instanceFileName:             String,
+    expectedSuccessCount:         Int,
     expectedValidationErrorCount: Int): Unit = {
 
     val instance = makeTestInstance(
@@ -178,7 +178,7 @@ class PrimaryItemDimensionalValidation270Test extends FunSuite {
 
     val uri = dummyUriPrefix.resolve(relativeDocPath)
 
-    XbrlInstance(docBuilder.build(uri))
+    XbrlInstance(docBuilder.build(uri).documentElement)
   }
 
   private def doMakeValidator(entryPointUris: Set[URI], doResolveProhibitionAndOverriding: Boolean): DimensionalValidator = {

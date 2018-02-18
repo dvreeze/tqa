@@ -32,14 +32,14 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 object TrivialDocumentCollector extends DocumentCollector {
 
   final def collectTaxonomyRootElems(
-    entryPointUris: Set[URI],
+    entryPointUris:  Set[URI],
     documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
 
     entryPointUris.toIndexedSeq.sortBy(_.toString).map(uri => buildRootElem(uri, documentBuilder))
   }
 
   private def buildRootElem(uri: URI, documentBuilder: DocumentBuilder): TaxonomyRootElem = {
-    val taxoRootElemOption = TaxonomyRootElem.buildOptionally(documentBuilder.build(uri))
+    val taxoRootElemOption = TaxonomyRootElem.buildOptionally(documentBuilder.build(uri).documentElement)
 
     taxoRootElemOption.getOrElse(sys.error(s"Could not find taxonomy root element for $uri"))
   }

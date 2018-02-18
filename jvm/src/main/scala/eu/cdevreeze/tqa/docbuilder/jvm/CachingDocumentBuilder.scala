@@ -23,7 +23,7 @@ import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 
 /**
  * DocumentBuilder using a Guava document cache. By all means, reuse the underlying document cache
@@ -31,34 +31,34 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
  *
  * @author Chris de Vreeze
  */
-final class CachingDocumentBuilder[E <: BackingElemApi](
-    val cache: LoadingCache[URI, E]) extends DocumentBuilder {
+final class CachingDocumentBuilder[D <: BackingDocumentApi](
+  val cache: LoadingCache[URI, D]) extends DocumentBuilder {
 
-  type BackingElem = E
+  type BackingDoc = D
 
-  def build(uri: URI): BackingElem = cache.get(uri)
+  def build(uri: URI): BackingDoc = cache.get(uri)
 }
 
 object CachingDocumentBuilder {
 
   /**
-   * Factory method to create a Google Guava BackingElem cache.
+   * Factory method to create a Google Guava BackingDoc cache.
    */
-  def createCache[E <: BackingElemApi](
-    wrappedDocBuilder: DocumentBuilder.Aux[E],
-    cacheSize: Int): LoadingCache[URI, E] = {
+  def createCache[D <: BackingDocumentApi](
+    wrappedDocBuilder: DocumentBuilder.Aux[D],
+    cacheSize:         Int): LoadingCache[URI, D] = {
 
-    val cacheBuilder: CacheBuilder[URI, E] =
-      CacheBuilder.newBuilder().maximumSize(cacheSize).recordStats().asInstanceOf[CacheBuilder[URI, E]]
+    val cacheBuilder: CacheBuilder[URI, D] =
+      CacheBuilder.newBuilder().maximumSize(cacheSize).recordStats().asInstanceOf[CacheBuilder[URI, D]]
 
-    val cacheLoader = new CacheLoader[URI, E] {
+    val cacheLoader = new CacheLoader[URI, D] {
 
-      def load(key: URI): E = {
+      def load(key: URI): D = {
         wrappedDocBuilder.build(key)
       }
     }
 
-    val cache: LoadingCache[URI, E] = cacheBuilder.build(cacheLoader)
+    val cache: LoadingCache[URI, D] = cacheBuilder.build(cacheLoader)
     cache
   }
 }

@@ -51,8 +51,8 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase = Linkbase.build(linkbaseDocElem)
@@ -90,8 +90,8 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-05-ElementLocatorExample.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-05-ElementLocatorExample-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase = Linkbase.build(linkbaseDocElem)
@@ -140,8 +140,8 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase = Linkbase.build(linkbaseDocElem)
@@ -179,8 +179,8 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase = Linkbase.build(linkbaseDocElem)
@@ -218,8 +218,8 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-03-HrefResolutionXMLBase.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/base/202-03-HrefResolutionXMLBase-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri)
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
+    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase = Linkbase.build(linkbaseDocElem)
@@ -256,7 +256,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docUri = URI.create("file:///conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd")
 
-    val xsdDocElem = docBuilder.build(docUri)
+    val xsdDocElem = docBuilder.build(docUri).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
 

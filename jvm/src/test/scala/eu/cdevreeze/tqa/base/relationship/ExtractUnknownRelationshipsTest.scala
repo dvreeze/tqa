@@ -59,7 +59,7 @@ class ExtractUnknownRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml")
 
-    val parsedSchemaDocElem = docBuilder.build(xsdDocUri)
+    val parsedSchemaDocElem = docBuilder.build(xsdDocUri).documentElement
 
     val editedSchemaDocSimpleElem =
       parsedSchemaDocElem.underlyingElem transformElemsOrSelf {
@@ -70,7 +70,7 @@ class ExtractUnknownRelationshipsTest extends FunSuite {
       }
     val xsdDocElem = indexed.Elem(parsedSchemaDocElem.docUri, editedSchemaDocSimpleElem)
 
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri)
+    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
 
     val xsdSchema = XsdSchema.build(xsdDocElem)
     val linkbase = Linkbase.build(linkbaseDocElem)
