@@ -29,6 +29,7 @@ import eu.cdevreeze.tqa.base.dom.GlobalAttributeDeclaration
 import eu.cdevreeze.tqa.base.dom.GlobalElementDeclaration
 import eu.cdevreeze.tqa.base.dom.NamedTypeDefinition
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.dom.XsdSchema
@@ -58,15 +59,17 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * @author Chris de Vreeze
  */
 final class BasicTaxonomy private (
-    val taxonomyBase: TaxonomyBase,
-    val extraSubstitutionGroupMap: SubstitutionGroupMap,
-    val netSubstitutionGroupMap: SubstitutionGroupMap,
-    val relationships: immutable.IndexedSeq[Relationship],
-    val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
-    val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
-    val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
-    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
-    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
+  val taxonomyBase:                      TaxonomyBase,
+  val extraSubstitutionGroupMap:         SubstitutionGroupMap,
+  val netSubstitutionGroupMap:           SubstitutionGroupMap,
+  val relationships:                     immutable.IndexedSeq[Relationship],
+  val conceptDeclarationsByEName:        Map[EName, ConceptDeclaration],
+  val standardRelationshipsBySource:     Map[EName, immutable.IndexedSeq[StandardRelationship]],
+  val nonStandardRelationshipsBySource:  Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
+  val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
+  val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
+
+  def taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument] = taxonomyBase.taxonomyDocs
 
   def rootElems: immutable.IndexedSeq[TaxonomyElem] = taxonomyBase.rootElems
 
@@ -217,9 +220,9 @@ object BasicTaxonomy {
    * This method invokes the overloaded build method having as 4th parameter the arc filter that always returns true.
    */
   def build(
-    taxonomyBase: TaxonomyBase,
+    taxonomyBase:              TaxonomyBase,
     extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationshipFactory: RelationshipFactory): BasicTaxonomy = {
+    relationshipFactory:       RelationshipFactory): BasicTaxonomy = {
 
     build(taxonomyBase, extraSubstitutionGroupMap, relationshipFactory, _ => true)
   }
@@ -233,10 +236,10 @@ object BasicTaxonomy {
    * The arc filter is only used during relationship extraction. It is not used to filter any taxonomy DOM content.
    */
   def build(
-    taxonomyBase: TaxonomyBase,
+    taxonomyBase:              TaxonomyBase,
     extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationshipFactory: RelationshipFactory,
-    arcFilter: XLinkArc => Boolean): BasicTaxonomy = {
+    relationshipFactory:       RelationshipFactory,
+    arcFilter:                 XLinkArc => Boolean): BasicTaxonomy = {
 
     val relationships = relationshipFactory.extractRelationships(taxonomyBase, arcFilter)
 
@@ -248,9 +251,9 @@ object BasicTaxonomy {
    * Make sure that the relationships are backed by arcs in the underlying taxonomy. This is not checked.
    */
   def build(
-    taxonomyBase: TaxonomyBase,
+    taxonomyBase:              TaxonomyBase,
     extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
+    relationships:             immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
     val netSubstitutionGroupMap =
       taxonomyBase.computeDerivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)

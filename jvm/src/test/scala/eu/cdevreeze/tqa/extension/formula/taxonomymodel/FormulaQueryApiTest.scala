@@ -60,7 +60,7 @@ class FormulaQueryApiTest extends FunSuite {
 
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
-    val taxoBase = TaxonomyBase.build(taxoRootElems)
+    val taxoBase = TaxonomyBase.buildFromRootElems(taxoRootElems)
     val taxo = BasicTaxonomy.build(taxoBase, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     val formulaTaxo = BasicFormulaTaxonomy.build(taxo)
@@ -177,7 +177,7 @@ class FormulaQueryApiTest extends FunSuite {
 
     val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
 
-    val taxoBase = TaxonomyBase.build(taxoRootElems)
+    val taxoBase = TaxonomyBase.buildFromRootElems(taxoRootElems)
     val taxo = BasicTaxonomy.build(taxoBase, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     val formulaTaxo = BasicFormulaTaxonomy.build(taxo)

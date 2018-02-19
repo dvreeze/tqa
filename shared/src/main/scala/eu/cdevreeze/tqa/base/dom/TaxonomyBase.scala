@@ -28,8 +28,8 @@ import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
- * Very limited notion of a taxonomy, as a collection of taxonomy root elements. It contains a map from URIs
- * (with fragments) to taxonomy elements, for quick element lookups based on URIs with fragments. It also contains
+ * Very limited notion of a taxonomy, as a collection of taxonomy documents. It contains a map from URIs
+ * (with fragments) to taxonomy documents, for quick element lookups based on URIs with fragments. It also contains
  * a map from ENames (names with target namespace) of global element declarations and named type definitions.
  *
  * It '''does not understand (resolved) relationships''', and it has no taxonomy query API, but it supports creation of such
@@ -46,7 +46,7 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * TaxonomyBase creation should never fail, if correct URIs are passed. Even the instance methods are very lenient and
  * should never fail. Typically, a taxonomy instantiated as an object of this class has not yet been validated.
  *
- * For the rootElemUriMap and elemUriMap, we have that data is silently lost in those maps if there are any duplicate IDs (per document).
+ * For the taxonomyDocUriMap and elemUriMap, we have that data is silently lost in those maps if there are any duplicate IDs (per document).
  * In a valid taxonomy (as XML document set) this duplication is not allowed.
  *
  * For the globalElementDeclarationMap, namedTypeDefinitionMap, etc., we also have that data is silently lost if there
@@ -56,16 +56,20 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * @author Chris de Vreeze
  */
 final class TaxonomyBase private (
-    val rootElems: immutable.IndexedSeq[TaxonomyElem],
-    val rootElemUriMap: Map[URI, TaxonomyElem],
-    val elemUriMap: Map[URI, TaxonomyElem],
-    val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration],
-    val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition],
-    val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration]) {
+  val taxonomyDocs:                  immutable.IndexedSeq[TaxonomyDocument],
+  val taxonomyDocUriMap:             Map[URI, TaxonomyDocument],
+  val elemUriMap:                    Map[URI, TaxonomyElem],
+  val globalElementDeclarationMap:   Map[EName, GlobalElementDeclaration],
+  val namedTypeDefinitionMap:        Map[EName, NamedTypeDefinition],
+  val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration]) {
 
   require(
-    rootElems.forall(e => e.docUri.getFragment == null),
+    taxonomyDocs.forall(_.uriOption.forall(_.getFragment == null)),
     s"Expected document URIs but got at least one URI with fragment")
+
+  def rootElems: immutable.IndexedSeq[TaxonomyElem] = taxonomyDocs.map(_.documentElement)
+
+  def rootElemUriMap: Map[URI, TaxonomyElem] = taxonomyDocUriMap.mapValues(_.documentElement)
 
   /**
    * Returns the SubstitutionGroupMap that can be derived from this taxonomy base alone.
@@ -167,8 +171,8 @@ final class TaxonomyBase private (
    */
   def filterDocumentUris(docUris: Set[URI]): TaxonomyBase = {
     new TaxonomyBase(
-      rootElems.filter(e => docUris.contains(e.docUri)),
-      rootElemUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
+      taxonomyDocs.filter(d => docUris.contains(d.uri)),
+      taxonomyDocUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
       elemUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
       globalElementDeclarationMap.filter(kv => docUris.contains(kv._2.docUri)),
       namedTypeDefinitionMap.filter(kv => docUris.contains(kv._2.docUri)),
@@ -240,12 +244,14 @@ object TaxonomyBase {
   /**
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    *
-   * It is the responsibility of the caller to pass different taxonomy document root elements.
+   * It is the responsibility of the caller to pass different taxonomy documents.
    */
-  def build(rootElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyBase = {
-    val rootElemUriMap: Map[URI, TaxonomyElem] = {
-      rootElems.groupBy(e => e.docUri).mapValues(_.head)
+  def build(taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument]): TaxonomyBase = {
+    val taxonomyDocUriMap: Map[URI, TaxonomyDocument] = {
+      taxonomyDocs.groupBy(_.uri).mapValues(_.head)
     }
+
+    val rootElems = taxonomyDocs.map(_.documentElement)
 
     val elemUriMap: Map[URI, TaxonomyElem] = {
       rootElems.flatMap(e => getElemUriMap(e).toSeq).toMap
@@ -263,7 +269,14 @@ object TaxonomyBase {
       rootElems.flatMap(e => getGlobalAttributeDeclarationMap(e).toSeq).toMap
     }
 
-    new TaxonomyBase(rootElems, rootElemUriMap, elemUriMap, globalElementDeclarationMap, namedTypeDefinitionMap, globalAttributeDeclarationMap)
+    new TaxonomyBase(taxonomyDocs, taxonomyDocUriMap, elemUriMap, globalElementDeclarationMap, namedTypeDefinitionMap, globalAttributeDeclarationMap)
+  }
+
+  /**
+   * Returns `build(rootElems.map(e => TaxonomyDocument(None, e)))`.
+   */
+  def buildFromRootElems(rootElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyBase = {
+    build(rootElems.map(e => TaxonomyDocument(None, e)))
   }
 
   private def getGlobalElementDeclarationMap(rootElem: TaxonomyElem): Map[EName, GlobalElementDeclaration] = {

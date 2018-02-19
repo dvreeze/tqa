@@ -20,11 +20,11 @@ import java.net.URI
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
- * Strategy for collecting taxonomy document root elements. Typically implemented as DTS discovery, although
+ * Strategy for collecting taxonomy documents. Typically implemented as DTS discovery, although
  * it is also possible that all document URIs must be explicitly mentioned, as is the case for TrivialDocumentCollector.
  *
  * @author Chris de Vreeze
@@ -32,7 +32,7 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 trait DocumentCollector {
 
   /**
-   * Collects taxonomy root elements for the given entry points, using the given document builder.
+   * Collects taxonomy documents for the given entry points, using the given document builder.
    *
    * If this document collector performs DTS discovery, the entry point URIs are the entry points for
    * DTS discovery. If this document collector does not perform any DTS discovery, and expects all
@@ -41,7 +41,7 @@ trait DocumentCollector {
    *
    * The entry point URIs should normally be the canonical, published document locations.
    */
-  def collectTaxonomyRootElems(
-    entryPointUris: Set[URI],
-    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem]
+  def collectTaxonomyDocuments(
+    entryPointUris:  Set[URI],
+    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyDocument]
 }

@@ -28,7 +28,7 @@ import eu.cdevreeze.tqa.base.dom.LinkbaseRef
 import eu.cdevreeze.tqa.base.dom.RoleRef
 import eu.cdevreeze.tqa.base.dom.StandardLoc
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
-import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.XsdSchema
 
 /**
@@ -42,8 +42,8 @@ import eu.cdevreeze.tqa.base.dom.XsdSchema
  */
 final class DefaultDtsCollector extends AbstractDtsCollector {
 
-  def findAllUsedDocUris(rootElem: TaxonomyRootElem): Set[URI] = {
-    rootElem match {
+  def findAllUsedDocUris(taxonomyDoc: TaxonomyDocument): Set[URI] = {
+    taxonomyDoc.documentElement match {
       case xsdSchema: XsdSchema =>
         // Minding embedded linkbases
 
@@ -52,6 +52,8 @@ final class DefaultDtsCollector extends AbstractDtsCollector {
         }
       case linkbase: Linkbase =>
         findAllUsedDocUrisInLinkbase(linkbase)
+      case _: TaxonomyElem =>
+        Set.empty
     }
   }
 

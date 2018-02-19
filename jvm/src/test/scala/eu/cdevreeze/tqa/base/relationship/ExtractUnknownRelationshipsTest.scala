@@ -77,7 +77,7 @@ class ExtractUnknownRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 

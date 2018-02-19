@@ -20,7 +20,7 @@ import java.net.URI
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
@@ -31,16 +31,16 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
  */
 object TrivialDocumentCollector extends DocumentCollector {
 
-  final def collectTaxonomyRootElems(
+  final def collectTaxonomyDocuments(
     entryPointUris:  Set[URI],
-    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyDocument] = {
 
-    entryPointUris.toIndexedSeq.sortBy(_.toString).map(uri => buildRootElem(uri, documentBuilder))
+    entryPointUris.toIndexedSeq.sortBy(_.toString).map(uri => buildTaxonomyDoc(uri, documentBuilder))
   }
 
-  private def buildRootElem(uri: URI, documentBuilder: DocumentBuilder): TaxonomyRootElem = {
-    val taxoRootElemOption = TaxonomyRootElem.buildOptionally(documentBuilder.build(uri).documentElement)
+  private def buildTaxonomyDoc(uri: URI, documentBuilder: DocumentBuilder): TaxonomyDocument = {
+    val taxoDocOption = TaxonomyDocument.buildOptionally(documentBuilder.build(uri))
 
-    taxoRootElemOption.getOrElse(sys.error(s"Could not find taxonomy root element for $uri"))
+    taxoDocOption.getOrElse(sys.error(s"Could not find taxonomy document for $uri"))
   }
 }

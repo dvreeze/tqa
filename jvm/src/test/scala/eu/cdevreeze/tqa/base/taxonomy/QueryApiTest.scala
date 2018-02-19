@@ -30,7 +30,7 @@ import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
 import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
-import eu.cdevreeze.tqa.base.dom.TaxonomyElem
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
@@ -57,9 +57,9 @@ class QueryApiTest extends FunSuite {
 
     val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
 
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val underlyingTaxo = TaxonomyBase.build(taxoDocs)
     val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
@@ -125,9 +125,9 @@ class QueryApiTest extends FunSuite {
 
     val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
 
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val underlyingTaxo = TaxonomyBase.build(taxoDocs)
     val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
@@ -140,7 +140,7 @@ class QueryApiTest extends FunSuite {
       richTaxo.taxonomyBase.findAllDuplicateGlobalElementDeclarationENames.isEmpty
     }
     assertResult(true) {
-      taxoRootElems.forall(e => richTaxo.taxonomyBase.findAllDuplicateIds(e).isEmpty)
+      taxoDocs.map(_.documentElement).forall(e => richTaxo.taxonomyBase.findAllDuplicateIds(e).isEmpty)
     }
 
     assertResult(Nil) {
@@ -224,9 +224,9 @@ class QueryApiTest extends FunSuite {
 
     val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
 
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val underlyingTaxo = TaxonomyBase.build(taxoDocs)
     val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
@@ -330,9 +330,9 @@ class QueryApiTest extends FunSuite {
 
     val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
 
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val underlyingTaxo = TaxonomyBase.build(taxoDocs)
     val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {
@@ -433,9 +433,9 @@ class QueryApiTest extends FunSuite {
 
     val docs = taxoDocUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
 
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val underlyingTaxo = TaxonomyBase.build(taxoDocs)
     val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     assertResult(true) {

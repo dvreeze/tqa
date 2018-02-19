@@ -59,7 +59,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -98,7 +98,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -148,7 +148,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -187,7 +187,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -226,7 +226,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.build(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -262,7 +262,7 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val tns = "http://www.UBmatrix.com/Patterns/BasicCalculation"
 
-    val taxo = TaxonomyBase.build(Vector(xsdSchema))
+    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 

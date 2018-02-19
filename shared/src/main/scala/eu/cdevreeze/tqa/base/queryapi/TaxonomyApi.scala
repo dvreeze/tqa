@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.base.queryapi
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.relationship.Relationship
 
@@ -29,19 +30,24 @@ import eu.cdevreeze.tqa.base.relationship.Relationship
  * @author Chris de Vreeze
  */
 trait TaxonomyApi
-    extends TaxonomySchemaApi
-    with StandardRelationshipContainerApi
-    with NonStandardRelationshipContainerApi
-    with InterConceptRelationshipContainerApi
-    with PresentationRelationshipContainerApi
-    with ConceptLabelRelationshipContainerApi
-    with ConceptReferenceRelationshipContainerApi
-    with DimensionalRelationshipContainerApi {
+  extends TaxonomySchemaApi
+  with StandardRelationshipContainerApi
+  with NonStandardRelationshipContainerApi
+  with InterConceptRelationshipContainerApi
+  with PresentationRelationshipContainerApi
+  with ConceptLabelRelationshipContainerApi
+  with ConceptReferenceRelationshipContainerApi
+  with DimensionalRelationshipContainerApi {
 
   /**
    * Returns all relationships in the taxonomy
    */
   def relationships: immutable.IndexedSeq[Relationship]
+
+  /**
+   * Returns all taxonomy documents.
+   */
+  def taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument]
 
   /**
    * Returns all (document) root elements. To find certain taxonomy elements across the taxonomy,

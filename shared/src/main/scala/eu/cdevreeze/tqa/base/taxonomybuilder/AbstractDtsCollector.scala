@@ -21,7 +21,7 @@ import java.net.URI
 import scala.annotation.tailrec
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
@@ -35,29 +35,29 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
  */
 abstract class AbstractDtsCollector extends DocumentCollector {
 
-  final def collectTaxonomyRootElems(
+  final def collectTaxonomyDocuments(
     entryPointUris:  Set[URI],
-    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyRootElem] = {
+    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyDocument] = {
 
     require(entryPointUris.nonEmpty, s"At least one entryPoint URI must be provided")
 
     val dts = findDts(entryPointUris, Map(), documentBuilder)
 
-    dts.values.toIndexedSeq.sortBy(_.docUri.toString)
+    dts.values.toIndexedSeq.sortBy(_.uri.toString)
   }
 
   /**
    * Finds all absolute URIs without fragment that must be found in the given document
    * according to DTS discovery rules. The result excludes the document URI of the given
-   * document root itself. Minds the possibility of having embedded linkbases in schemas.
+   * document itself. Minds the possibility of having embedded linkbases in schemas.
    */
-  def findAllUsedDocUris(rootElem: TaxonomyRootElem): Set[URI]
+  def findAllUsedDocUris(rootElem: TaxonomyDocument): Set[URI]
 
   @tailrec
   private def findDts(
     docUris:         Set[URI],
-    processedDocs:   Map[URI, TaxonomyRootElem],
-    documentBuilder: DocumentBuilder): Map[URI, TaxonomyRootElem] = {
+    processedDocs:   Map[URI, TaxonomyDocument],
+    documentBuilder: DocumentBuilder): Map[URI, TaxonomyDocument] = {
 
     val processedDocUris = processedDocs.keySet
 
@@ -66,15 +66,15 @@ abstract class AbstractDtsCollector extends DocumentCollector {
     // One step, processing all URIs currently known, and not yet processed
     val docUrisToProcess = docUris.diff(processedDocUris)
 
-    val rootElemsFound = docUrisToProcess.toIndexedSeq.map(uri => buildRootElem(uri, documentBuilder))
+    val taxoDocsFound = docUrisToProcess.toIndexedSeq.map(uri => buildTaxonomyDocument(uri, documentBuilder))
 
-    val rootElemMapFound: Map[URI, TaxonomyRootElem] = rootElemsFound.map(e => (e.docUri -> e)).toMap
+    val taxoDocMapFound: Map[URI, TaxonomyDocument] = taxoDocsFound.map(e => (e.uri -> e)).toMap
 
-    val docUrisFound = rootElemsFound.flatMap(e => findAllUsedDocUris(e)).toSet
+    val docUrisFound = taxoDocsFound.flatMap(e => findAllUsedDocUris(e)).toSet
 
     val newDocUris = docUris.union(docUrisFound)
 
-    val newProcessedDocs: Map[URI, TaxonomyRootElem] = processedDocs ++ rootElemMapFound
+    val newProcessedDocs: Map[URI, TaxonomyDocument] = processedDocs ++ taxoDocMapFound
 
     assert(newProcessedDocs.keySet == docUris)
 
@@ -90,9 +90,9 @@ abstract class AbstractDtsCollector extends DocumentCollector {
     }
   }
 
-  private def buildRootElem(uri: URI, documentBuilder: DocumentBuilder): TaxonomyRootElem = {
-    val taxoRootElemOption = TaxonomyRootElem.buildOptionally(documentBuilder.build(uri).documentElement)
+  private def buildTaxonomyDocument(uri: URI, documentBuilder: DocumentBuilder): TaxonomyDocument = {
+    val taxoDocOption = TaxonomyDocument.buildOptionally(documentBuilder.build(uri))
 
-    taxoRootElemOption.getOrElse(sys.error(s"Could not find taxonomy root element for $uri during DTS discovery"))
+    taxoDocOption.getOrElse(sys.error(s"Could not find taxonomy document for $uri during DTS discovery"))
   }
 }

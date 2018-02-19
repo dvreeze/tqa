@@ -374,7 +374,7 @@ class DimensionalRelationshipTargetTest extends FunSuite {
 
     val taxoRootElems = rootElems.map(e => TaxonomyElem.build(e))
 
-    val underlyingTaxo = TaxonomyBase.build(taxoRootElems)
+    val underlyingTaxo = TaxonomyBase.buildFromRootElems(taxoRootElems)
     val richTaxo =
       BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.StrictInstance)
     richTaxo

@@ -33,11 +33,11 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
  * @author Chris de Vreeze
  */
 final class TaxonomyBuilder(
-    val documentBuilder: DocumentBuilder,
-    val documentCollector: DocumentCollector,
-    val extraSubstitutionGroupMap: SubstitutionGroupMap,
-    val relationshipFactory: RelationshipFactory,
-    val arcFilter: XLinkArc => Boolean) {
+  val documentBuilder:           DocumentBuilder,
+  val documentCollector:         DocumentCollector,
+  val extraSubstitutionGroupMap: SubstitutionGroupMap,
+  val relationshipFactory:       RelationshipFactory,
+  val arcFilter:                 XLinkArc => Boolean) {
 
   def withExtraSubstitutionGroupMap(newExtraSubstitutionGroupMap: SubstitutionGroupMap): TaxonomyBuilder = {
     new TaxonomyBuilder(documentBuilder, documentCollector, newExtraSubstitutionGroupMap, relationshipFactory, arcFilter)
@@ -51,9 +51,9 @@ final class TaxonomyBuilder(
    * Builds a `BasicTaxonomy`, passing the entry point URIs to the document collector of this taxonomy builder.
    */
   def build(entryPointUris: Set[URI]): BasicTaxonomy = {
-    val taxoRootElems = documentCollector.collectTaxonomyRootElems(entryPointUris, documentBuilder)
+    val taxoDocs = documentCollector.collectTaxonomyDocuments(entryPointUris, documentBuilder)
 
-    val taxonomyBase = TaxonomyBase.build(taxoRootElems)
+    val taxonomyBase = TaxonomyBase.build(taxoDocs)
 
     BasicTaxonomy.build(taxonomyBase, extraSubstitutionGroupMap, relationshipFactory, arcFilter)
   }
@@ -75,8 +75,8 @@ object TaxonomyBuilder {
   }
 
   final class HasDocumentCollector(
-      val documentBuilder: DocumentBuilder,
-      val documentCollector: DocumentCollector) {
+    val documentBuilder:   DocumentBuilder,
+    val documentCollector: DocumentCollector) {
 
     def withRelationshipFactory(relationshipFactory: RelationshipFactory): TaxonomyBuilder = {
       new TaxonomyBuilder(documentBuilder, documentCollector, SubstitutionGroupMap.Empty, relationshipFactory, (_ => true))
