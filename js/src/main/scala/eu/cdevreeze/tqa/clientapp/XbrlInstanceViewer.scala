@@ -45,6 +45,7 @@ import eu.cdevreeze.tqa.instance.ItemFact
 import eu.cdevreeze.tqa.instance.NumericItemFact
 import eu.cdevreeze.tqa.instance.TupleFact
 import eu.cdevreeze.tqa.instance.XbrlInstance
+import eu.cdevreeze.tqa.instance.XbrlInstanceDocument
 import eu.cdevreeze.tqa.instance.XbrliContext
 import eu.cdevreeze.tqa.instance.XbrliElem
 import eu.cdevreeze.tqa.instance.XbrliUnit
@@ -102,7 +103,7 @@ object XbrlInstanceViewer {
         // when querying the instance (for facts, for example).
 
         val idoc = indexed.Document(URI.create(xbrlInstanceUri), JsDomConversions.convertToDocument(parsedDoc))
-        val xbrlInstance = XbrlInstance(idoc.documentElement)
+        val xbrlInstance = XbrlInstanceDocument.build(idoc).documentElement
 
         val facts = xbrlInstance.findAllFacts
 
@@ -184,9 +185,9 @@ object XbrlInstanceViewer {
   }
 
   private def convertAspectsToTable(
-    fact: Fact,
+    fact:          Fact,
     contextOption: Option[XbrliContext],
-    unitOption: Option[XbrliUnit]): HTMLTableElement = {
+    unitOption:    Option[XbrliUnit]): HTMLTableElement = {
 
     val coreAspectValues: Map[Aspect, Any] = extractCoreAspectValues(fact, contextOption, unitOption)
 
@@ -301,9 +302,9 @@ object XbrlInstanceViewer {
   }
 
   private def extractCoreAspectValues(
-    fact: Fact,
+    fact:          Fact,
     contextOption: Option[XbrliContext],
-    unitOption: Option[XbrliUnit]): Map[Aspect, Any] = {
+    unitOption:    Option[XbrliUnit]): Map[Aspect, Any] = {
 
     import eu.cdevreeze.tqa.aspect.Aspect._
 
@@ -391,7 +392,7 @@ object XbrlInstanceViewer {
       case e => immutable.IndexedSeq(e)
     }
 
-    XbrlInstance(indexed.Elem(minimizedInstanceAsSimpleElem.prettify(2)))
+    XbrlInstance.build(indexed.Elem(minimizedInstanceAsSimpleElem.prettify(2)))
   }
 
   // TODO Add missing core aspects

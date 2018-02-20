@@ -23,7 +23,6 @@ import org.scalatest.FunSuite
 import eu.cdevreeze.tqa.instance._
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.jsdom.JsDomDocument
-import eu.cdevreeze.yaidom.jsdom.JsDomElem
 import org.scalajs.dom.experimental.domparser.DOMParser
 import org.scalajs.dom.experimental.domparser.SupportedType
 
@@ -38,9 +37,7 @@ class XbrlInstanceTest extends FunSuite {
     val db = new DOMParser()
     val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(xbrlInstanceString, SupportedType.`text/xml`))
 
-    val rootElem: JsDomElem = domDoc.documentElement
-
-    val xbrlInstance: XbrlInstance = XbrlInstance(rootElem)
+    val xbrlInstance: XbrlInstance = XbrlInstance.build(domDoc.documentElement)
 
     val tns = "http://xbrl.org/together"
 

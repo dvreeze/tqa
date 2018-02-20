@@ -181,7 +181,7 @@ class PrimaryItemDimensionalValidationTest extends FunSuite {
 
     val uri = dummyUriPrefix.resolve(relativeDocPath)
 
-    XbrlInstance(docBuilder.build(uri).documentElement)
+    XbrlInstance.build(docBuilder.build(uri).documentElement)
   }
 
   private def doMakeValidator(entryPointUris: Set[URI], doResolveProhibitionAndOverriding: Boolean): DimensionalValidator = {
