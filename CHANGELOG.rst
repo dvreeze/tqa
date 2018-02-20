@@ -3,6 +3,54 @@ CHANGELOG
 =========
 
 
+0.7.0
+=====
+
+This version adds taxonomy documents and XBRL instance documents (that can contain top-level comments
+and processing instructions besides the root element).
+
+The major changes are:
+
+* Using yaidom 1.7.1 ``BackingDocumentApi`` in API of ``SaxonDocument``
+* Now ``DocumentBuilder`` returns documents instead of (root) elements
+* Added ``TaxonomyDocument`` and using it in taxonomy classes (and document collectors) instead of (root) elements
+* Added ``XbrlInstanceDocument``
+* Renamed XbrlInstance ``apply`` method to ``build``
+
+Breaking changes (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method build(java.net.URI)eu.cdevreeze.yaidom.queryapi.BackingElemApi in interface eu.cdevreeze.tqa.docbuilder.DocumentBuilder has a different result type in current version, where it is eu.cdevreeze.yaidom.queryapi.BackingDocumentApi rather than eu.cdevreeze.yaidom.queryapi.BackingElemApi
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.docbuilder.DocumentBuilder.build")
+* abstract method build(java.net.URI)eu.cdevreeze.yaidom.queryapi.BackingDocumentApi in interface eu.cdevreeze.tqa.docbuilder.DocumentBuilder is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.DocumentBuilder.build")
+* method build(java.net.URI)eu.cdevreeze.yaidom.queryapi.BackingElemApi in class eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder has a different result type in current version, where it is eu.cdevreeze.yaidom.queryapi.BackingDocumentApi rather than eu.cdevreeze.yaidom.queryapi.BackingElemApi
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder.build")
+* abstract method taxonomyDocs()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.TaxonomyApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.taxonomyDocs")
+* method collectTaxonomyRootElems(scala.collection.immutable.Set,eu.cdevreeze.tqa.docbuilder.DocumentBuilder)scala.collection.immutable.IndexedSeq in object eu.cdevreeze.tqa.base.taxonomybuilder.TrivialDocumentCollector does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.TrivialDocumentCollector.collectTaxonomyRootElems")
+* abstract method collectTaxonomyRootElems(scala.collection.immutable.Set,eu.cdevreeze.tqa.docbuilder.DocumentBuilder)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.taxonomybuilder.DocumentCollector does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.DocumentCollector.collectTaxonomyRootElems")
+* abstract method collectTaxonomyDocuments(scala.collection.immutable.Set,eu.cdevreeze.tqa.docbuilder.DocumentBuilder)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.taxonomybuilder.DocumentCollector is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.DocumentCollector.collectTaxonomyDocuments")
+* method findAllUsedDocUris(eu.cdevreeze.tqa.base.dom.TaxonomyRootElem)scala.collection.immutable.Set in class eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector's type is different in current version, where it is (eu.cdevreeze.tqa.base.dom.TaxonomyDocument)scala.collection.immutable.Set instead of (eu.cdevreeze.tqa.base.dom.TaxonomyRootElem)scala.collection.immutable.Set
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector.findAllUsedDocUris")
+* method collectTaxonomyRootElems(scala.collection.immutable.Set,eu.cdevreeze.tqa.docbuilder.DocumentBuilder)scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.taxonomybuilder.AbstractDtsCollector does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.AbstractDtsCollector.collectTaxonomyRootElems")
+* method findAllUsedDocUris(eu.cdevreeze.tqa.base.dom.TaxonomyRootElem)scala.collection.immutable.Set in class eu.cdevreeze.tqa.base.taxonomybuilder.AbstractDtsCollector's type is different in current version, where it is (eu.cdevreeze.tqa.base.dom.TaxonomyDocument)scala.collection.immutable.Set instead of (eu.cdevreeze.tqa.base.dom.TaxonomyRootElem)scala.collection.immutable.Set
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.AbstractDtsCollector.findAllUsedDocUris")
+* abstract method findAllUsedDocUris(eu.cdevreeze.tqa.base.dom.TaxonomyDocument)scala.collection.immutable.Set in class eu.cdevreeze.tqa.base.taxonomybuilder.AbstractDtsCollector is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.AbstractDtsCollector.findAllUsedDocUris")
+* method build(java.net.URI)eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem in class eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder has a different result type in current version, where it is eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocument rather than eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonElem
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder.build")
+* method build(java.net.URI)eu.cdevreeze.yaidom.indexed.IndexedScopedNode#Elem in class eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder has a different result type in current version, where it is eu.cdevreeze.yaidom.indexed.Document rather than eu.cdevreeze.yaidom.indexed.IndexedScopedNode#Elem
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder.build")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingElemApi)eu.cdevreeze.tqa.instance.XbrliElem in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.apply")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingElemApi)eu.cdevreeze.tqa.instance.XbrlInstance in object eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.apply")
+
+
 0.6.1
 =====
 
