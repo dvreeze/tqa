@@ -27,9 +27,8 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.LabelArc
-import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
-import eu.cdevreeze.tqa.base.dom.XsdSchema
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
@@ -51,15 +50,15 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-01-HrefResolution-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
+    val xsdBackingDoc = docBuilder.build(xsdDocUri)
+    val linkbaseBackingDoc = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDocElem)
-    val linkbase = Linkbase.build(linkbaseDocElem)
+    val xsdSchemaDoc = TaxonomyDocument.build(xsdBackingDoc)
+    val linkbaseDoc = TaxonomyDocument.build(linkbaseBackingDoc)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.build(Vector(xsdSchemaDoc, linkbaseDoc))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -90,15 +89,15 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-05-ElementLocatorExample.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-05-ElementLocatorExample-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
+    val xsdBackingDoc = docBuilder.build(xsdDocUri)
+    val linkbaseBackingDoc = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDocElem)
-    val linkbase = Linkbase.build(linkbaseDocElem)
+    val xsdSchemaDoc = TaxonomyDocument.build(xsdBackingDoc)
+    val linkbaseDoc = TaxonomyDocument.build(linkbaseBackingDoc)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.build(Vector(xsdSchemaDoc, linkbaseDoc))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -140,15 +139,15 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-09-ElementSchemeXPointerLocatorExample-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
+    val xsdBackingDoc = docBuilder.build(xsdDocUri)
+    val linkbaseBackingDoc = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDocElem)
-    val linkbase = Linkbase.build(linkbaseDocElem)
+    val xsdSchemaDoc = TaxonomyDocument.build(xsdBackingDoc)
+    val linkbaseDoc = TaxonomyDocument.build(linkbaseBackingDoc)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.build(Vector(xsdSchemaDoc, linkbaseDoc))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -179,15 +178,15 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-10-ElementSchemeXPointerLocatorExample-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
+    val xsdBackingDoc = docBuilder.build(xsdDocUri)
+    val linkbaseBackingDoc = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDocElem)
-    val linkbase = Linkbase.build(linkbaseDocElem)
+    val xsdSchemaDoc = TaxonomyDocument.build(xsdBackingDoc)
+    val linkbaseDoc = TaxonomyDocument.build(linkbaseBackingDoc)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.build(Vector(xsdSchemaDoc, linkbaseDoc))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -218,15 +217,15 @@ class ExtractRelationshipsTest extends FunSuite {
     val xsdDocUri = URI.create("file:///conf-suite/Common/200-linkbase/202-03-HrefResolutionXMLBase.xsd")
     val linkbaseDocUri = URI.create("file:///conf-suite/Common/200-linkbase/base/202-03-HrefResolutionXMLBase-label.xml")
 
-    val xsdDocElem = docBuilder.build(xsdDocUri).documentElement
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
+    val xsdBackingDoc = docBuilder.build(xsdDocUri)
+    val linkbaseBackingDoc = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDocElem)
-    val linkbase = Linkbase.build(linkbaseDocElem)
+    val xsdSchemaDoc = TaxonomyDocument.build(xsdBackingDoc)
+    val linkbaseDoc = TaxonomyDocument.build(linkbaseBackingDoc)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.build(Vector(xsdSchemaDoc, linkbaseDoc))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
@@ -256,13 +255,13 @@ class ExtractRelationshipsTest extends FunSuite {
 
     val docUri = URI.create("file:///conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd")
 
-    val xsdDocElem = docBuilder.build(docUri).documentElement
+    val xsdBackingDoc = docBuilder.build(docUri)
 
-    val xsdSchema = XsdSchema.build(xsdDocElem)
+    val xsdSchemaDoc = TaxonomyDocument.build(xsdBackingDoc)
 
     val tns = "http://www.UBmatrix.com/Patterns/BasicCalculation"
 
-    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema))
+    val taxo = TaxonomyBase.build(Vector(xsdSchemaDoc))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 

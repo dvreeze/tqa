@@ -29,16 +29,16 @@ import eu.cdevreeze.tqa.ENames.RefEName
 import eu.cdevreeze.tqa.ENames.XsElementEName
 import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.ConceptLabelResource
-import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.OtherXsdElem
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
-import eu.cdevreeze.tqa.base.dom.XsdSchema
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import eu.cdevreeze.yaidom.simple
 
 /**
  * Unknown relationship extraction test case. It uses test data from the XBRL Core Conformance Suite, but adapted
@@ -68,16 +68,17 @@ class ExtractUnknownRelationshipsTest extends FunSuite {
         case e =>
           e
       }
-    val xsdDocElem = indexed.Elem(parsedSchemaDocElem.docUri, editedSchemaDocSimpleElem)
+    val xsdBackingDoc =
+      indexed.Document.from(simple.Document(Some(parsedSchemaDocElem.docUri), editedSchemaDocSimpleElem))
 
-    val linkbaseDocElem = docBuilder.build(linkbaseDocUri).documentElement
+    val linkbaseBackingDoc = docBuilder.build(linkbaseDocUri)
 
-    val xsdSchema = XsdSchema.build(xsdDocElem)
-    val linkbase = Linkbase.build(linkbaseDocElem)
+    val xsdSchemaDoc = TaxonomyDocument.build(xsdBackingDoc)
+    val linkbaseDoc = TaxonomyDocument.build(linkbaseBackingDoc)
 
     val tns = "http://mycompany.com/xbrl/taxonomy"
 
-    val taxo = TaxonomyBase.buildFromRootElems(Vector(xsdSchema, linkbase))
+    val taxo = TaxonomyBase.build(Vector(xsdSchemaDoc, linkbaseDoc))
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 

@@ -47,14 +47,21 @@ final class TaxonomyDocument(
 
   def uri: URI = uriOption.getOrElse(TaxonomyDocument.EmptyUri)
 
-  def documentElement: TaxonomyElem =
+  def documentElement: TaxonomyElem = {
     (children collectFirst { case e: TaxonomyElem => e }).getOrElse(sys.error(s"Missing document element"))
+  }
 
-  def processingInstructions: immutable.IndexedSeq[TaxonomyProcessingInstructionNode] =
+  def processingInstructions: immutable.IndexedSeq[TaxonomyProcessingInstructionNode] = {
     children.collect({ case pi: TaxonomyProcessingInstructionNode => pi })
+  }
 
-  def comments: immutable.IndexedSeq[TaxonomyCommentNode] =
+  def comments: immutable.IndexedSeq[TaxonomyCommentNode] = {
     children.collect({ case c: TaxonomyCommentNode => c })
+  }
+
+  def withXmlDeclarationOption(newXmlDeclarationOption: Option[XmlDeclaration]): TaxonomyDocument = {
+    new TaxonomyDocument(newXmlDeclarationOption, children)
+  }
 }
 
 object TaxonomyDocument {
@@ -67,28 +74,6 @@ object TaxonomyDocument {
 
   def apply(xmlDeclarationOption: Option[XmlDeclaration], documentElement: TaxonomyElem): TaxonomyDocument = {
     new TaxonomyDocument(xmlDeclarationOption, Vector(documentElement))
-  }
-
-  /**
-   * Optionally builds a `TaxonomyDocument` from a `BackingDocumentApi`, but only if the document element
-   * is a `TaxonomyRootElem`, and returning None otherwise.
-   */
-  def buildOptionally(backingDoc: BackingDocumentApi): Option[TaxonomyDocument] = {
-    val taxoRootElemOption = TaxonomyRootElem.buildOptionally(backingDoc.documentElement)
-
-    if (taxoRootElemOption.isEmpty) {
-      None
-    } else {
-      val xmlDeclarationOption = backingDoc.xmlDeclarationOption
-
-      val children: immutable.IndexedSeq[CanBeTaxonomyDocumentChild] = backingDoc.children map {
-        case c: Nodes.Comment                => TaxonomyCommentNode(c.text)
-        case pi: Nodes.ProcessingInstruction => TaxonomyProcessingInstructionNode(pi.target, pi.data)
-        case _: Nodes.Elem                   => taxoRootElemOption.get
-      }
-
-      Some(TaxonomyDocument(xmlDeclarationOption, children))
-    }
   }
 
   /**

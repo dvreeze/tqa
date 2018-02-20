@@ -25,7 +25,7 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
-import eu.cdevreeze.tqa.base.dom.TaxonomyElem
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.extension.formula.model
@@ -58,9 +58,9 @@ class FormulaQueryApiTest extends FunSuite {
 
     val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
 
-    val taxoBase = TaxonomyBase.buildFromRootElems(taxoRootElems)
+    val taxoBase = TaxonomyBase.build(taxoDocs)
     val taxo = BasicTaxonomy.build(taxoBase, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     val formulaTaxo = BasicFormulaTaxonomy.build(taxo)
@@ -175,9 +175,9 @@ class FormulaQueryApiTest extends FunSuite {
 
     val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
 
-    val taxoRootElems = docs.map(d => TaxonomyElem.build(indexed.Document(d).documentElement))
+    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
 
-    val taxoBase = TaxonomyBase.buildFromRootElems(taxoRootElems)
+    val taxoBase = TaxonomyBase.build(taxoDocs)
     val taxo = BasicTaxonomy.build(taxoBase, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
 
     val formulaTaxo = BasicFormulaTaxonomy.build(taxo)

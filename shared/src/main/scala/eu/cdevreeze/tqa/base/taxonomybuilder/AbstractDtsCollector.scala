@@ -22,6 +22,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
+import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
@@ -66,7 +67,7 @@ abstract class AbstractDtsCollector extends DocumentCollector {
     // One step, processing all URIs currently known, and not yet processed
     val docUrisToProcess = docUris.diff(processedDocUris)
 
-    val taxoDocsFound = docUrisToProcess.toIndexedSeq.map(uri => buildTaxonomyDocument(uri, documentBuilder))
+    val taxoDocsFound = docUrisToProcess.toIndexedSeq.map(uri => buildTaxonomyDoc(uri, documentBuilder))
 
     val taxoDocMapFound: Map[URI, TaxonomyDocument] = taxoDocsFound.map(e => (e.uri -> e)).toMap
 
@@ -90,9 +91,13 @@ abstract class AbstractDtsCollector extends DocumentCollector {
     }
   }
 
-  private def buildTaxonomyDocument(uri: URI, documentBuilder: DocumentBuilder): TaxonomyDocument = {
-    val taxoDocOption = TaxonomyDocument.buildOptionally(documentBuilder.build(uri))
+  private def buildTaxonomyDoc(uri: URI, documentBuilder: DocumentBuilder): TaxonomyDocument = {
+    val taxoDoc = TaxonomyDocument.build(documentBuilder.build(uri))
 
-    taxoDocOption.getOrElse(sys.error(s"Could not find taxonomy document for $uri during DTS discovery"))
+    require(
+      taxoDoc.documentElement.isInstanceOf[TaxonomyRootElem],
+      s"Not a taxonomy document root element: ${taxoDoc.documentElement.resolvedName}")
+
+    taxoDoc
   }
 }

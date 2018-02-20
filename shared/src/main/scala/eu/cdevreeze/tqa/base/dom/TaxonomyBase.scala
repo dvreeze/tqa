@@ -272,13 +272,6 @@ object TaxonomyBase {
     new TaxonomyBase(taxonomyDocs, taxonomyDocUriMap, elemUriMap, globalElementDeclarationMap, namedTypeDefinitionMap, globalAttributeDeclarationMap)
   }
 
-  /**
-   * Returns `build(rootElems.map(e => TaxonomyDocument(None, e)))`.
-   */
-  def buildFromRootElems(rootElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyBase = {
-    build(rootElems.map(e => TaxonomyDocument(None, e)))
-  }
-
   private def getGlobalElementDeclarationMap(rootElem: TaxonomyElem): Map[EName, GlobalElementDeclaration] = {
     // TODO Speed up by finding the target namespace (per xs:schema) only once.
     val globalElementDeclarations = rootElem.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem)

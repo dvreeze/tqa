@@ -31,7 +31,7 @@ import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
-import eu.cdevreeze.tqa.base.dom.TaxonomyElem
+import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
@@ -370,11 +370,11 @@ class DimensionalRelationshipTargetTest extends FunSuite {
   private def makeTestTaxonomy(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
     val uris = relativeDocPaths.map(relativeDocPath => dummyUriPrefix.resolve(relativeDocPath))
 
-    val rootElems = uris.map(uri => docBuilder.build(uri).documentElement)
+    val backingDocs = uris.map(uri => docBuilder.build(uri))
 
-    val taxoRootElems = rootElems.map(e => TaxonomyElem.build(e))
+    val taxoDocs = backingDocs.map(d => TaxonomyDocument.build(d))
 
-    val underlyingTaxo = TaxonomyBase.buildFromRootElems(taxoRootElems)
+    val underlyingTaxo = TaxonomyBase.build(taxoDocs)
     val richTaxo =
       BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.StrictInstance)
     richTaxo
