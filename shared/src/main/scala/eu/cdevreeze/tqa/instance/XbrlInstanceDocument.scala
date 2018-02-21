@@ -41,7 +41,7 @@ final class XbrlInstanceDocument(
 
   type ThisDoc = XbrlInstanceDocument
 
-  type DocElemType = XbrliElem
+  type DocElemType = XbrlInstance
 
   def uriOption: Option[URI] = documentElement.backingElem.docUriOption
 
@@ -72,7 +72,7 @@ object XbrlInstanceDocument {
     new XbrlInstanceDocument(xmlDeclarationOption, children)
   }
 
-  def apply(xmlDeclarationOption: Option[XmlDeclaration], documentElement: XbrliElem): XbrlInstanceDocument = {
+  def apply(xmlDeclarationOption: Option[XmlDeclaration], documentElement: XbrlInstance): XbrlInstanceDocument = {
     new XbrlInstanceDocument(xmlDeclarationOption, Vector(documentElement))
   }
 
