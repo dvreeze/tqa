@@ -358,20 +358,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   }
 
   final def computeHasHypercubeInheritanceOrSelf: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] = {
-    val hasHypercubes = findAllHasHypercubeRelationships
-
-    val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
-      hasHypercubes flatMap { hasHypercube =>
-        val domainMemberPaths =
-          filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
-
-        val inheritingConcepts = domainMemberPaths.flatMap(_.relationships).map(_.targetConceptEName).distinct
-        val ownOrInheritingConcepts = hasHypercube.primary +: inheritingConcepts
-
-        ownOrInheritingConcepts.map(concept => (concept -> hasHypercube))
-      }
-
-    conceptHasHypercubes.groupBy(_._1).mapValues(_.map(_._2).distinct)
+    computeHasHypercubeInheritanceOrSelf(_ => true)
   }
 
   final def computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps: Map[EName, Map[String, Set[EName]]] = {
@@ -381,24 +368,32 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   }
 
   final def computeHasHypercubeInheritance: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] = {
-    val hasHypercubes = findAllHasHypercubeRelationships
-
-    val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
-      hasHypercubes flatMap { hasHypercube =>
-        val domainMemberPaths =
-          filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
-
-        val inheritingConcepts = domainMemberPaths.flatMap(_.relationships).map(_.targetConceptEName).distinct
-
-        inheritingConcepts.map(concept => (concept -> hasHypercube))
-      }
-
-    conceptHasHypercubes.groupBy(_._1).mapValues(_.map(_._2).distinct)
+    computeHasHypercubeInheritance(_ => true)
   }
 
   final def computeHasHypercubeInheritanceReturningElrToPrimariesMaps: Map[EName, Map[String, Set[EName]]] = {
     computeHasHypercubeInheritance mapValues { hasHypercubes =>
       hasHypercubes.groupBy(_.elr).mapValues(_.map(_.sourceConceptEName).toSet)
+    }
+  }
+
+  final def computeHasHypercubeInheritanceOrSelfForElr(elr: String): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] = {
+    computeHasHypercubeInheritanceOrSelf(_.elr == elr)
+  }
+
+  final def computeHasHypercubeInheritanceOrSelfForElrReturningPrimaries(elr: String): Map[EName, Set[EName]] = {
+    computeHasHypercubeInheritanceOrSelfForElr(elr) mapValues { hasHypercubes =>
+      hasHypercubes.map(_.sourceConceptEName).toSet
+    }
+  }
+
+  final def computeHasHypercubeInheritanceForElr(elr: String): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] = {
+    computeHasHypercubeInheritance(_.elr == elr)
+  }
+
+  final def computeHasHypercubeInheritanceForElrReturningPrimaries(elr: String): Map[EName, Set[EName]] = {
+    computeHasHypercubeInheritanceForElr(elr) mapValues { hasHypercubes =>
+      hasHypercubes.map(_.sourceConceptEName).toSet
     }
   }
 
@@ -474,6 +469,8 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     }
   }
 
+  // Private methods
+
   private def findAllDomainElrPairsPerDimension(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[(EName, String)]] = {
     val hypercubeDimensionRelationships = findAllConsecutiveHypercubeDimensionRelationships(hasHypercubeRelationship)
 
@@ -483,5 +480,42 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     val dimensionDomainRelationshipsByDimension = dimensionDomainRelationships.groupBy(_.dimension)
 
     dimensionDomainRelationshipsByDimension.mapValues(_.map(rel => (rel.domain -> rel.elr)).toSet)
+  }
+
+  private def computeHasHypercubeInheritanceOrSelf(
+    p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] = {
+
+    val hasHypercubes = filterHasHypercubeRelationships(p)
+
+    val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
+      hasHypercubes flatMap { hasHypercube =>
+        val domainMemberPaths =
+          filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
+
+        val inheritingConcepts = domainMemberPaths.flatMap(_.relationships).map(_.targetConceptEName).distinct
+        val ownOrInheritingConcepts = hasHypercube.primary +: inheritingConcepts
+
+        ownOrInheritingConcepts.map(concept => (concept -> hasHypercube))
+      }
+
+    conceptHasHypercubes.groupBy(_._1).mapValues(_.map(_._2).distinct)
+  }
+
+  private def computeHasHypercubeInheritance(
+    p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]] = {
+
+    val hasHypercubes = filterHasHypercubeRelationships(p)
+
+    val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
+      hasHypercubes flatMap { hasHypercube =>
+        val domainMemberPaths =
+          filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
+
+        val inheritingConcepts = domainMemberPaths.flatMap(_.relationships).map(_.targetConceptEName).distinct
+
+        inheritingConcepts.map(concept => (concept -> hasHypercube))
+      }
+
+    conceptHasHypercubes.groupBy(_._1).mapValues(_.map(_._2).distinct)
   }
 }
