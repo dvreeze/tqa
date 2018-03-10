@@ -31,6 +31,8 @@ import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.base.common.CyclesAllowed
 import eu.cdevreeze.tqa.base.common.PeriodType
+import eu.cdevreeze.tqa.base.common.StandardLabelRoles
+import eu.cdevreeze.tqa.base.common.StandardReferenceRoles
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.common.Variety
 import eu.cdevreeze.tqa.xlink
@@ -1259,14 +1261,24 @@ sealed abstract class StandardResource private[dom] (
  */
 final class ConceptLabelResource private[dom] (
   backingElem: BackingElemApi,
-  childElems:  immutable.IndexedSeq[TaxonomyElem]) extends StandardResource(backingElem, childElems)
+  childElems:  immutable.IndexedSeq[TaxonomyElem]) extends StandardResource(backingElem, childElems) {
+
+  def isStandardLabel: Boolean = {
+    roleOption.forall(_ == StandardLabelRoles.StandardLabel)
+  }
+}
 
 /**
  * Concept-reference resource. It is a link:reference element.
  */
 final class ConceptReferenceResource private[dom] (
   backingElem: BackingElemApi,
-  childElems:  immutable.IndexedSeq[TaxonomyElem]) extends StandardResource(backingElem, childElems)
+  childElems:  immutable.IndexedSeq[TaxonomyElem]) extends StandardResource(backingElem, childElems) {
+
+  def isStandardReference: Boolean = {
+    roleOption.forall(_ == StandardReferenceRoles.StandardReference)
+  }
+}
 
 // Generic linkbase content.
 

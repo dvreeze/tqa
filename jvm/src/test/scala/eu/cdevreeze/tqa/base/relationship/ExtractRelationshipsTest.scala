@@ -26,6 +26,7 @@ import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
+import eu.cdevreeze.tqa.base.common.StandardLabelRoles
 import eu.cdevreeze.tqa.base.dom.LabelArc
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
@@ -329,7 +330,7 @@ class ExtractRelationshipsTest extends FunSuite {
       computerEquipmentLabelRelationships.map(_.arc).distinct.size
     }
 
-    assertResult(Set("http://www.xbrl.org/2003/role/label", "http://www.xbrl.org/2003/role/documentation")) {
+    assertResult(Set(StandardLabelRoles.StandardLabel, StandardLabelRoles.Documentation)) {
       computerEquipmentLabelRelationships.map(_.resourceRole).toSet
     }
     assertResult(Set("en")) {

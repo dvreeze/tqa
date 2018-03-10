@@ -37,6 +37,8 @@ import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
 import eu.cdevreeze.tqa.base.common.ContextElement
+import eu.cdevreeze.tqa.base.common.StandardLabelRoles
+import eu.cdevreeze.tqa.base.common.StandardReferenceRoles
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.CalculationArc
@@ -242,7 +244,7 @@ final class ConceptLabelRelationship(
 
   def resource: ConceptLabelResource = resolvedTo.resolvedElem
 
-  def resourceRole: String = resource.roleOption.getOrElse("http://www.xbrl.org/2003/role/label")
+  def resourceRole: String = resource.roleOption.getOrElse(StandardLabelRoles.StandardLabel)
 
   def language: String = {
     resource.attributeOption(XmlLangEName).getOrElse(sys.error(s"Missing xml:lang in $toPath in $docUri"))
@@ -261,7 +263,7 @@ final class ConceptReferenceRelationship(
 
   def resource: ConceptReferenceResource = resolvedTo.resolvedElem
 
-  def resourceRole: String = resource.roleOption.getOrElse("http://www.xbrl.org/2003/role/reference")
+  def resourceRole: String = resource.roleOption.getOrElse(StandardReferenceRoles.StandardReference)
 
   def referenceElems: immutable.IndexedSeq[TaxonomyElem] = resource.findAllChildElems
 }
