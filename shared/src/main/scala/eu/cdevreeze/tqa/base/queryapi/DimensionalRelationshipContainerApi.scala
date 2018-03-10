@@ -317,10 +317,35 @@ trait DimensionalRelationshipContainerApi {
   def findAllInheritedHasHypercubesAsElrToPrimariesMap(concept: EName): Map[String, Set[EName]]
 
   /**
+   * Finds all own or inherited has-hypercubes per concept that pass the predicate.
+   * See section 2.6.1 of the XBRL Dimensions specification.
+   *
+   * This is potentially an expensive bulk version of method findAllOwnOrInheritedHasHypercubes, and
+   * should typically be called as few times as possible.
+   */
+  def computeFilteredHasHypercubeInheritanceOrSelf(
+    p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
+
+  /**
+   * Finds all inherited has-hypercubes per concept that pass the predicate.
+   * See section 2.6.1 of the XBRL Dimensions specification.
+   *
+   * This is potentially an expensive bulk version of method findAllInheritedHasHypercubes, and
+   * should typically be called as few times as possible.
+   */
+  def computeFilteredHasHypercubeInheritance(
+    p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
+
+  /**
    * Finds all own or inherited has-hypercubes per concept. See section 2.6.1 of the XBRL Dimensions specification.
    *
    * This is an expensive bulk version of method findAllOwnOrInheritedHasHypercubes, and should be called
    * as few times as possible.
+   *
+   * This function is equivalent to:
+   * {{{
+   * computeFilteredHasHypercubeInheritanceOrSelf(_ => true)
+   * }}}
    */
   def computeHasHypercubeInheritanceOrSelf: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
 
@@ -338,6 +363,11 @@ trait DimensionalRelationshipContainerApi {
    *
    * This is an expensive bulk version of method findAllInheritedHasHypercubes, and should be called
    * as few times as possible.
+   *
+   * This function is equivalent to:
+   * {{{
+   * computeFilteredHasHypercubeInheritance(_ => true)
+   * }}}
    */
   def computeHasHypercubeInheritance: Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
 
@@ -355,6 +385,11 @@ trait DimensionalRelationshipContainerApi {
    *
    * This is a rather expensive bulk version of method findAllOwnOrInheritedHasHypercubes, and should be called
    * as few times as possible.
+   *
+   * This function is equivalent to:
+   * {{{
+   * computeFilteredHasHypercubeInheritanceOrSelf(_.elr == elr)
+   * }}}
    */
   def computeHasHypercubeInheritanceOrSelfForElr(elr: String): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
 
@@ -372,6 +407,11 @@ trait DimensionalRelationshipContainerApi {
    *
    * This is a rather expensive bulk version of method findAllInheritedHasHypercubes, and should be called
    * as few times as possible.
+   *
+   * This function is equivalent to:
+   * {{{
+   * computeFilteredHasHypercubeInheritance(_.elr == elr)
+   * }}}
    */
   def computeHasHypercubeInheritanceForElr(elr: String): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
 
