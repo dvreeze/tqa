@@ -3,6 +3,34 @@ CHANGELOG
 =========
 
 
+0.7.1
+=====
+
+This version is almost the same as version 0.7.0.
+
+This version added the following to the previous version:
+
+* More query methods for querying dimensional tree inheritance, filtering on has-hypercube relationships
+* Constants for standard label and reference roles
+
+Breaking changes (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* abstract method computeFilteredHasHypercubeInheritanceOrSelf(scala.Function1)scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.computeFilteredHasHypercubeInheritanceOrSelf")
+* abstract method computeHasHypercubeInheritanceForElr(java.lang.String)scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.computeHasHypercubeInheritanceForElr")
+* abstract method computeHasHypercubeInheritanceForElrReturningPrimaries(java.lang.String)scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.computeHasHypercubeInheritanceForElrReturningPrimaries")
+* abstract method computeHasHypercubeInheritanceOrSelfForElrReturningPrimaries(java.lang.String)scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.computeHasHypercubeInheritanceOrSelfForElrReturningPrimaries")
+* abstract method computeHasHypercubeInheritanceOrSelfForElr(java.lang.String)scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.computeHasHypercubeInheritanceOrSelfForElr")
+* abstract method computeFilteredHasHypercubeInheritance(scala.Function1)scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.computeFilteredHasHypercubeInheritance")
+* method apply(scala.Option,eu.cdevreeze.tqa.instance.XbrliElem)eu.cdevreeze.tqa.instance.XbrlInstanceDocument in object eu.cdevreeze.tqa.instance.XbrlInstanceDocument in current version does not have a correspondent with same parameter signature among (scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.XbrlInstanceDocument, (scala.Option,eu.cdevreeze.tqa.instance.XbrlInstance)eu.cdevreeze.tqa.instance.XbrlInstanceDocument
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.instance.XbrlInstanceDocument.apply")
+
+
 0.7.0
 =====
 
