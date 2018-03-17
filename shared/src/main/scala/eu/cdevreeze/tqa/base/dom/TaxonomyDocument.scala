@@ -31,25 +31,36 @@ import eu.cdevreeze.yaidom.queryapi.Nodes
  * @author Chris de Vreeze
  */
 // scalastyle:off null
-final class TaxonomyDocument(
-  val xmlDeclarationOption: Option[XmlDeclaration],
-  val children:             immutable.IndexedSeq[CanBeTaxonomyDocumentChild]) extends DocumentApi {
+final class TaxonomyDocument private (
+  val backingDocument: BackingDocumentApi,
+  val documentElement: TaxonomyElem) extends DocumentApi {
 
-  require(xmlDeclarationOption ne null)
-  require(children ne null)
+  // Note that the constructor arguments are overlapping. This is safe because the constructor is
+  // private, and the public factory method does not have this overlap. The data redundancy in the
+  // private constructor prevents expensive construction of the TaxonomyElem document element, while
+  // retaining all of the backing document (including its non-element children), which may not
+  // be recoverable from the document children.
+
+  require(backingDocument ne null)
   require(documentElement ne null)
 
   type ThisDoc = TaxonomyDocument
 
   type DocElemType = TaxonomyElem
 
-  def uriOption: Option[URI] = documentElement.backingElem.docUriOption
+  def xmlDeclarationOption: Option[XmlDeclaration] = backingDocument.xmlDeclarationOption
+
+  def children: immutable.IndexedSeq[CanBeTaxonomyDocumentChild] = {
+    backingDocument.children map {
+      case c: Nodes.Comment                => TaxonomyCommentNode(c.text)
+      case pi: Nodes.ProcessingInstruction => TaxonomyProcessingInstructionNode(pi.target, pi.data)
+      case _: Nodes.Elem                   => documentElement
+    }
+  }
+
+  def uriOption: Option[URI] = backingDocument.uriOption
 
   def uri: URI = uriOption.getOrElse(TaxonomyDocument.EmptyUri)
-
-  def documentElement: TaxonomyElem = {
-    (children collectFirst { case e: TaxonomyElem => e }).getOrElse(sys.error(s"Missing document element"))
-  }
 
   def processingInstructions: immutable.IndexedSeq[TaxonomyProcessingInstructionNode] = {
     children.collect({ case pi: TaxonomyProcessingInstructionNode => pi })
@@ -58,23 +69,11 @@ final class TaxonomyDocument(
   def comments: immutable.IndexedSeq[TaxonomyCommentNode] = {
     children.collect({ case c: TaxonomyCommentNode => c })
   }
-
-  def withXmlDeclarationOption(newXmlDeclarationOption: Option[XmlDeclaration]): TaxonomyDocument = {
-    new TaxonomyDocument(newXmlDeclarationOption, children)
-  }
 }
 
 object TaxonomyDocument {
 
   private val EmptyUri = URI.create("")
-
-  def apply(xmlDeclarationOption: Option[XmlDeclaration], children: immutable.IndexedSeq[CanBeTaxonomyDocumentChild]): TaxonomyDocument = {
-    new TaxonomyDocument(xmlDeclarationOption, children)
-  }
-
-  def apply(xmlDeclarationOption: Option[XmlDeclaration], documentElement: TaxonomyElem): TaxonomyDocument = {
-    new TaxonomyDocument(xmlDeclarationOption, Vector(documentElement))
-  }
 
   /**
    * Builds a `TaxonomyDocument` from a `BackingDocumentApi`.
@@ -82,14 +81,6 @@ object TaxonomyDocument {
   def build(backingDoc: BackingDocumentApi): TaxonomyDocument = {
     val taxoRootElem = TaxonomyElem.build(backingDoc.documentElement)
 
-    val xmlDeclarationOption = backingDoc.xmlDeclarationOption
-
-    val children: immutable.IndexedSeq[CanBeTaxonomyDocumentChild] = backingDoc.children map {
-      case c: Nodes.Comment                => TaxonomyCommentNode(c.text)
-      case pi: Nodes.ProcessingInstruction => TaxonomyProcessingInstructionNode(pi.target, pi.data)
-      case _: Nodes.Elem                   => taxoRootElem
-    }
-
-    TaxonomyDocument(xmlDeclarationOption, children)
+    new TaxonomyDocument(backingDoc, taxoRootElem)
   }
 }
