@@ -40,18 +40,17 @@ import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemNodeApi
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
-import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 
 /**
  * "XBRL instance DOM node".
  *
  * @author Chris de Vreeze
  */
-sealed abstract class XbrliNode extends ResolvedNodes.Node
+sealed abstract class XbrliNode extends Nodes.Node
 
 sealed abstract class CanBeXbrliDocumentChild extends XbrliNode with Nodes.CanBeDocumentChild
 
-final case class XbrliTextNode(text: String) extends XbrliNode with ResolvedNodes.Text
+final case class XbrliTextNode(text: String) extends XbrliNode with Nodes.Text
 
 final case class XbrliProcessingInstructionNode(target: String, data: String) extends CanBeXbrliDocumentChild
   with Nodes.ProcessingInstruction
@@ -95,7 +94,7 @@ final case class XbrliCommentNode(text: String) extends CanBeXbrliDocumentChild 
 sealed class XbrliElem private[instance] (
   val backingElem: BackingElemNodeApi,
   childElems:      immutable.IndexedSeq[XbrliElem]) extends CanBeXbrliDocumentChild
-  with ResolvedNodes.Elem with ScopedElemNodeApi with ScopedElemLike with SubtypeAwareElemLike {
+  with Nodes.Elem with ScopedElemNodeApi with ScopedElemLike with SubtypeAwareElemLike {
 
   // TODO Restore old equality on the backing elements themselves (after JS DOM wrappers have appropriate equality)
   assert(

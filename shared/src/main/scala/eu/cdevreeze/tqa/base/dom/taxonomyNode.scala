@@ -45,18 +45,17 @@ import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemNodeApi
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
-import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 
 /**
  * "Taxonomy DOM node".
  *
  * @author Chris de Vreeze
  */
-sealed abstract class TaxonomyNode extends ResolvedNodes.Node
+sealed abstract class TaxonomyNode extends Nodes.Node
 
 sealed abstract class CanBeTaxonomyDocumentChild extends TaxonomyNode with Nodes.CanBeDocumentChild
 
-final case class TaxonomyTextNode(text: String) extends TaxonomyNode with ResolvedNodes.Text
+final case class TaxonomyTextNode(text: String) extends TaxonomyNode with Nodes.Text
 
 final case class TaxonomyProcessingInstructionNode(target: String, data: String) extends CanBeTaxonomyDocumentChild
   with Nodes.ProcessingInstruction
@@ -133,7 +132,7 @@ final case class TaxonomyCommentNode(text: String) extends CanBeTaxonomyDocument
 sealed abstract class TaxonomyElem private[dom] (
   val backingElem: BackingElemNodeApi,
   val childElems:  immutable.IndexedSeq[TaxonomyElem]) extends CanBeTaxonomyDocumentChild
-  with AnyTaxonomyElem with ResolvedNodes.Elem with ScopedElemNodeApi with ScopedElemLike with SubtypeAwareElemLike {
+  with AnyTaxonomyElem with Nodes.Elem with ScopedElemNodeApi with ScopedElemLike with SubtypeAwareElemLike {
 
   type ThisElem = TaxonomyElem
 

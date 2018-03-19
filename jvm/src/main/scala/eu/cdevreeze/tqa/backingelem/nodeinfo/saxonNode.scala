@@ -31,7 +31,6 @@ import eu.cdevreeze.yaidom.core.QNameProvider
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 import eu.cdevreeze.yaidom.queryapi.Nodes
-import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 import net.sf.saxon.`type`.Type
 import net.sf.saxon.om.AbsolutePath
 import net.sf.saxon.om.AxisInfo
@@ -44,7 +43,7 @@ import net.sf.saxon.pattern.NodeKindTest
  * @author Chris de Vreeze
  */
 // scalastyle:off null
-sealed abstract class SaxonNode(val wrappedNode: NodeInfo) extends ResolvedNodes.Node {
+sealed abstract class SaxonNode(val wrappedNode: NodeInfo) extends Nodes.Node {
 
   final override def toString: String = wrappedNode.toString
 
@@ -111,7 +110,7 @@ sealed trait SaxonCanBeDocumentChild extends SaxonNode with Nodes.CanBeDocumentC
  */
 // scalastyle:off number.of.methods
 final class SaxonElem(
-  override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with ResolvedNodes.Elem with SaxonCanBeDocumentChild with BackingElemNodeApi {
+  override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with Nodes.Elem with SaxonCanBeDocumentChild with BackingElemNodeApi {
 
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.ELEMENT, s"Expected element but got node kind ${wrappedNode.getNodeKind}")
@@ -483,7 +482,7 @@ final class SaxonElem(
   def commentChildren: immutable.IndexedSeq[SaxonComment] = children collect { case c: SaxonComment => c }
 }
 
-final class SaxonText(override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with ResolvedNodes.Text {
+final class SaxonText(override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with Nodes.Text {
   require(wrappedNode ne null)
   require(
     wrappedNode.getNodeKind == Type.TEXT || wrappedNode.getNodeKind == Type.WHITESPACE_TEXT,

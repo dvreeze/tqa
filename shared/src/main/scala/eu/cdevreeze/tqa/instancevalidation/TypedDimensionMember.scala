@@ -18,8 +18,9 @@ package eu.cdevreeze.tqa.instancevalidation
 
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
+import eu.cdevreeze.yaidom.queryapi.ClarkElemNodeApi
+import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.resolved
-import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 
 /**
  * Typed dimension member, which on the one hand knows its ancestry, and on the other hand can be
@@ -40,12 +41,12 @@ final class TypedDimensionMember(val backingElem: BackingElemNodeApi) {
 
   private def makeResolvedElem(elem: BackingElemNodeApi): resolved.Elem = {
     require(
-      elem.isInstanceOf[ResolvedNodes.Elem],
-      s"Cannot treat element ${elem.key} as 'ResolvedNodes.Elem'. This is a bug in the program.")
+      elem.isInstanceOf[Nodes.Elem with ClarkElemNodeApi],
+      s"Cannot treat element ${elem.key} as 'Nodes.Elem with ClarkElemNodeApi'. This is a bug in the program.")
 
     // Best effort, but not completely safe as a basis to compare elements.
 
-    resolved.Elem(elem.asInstanceOf[ResolvedNodes.Elem]).
+    resolved.Elem(elem.asInstanceOf[Nodes.Elem with ClarkElemNodeApi]).
       removeAllInterElementWhitespace.coalesceAndNormalizeAllText
   }
 }
