@@ -9,13 +9,13 @@ val scalaVer = "2.12.4"
 
 // I wanted to cross-build for Scala 2.13.0-M2 as well, but then miss library scalajs-jsjoda-as-java-time
 
-val crossScalaVer = Seq(scalaVer, "2.11.11")
+val crossScalaVer = Seq(scalaVer, "2.11.12")
 
 lazy val commonSettings = Seq(
   name         := "tqa",
   description  := "Extensible XBRL taxonomy query API",
   organization := "eu.cdevreeze.tqa",
-  version      := "0.7.2-SNAPSHOT",
+  version      := "0.8.0-SNAPSHOT",
 
   scalaVersion       := scalaVer,
   crossScalaVersions := crossScalaVer,
@@ -36,7 +36,7 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.7.1",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.8.0-M1",
 
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.4",
 

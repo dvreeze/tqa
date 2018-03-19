@@ -29,7 +29,7 @@ import eu.cdevreeze.yaidom.core.Path
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.QNameProvider
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 import eu.cdevreeze.yaidom.queryapi.Nodes
 import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 import net.sf.saxon.`type`.Type
@@ -39,7 +39,7 @@ import net.sf.saxon.om.NodeInfo
 import net.sf.saxon.pattern.NodeKindTest
 
 /**
- * Saxon yaidom BackingElemApi wrapper around Saxon 9.7 NodeInfo backends.
+ * Saxon yaidom BackingElemNodeApi wrapper around Saxon 9.7 NodeInfo backends.
  *
  * @author Chris de Vreeze
  */
@@ -111,12 +111,14 @@ sealed trait SaxonCanBeDocumentChild extends SaxonNode with Nodes.CanBeDocumentC
  */
 // scalastyle:off number.of.methods
 final class SaxonElem(
-  override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with ResolvedNodes.Elem with SaxonCanBeDocumentChild with BackingElemApi {
+  override val wrappedNode: NodeInfo) extends SaxonNode(wrappedNode) with ResolvedNodes.Elem with SaxonCanBeDocumentChild with BackingElemNodeApi {
 
   require(wrappedNode ne null)
   require(wrappedNode.getNodeKind == Type.ELEMENT, s"Expected element but got node kind ${wrappedNode.getNodeKind}")
 
   type ThisElem = SaxonElem
+
+  type ThisNode = SaxonNode
 
   def thisElem: ThisElem = this
 

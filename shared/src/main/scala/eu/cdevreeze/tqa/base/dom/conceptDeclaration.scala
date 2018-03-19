@@ -27,7 +27,7 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
  * Concept declaration, wrapping a `GlobalElementDeclaration`. It must be in substitution group xbrli:item or xbrli:tuple,
@@ -66,7 +66,7 @@ sealed abstract class ConceptDeclaration private[dom] (val globalElementDeclarat
     globalElementDeclaration.substitutionGroupOption
   }
 
-  final def backingElem: BackingElemApi = {
+  final def backingElem: BackingElemNodeApi = {
     globalElementDeclaration.backingElem
   }
 

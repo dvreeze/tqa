@@ -25,7 +25,7 @@ import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.xlink.XLinkArc
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
  * XLink arc in a formula link. In other words, a generic XLink arc defined by one of the formula specifications.
@@ -36,7 +36,7 @@ sealed trait FormulaArc extends tqa.base.dom.AnyTaxonomyElem with XLinkArc {
 
   def underlyingArc: tqa.base.dom.NonStandardArc
 
-  final def backingElem: BackingElemApi = underlyingArc.backingElem
+  final def backingElem: BackingElemNodeApi = underlyingArc.backingElem
 
   final def docUri: URI = underlyingArc.docUri
 
@@ -46,7 +46,7 @@ sealed trait FormulaArc extends tqa.base.dom.AnyTaxonomyElem with XLinkArc {
 
   final def elr: String = underlyingArc.elr
 
-  final def underlyingParentElem: BackingElemApi = underlyingArc.backingElem.parent
+  final def underlyingParentElem: BackingElemNodeApi = underlyingArc.backingElem.parent
 
   final def arcrole: String = underlyingArc.arcrole
 

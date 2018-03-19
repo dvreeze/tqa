@@ -20,7 +20,7 @@ import scala.collection.immutable
 
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
  * A very simple XPath evaluator abstraction. It has no knowledge about static and dynamic contexts (other than the
@@ -59,9 +59,9 @@ trait XPathEvaluator {
 
   def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[Node]
 
-  def evaluateAsBackingElem(expr: XPathExpression, contextItemOption: Option[ContextItem]): BackingElemApi
+  def evaluateAsBackingElem(expr: XPathExpression, contextItemOption: Option[ContextItem]): BackingElemNodeApi
 
-  def evaluateAsBackingElemSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[BackingElemApi]
+  def evaluateAsBackingElemSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[BackingElemNodeApi]
 
   def evaluateAsBigDecimal(expr: XPathExpression, contextItemOption: Option[ContextItem]): BigDecimal
 

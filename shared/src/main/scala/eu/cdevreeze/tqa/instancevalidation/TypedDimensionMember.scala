@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.instancevalidation
 
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 import eu.cdevreeze.yaidom.resolved
 import eu.cdevreeze.yaidom.resolved.ResolvedNodes
 
@@ -27,7 +27,7 @@ import eu.cdevreeze.yaidom.resolved.ResolvedNodes
  *
  * @author Chris de Vreeze
  */
-final class TypedDimensionMember(val backingElem: BackingElemApi) {
+final class TypedDimensionMember(val backingElem: BackingElemNodeApi) {
 
   override def equals(other: Any): Boolean = other match {
     case other: TypedDimensionMember =>
@@ -38,7 +38,7 @@ final class TypedDimensionMember(val backingElem: BackingElemApi) {
 
   override def hashCode: Int = makeResolvedElem(backingElem).hashCode
 
-  private def makeResolvedElem(elem: BackingElemApi): resolved.Elem = {
+  private def makeResolvedElem(elem: BackingElemNodeApi): resolved.Elem = {
     require(
       elem.isInstanceOf[ResolvedNodes.Elem],
       s"Cannot treat element ${elem.key} as 'ResolvedNodes.Elem'. This is a bug in the program.")

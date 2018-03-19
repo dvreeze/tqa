@@ -23,7 +23,7 @@ import scala.collection.immutable
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 import eu.cdevreeze.yaidom.simple
 
 /**
@@ -32,8 +32,8 @@ import eu.cdevreeze.yaidom.simple
  * @author Chris de Vreeze
  */
 final case class SimpleCatalog(
-    xmlBaseAttributeOption: Option[URI],
-    uriRewrites: immutable.IndexedSeq[SimpleCatalog.UriRewrite]) {
+  xmlBaseAttributeOption: Option[URI],
+  uriRewrites:            immutable.IndexedSeq[SimpleCatalog.UriRewrite]) {
 
   /**
    * Applies the best matching rewrite rule to the given URI, if any, and returns the optional
@@ -77,9 +77,9 @@ final case class SimpleCatalog(
 object SimpleCatalog {
 
   final case class UriRewrite(
-      xmlBaseAttributeOption: Option[URI],
-      uriStartString: String,
-      rewritePrefix: String) {
+    xmlBaseAttributeOption: Option[URI],
+    uriStartString:         String,
+    rewritePrefix:          String) {
 
     /**
      * Returns the normalized URI start string, which is used for matching against normalized URIs.
@@ -110,7 +110,7 @@ object SimpleCatalog {
 
   object UriRewrite {
 
-    def fromElem(rewriteElem: BackingElemApi): UriRewrite = {
+    def fromElem(rewriteElem: BackingElemNodeApi): UriRewrite = {
       require(rewriteElem.resolvedName == ErRewriteURIEName, s"Expected $ErRewriteURIEName but got ${rewriteElem.resolvedName}")
 
       val xmlBase = rewriteElem.parentBaseUriOption.getOrElse(URI.create("")).relativize(rewriteElem.baseUri)
@@ -123,7 +123,7 @@ object SimpleCatalog {
     }
   }
 
-  def fromElem(catalogElem: BackingElemApi): SimpleCatalog = {
+  def fromElem(catalogElem: BackingElemNodeApi): SimpleCatalog = {
     require(catalogElem.resolvedName == ErCatalogEName, s"Expected $ErCatalogEName but got ${catalogElem.resolvedName}")
 
     val xmlBase = catalogElem.docUri.relativize(catalogElem.baseUri)

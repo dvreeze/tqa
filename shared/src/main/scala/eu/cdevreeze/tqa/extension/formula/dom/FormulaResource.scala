@@ -36,7 +36,7 @@ import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.aspect.AspectModel
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
  * XLink resource in a formula link. In other words, a variable:resource. See variable.xsd.
@@ -47,7 +47,7 @@ sealed trait FormulaResource extends FormulaOrTableResource {
 
   def underlyingResource: tqa.base.dom.NonStandardResource
 
-  final def backingElem: BackingElemApi = underlyingResource.backingElem
+  final def backingElem: BackingElemNodeApi = underlyingResource.backingElem
 
   final def docUri: URI = underlyingResource.docUri
 
@@ -57,7 +57,7 @@ sealed trait FormulaResource extends FormulaOrTableResource {
 
   final def elr: String = underlyingResource.elr
 
-  final def underlyingParentElem: BackingElemApi = underlyingResource.backingElem.parent
+  final def underlyingParentElem: BackingElemNodeApi = underlyingResource.backingElem.parent
 
   final def xlinkLabel: String = underlyingResource.xlinkLabel
 

@@ -31,7 +31,7 @@ import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 import javax.xml.transform.URIResolver
 import javax.xml.xpath
 import javax.xml.xpath.XPathConstants
@@ -109,7 +109,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
     }
   }
 
-  def evaluateAsBackingElem(expr: XPathExpression, contextItemOption: Option[ContextItem]): BackingElemApi = {
+  def evaluateAsBackingElem(expr: XPathExpression, contextItemOption: Option[ContextItem]): BackingElemNodeApi = {
     val nodeResult = evaluateAsNode(expr, contextItemOption)
     // Assuming the result to be an element node
     SaxonNode.wrapElement(nodeResult)
@@ -117,7 +117,7 @@ final class JaxpXPathEvaluatorUsingSaxon(val underlyingEvaluator: saxon.xpath.XP
 
   def evaluateAsBackingElemSeq(
     expr: XPathExpression,
-    contextItemOption: Option[ContextItem]): immutable.IndexedSeq[BackingElemApi] = {
+    contextItemOption: Option[ContextItem]): immutable.IndexedSeq[BackingElemNodeApi] = {
 
     val nodeSeqResult = evaluateAsNodeSeq(expr, contextItemOption)
     // Assuming all results to be element nodes

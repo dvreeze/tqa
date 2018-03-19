@@ -19,7 +19,7 @@ package eu.cdevreeze.tqa.xpathaware.extension.formula
 import eu.cdevreeze.tqa.extension.formula.dom.TypedDimensionAspect
 import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
  * Wrapper around an TypedDimensionAspect, which can extract the relevant data by evaluating XPath where needed.
@@ -35,7 +35,7 @@ final class TypedDimensionAspectData(val dimensionAspect: TypedDimensionAspect) 
 
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
-  def valueOption(implicit xpathEvaluator: XPathEvaluator): Option[BackingElemApi] = {
+  def valueOption(implicit xpathEvaluator: XPathEvaluator): Option[BackingElemNodeApi] = {
     // TODO Is this correct?
 
     dimensionAspect.valueElemOption.map(_.underlyingElem.backingElem.findAllChildElems.head) orElse {

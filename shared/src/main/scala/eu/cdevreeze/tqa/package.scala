@@ -73,13 +73,13 @@ package eu.cdevreeze
  *
  * ==Backing XML DOM implementations==
  *
- * TQA is flexible in the DOM implementation used. It is pluggable, as long as it offers a yaidom `BackingElemApi`
+ * TQA is flexible in the DOM implementation used. It is pluggable, as long as it offers a yaidom `BackingElemNodeApi`
  * facade and we have a `eu.cdevreeze.tqa.backingelem.DocumentBuilder` for it.
  *
  * Out of the box, 2 backing DOM implementations are available:
  * <ul>
- * <li>A `BackingElemApi` implementation wrapping Saxon `NodeInfo` objects, and typically implemented using Saxon tiny trees</li>
- * <li>A `BackingElemApi` native implementation using yaidom "indexed" elements</li>
+ * <li>A `BackingElemNodeApi` implementation wrapping Saxon `NodeInfo` objects, and typically implemented using Saxon tiny trees</li>
+ * <li>A `BackingElemNodeApi` native implementation using yaidom "indexed" elements</li>
  * </ul>
  *
  * The Saxon (9.7) wrapper implementation, especially when tiny trees are used under the hood, is efficient in space

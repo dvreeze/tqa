@@ -22,13 +22,13 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.BackingElemApi
+import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
  * An XLink element in a taxonomy, obeying the constraints on XLink imposed by XBRL. For example, an XLink arc or extended link.
  *
- * The XLink elements are backed by a yaidom `BackingElemApi`. As a consequence, XLink child elements of an extended link know their
- * parent element (as BackingElemApi), and therefore know their ELR (extended link role).
+ * The XLink elements are backed by a yaidom `BackingElemNodeApi`. As a consequence, XLink child elements of an extended link know their
+ * parent element (as BackingElemNodeApi), and therefore know their ELR (extended link role).
  *
  * XLink (see https://www.w3.org/TR/xlink11/) is a somewhat low level standard on top of XML, but it is
  * very important in an XBRL context. Many taxonomy elements are also XLink elements, especially inside linkbases.
@@ -37,7 +37,7 @@ import eu.cdevreeze.yaidom.queryapi.BackingElemApi
  */
 trait XLinkElem {
 
-  def backingElem: BackingElemApi
+  def backingElem: BackingElemNodeApi
 
   def key: XmlFragmentKey
 
@@ -78,7 +78,7 @@ trait ChildXLink extends XLinkElem {
    * backingElem.parentOption
    * }}}
    */
-  def underlyingParentElem: BackingElemApi
+  def underlyingParentElem: BackingElemNodeApi
 }
 
 /**

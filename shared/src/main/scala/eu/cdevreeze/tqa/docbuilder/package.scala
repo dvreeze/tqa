@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa
 
 /**
- * Document builders for yaidom `BackingElemApi` implementations that can be used as underlying element
+ * Document builders for yaidom `BackingElemNodeApi` implementations that can be used as underlying element
  * implementation in the TQA taxonomy DOM.
  *
  * The document builder abstraction must be useful both in the JVM and in JavaScript runtimes.

@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.backingelem.nodeinfo
 
 /**
- * Document builders for a Saxon-based BackingElemApi implementation that can be used as underlying element
+ * Document builders for a Saxon-based BackingElemNodeApi implementation that can be used as underlying element
  * implementation in the TQA taxonomy DOM.
  *
  * @author Chris de Vreeze
