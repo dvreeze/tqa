@@ -16,8 +16,13 @@
 
 package eu.cdevreeze.tqa.xpath
 
+import java.net.URI
+
+import eu.cdevreeze.yaidom.core.Scope
+import javax.xml.transform.URIResolver
+
 /**
- * A very simple XPath evaluator factory abstraction.
+ * A simple XPath evaluator factory abstraction.
  *
  * @author Chris de Vreeze
  */
@@ -39,6 +44,27 @@ trait XPathEvaluatorFactory {
   type ContextItem
 
   def newXPathEvaluator(): XPathEvaluator.Aux[XPathExpression, Node, ContextItem]
+
+  /**
+   * Creates an XPathEvaluator from the provided (optional) document URI, scope and URI resolver.
+   *
+   * The scope is typically the scope of the root element of the document whose URI is provided, enhanced with the
+   * minimal scope (for XPath evaluation).
+   */
+  def newXPathEvaluator(
+    docUriOption: Option[URI],
+    scope:        Scope,
+    uriResolver:  URIResolver): XPathEvaluator.Aux[XPathExpression, Node, ContextItem]
+
+  /**
+   * Returns `newXPathEvaluator(docUriOption, scope, SimpleUriResolver.identity)`.
+   *
+   * This factory method is useful if document retrieval functions (such as fn:doc) only use
+   * absolute URIs to local files.
+   */
+  def newXPathEvaluator(
+    docUriOption: Option[URI],
+    scope:        Scope): XPathEvaluator.Aux[XPathExpression, Node, ContextItem]
 }
 
 object XPathEvaluatorFactory {

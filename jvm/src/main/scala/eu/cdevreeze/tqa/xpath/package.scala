@@ -20,7 +20,7 @@ package eu.cdevreeze.tqa
  * XPath evaluation abstraction. It is needed for processing formula and table link content. It is as
  * technology-agnostic as possible.
  *
- * This package is not used in most of TQA. It is only used in the "richtaxonomy" namespace, so most of
+ * This package is not used in most of TQA. It is only used in the "xpathaware" namespace, so most of
  * TQA has no knowledge about and dependency on XPath processing.
  *
  * @author Chris de Vreeze

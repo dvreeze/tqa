@@ -20,6 +20,7 @@ import scala.collection.immutable
 
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
@@ -51,13 +52,17 @@ trait XPathEvaluator {
    */
   type ContextItem
 
-  // TODO Simple XDM model, and evaluation methods that return XDM items.
+  // Note that we have no evaluation methods that return XDM items.
+  // Indeed, we have no XDM model in these XPath evaluation abstractions.
+  // Hence, we do not have the modeling challenges related to the fact that in XDM everything is a sequence.
 
   def evaluateAsString(expr: XPathExpression, contextItemOption: Option[ContextItem]): String
 
   def evaluateAsNode(expr: XPathExpression, contextItemOption: Option[ContextItem]): Node
 
   def evaluateAsNodeSeq(expr: XPathExpression, contextItemOption: Option[ContextItem]): immutable.IndexedSeq[Node]
+
+  def evaluateAsBackingDocument(expr: XPathExpression, contextItemOption: Option[ContextItem]): BackingDocumentApi
 
   def evaluateAsBackingElem(expr: XPathExpression, contextItemOption: Option[ContextItem]): BackingElemNodeApi
 

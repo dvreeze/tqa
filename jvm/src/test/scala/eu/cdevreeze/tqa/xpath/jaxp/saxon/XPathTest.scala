@@ -32,6 +32,7 @@ import eu.cdevreeze.tqa.backingelem.nodeinfo.YaidomSimpleToSaxonElemConverter
 import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
+import eu.cdevreeze.tqa.xpath.SimpleUriResolver
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
@@ -116,13 +117,12 @@ class XPathTest extends FunSuite {
     }
   })
 
-  private val xpathEvaluator =
-    JaxpXPathEvaluatorUsingSaxon.newInstance(
-      xpathEvaluatorFactory,
-      rootElem.docUri,
-      rootElem.scope ++ JaxpXPathEvaluatorUsingSaxon.MinimalScope ++
+  private val xpathEvaluator: JaxpXPathEvaluatorUsingSaxon =
+    xpathEvaluatorFactory.newXPathEvaluator(
+      Some(rootElem.docUri),
+      rootElem.scope ++ JaxpXPathEvaluatorFactoryUsingSaxon.MinimalScope ++
         Scope.from("myfun" -> MyFuncNamespace, "myvar" -> MyVarNamespace),
-      new SimpleUriResolver(UriConverters.fromLocalMirrorRootDirectory(rootDir)))
+      SimpleUriResolver.fromLocalMirrorRootDirectory(rootDir))
 
   test("testSimpleStringXPathWithoutContextItem") {
     val exprString = "string(count((1, 2, 3, 4, 5)))"
