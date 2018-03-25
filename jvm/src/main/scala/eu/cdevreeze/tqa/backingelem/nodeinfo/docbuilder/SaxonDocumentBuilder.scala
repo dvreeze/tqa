@@ -20,8 +20,8 @@ import java.net.URI
 
 import org.xml.sax.InputSource
 
-import eu.cdevreeze.tqa.backingelem.nodeinfo.SaxonDocument
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
+import eu.cdevreeze.yaidom.saxon.SaxonDocument
 import javax.xml.transform.Source
 import javax.xml.transform.stream.StreamSource
 import net.sf.saxon.s9api

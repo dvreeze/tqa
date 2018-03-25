@@ -19,8 +19,10 @@ package eu.cdevreeze.tqa.xpathaware
 import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.ENameValueOrExpr
-import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
  * XPath-aware evaluator of a ENameValueOrExpr. XPath evaluation is performed without any context item.
@@ -36,10 +38,13 @@ object ENameValueOrExprEvaluator extends ValueOrExprEvaluator[EName] {
    * Returns the EName result of the ENameValueOrExpr. If a ENameExpr is passed, it is first "compiled"
    * before XPath evaluation.
    */
-  override def evaluate(valueOrExpr: ENameValueOrExpr)(implicit xpathEvaluator: XPathEvaluator): EName = valueOrExpr match {
+  override def evaluate(valueOrExpr: ENameValueOrExpr)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): EName = valueOrExpr match {
     case v: ENameValue =>
       v.value
     case e: ENameExpr =>
-      xpathEvaluator.evaluateAsEName(xpathEvaluator.toXPathExpression(e.expr.xpathExpression), None)
+      val qnameString =
+        xpathEvaluator.evaluateAsString(xpathEvaluator.makeXPathExpression(e.expr.xpathExpression), None)
+      val qname = QName(qnameString)
+      scope.resolveQNameOption(qname).getOrElse(sys.error(s"Could not resolve QName $qname in scope $scope"))
   }
 }

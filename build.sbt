@@ -5,7 +5,7 @@
 // See https://github.com/cquiroz/scala-java-time/blob/master/build.sbt as a "template" for this build file.
 
 
-val scalaVer = "2.12.4"
+val scalaVer = "2.12.5"
 
 // I wanted to cross-build for Scala 2.13.0-M2 as well, but then miss library scalajs-jsjoda-as-java-time
 
@@ -20,7 +20,7 @@ lazy val commonSettings = Seq(
   scalaVersion       := scalaVer,
   crossScalaVersions := crossScalaVer,
 
-  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint"),
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint", "-target:jvm-1.8"),
 
   publishArtifact in Test := false,
   publishMavenStyle := true,
@@ -36,11 +36,11 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.8.0-M2",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.8.0-M3",
 
-  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.4",
+  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.5",
 
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.4" % "test"
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % "test"
 )
 
 lazy val root = project.in(file("."))
@@ -60,17 +60,17 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-8",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-10",
 
-    libraryDependencies += "com.google.guava" % "guava" % "22.0",
+    libraryDependencies += "com.google.guava" % "guava" % "24.1-jre",
 
     libraryDependencies += "com.google.code.findbugs" % "jsr305" % "1.3.9",
 
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.0.6",
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.0",
 
     libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.8.0" % "optional",
 
-    libraryDependencies += "org.scalameta" %%% "scalameta" % "2.0.1" % "test",
+    libraryDependencies += "org.scalameta" %%% "scalameta" % "3.6.0" % "test",
 
     libraryDependencies += "junit" % "junit" % "4.12" % "test",
 
@@ -80,7 +80,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
     // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.4",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.5",
 
     // We use some JDK 8 java.time classes in shared code ...
 

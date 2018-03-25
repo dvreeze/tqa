@@ -25,11 +25,12 @@ import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
-import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
  * Wrapper around a DimensionRelationshipNode, which can extract the relevant data by evaluating XPath where needed.
@@ -45,29 +46,29 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
    */
   def dimensionName: EName = dimensionRelationshipNode.dimensionName
 
-  def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
+  def relationshipSources(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[EName] = {
     dimensionRelationshipNode.sourceValuesOrExpressions.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
   }
 
-  def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
+  def linkroleOption(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Option[String] = {
     dimensionRelationshipNode.linkroleValueOrExprOption.
-      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
   }
 
-  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): DimensionRelationshipNodes.FormulaAxis = {
+  def formulaAxis(implicit xpathEvaluator: XPathEvaluator, scope: Scope): DimensionRelationshipNodes.FormulaAxis = {
     val stringResultOption =
       dimensionRelationshipNode.formulaAxisValueOrExprOption.
-        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
 
     stringResultOption.map(v => DimensionRelationshipNodes.FormulaAxis.fromString(v)).
       getOrElse(DimensionRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
-  def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
+  def generations(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Int = {
     val resultAsBigDecimalOption =
       dimensionRelationshipNode.generationsValueOrExprOption.
-        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
 
     resultAsBigDecimalOption.map(_.toInt).getOrElse(0)
   }
@@ -80,17 +81,17 @@ object DimensionRelationshipNodeData {
    */
   def findAllMembersInDimensionRelationshipNode(
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
 
     val dimension: EName = dimensionRelationshipNode.dimensionName
 
     val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
-    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator)
+    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator, scope)
 
     val rawRelationshipSources: immutable.IndexedSeq[EName] =
-      dimensionRelationNodeData.relationshipSources(xpathEvaluator)
+      dimensionRelationNodeData.relationshipSources(xpathEvaluator, scope)
 
-    val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator)
+    val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator, scope)
 
     val startMembers: immutable.IndexedSeq[DimensionMemberTreeWalkSpec.StartMember] = {
       if (rawRelationshipSources.isEmpty) {
@@ -110,7 +111,7 @@ object DimensionRelationshipNodeData {
     // Number of generations (optional), from the perspective of finding the descendant-or-self
     // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
     val effectiveGenerationsOption: Option[Int] = {
-      val rawValue = dimensionRelationNodeData.generations(xpathEvaluator)
+      val rawValue = dimensionRelationNodeData.generations(xpathEvaluator, scope)
       val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
       val resultOption = if (axis.includesChildrenButNotDeeperDescendants) Some(1) else optionalRawResult
       resultOption

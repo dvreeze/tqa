@@ -24,11 +24,12 @@ import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
-import eu.cdevreeze.tqa.xpath.XPathEvaluator
 import eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
  * Wrapper around a ConceptRelationshipNode, which can extract the relevant data by evaluating XPath where needed.
@@ -39,43 +40,43 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
-  def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
+  def relationshipSources(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[EName] = {
     conceptRelationshipNode.sourceValuesOrExpressions.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
   }
 
-  def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
+  def linkroleOption(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Option[String] = {
     conceptRelationshipNode.linkroleValueOrExprOption.
-      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
   }
 
-  def arcrole(implicit xpathEvaluator: XPathEvaluator): String = {
-    StringValueOrExprEvaluator.evaluate(conceptRelationshipNode.arcroleValueOrExpr)(xpathEvaluator)
+  def arcrole(implicit xpathEvaluator: XPathEvaluator, scope: Scope): String = {
+    StringValueOrExprEvaluator.evaluate(conceptRelationshipNode.arcroleValueOrExpr)(xpathEvaluator, scope)
   }
 
-  def linknameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
+  def linknameOption(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Option[EName] = {
     conceptRelationshipNode.linknameValueOrExprOption.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
   }
 
-  def arcnameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
+  def arcnameOption(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Option[EName] = {
     conceptRelationshipNode.arcnameValueOrExprOption.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
   }
 
-  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): ConceptRelationshipNodes.FormulaAxis = {
+  def formulaAxis(implicit xpathEvaluator: XPathEvaluator, scope: Scope): ConceptRelationshipNodes.FormulaAxis = {
     val stringResultOption =
       conceptRelationshipNode.formulaAxisValueOrExprOption.
-        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
 
     stringResultOption.map(v => ConceptRelationshipNodes.FormulaAxis.fromString(v)).
       getOrElse(ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
-  def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
+  def generations(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Int = {
     val resultAsBigDecimalOption =
       conceptRelationshipNode.generationsValueOrExprOption.
-        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
 
     resultAsBigDecimalOption.map(_.toInt).getOrElse(0)
   }
@@ -89,21 +90,21 @@ object ConceptRelationshipNodeData {
   // scalastyle:off method.length
   def findAllConceptsInConceptRelationshipNode(
     conceptRelationshipNode: ConceptRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): Set[EName] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
 
     val conceptRelationNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
-    val axis = conceptRelationNodeData.formulaAxis(xpathEvaluator)
+    val axis = conceptRelationNodeData.formulaAxis(xpathEvaluator, scope)
 
     val rawRelationshipSources: immutable.IndexedSeq[EName] =
-      conceptRelationNodeData.relationshipSources(xpathEvaluator)
+      conceptRelationNodeData.relationshipSources(xpathEvaluator, scope)
 
-    val linkroleOption: Option[String] = conceptRelationNodeData.linkroleOption(xpathEvaluator)
+    val linkroleOption: Option[String] = conceptRelationNodeData.linkroleOption(xpathEvaluator, scope)
 
-    val arcrole: String = conceptRelationNodeData.arcrole(xpathEvaluator)
+    val arcrole: String = conceptRelationNodeData.arcrole(xpathEvaluator, scope)
 
-    val linknameOption: Option[EName] = conceptRelationNodeData.linknameOption(xpathEvaluator)
+    val linknameOption: Option[EName] = conceptRelationNodeData.linknameOption(xpathEvaluator, scope)
 
-    val arcnameOption: Option[EName] = conceptRelationNodeData.arcnameOption(xpathEvaluator)
+    val arcnameOption: Option[EName] = conceptRelationNodeData.arcnameOption(xpathEvaluator, scope)
 
     val doResolveXfiRoot = rawRelationshipSources.isEmpty || rawRelationshipSources.contains(ENames.XfiRootEName)
 
@@ -122,7 +123,7 @@ object ConceptRelationshipNodeData {
     // Number of generations (optional), from the perspective of finding the descendant-or-self
     // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
     val effectiveGenerationsOption: Option[Int] = {
-      val rawValue = conceptRelationNodeData.generations(xpathEvaluator)
+      val rawValue = conceptRelationNodeData.generations(xpathEvaluator, scope)
       val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
       val resultOption = if (axis.includesChildrenButNotDeeperDescendants) Some(1) else optionalRawResult
       resultOption
