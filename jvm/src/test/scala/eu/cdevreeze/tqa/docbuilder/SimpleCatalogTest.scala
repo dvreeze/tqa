@@ -24,7 +24,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.xml.sax.InputSource
 
-import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.indexed.Elem
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import eu.cdevreeze.yaidom.resolved
 
@@ -40,7 +40,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -70,7 +70,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -100,7 +100,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -125,7 +125,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -153,7 +153,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml3))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml3))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -178,7 +178,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml4))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml4))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -203,7 +203,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml5))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml5))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -228,7 +228,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml6))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml6))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 
@@ -253,7 +253,7 @@ class SimpleCatalogTest extends FunSuite {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val catalogElem =
-      indexed.Elem(docParser.parse(new InputSource(new StringReader(catalogXml7))).documentElement)
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml7))).documentElement)
 
     val catalog = SimpleCatalog.fromElem(catalogElem)
 

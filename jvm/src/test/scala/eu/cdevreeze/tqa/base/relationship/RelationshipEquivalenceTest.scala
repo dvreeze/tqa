@@ -28,12 +28,12 @@ import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.OrderEName
 import eu.cdevreeze.tqa.ENames.WeightEName
-import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.XLinkLocator
+import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.yaidom.core.EName

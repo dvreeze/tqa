@@ -22,9 +22,9 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
+import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import net.sf.saxon.s9api.Processor
 
 /**

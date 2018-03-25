@@ -28,13 +28,13 @@ import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
+import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.indexed.docbuilder
+package eu.cdevreeze.tqa.docbuilder.indexed
 
 import java.net.URI
 

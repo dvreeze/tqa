@@ -28,7 +28,6 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.dom.LocalElementDeclaration
 import eu.cdevreeze.tqa.base.dom.RoleRef
 import eu.cdevreeze.tqa.base.dom.RoleType
@@ -38,6 +37,7 @@ import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
+import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
 

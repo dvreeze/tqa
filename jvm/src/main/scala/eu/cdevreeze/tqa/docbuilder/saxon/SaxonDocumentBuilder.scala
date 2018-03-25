@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder
+package eu.cdevreeze.tqa.docbuilder.saxon
 
 import java.net.URI
 

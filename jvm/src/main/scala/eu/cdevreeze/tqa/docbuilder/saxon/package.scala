@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.backingelem.nodeinfo
+package eu.cdevreeze.tqa.docbuilder
 
 /**
  * Document builders for a Saxon-based BackingElemNodeApi implementation that can be used as underlying element
@@ -22,4 +22,4 @@ package eu.cdevreeze.tqa.backingelem.nodeinfo
  *
  * @author Chris de Vreeze
  */
-package object docbuilder
+package object saxon

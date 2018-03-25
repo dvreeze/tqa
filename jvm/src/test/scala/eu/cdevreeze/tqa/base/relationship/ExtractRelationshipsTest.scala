@@ -25,12 +25,12 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
-import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.base.common.StandardLabelRoles
 import eu.cdevreeze.tqa.base.dom.LabelArc
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax

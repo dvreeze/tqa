@@ -23,14 +23,14 @@ import java.util.zip.ZipFile
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.backingelem.indexed.docbuilder.IndexedDocumentBuilder
-import eu.cdevreeze.tqa.backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
+import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.extension.table.relationship.TableRelationship
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
