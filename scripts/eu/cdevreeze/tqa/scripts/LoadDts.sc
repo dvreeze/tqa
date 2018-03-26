@@ -84,8 +84,8 @@ def backingElemToSimpleElem(backingElem: yaidom.queryapi.BackingElemApi): yaidom
   backingElem match {
     case e: yaidom.indexed.IndexedScopedNode.Elem[_] if e.underlyingElem.isInstanceOf[yaidom.simple.Elem] =>
       e.underlyingElem.asInstanceOf[yaidom.simple.Elem]
-    case e: backingelem.nodeinfo.SaxonElem =>
-      backingelem.nodeinfo.YaidomSaxonToSimpleElemConverter.convertSaxonElem(e)
+    case e: yaidom.saxon.SaxonElem =>
+      yaidom.utils.saxon.SaxonElemToSimpleElemConverter.convertSaxonElem(e)
     case e =>
       sys.error(s"Unexpected element type: ${e.getClass}")
   }
@@ -103,7 +103,7 @@ val processor = new Processor(false)
 
 def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
   val docBuilder =
-    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(
+    new docbuilder.saxon.SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
       docbuilder.jvm.UriResolvers.fromLocalMirrorRootDirectory(localRootDir))
 
@@ -136,7 +136,7 @@ def loadDts(localRootDir: File, entrypointUri: URI): BasicTaxonomy = {
 
 def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
   val documentBuilder =
-    new backingelem.nodeinfo.docbuilder.SaxonDocumentBuilder(
+    new docbuilder.saxon.SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
       docbuilder.jvm.UriResolvers.fromUriConverter(docbuilder.jvm.UriConverters.identity))
 
