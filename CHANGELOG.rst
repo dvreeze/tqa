@@ -3,6 +3,21 @@ CHANGELOG
 =========
 
 
+0.8.0-M1
+========
+
+The main changes in this version are:
+
+* Dependency on yaidom 1.8.0-M3
+* The yaidom Saxon wrapper elements have been removed, and now live in yaidom 1.8.0-M3
+* The XPath evaluation support (API and implementation for Saxon) has been removed, and now lives in yaidom 1.8.0-M3 (and has been improved)
+* Class ``TaxonomyDocument`` now holds both the ``TaxonomyElem`` document element and the entire backing document
+* Moved indexed document and Saxon document builders to another package
+
+MiMa reports too many breaking changes to list them. They are mostly of a trivial nature, but it does mean
+that upgrading TQA in client code from 0.7.1 to 0.8.0-M1 does require some work on the part of the programmer.
+
+
 0.7.1
 =====
 

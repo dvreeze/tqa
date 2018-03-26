@@ -60,7 +60,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-10",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-10" % "optional",
 
     libraryDependencies += "com.google.guava" % "guava" % "24.1-jre",
 
@@ -74,7 +74,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "junit" % "junit" % "4.12" % "test",
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.7.0")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.7.1")
   )
   .jsSettings(
     // Do we need this jsEnv?
@@ -94,7 +94,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     parallelExecution in Test := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.7.0")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.7.1")
   )
 
 lazy val tqaJVM = tqa.jvm
