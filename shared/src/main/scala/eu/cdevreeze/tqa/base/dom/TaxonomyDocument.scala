@@ -43,6 +43,7 @@ final class TaxonomyDocument private (
 
   require(backingDocument ne null)
   require(documentElement ne null)
+  assert(backingDocument.documentElement.resolvedName == documentElement.resolvedName)
 
   type ThisDoc = TaxonomyDocument
 
@@ -69,6 +70,10 @@ final class TaxonomyDocument private (
   def comments: immutable.IndexedSeq[TaxonomyCommentNode] = {
     children.collect({ case c: TaxonomyCommentNode => c })
   }
+
+  def isSchemaDocument: Boolean = documentElement.isInstanceOf[XsdSchema]
+
+  def isLinkbaseDocument: Boolean = documentElement.isInstanceOf[Linkbase]
 }
 
 object TaxonomyDocument {
