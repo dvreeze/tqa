@@ -37,6 +37,8 @@ trait TaxonomyApi
   with PresentationRelationshipContainerApi
   with ConceptLabelRelationshipContainerApi
   with ConceptReferenceRelationshipContainerApi
+  with ElementLabelRelationshipContainerApi
+  with ElementReferenceRelationshipContainerApi
   with DimensionalRelationshipContainerApi {
 
   /**

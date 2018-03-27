@@ -24,7 +24,6 @@ import eu.cdevreeze.tqa.base.dom.NonStandardArc
 import eu.cdevreeze.tqa.base.dom.NonStandardResource
 import eu.cdevreeze.tqa.base.dom.OtherNonXLinkElem
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
-import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.extension.formula.dom.ExistenceAssertion
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaArc
 import eu.cdevreeze.tqa.extension.formula.dom.FormulaResource
@@ -42,12 +41,12 @@ import eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship
  * @author Chris de Vreeze
  */
 final class BasicFormulaTaxonomy private (
-    val underlyingTaxonomy: TaxonomyApi,
-    val formulaRelationships: immutable.IndexedSeq[FormulaRelationship],
-    val formulaRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[FormulaRelationship]],
-    val formulaArcs: immutable.IndexedSeq[FormulaArc],
-    val formulaResources: immutable.IndexedSeq[FormulaResource],
-    val otherFormulaElems: immutable.IndexedSeq[OtherFormulaElem]) extends FormulaRelationshipContainerLike {
+  val underlyingTaxonomy:           TaxonomyApi,
+  val formulaRelationships:         immutable.IndexedSeq[FormulaRelationship],
+  val formulaRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[FormulaRelationship]],
+  val formulaArcs:                  immutable.IndexedSeq[FormulaArc],
+  val formulaResources:             immutable.IndexedSeq[FormulaResource],
+  val otherFormulaElems:            immutable.IndexedSeq[OtherFormulaElem]) extends FormulaRelationshipContainerLike {
 
   def findAllVariableSets: immutable.IndexedSeq[VariableSet] = {
     formulaResources collect { case vs: VariableSet => vs }
@@ -72,7 +71,7 @@ object BasicFormulaTaxonomy {
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    */
   def build(underlyingTaxonomy: TaxonomyApi): BasicFormulaTaxonomy = {
-    val nonStandardRelationships = underlyingTaxonomy.findAllNonStandardRelationshipsOfType(classTag[NonStandardRelationship])
+    val nonStandardRelationships = underlyingTaxonomy.findAllNonStandardRelationships
     val formulaRelationships = nonStandardRelationships.flatMap(rel => FormulaRelationship.opt(rel))
 
     val formulaRelationshipsBySource = formulaRelationships.groupBy(_.sourceElem.key)

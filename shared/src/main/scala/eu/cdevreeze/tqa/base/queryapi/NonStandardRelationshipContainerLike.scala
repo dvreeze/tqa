@@ -58,15 +58,27 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
     findAllNonStandardRelationshipsOfType(relationshipType).filter(p)
   }
 
+  final def findAllOutgoingNonStandardRelationships(
+    sourceKey: XmlFragmentKey): immutable.IndexedSeq[NonStandardRelationship] = {
+
+    filterOutgoingNonStandardRelationships(sourceKey)(_ => true)
+  }
+
+  final def filterOutgoingNonStandardRelationships(
+    sourceKey: XmlFragmentKey)(p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
+
+    nonStandardRelationshipsBySource.getOrElse(sourceKey, Vector()).filter(p)
+  }
+
   final def findAllOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey: XmlFragmentKey,
+    sourceKey:        XmlFragmentKey,
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterOutgoingNonStandardRelationshipsOfType(sourceKey, relationshipType)(_ => true)
   }
 
   final def filterOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey: XmlFragmentKey,
+    sourceKey:        XmlFragmentKey,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType

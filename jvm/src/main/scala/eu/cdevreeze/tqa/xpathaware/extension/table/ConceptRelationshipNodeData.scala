@@ -90,7 +90,7 @@ object ConceptRelationshipNodeData {
   // scalastyle:off method.length
   def findAllConceptsInConceptRelationshipNode(
     conceptRelationshipNode: ConceptRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
+    taxo:                    BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
 
     val conceptRelationNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
     val axis = conceptRelationNodeData.formulaAxis(xpathEvaluator, scope)
@@ -162,7 +162,7 @@ object ConceptRelationshipNodeData {
    */
   def filterDescendantOrSelfConcepts(
     treeWalkSpec: ConceptTreeWalkSpec,
-    taxo: BasicTableTaxonomy): Set[EName] = {
+    taxo:         BasicTableTaxonomy): Set[EName] = {
 
     val relationshipPaths =
       taxo.underlyingTaxonomy.filterOutgoingConsecutiveInterConceptRelationshipPaths(
@@ -182,10 +182,10 @@ object ConceptRelationshipNodeData {
 
   private def resolveXfiRoot(
     linkroleOption: Option[String],
-    arcrole: String,
+    arcrole:        String,
     linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): Set[EName] = {
+    arcnameOption:  Option[EName],
+    taxo:           BasicTableTaxonomy): Set[EName] = {
 
     val relationships =
       taxo.underlyingTaxonomy filterInterConceptRelationships { rel =>
@@ -198,21 +198,21 @@ object ConceptRelationshipNodeData {
   }
 
   private def findAllSiblings(
-    concept: EName,
+    concept:        EName,
     linkroleOption: Option[String],
-    arcrole: String,
+    arcrole:        String,
     linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): Set[EName] = {
+    arcnameOption:  Option[EName],
+    taxo:           BasicTableTaxonomy): Set[EName] = {
 
     val incomingRelationships =
-      taxo.underlyingTaxonomy.filterIncomingInterConceptRelationshipsOfType(concept, classTag[InterConceptRelationship]) { rel =>
+      taxo.underlyingTaxonomy.filterIncomingInterConceptRelationships(concept) { rel =>
         relationshipMatchesCriteria(rel, linkroleOption, arcrole, linknameOption, arcnameOption)
       }
 
     if (incomingRelationships.nonEmpty) {
       (incomingRelationships flatMap { rel =>
-        taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationshipsOfType(rel.sourceConceptEName, classTag[InterConceptRelationship]) { r =>
+        taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationships(rel.sourceConceptEName) { r =>
           relationshipMatchesCriteria(r, linkroleOption, arcrole, linknameOption, arcnameOption)
         }
       }).map(_.targetConceptEName).toSet.diff(Set(concept))
@@ -223,11 +223,11 @@ object ConceptRelationshipNodeData {
   }
 
   private def relationshipMatchesCriteria(
-    relationship: InterConceptRelationship,
+    relationship:   InterConceptRelationship,
     linkroleOption: Option[String],
-    arcrole: String,
+    arcrole:        String,
     linknameOption: Option[EName],
-    arcnameOption: Option[EName]): Boolean = {
+    arcnameOption:  Option[EName]): Boolean = {
 
     linkroleOption.forall(lr => relationship.elr == lr) &&
       (relationship.arcrole == arcrole) &&
@@ -243,11 +243,11 @@ object ConceptRelationshipNodeData {
    * The optional generations cannot contain 0. None means unbounded.
    */
   final case class ConceptTreeWalkSpec(
-    val startConcept: EName,
-    val includeSelf: Boolean,
+    val startConcept:      EName,
+    val includeSelf:       Boolean,
     val generationsOption: Option[Int],
-    val linkroleOption: Option[String],
-    val arcrole: String,
-    val linknameOption: Option[EName],
-    val arcnameOption: Option[EName])
+    val linkroleOption:    Option[String],
+    val arcrole:           String,
+    val linknameOption:    Option[EName],
+    val arcnameOption:     Option[EName])
 }

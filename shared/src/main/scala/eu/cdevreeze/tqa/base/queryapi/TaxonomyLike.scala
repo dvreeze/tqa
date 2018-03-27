@@ -31,4 +31,6 @@ trait TaxonomyLike
   with PresentationRelationshipContainerLike
   with ConceptLabelRelationshipContainerLike
   with ConceptReferenceRelationshipContainerLike
+  with ElementLabelRelationshipContainerLike
+  with ElementReferenceRelationshipContainerLike
   with DimensionalRelationshipContainerLike

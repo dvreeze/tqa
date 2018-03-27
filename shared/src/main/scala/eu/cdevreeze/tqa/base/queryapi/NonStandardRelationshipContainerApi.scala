@@ -47,16 +47,28 @@ trait NonStandardRelationshipContainerApi {
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
+   * Finds all non-standard relationships that are outgoing from the given concept.
+   */
+  def findAllOutgoingNonStandardRelationships(
+    sourceKey: XmlFragmentKey): immutable.IndexedSeq[NonStandardRelationship]
+
+  /**
+   * Filters non-standard relationships that are outgoing from the given concept.
+   */
+  def filterOutgoingNonStandardRelationships(
+    sourceKey: XmlFragmentKey)(p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
+
+  /**
    * Finds all non-standard relationships of the given type that are outgoing from the given XML element.
    */
   def findAllOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey: XmlFragmentKey,
+    sourceKey:        XmlFragmentKey,
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters non-standard relationships of the given type that are outgoing from the given XML element.
    */
   def filterOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey: XmlFragmentKey,
+    sourceKey:        XmlFragmentKey,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 }

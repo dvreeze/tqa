@@ -47,17 +47,29 @@ trait StandardRelationshipContainerApi {
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
+   * Finds all standard relationships that are outgoing from the given concept.
+   */
+  def findAllOutgoingStandardRelationships(
+    sourceConcept: EName): immutable.IndexedSeq[StandardRelationship]
+
+  /**
+   * Filters standard relationships that are outgoing from the given concept.
+   */
+  def filterOutgoingStandardRelationships(
+    sourceConcept: EName)(p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship]
+
+  /**
    * Finds all standard relationships of the given type that are outgoing from the given concept.
    */
   def findAllOutgoingStandardRelationshipsOfType[A <: StandardRelationship](
-    sourceConcept: EName,
+    sourceConcept:    EName,
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters standard relationships of the given type that are outgoing from the given concept.
    */
   def filterOutgoingStandardRelationshipsOfType[A <: StandardRelationship](
-    sourceConcept: EName,
+    sourceConcept:    EName,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   // TODO Methods to validate some closure properties, such as closure under DTS discovery rules

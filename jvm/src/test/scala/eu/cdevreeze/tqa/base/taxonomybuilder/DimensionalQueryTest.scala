@@ -1334,7 +1334,7 @@ class DimensionalQueryTest extends FunSuite {
     // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
 
     val outgoingPaths =
-      taxo.filterOutgoingInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingUnrestrictedInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(2)(outgoingPaths.size)
 
@@ -1378,7 +1378,7 @@ class DimensionalQueryTest extends FunSuite {
     // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
 
     val outgoingPaths =
-      taxo.filterOutgoingInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingUnrestrictedInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(2)(outgoingPaths.size)
 

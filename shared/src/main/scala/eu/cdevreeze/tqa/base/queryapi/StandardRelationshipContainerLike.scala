@@ -58,15 +58,27 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
     findAllStandardRelationshipsOfType(relationshipType).filter(p)
   }
 
+  final def findAllOutgoingStandardRelationships(
+    sourceConcept: EName): immutable.IndexedSeq[StandardRelationship] = {
+
+    filterOutgoingStandardRelationships(sourceConcept)(_ => true)
+  }
+
+  final def filterOutgoingStandardRelationships(
+    sourceConcept: EName)(p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
+
+    standardRelationshipsBySource.getOrElse(sourceConcept, Vector()).filter(p)
+  }
+
   final def findAllOutgoingStandardRelationshipsOfType[A <: StandardRelationship](
-    sourceConcept: EName,
+    sourceConcept:    EName,
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterOutgoingStandardRelationshipsOfType(sourceConcept, relationshipType)(_ => true)
   }
 
   final def filterOutgoingStandardRelationshipsOfType[A <: StandardRelationship](
-    sourceConcept: EName,
+    sourceConcept:    EName,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType

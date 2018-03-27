@@ -24,7 +24,6 @@ import eu.cdevreeze.tqa.base.dom.NonStandardArc
 import eu.cdevreeze.tqa.base.dom.NonStandardResource
 import eu.cdevreeze.tqa.base.dom.OtherNonXLinkElem
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
-import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.extension.table.dom.OtherTableElem
 import eu.cdevreeze.tqa.extension.table.dom.Table
 import eu.cdevreeze.tqa.extension.table.dom.TableArc
@@ -39,12 +38,12 @@ import eu.cdevreeze.tqa.extension.table.relationship.TableRelationship
  * @author Chris de Vreeze
  */
 final class BasicTableTaxonomy private (
-    val underlyingTaxonomy: TaxonomyApi,
-    val tableRelationships: immutable.IndexedSeq[TableRelationship],
-    val tableRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[TableRelationship]],
-    val tableArcs: immutable.IndexedSeq[TableArc],
-    val tableResources: immutable.IndexedSeq[TableResource],
-    val otherTableElems: immutable.IndexedSeq[OtherTableElem]) extends TableRelationshipContainerLike {
+  val underlyingTaxonomy:         TaxonomyApi,
+  val tableRelationships:         immutable.IndexedSeq[TableRelationship],
+  val tableRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[TableRelationship]],
+  val tableArcs:                  immutable.IndexedSeq[TableArc],
+  val tableResources:             immutable.IndexedSeq[TableResource],
+  val otherTableElems:            immutable.IndexedSeq[OtherTableElem]) extends TableRelationshipContainerLike {
 
   def findAllTables: immutable.IndexedSeq[Table] = {
     tableResources collect { case t: Table => t }
@@ -57,7 +56,7 @@ object BasicTableTaxonomy {
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    */
   def build(underlyingTaxonomy: TaxonomyApi): BasicTableTaxonomy = {
-    val nonStandardRelationships = underlyingTaxonomy.findAllNonStandardRelationshipsOfType(classTag[NonStandardRelationship])
+    val nonStandardRelationships = underlyingTaxonomy.findAllNonStandardRelationships
     val tableRelationships = nonStandardRelationships.flatMap(rel => TableRelationship.opt(rel))
 
     val tableRelationshipsBySource = tableRelationships.groupBy(_.sourceElem.key)
