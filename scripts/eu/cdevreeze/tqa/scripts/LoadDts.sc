@@ -4,6 +4,7 @@
 
 // Taking TQA version 0.8.0-M1
 
+import $ivy.`net.sf.saxon:Saxon-HE:9.8.0-10`, net.sf.saxon.s9api.Processor
 import $ivy.`eu.cdevreeze.tqa::tqa:0.8.0-M1`
 
 // Imports that (must) remain available after this initialization script
@@ -17,8 +18,6 @@ import scala.reflect.classTag
 
 import eu.cdevreeze.yaidom.core._
 import eu.cdevreeze.yaidom
-
-import net.sf.saxon.s9api.Processor
 
 import eu.cdevreeze.tqa._
 import eu.cdevreeze.tqa.base._
