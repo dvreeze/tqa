@@ -149,9 +149,9 @@ final class BasicTaxonomy private (
    * In order to keep the same net substitution groups, they are passed as the extra substitution groups
    * to the subset BasicTaxonomy.
    */
-  def filterDocumentUris(docUris: Set[URI]): BasicTaxonomy = {
+  def filteringDocumentUris(docUris: Set[URI]): BasicTaxonomy = {
     new BasicTaxonomy(
-      taxonomyBase.filterDocumentUris(docUris),
+      taxonomyBase.filteringDocumentUris(docUris),
       netSubstitutionGroupMap,
       netSubstitutionGroupMap,
       relationships.filter(rel => docUris.contains(rel.docUri)),
@@ -167,7 +167,7 @@ final class BasicTaxonomy private (
    * Schema and linkbase DOM content remains the same. Only relationships are filtered.
    * It can be used to make query methods (not taking an EName) cheaper.
    */
-  def filterRelationships(p: Relationship => Boolean): BasicTaxonomy = {
+  def filteringRelationships(p: Relationship => Boolean): BasicTaxonomy = {
     new BasicTaxonomy(
       taxonomyBase,
       extraSubstitutionGroupMap,
@@ -208,7 +208,7 @@ final class BasicTaxonomy private (
       !removedRelationships.contains(rel)
     }
 
-    val outputTaxo = filterRelationships(acceptRelationship)
+    val outputTaxo = filteringRelationships(acceptRelationship)
     outputTaxo
   }
 }
