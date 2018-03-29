@@ -16,13 +16,21 @@
 
 package eu.cdevreeze.tqa.taxonomycreation
 
+import eu.cdevreeze.tqa.base.dom.AnonymousComplexTypeDefinition
 import eu.cdevreeze.tqa.base.dom.ConceptDeclaration
 import eu.cdevreeze.tqa.base.dom.GlobalElementDeclaration
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
 
 /**
  * Taxonomy element creation API.
+ *
+ * The taxonomy is mainly needed as context for its knowledge of substitution groups.
+ *
+ * The creation methods below have a Scope as last parameter. That scope, after removing the default namespace (if any),
+ * must be complete enough for finding QNames for each of the passed ENames (e.g. target EName, optional type as EName, etc.).
+ * Otherwise an exception is thrown.
  *
  * @author Chris de Vreeze
  */
@@ -34,13 +42,29 @@ trait TaxonomyElemCreator {
     targetEName:             EName,
     typeOption:              Option[EName],
     substitutionGroupOption: Option[EName],
-    otherAttributes:         Map[EName, String]): ConceptDeclaration
+    otherAttributes:         Map[EName, String],
+    scope:                   Scope): ConceptDeclaration
 
   def createGlobalElementDeclaration(
     targetEName:             EName,
     typeOption:              Option[EName],
     substitutionGroupOption: Option[EName],
-    otherAttributes:         Map[EName, String]): GlobalElementDeclaration
+    otherAttributes:         Map[EName, String],
+    scope:                   Scope): GlobalElementDeclaration
+
+  def createConceptDeclarationWithNestedType(
+    targetEName:             EName,
+    typeDefinition:          AnonymousComplexTypeDefinition,
+    substitutionGroupOption: Option[EName],
+    otherAttributes:         Map[EName, String],
+    scope:                   Scope): ConceptDeclaration
+
+  def createGlobalElementDeclarationWithNestedType(
+    targetEName:             EName,
+    typeDefinition:          AnonymousComplexTypeDefinition,
+    substitutionGroupOption: Option[EName],
+    otherAttributes:         Map[EName, String],
+    scope:                   Scope): GlobalElementDeclaration
 
   // TODO Support for far more taxonomy elements
 }

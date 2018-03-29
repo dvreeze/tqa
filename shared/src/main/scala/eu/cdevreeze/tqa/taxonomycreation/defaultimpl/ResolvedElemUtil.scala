@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.taxonomycreation.defaultimpl
 
-import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.resolved
@@ -41,7 +39,7 @@ object ResolvedElemUtil {
   }
 
   /**
-   * Calls `convertToSimpleNode(node, scope).asInstanceOf[simple.Elem]`.
+   * Calls `convertToSimpleNode(elem, scope).asInstanceOf[simple.Elem]`.
    */
   def convertToSimpleElem(elem: resolved.Elem, scope: Scope): simple.Elem = {
     convertToSimpleNode(elem, scope).asInstanceOf[simple.Elem]
@@ -63,48 +61,18 @@ object ResolvedElemUtil {
       case elem: resolved.Elem =>
         val attrs =
           elem.resolvedAttributes.toIndexedSeq
-            .map { case (attrEName, attrValue) => attributeENameToQName(attrEName, scope) -> attrValue }
+            .map { case (attrEName, attrValue) => ENameUtil.attributeENameToQName(attrEName, scope) -> attrValue }
+            .sortBy { case (attrQName, attrValue) => attrQName.toString }
 
         // Recursive calls
 
         val children = elem.children.map(ch => convertToSimpleNode(ch, scope))
 
         simple.Elem(
-          elementENameToQName(elem.resolvedName, scope),
+          ENameUtil.elementENameToQName(elem.resolvedName, scope),
           attrs,
           scope,
           children)
     }
-  }
-
-  /**
-   * Converts an EName to a QName, using the passed scope.
-   *
-   * The scope must have no default namespace (so a created QName without prefix will have no namespace),
-   * and it must find a prefix for the namespaces used in the EName.
-   */
-  def elementENameToQName(ename: EName, scope: Scope): QName = {
-    require(scope.defaultNamespaceOption.isEmpty, s"No default namespace allowed, but got scope $scope")
-
-    // TODO Use QNameProvider
-
-    ename.namespaceUriOption match {
-      case None =>
-        QName(ename.localPart)
-      case Some(ns) =>
-        val prefix = scope.prefixForNamespace(ns, () => sys.error(s"No prefix found for namespace '$ns'"))
-        QName(prefix, ename.localPart)
-    }
-  }
-
-  /**
-   * Calls `elementNameToQName(ename, scope)`, knowing that there is no default namespace.
-   */
-  def attributeENameToQName(ename: EName, scope: Scope): QName = {
-    assert(scope.defaultNamespaceOption.isEmpty)
-
-    // TODO Use QNameProvider
-
-    elementENameToQName(ename, scope)
   }
 }

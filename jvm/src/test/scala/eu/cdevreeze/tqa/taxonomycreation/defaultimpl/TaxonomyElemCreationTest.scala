@@ -20,15 +20,17 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.base.dom.ConceptDeclaration
-import eu.cdevreeze.tqa.base.dom.TaxonomyBase
-import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
-import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
+import eu.cdevreeze.tqa.base.taxonomybuilder.TrivialDocumentCollector
+import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
 /**
@@ -40,16 +42,23 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 class TaxonomyElemCreationTest extends FunSuite {
 
   test("testCreateConceptDeclaration") {
-    val scope = taxonomy.guessedScope ++ Scope.from("ex" -> "http://www.example.com")
-    val taxoElemCreator = new DefaultTaxonomyElemCreator(taxonomy, scope)
+    val taxoElemCreator = new DefaultTaxonomyElemCreator(taxonomy)
 
+    val scope = taxonomy.guessedScope ++ Scope.from("ex" -> "http://www.example.com")
     import scope._
 
-    val conceptDecl: ConceptDeclaration = taxoElemCreator.createConceptDeclaration(
-      QName("ex:Assets").res,
-      Some(QName("xbrli:stringItemType").res),
-      Some(QName("xbrli:item").res),
-      Map())
+    val conceptDecl: ConceptDeclaration =
+      taxoElemCreator.createConceptDeclaration(
+        QName("ex:Assets").res,
+        Some(QName("xbrli:stringItemType").res),
+        Some(QName("xbrli:item").res),
+        Map(
+          ENames.AbstractEName -> "false",
+          ENames.IdEName -> "ex_Assets",
+          ENames.NillableEName -> "false",
+          ENames.XbrliBalanceEName -> "credit",
+          ENames.XbrliPeriodTypeEName -> "duration"),
+        scope.filterKeys(Set("ex", "xbrli")))
 
     assertResult(QName("ex:Assets").res) {
       conceptDecl.targetEName
@@ -62,22 +71,31 @@ class TaxonomyElemCreationTest extends FunSuite {
     assertResult(Some(QName("xbrli:item").res)) {
       conceptDecl.substitutionGroupOption
     }
+
+    assertResult(Some(PeriodType.Duration)) {
+      conceptDecl.globalElementDeclaration.periodTypeOption
+    }
+  }
+
+  private val taxoBuilder: TaxonomyBuilder = {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val documentBuilder =
+      new IndexedDocumentBuilder(docParser, UriResolvers.fromUriConverter(UriConverters.identity))
+
+    TaxonomyBuilder
+      .withDocumentBuilder(documentBuilder)
+      .withDocumentCollector(TrivialDocumentCollector)
+      .withLenientRelationshipFactory
   }
 
   private val taxonomy: BasicTaxonomy = {
-    val docParser = DocumentParserUsingStax.newInstance()
-
-    val docUris = Vector(
+    val docUris = Set(
       classOf[TaxonomyElemCreationTest].getResource("/taxonomies/acra/2013/fr/sg-fsh-bfc/sg-fsh-bfc_2013-09-13_def.xml").toURI,
       classOf[TaxonomyElemCreationTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13.xsd").toURI)
 
-    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
+    val taxo = taxoBuilder.build(docUris)
 
-    val taxoDocs = docs.map(d => TaxonomyDocument.build(indexed.Document(d)))
-
-    val underlyingTaxo = TaxonomyBase.build(taxoDocs)
-    val richTaxo = BasicTaxonomy.build(underlyingTaxo, SubstitutionGroupMap.Empty, DefaultRelationshipFactory.LenientInstance)
-
-    richTaxo.ensuring(_.findAllGlobalElementDeclarations.size > 1600)
+    taxo.ensuring(_.findAllGlobalElementDeclarations.size > 1600)
   }
 }

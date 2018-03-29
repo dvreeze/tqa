@@ -21,6 +21,7 @@ import eu.cdevreeze.tqa.base.relationship.ConceptReferenceRelationship
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
 
 /**
@@ -38,21 +39,24 @@ trait RelationshipCreator {
     otherArcAttributes: Map[EName, String],
     resourceRole:       String,
     languageOption:     Option[String],
-    labelText:          String): ConceptLabelRelationship
+    labelText:          String,
+    scope:              Scope): ConceptLabelRelationship
 
   def createConceptReferenceRelationship(
     elr:                String,
     concept:            EName,
     otherArcAttributes: Map[EName, String],
     resourceRole:       String,
-    rawReferenceElem:   BackingElemNodeApi): ConceptReferenceRelationship
+    rawReferenceElem:   BackingElemNodeApi,
+    scope:              Scope): ConceptReferenceRelationship
 
   def createInterConceptRelationship(
     elr:                String,
     sourceConcept:      EName,
     targetConcept:      EName,
     arcrole:            String,
-    otherArcAttributes: Map[EName, String]): InterConceptRelationship
+    otherArcAttributes: Map[EName, String],
+    scope:              Scope): InterConceptRelationship
 
   // TODO Support for far more kinds of relationships
 }
