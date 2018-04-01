@@ -150,15 +150,15 @@ sealed abstract class TaxonomyElem private[dom] (
     var childElemIdx = 0
 
     backingElem.children flatMap {
-      case che: ScopedNodes.Elem =>
+      case che: BackingNodes.Elem =>
         val e = childElems(childElemIdx)
         childElemIdx += 1
         Some(e)
-      case ch: ScopedNodes.Text =>
+      case ch: BackingNodes.Text =>
         Some(TaxonomyTextNode(ch.text))
-      case ch: ScopedNodes.Comment =>
+      case ch: BackingNodes.Comment =>
         Some(TaxonomyCommentNode(ch.text))
-      case ch: ScopedNodes.ProcessingInstruction =>
+      case ch: BackingNodes.ProcessingInstruction =>
         Some(TaxonomyProcessingInstructionNode(ch.target, ch.data))
       case ch =>
         None
