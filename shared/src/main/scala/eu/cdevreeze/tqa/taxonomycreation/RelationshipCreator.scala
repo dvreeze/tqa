@@ -22,7 +22,7 @@ import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 
 /**
  * Taxonomy relationship creation API.
@@ -47,7 +47,7 @@ trait RelationshipCreator {
     concept:            EName,
     otherArcAttributes: Map[EName, String],
     resourceRole:       String,
-    rawReferenceElem:   BackingElemNodeApi,
+    rawReferenceElem:   BackingNodes.Elem,
     scope:              Scope): ConceptReferenceRelationship
 
   def createInterConceptRelationship(

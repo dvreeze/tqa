@@ -33,7 +33,7 @@ import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import net.sf.saxon.s9api.Processor
 
 /**
@@ -77,7 +77,7 @@ class PrimaryItemDimensionalValidation271Test extends FunSuite {
 
   private val ValidationErrorEName = EName(xbrldieNs, "PrimaryItemDimensionallyInvalidError")
 
-  private val testCaseDocElem: BackingElemNodeApi = {
+  private val testCaseDocElem: BackingNodes.Elem = {
     docBuilder.build(testCaseUri).documentElement.ensuring(_.resolvedName == EName(confNs, "testcase")).
       ensuring(_.filterElems(_.resolvedName == EName(confNs, "error")).forall(_.textAsResolvedQName == ValidationErrorEName))
   }

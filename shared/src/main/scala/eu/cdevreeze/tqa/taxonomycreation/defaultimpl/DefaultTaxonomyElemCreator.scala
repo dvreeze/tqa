@@ -26,9 +26,12 @@ import eu.cdevreeze.tqa.base.dom.XsdElem
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.taxonomycreation.TaxonomyElemCreator
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.QNameProvider
 import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.resolved
-import eu.cdevreeze.yaidom.utils.ResolvedElemEditor
+import eu.cdevreeze.yaidom.simple
 
 /**
  * Default taxonomy element creation API implementation.
@@ -61,6 +64,7 @@ final class DefaultTaxonomyElemCreator(
     scope:                   Scope): GlobalElementDeclaration = {
 
     val effectiveScope = scope.withoutDefaultNamespace ++ Scope.from("xs" -> Namespaces.XsNamespace)
+    assert(effectiveScope.withoutDefaultNamespace.makeInvertible == effectiveScope)
 
     val usedENames =
       List(Some(targetEName), typeOption, substitutionGroupOption).flatten.toSet.union(otherAttributes.keySet)
@@ -75,24 +79,22 @@ final class DefaultTaxonomyElemCreator(
     import eu.cdevreeze.yaidom.resolved.Node._
 
     val elemDeclResolvedElem =
-      ResolvedElemEditor.wrap(emptyElem(ENames.XsElementEName, otherAttributes))
-        .plusResolvedAttribute(ENames.NameEName, targetEName.localPart)
-        .plusResolvedAttributeOption(
+      emptyElem(ENames.XsElementEName, otherAttributes)
+        .plusAttribute(ENames.NameEName, targetEName.localPart)
+        .plusAttributeOption(
           ENames.TypeEName,
-          typeOption.map(tp => ENameUtil.attributeENameToQName(tp, effectiveScope).toString))
-        .plusResolvedAttributeOption(
+          typeOption.map(tp => enameToQName(tp, effectiveScope).toString))
+        .plusAttributeOption(
           ENames.SubstitutionGroupEName,
-          substitutionGroupOption.map(sg => ENameUtil.attributeENameToQName(sg, effectiveScope).toString))
-        .toElem
+          substitutionGroupOption.map(sg => enameToQName(sg, effectiveScope).toString))
 
     val schemaResolvedElem =
-      ResolvedElemEditor.wrap(emptyElem(ENames.XsSchemaEName))
-        .plusResolvedAttributeOption(ENames.TargetNamespaceEName, targetEName.namespaceUriOption)
+      emptyElem(ENames.XsSchemaEName)
+        .plusAttributeOption(ENames.TargetNamespaceEName, targetEName.namespaceUriOption)
         .plusChild(elemDeclResolvedElem)
-        .toElem
 
     val schemaRoot =
-      TaxonomyElem.build(ResolvedElemUtil.convertToIndexedElem(schemaResolvedElem, effectiveScope))
+      TaxonomyElem.build(indexed.Elem(simple.Elem.from(schemaResolvedElem, effectiveScope)))
         .asInstanceOf[XsdElem]
 
     val elemDecl = schemaRoot.childElems.head.asInstanceOf[GlobalElementDeclaration]
@@ -130,13 +132,14 @@ final class DefaultTaxonomyElemCreator(
         s"'${typeDefinition.schemaTargetNamespaceOption}' versus '${targetEName.namespaceUriOption}'")
 
     val effectiveScope = scope.withoutDefaultNamespace ++ Scope.from("xs" -> Namespaces.XsNamespace)
+    assert(effectiveScope.withoutDefaultNamespace.makeInvertible == effectiveScope)
 
     val usedENames =
       List(Some(targetEName), substitutionGroupOption).flatten.toSet.union(otherAttributes.keySet)
 
     val usedNamespaces =
       usedENames.flatMap(_.namespaceUriOption)
-        .union(SimpleElemUtil.convertToSimpleElem(typeDefinition).scope.withoutDefaultNamespace.namespaces)
+        .union(simple.Elem.from(typeDefinition).scope.withoutDefaultNamespace.namespaces)
 
     val unknownNamespaces = usedNamespaces.filter(ns => effectiveScope.prefixesForNamespace(ns).isEmpty)
 
@@ -147,22 +150,20 @@ final class DefaultTaxonomyElemCreator(
     import eu.cdevreeze.yaidom.resolved.Node._
 
     val elemDeclResolvedElem =
-      ResolvedElemEditor.wrap(emptyElem(ENames.XsElementEName, otherAttributes))
-        .plusResolvedAttribute(ENames.NameEName, targetEName.localPart)
-        .plusResolvedAttributeOption(
+      emptyElem(ENames.XsElementEName, otherAttributes)
+        .plusAttribute(ENames.NameEName, targetEName.localPart)
+        .plusAttributeOption(
           ENames.SubstitutionGroupEName,
-          substitutionGroupOption.map(sg => ENameUtil.attributeENameToQName(sg, effectiveScope).toString))
-        .plusChild(resolved.Elem(typeDefinition))
-        .toElem
+          substitutionGroupOption.map(sg => enameToQName(sg, effectiveScope).toString))
+        .plusChild(resolved.Elem.from(typeDefinition))
 
     val schemaResolvedElem =
-      ResolvedElemEditor.wrap(emptyElem(ENames.XsSchemaEName))
-        .plusResolvedAttributeOption(ENames.TargetNamespaceEName, targetEName.namespaceUriOption)
+      emptyElem(ENames.XsSchemaEName)
+        .plusAttributeOption(ENames.TargetNamespaceEName, targetEName.namespaceUriOption)
         .plusChild(elemDeclResolvedElem)
-        .toElem
 
     val schemaRoot =
-      TaxonomyElem.build(ResolvedElemUtil.convertToIndexedElem(schemaResolvedElem, effectiveScope))
+      TaxonomyElem.build(indexed.Elem(simple.Elem.from(schemaResolvedElem, effectiveScope)))
         .asInstanceOf[XsdElem]
 
     val elemDecl = schemaRoot.childElems.head.asInstanceOf[GlobalElementDeclaration]
@@ -171,5 +172,23 @@ final class DefaultTaxonomyElemCreator(
       .ensuring(_.targetEName == targetEName)
       .ensuring(_.substitutionGroupOption == substitutionGroupOption)
       .ensuring(_.resolvedAttributes.toMap.filterKeys(otherAttributes.keySet) == otherAttributes)
+  }
+
+  /**
+   * Converts an EName to a QName, using the passed scope.
+   *
+   * The scope must have no default namespace (so a created QName without prefix will have no namespace),
+   * and it must find a prefix for the namespaces used in the EName.
+   */
+  private def enameToQName(ename: EName, scope: Scope)(implicit qnameProvider: QNameProvider): QName = {
+    require(scope.defaultNamespaceOption.isEmpty, s"No default namespace allowed, but got scope $scope")
+
+    ename.namespaceUriOption match {
+      case None =>
+        qnameProvider.getUnprefixedQName(ename.localPart)
+      case Some(ns) =>
+        val prefix = scope.prefixForNamespace(ns, () => sys.error(s"No prefix found for namespace '$ns'"))
+        qnameProvider.getQName(prefix, ename.localPart)
+    }
   }
 }

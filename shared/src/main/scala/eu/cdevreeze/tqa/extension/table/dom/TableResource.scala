@@ -41,7 +41,7 @@ import eu.cdevreeze.tqa.extension.formula.dom.FormulaOrTableResource
 import eu.cdevreeze.tqa.extension.formula.dom.OtherFormulaElem
 import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 
 /**
  * XLink resource in a table link.
@@ -52,7 +52,7 @@ sealed trait TableResource extends FormulaOrTableResource {
 
   def underlyingResource: tqa.base.dom.NonStandardResource
 
-  final def backingElem: BackingElemNodeApi = underlyingResource.backingElem
+  final def backingElem: BackingNodes.Elem = underlyingResource.backingElem
 
   final def docUri: URI = underlyingResource.docUri
 
@@ -62,7 +62,7 @@ sealed trait TableResource extends FormulaOrTableResource {
 
   final def elr: String = underlyingResource.elr
 
-  final def underlyingParentElem: BackingElemNodeApi = underlyingResource.backingElem.parent
+  final def underlyingParentElem: BackingNodes.Elem = underlyingResource.backingElem.parent
 
   final def xlinkLabel: String = underlyingResource.xlinkLabel
 

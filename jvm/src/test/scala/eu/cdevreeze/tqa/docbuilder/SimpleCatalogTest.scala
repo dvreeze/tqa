@@ -61,8 +61,8 @@ class SimpleCatalogTest extends FunSuite {
       catalog
     }
 
-    assertResult(resolved.Elem(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
-      resolved.Elem(expectedCatalog.toElem).removeAllInterElementWhitespace
+    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
+      resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
     }
   }
 
@@ -91,8 +91,8 @@ class SimpleCatalogTest extends FunSuite {
       catalog
     }
 
-    assertResult(resolved.Elem(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
-      resolved.Elem(expectedCatalog.toElem).removeAllInterElementWhitespace
+    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
+      resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
     }
   }
 

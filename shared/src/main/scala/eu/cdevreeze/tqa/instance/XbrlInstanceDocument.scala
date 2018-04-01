@@ -22,8 +22,8 @@ import scala.collection.immutable
 
 import eu.cdevreeze.yaidom.core.XmlDeclaration
 import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.DocumentApi
-import eu.cdevreeze.yaidom.queryapi.Nodes
 
 /**
  * "XBRL instance DOM document".
@@ -85,9 +85,9 @@ object XbrlInstanceDocument {
     val xmlDeclarationOption = backingDoc.xmlDeclarationOption
 
     val children: immutable.IndexedSeq[CanBeXbrliDocumentChild] = backingDoc.children map {
-      case c: Nodes.Comment                => XbrliCommentNode(c.text)
-      case pi: Nodes.ProcessingInstruction => XbrliProcessingInstructionNode(pi.target, pi.data)
-      case _: Nodes.Elem                   => rootElem
+      case c: BackingNodes.Comment                => XbrliCommentNode(c.text)
+      case pi: BackingNodes.ProcessingInstruction => XbrliProcessingInstructionNode(pi.target, pi.data)
+      case _: BackingNodes.Elem                   => rootElem
     }
 
     XbrlInstanceDocument(xmlDeclarationOption, children)

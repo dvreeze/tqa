@@ -23,7 +23,7 @@ import scala.collection.immutable
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.simple
 
 /**
@@ -110,7 +110,7 @@ object SimpleCatalog {
 
   object UriRewrite {
 
-    def fromElem(rewriteElem: BackingElemNodeApi): UriRewrite = {
+    def fromElem(rewriteElem: BackingNodes.Elem): UriRewrite = {
       require(rewriteElem.resolvedName == ErRewriteURIEName, s"Expected $ErRewriteURIEName but got ${rewriteElem.resolvedName}")
 
       val xmlBase = rewriteElem.parentBaseUriOption.getOrElse(URI.create("")).relativize(rewriteElem.baseUri)
@@ -123,7 +123,7 @@ object SimpleCatalog {
     }
   }
 
-  def fromElem(catalogElem: BackingElemNodeApi): SimpleCatalog = {
+  def fromElem(catalogElem: BackingNodes.Elem): SimpleCatalog = {
     require(catalogElem.resolvedName == ErCatalogEName, s"Expected $ErCatalogEName but got ${catalogElem.resolvedName}")
 
     val xmlBase = catalogElem.docUri.relativize(catalogElem.baseUri)

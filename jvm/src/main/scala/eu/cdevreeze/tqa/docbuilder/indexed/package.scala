@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.docbuilder
 
 /**
- * Document builders for native yaidom "indexed" BackingElemNodeApi implementation that can be used as
+ * Document builders for native yaidom "indexed" `BackingNodes.Elem` implementation that can be used as
  * underlying element implementation in the TQA taxonomy DOM. It is not very efficient, in particular in
  * memory footprint.
  *

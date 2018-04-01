@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.docbuilder
 
 /**
- * Document builders for a Saxon-based BackingElemNodeApi implementation that can be used as underlying element
+ * Document builders for a Saxon-based `BackingNodes.Elem` implementation that can be used as underlying element
  * implementation in the TQA taxonomy DOM.
  *
  * @author Chris de Vreeze

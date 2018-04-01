@@ -36,7 +36,7 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.8.0-M3",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.8.0-M4",
 
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.5",
 
@@ -60,7 +60,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-10" % "optional",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-10",
 
     libraryDependencies += "com.google.guava" % "guava" % "24.1-jre",
 

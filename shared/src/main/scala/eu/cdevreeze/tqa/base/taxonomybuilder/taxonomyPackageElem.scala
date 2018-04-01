@@ -27,7 +27,7 @@ import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.BackingElemNodeApi
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 
@@ -40,14 +40,14 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  *
  * It is not required that the taxonomy package elements are schema-valid. Construction of a taxonomy package element is indeed quite lenient.
  *
- * Note that the backing element implementation can be any implementation of yaidom query API trait `BackingElemNodeApi`.
+ * Note that the backing element implementation can be any implementation of yaidom query API trait `BackingNodes.Elem`.
  *
  * This class hierarchy depends on Java 8 or later, due to the use of Java 8 time API.
  *
  * @author Chris de Vreeze
  */
 sealed class TaxonomyPackageElem private[taxonomybuilder] (
-  val backingElem: BackingElemNodeApi,
+  val backingElem: BackingNodes.Elem,
   childElems:      immutable.IndexedSeq[TaxonomyPackageElem]) extends ScopedElemLike with SubtypeAwareElemLike {
 
   // TODO Restore old equality on the backing elements themselves (after JS DOM wrappers have appropriate equality)
@@ -94,7 +94,7 @@ sealed class TaxonomyPackageElem private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class TaxonomyPackage private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpTaxonomyPackageEName, s"Expected EName $TpTaxonomyPackageEName but found $resolvedName")
@@ -174,7 +174,7 @@ final class TaxonomyPackage private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class Identifier private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpIdentifierEName, s"Expected EName $TpIdentifierEName but found $resolvedName")
@@ -198,7 +198,7 @@ sealed trait DocumentationGroup extends TaxonomyPackageElem {
  * @author Chris de Vreeze
  */
 final class Name private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) with DocumentationGroup {
 
   require(resolvedName == TpNameEName, s"Expected EName $TpNameEName but found $resolvedName")
@@ -212,7 +212,7 @@ final class Name private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class Description private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) with DocumentationGroup {
 
   require(resolvedName == TpDescriptionEName, s"Expected EName $TpDescriptionEName but found $resolvedName")
@@ -226,7 +226,7 @@ final class Description private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class Version private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpVersionEName, s"Expected EName $TpVersionEName but found $resolvedName")
@@ -240,7 +240,7 @@ final class Version private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class License private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpLicenseEName, s"Expected EName $TpLicenseEName but found $resolvedName")
@@ -258,7 +258,7 @@ final class License private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class Publisher private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpPublisherEName, s"Expected EName $TpPublisherEName but found $resolvedName")
@@ -272,7 +272,7 @@ final class Publisher private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class PublisherUrl private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpPublisherURLEName, s"Expected EName $TpPublisherURLEName but found $resolvedName")
@@ -286,7 +286,7 @@ final class PublisherUrl private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class PublisherCountry private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpPublisherCountryEName, s"Expected EName $TpPublisherCountryEName but found $resolvedName")
@@ -300,7 +300,7 @@ final class PublisherCountry private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class PublicationDate private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpPublicationDateEName, s"Expected EName $TpPublicationDateEName but found $resolvedName")
@@ -315,7 +315,7 @@ final class PublicationDate private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class EntryPointsElem private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpEntryPointsEName, s"Expected EName $TpEntryPointsEName but found $resolvedName")
@@ -331,7 +331,7 @@ final class EntryPointsElem private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class SupersededTaxonomyPackagesElem private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpSupersededTaxonomyPackagesEName, s"Expected EName $TpSupersededTaxonomyPackagesEName but found $resolvedName")
@@ -347,7 +347,7 @@ final class SupersededTaxonomyPackagesElem private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class VersioningReportsElem private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpVersioningReportsEName, s"Expected EName $TpVersioningReportsEName but found $resolvedName")
@@ -363,7 +363,7 @@ final class VersioningReportsElem private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class EntryPoint private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpEntryPointEName, s"Expected EName $TpEntryPointEName but found $resolvedName")
@@ -403,7 +403,7 @@ final class EntryPoint private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class EntryPointDocument private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpEntryPointDocumentEName, s"Expected EName $TpEntryPointDocumentEName but found $resolvedName")
@@ -417,7 +417,7 @@ final class EntryPointDocument private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class VersioningReport private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpVersioningReportEName, s"Expected EName $TpVersioningReportEName but found $resolvedName")
@@ -431,7 +431,7 @@ final class VersioningReport private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class LanguagesElem private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpLanguagesEName, s"Expected EName $TpLanguagesEName but found $resolvedName")
@@ -447,7 +447,7 @@ final class LanguagesElem private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class Language private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpLanguageEName, s"Expected EName $TpLanguageEName but found $resolvedName")
@@ -461,7 +461,7 @@ final class Language private[taxonomybuilder] (
  * @author Chris de Vreeze
  */
 final class TaxonomyPackageRef private[taxonomybuilder] (
-  override val backingElem: BackingElemNodeApi,
+  override val backingElem: BackingNodes.Elem,
   childElems:               immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpTaxonomyPackageRefEName, s"Expected EName $TpTaxonomyPackageRefEName but found $resolvedName")
@@ -501,13 +501,13 @@ object TaxonomyPackageElem {
   /**
    * Expensive method to create an TaxonomyPackageElem tree
    */
-  def apply(elem: BackingElemNodeApi): TaxonomyPackageElem = {
+  def apply(elem: BackingNodes.Elem): TaxonomyPackageElem = {
     // Recursive calls
     val childElems = elem.findAllChildElems.map(e => apply(e))
     apply(elem, childElems)
   }
 
-  private[taxonomybuilder] def apply(elem: BackingElemNodeApi, childElems: immutable.IndexedSeq[TaxonomyPackageElem]): TaxonomyPackageElem = {
+  private[taxonomybuilder] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyPackageElem]): TaxonomyPackageElem = {
     elem.resolvedName match {
       case TpTaxonomyPackageEName            => new TaxonomyPackage(elem, childElems)
       case TpIdentifierEName                 => new Identifier(elem, childElems)
@@ -535,7 +535,7 @@ object TaxonomyPackageElem {
 
 object TaxonomyPackage {
 
-  def apply(elem: BackingElemNodeApi): TaxonomyPackage = {
+  def apply(elem: BackingNodes.Elem): TaxonomyPackage = {
     require(elem.resolvedName == TpTaxonomyPackageEName)
     TaxonomyPackageElem.apply(elem).asInstanceOf[TaxonomyPackage]
   }

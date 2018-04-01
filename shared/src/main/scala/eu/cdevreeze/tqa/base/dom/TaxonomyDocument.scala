@@ -22,8 +22,8 @@ import scala.collection.immutable
 
 import eu.cdevreeze.yaidom.core.XmlDeclaration
 import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.DocumentApi
-import eu.cdevreeze.yaidom.queryapi.Nodes
 
 /**
  * "Taxonomy DOM document".
@@ -53,9 +53,9 @@ final class TaxonomyDocument private (
 
   def children: immutable.IndexedSeq[CanBeTaxonomyDocumentChild] = {
     backingDocument.children map {
-      case c: Nodes.Comment                => TaxonomyCommentNode(c.text)
-      case pi: Nodes.ProcessingInstruction => TaxonomyProcessingInstructionNode(pi.target, pi.data)
-      case _: Nodes.Elem                   => documentElement
+      case c: BackingNodes.Comment                => TaxonomyCommentNode(c.text)
+      case pi: BackingNodes.ProcessingInstruction => TaxonomyProcessingInstructionNode(pi.target, pi.data)
+      case _: BackingNodes.Elem                   => documentElement
     }
   }
 
