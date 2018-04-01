@@ -16,9 +16,7 @@
 
 package eu.cdevreeze.tqa.instancevalidation
 
-import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
-import eu.cdevreeze.yaidom.queryapi.ClarkNodes
 import eu.cdevreeze.yaidom.resolved
 
 /**
@@ -39,13 +37,8 @@ final class TypedDimensionMember(val backingElem: BackingNodes.Elem) {
   override def hashCode: Int = makeResolvedElem(backingElem).hashCode
 
   private def makeResolvedElem(elem: BackingNodes.Elem): resolved.Elem = {
-    require(
-      elem.isInstanceOf[ClarkNodes.Elem],
-      s"Cannot treat element ${elem.key} as 'Nodes.Elem with ClarkElemNodeApi'. This is a bug in the program.")
-
     // Best effort, but not completely safe as a basis to compare elements.
 
-    resolved.Elem.from(elem.asInstanceOf[ClarkNodes.Elem]).
-      removeAllInterElementWhitespace.coalesceAndNormalizeAllText
+    resolved.Elem.from(elem).removeAllInterElementWhitespace.coalesceAndNormalizeAllText
   }
 }
