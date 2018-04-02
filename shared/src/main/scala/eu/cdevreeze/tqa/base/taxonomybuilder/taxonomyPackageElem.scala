@@ -29,6 +29,7 @@ import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
+import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 
 /**
@@ -48,7 +49,7 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  */
 sealed class TaxonomyPackageElem private[taxonomybuilder] (
   val backingElem: BackingNodes.Elem,
-  childElems:      immutable.IndexedSeq[TaxonomyPackageElem]) extends ScopedElemLike with SubtypeAwareElemLike {
+  childElems:      immutable.IndexedSeq[TaxonomyPackageElem]) extends ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
   // TODO Restore old equality on the backing elements themselves (after JS DOM wrappers have appropriate equality)
   assert(
@@ -57,7 +58,13 @@ sealed class TaxonomyPackageElem private[taxonomybuilder] (
 
   type ThisElem = TaxonomyPackageElem
 
+  type ThisNode = TaxonomyPackageElem
+
   final def thisElem: ThisElem = this
+
+  // We are not interested in non-element children
+
+  final def children: immutable.IndexedSeq[ThisNode] = findAllChildElems
 
   /**
    * Very fast implementation of findAllChildElems, for fast querying
