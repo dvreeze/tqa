@@ -2,10 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.LoadDts"
 
-// Taking TQA version 0.8.0-M1
+// Taking TQA version 0.8.0-M2
 
-import $ivy.`net.sf.saxon:Saxon-HE:9.8.0-10`, net.sf.saxon.s9api.Processor
-import $ivy.`eu.cdevreeze.tqa::tqa:0.8.0-M1`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.8.0-M2`
 
 // Imports that (must) remain available after this initialization script
 
@@ -15,6 +14,8 @@ import java.io._
 import scala.collection.immutable
 import scala.reflect.ClassTag
 import scala.reflect.classTag
+
+import net.sf.saxon.s9api.Processor
 
 import eu.cdevreeze.yaidom.core._
 import eu.cdevreeze.yaidom
@@ -75,25 +76,6 @@ def toVariableSetConverter(formulaTaxo: extension.formula.taxonomy.BasicFormulaT
 
 def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): extension.table.taxonomymodel.TableConverter = {
   new extension.table.taxonomymodel.TableConverter(tableTaxo)
-}
-
-// Printing a taxonomy element or backing element as simple element
-
-def backingElemToSimpleElem(backingElem: yaidom.queryapi.BackingElemApi): yaidom.simple.Elem = {
-  backingElem match {
-    case e: yaidom.indexed.IndexedScopedNode.Elem[_] if e.underlyingElem.isInstanceOf[yaidom.simple.Elem] =>
-      e.underlyingElem.asInstanceOf[yaidom.simple.Elem]
-    case e: yaidom.saxon.SaxonElem =>
-      yaidom.utils.saxon.SaxonElemToSimpleElemConverter.convertSaxonElem(e)
-    case e =>
-      sys.error(s"Unexpected element type: ${e.getClass}")
-  }
-}
-
-def toSimpleElem(taxoElem: TaxonomyElem): yaidom.simple.Elem = {
-  val backingElem = taxoElem.backingElem
-
-  backingElemToSimpleElem(backingElem)
 }
 
 // TQA: DTS bootstrapping function

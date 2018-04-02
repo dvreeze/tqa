@@ -44,7 +44,10 @@ class TaxonomyElemCreationTest extends FunSuite {
   test("testCreateConceptDeclaration") {
     val taxoElemCreator = new DefaultTaxonomyElemCreator(taxonomy)
 
-    val scope = taxonomy.guessedScope ++ Scope.from("ex" -> "http://www.example.com")
+    val scope = (taxonomy.guessedScope ++ Scope.from("ex" -> "http://www.example.com"))
+      .ensuring(_.defaultNamespaceOption.isEmpty)
+      .ensuring(sc => sc.makeInvertible == sc)
+
     import scope._
 
     val conceptDecl: ConceptDeclaration =

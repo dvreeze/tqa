@@ -68,7 +68,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.0",
 
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.8.0" % "optional",
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.8.0",
 
     libraryDependencies += "org.scalameta" %%% "scalameta" % "3.6.0" % "test",
 

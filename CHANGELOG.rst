@@ -3,6 +3,17 @@ CHANGELOG
 =========
 
 
+0.8.0-M2
+========
+
+The main changes in this version are:
+
+* Dependency on yaidom 1.8.0-M4
+* Therefore leveraging the new yaidom ``BackingNodes.Elem`` query API trait
+* Improved the taxonomy query API, by adding some "missing" methods and query API traits (for element label querying etc.)
+* Started (experimental) work on programmatic taxonomy creation
+
+
 0.8.0-M1
 ========
 
