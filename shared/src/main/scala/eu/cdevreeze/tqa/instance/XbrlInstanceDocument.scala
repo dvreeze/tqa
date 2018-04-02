@@ -31,36 +31,44 @@ import eu.cdevreeze.yaidom.queryapi.DocumentApi
  * @author Chris de Vreeze
  */
 // scalastyle:off null
-final class XbrlInstanceDocument(
-  val xmlDeclarationOption: Option[XmlDeclaration],
-  val children:             immutable.IndexedSeq[CanBeXbrliDocumentChild]) extends DocumentApi {
+final class XbrlInstanceDocument private (
+  val backingDocument: BackingDocumentApi,
+  val documentElement: XbrlInstance) extends DocumentApi {
 
-  require(xmlDeclarationOption ne null)
-  require(children ne null)
+  // Note that the constructor arguments are overlapping. This is safe because the constructor is
+  // private, and the public factory method does not have this overlap. The data redundancy in the
+  // private constructor prevents expensive construction of the XbrlInstance document element, while
+  // retaining all of the backing document (including its non-element children), which may not
+  // be recoverable from the document children.
+
+  require(backingDocument ne null)
   require(documentElement ne null)
+  assert(backingDocument.documentElement.resolvedName == documentElement.resolvedName)
 
   type ThisDoc = XbrlInstanceDocument
 
   type DocElemType = XbrlInstance
 
-  def uriOption: Option[URI] = documentElement.backingElem.docUriOption
+  def xmlDeclarationOption: Option[XmlDeclaration] = backingDocument.xmlDeclarationOption
+
+  def children: immutable.IndexedSeq[CanBeXbrliDocumentChild] = {
+    backingDocument.children map {
+      case c: BackingNodes.Comment                => XbrliCommentNode(c.text)
+      case pi: BackingNodes.ProcessingInstruction => XbrliProcessingInstructionNode(pi.target, pi.data)
+      case _: BackingNodes.Elem                   => documentElement
+    }
+  }
+
+  def uriOption: Option[URI] = backingDocument.uriOption
 
   def uri: URI = uriOption.getOrElse(XbrlInstanceDocument.EmptyUri)
 
-  def documentElement: XbrlInstance = {
-    (children collectFirst { case e: XbrlInstance => e }).getOrElse(sys.error(s"Missing document element"))
-  }
-
   def processingInstructions: immutable.IndexedSeq[XbrliProcessingInstructionNode] = {
-    children.collect({ case pi: XbrliProcessingInstructionNode => pi })
+    children.collect { case pi: XbrliProcessingInstructionNode => pi }
   }
 
   def comments: immutable.IndexedSeq[XbrliCommentNode] = {
-    children.collect({ case c: XbrliCommentNode => c })
-  }
-
-  def withXmlDeclarationOption(newXmlDeclarationOption: Option[XmlDeclaration]): XbrlInstanceDocument = {
-    new XbrlInstanceDocument(newXmlDeclarationOption, children)
+    children.collect { case c: XbrliCommentNode => c }
   }
 }
 
@@ -68,28 +76,12 @@ object XbrlInstanceDocument {
 
   private val EmptyUri = URI.create("")
 
-  def apply(xmlDeclarationOption: Option[XmlDeclaration], children: immutable.IndexedSeq[CanBeXbrliDocumentChild]): XbrlInstanceDocument = {
-    new XbrlInstanceDocument(xmlDeclarationOption, children)
-  }
-
-  def apply(xmlDeclarationOption: Option[XmlDeclaration], documentElement: XbrlInstance): XbrlInstanceDocument = {
-    new XbrlInstanceDocument(xmlDeclarationOption, Vector(documentElement))
-  }
-
   /**
-   * Builds a `XbrlInstanceDocument` from a `BackingDocumentApi`.
+   * Builds an `XbrlInstanceDocument` from a `BackingDocumentApi`.
    */
   def build(backingDoc: BackingDocumentApi): XbrlInstanceDocument = {
     val rootElem = XbrlInstance.build(backingDoc.documentElement)
 
-    val xmlDeclarationOption = backingDoc.xmlDeclarationOption
-
-    val children: immutable.IndexedSeq[CanBeXbrliDocumentChild] = backingDoc.children map {
-      case c: BackingNodes.Comment                => XbrliCommentNode(c.text)
-      case pi: BackingNodes.ProcessingInstruction => XbrliProcessingInstructionNode(pi.target, pi.data)
-      case _: BackingNodes.Elem                   => rootElem
-    }
-
-    XbrlInstanceDocument(xmlDeclarationOption, children)
+    new XbrlInstanceDocument(backingDoc, rootElem)
   }
 }

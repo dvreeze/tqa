@@ -64,11 +64,11 @@ final class TaxonomyDocument private (
   def uri: URI = uriOption.getOrElse(TaxonomyDocument.EmptyUri)
 
   def processingInstructions: immutable.IndexedSeq[TaxonomyProcessingInstructionNode] = {
-    children.collect({ case pi: TaxonomyProcessingInstructionNode => pi })
+    children.collect { case pi: TaxonomyProcessingInstructionNode => pi }
   }
 
   def comments: immutable.IndexedSeq[TaxonomyCommentNode] = {
-    children.collect({ case c: TaxonomyCommentNode => c })
+    children.collect { case c: TaxonomyCommentNode => c }
   }
 
   def isSchemaDocument: Boolean = documentElement.isInstanceOf[XsdSchema]
