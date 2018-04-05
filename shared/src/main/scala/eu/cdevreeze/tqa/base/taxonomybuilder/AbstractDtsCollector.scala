@@ -22,7 +22,6 @@ import scala.annotation.tailrec
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
-import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
@@ -94,9 +93,7 @@ abstract class AbstractDtsCollector extends DocumentCollector {
   private def buildTaxonomyDoc(uri: URI, documentBuilder: DocumentBuilder): TaxonomyDocument = {
     val taxoDoc = TaxonomyDocument.build(documentBuilder.build(uri))
 
-    require(
-      taxoDoc.documentElement.isInstanceOf[TaxonomyRootElem],
-      s"Not a taxonomy document root element: ${taxoDoc.documentElement.resolvedName}")
+    // Typically but not necessarily the root element is a TaxonomyRootElem
 
     taxoDoc
   }
