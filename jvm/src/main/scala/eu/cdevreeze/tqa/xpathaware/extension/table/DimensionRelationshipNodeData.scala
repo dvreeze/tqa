@@ -81,7 +81,7 @@ object DimensionRelationshipNodeData {
    */
   def findAllMembersInDimensionRelationshipNode(
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
+    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
 
     val dimension: EName = dimensionRelationshipNode.dimensionName
 
@@ -90,6 +90,8 @@ object DimensionRelationshipNodeData {
 
     val rawRelationshipSources: immutable.IndexedSeq[EName] =
       dimensionRelationNodeData.relationshipSources(xpathEvaluator, scope)
+
+    // TODO Fix linkrole processing. It must be the ELR of the has-hypercube, not of the dimension-domain!
 
     val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator, scope)
 
@@ -140,7 +142,7 @@ object DimensionRelationshipNodeData {
    */
   def filterDescendantOrSelfMembers(
     treeWalkSpec: DimensionMemberTreeWalkSpec,
-    taxo: BasicTableTaxonomy): Set[EName] = {
+    taxo:         BasicTableTaxonomy): Set[EName] = {
 
     // Ignoring unusable members without any usable descendants
 
@@ -165,11 +167,11 @@ object DimensionRelationshipNodeData {
    * The optional generations cannot contain 0. None means unbounded.
    */
   final case class DimensionMemberTreeWalkSpec(
-      val explicitDimension: EName,
-      val startMember: DimensionMemberTreeWalkSpec.StartMember,
-      val includeSelf: Boolean,
-      val generationsOption: Option[Int],
-      val linkroleOption: Option[String]) {
+    val explicitDimension: EName,
+    val startMember:       DimensionMemberTreeWalkSpec.StartMember,
+    val includeSelf:       Boolean,
+    val generationsOption: Option[Int],
+    val linkroleOption:    Option[String]) {
 
     def startMemberName: EName = startMember.startMemberName
 
