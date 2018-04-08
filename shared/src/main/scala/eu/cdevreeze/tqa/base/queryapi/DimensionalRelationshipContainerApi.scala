@@ -232,6 +232,30 @@ trait DimensionalRelationshipContainerApi {
   def filterIncomingDomainAwareRelationships(
     targetConcept: EName)(p: DomainAwareRelationship => Boolean): immutable.IndexedSeq[DomainAwareRelationship]
 
+  /**
+   * Finds all hypercube-dimension relationships that are incoming to the given (dimension) concept.
+   */
+  def findAllIncomingHypercubeDimensionRelationships(
+    targetConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship]
+
+  /**
+   * Filters hypercube-dimension relationships that are incoming to the given (dimension) concept.
+   */
+  def filterIncomingHypercubeDimensionRelationships(
+    targetConcept: EName)(p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
+
+  /**
+   * Finds all has-hypercube relationships that are incoming to the given (hypercube) concept.
+   */
+  def findAllIncomingHasHypercubeRelationships(
+    targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
+
+  /**
+   * Filters has-hypercube relationships that are incoming to the given (hypercube) concept.
+   */
+  def filterIncomingHasHypercubeRelationships(
+    targetConcept: EName)(p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
+
   // Filtering outgoing and incoming relationship paths
 
   /**

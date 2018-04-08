@@ -20,7 +20,6 @@ import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.ENameValueOrExpr
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
@@ -42,9 +41,16 @@ object ENameValueOrExprEvaluator extends ValueOrExprEvaluator[EName] {
     case v: ENameValue =>
       v.value
     case e: ENameExpr =>
-      val qnameString =
-        xpathEvaluator.evaluateAsString(xpathEvaluator.makeXPathExpression(e.expr.xpathExpression), None)
-      val qname = QName(qnameString)
-      scope.resolveQNameOption(qname).getOrElse(sys.error(s"Could not resolve QName $qname in scope $scope"))
+      // Cheating?
+
+      val localNameExprString = s"local-name-from-QName(${e.expr.xpathExpression})"
+      val namespaceUriExprString = s"namespace-uri-from-QName(${e.expr.xpathExpression})"
+
+      val localName =
+        xpathEvaluator.evaluateAsString(xpathEvaluator.makeXPathExpression(localNameExprString), None)
+      val namespaceUri =
+        xpathEvaluator.evaluateAsString(xpathEvaluator.makeXPathExpression(namespaceUriExprString), None)
+
+      if (namespaceUri.isEmpty) EName(localName) else EName(namespaceUri, localName)
   }
 }

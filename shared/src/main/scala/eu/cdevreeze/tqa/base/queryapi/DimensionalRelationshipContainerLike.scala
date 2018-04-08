@@ -252,6 +252,30 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainAwareRelationship])(p)
   }
 
+  final def findAllIncomingHypercubeDimensionRelationships(
+    targetConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
+
+    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HypercubeDimensionRelationship])
+  }
+
+  final def filterIncomingHypercubeDimensionRelationships(
+    targetConcept: EName)(p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
+
+    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HypercubeDimensionRelationship])(p)
+  }
+
+  final def findAllIncomingHasHypercubeRelationships(
+    targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
+
+    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HasHypercubeRelationship])
+  }
+
+  final def filterIncomingHasHypercubeRelationships(
+    targetConcept: EName)(p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship] = {
+
+    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HasHypercubeRelationship])(p)
+  }
+
   // Filtering outgoing and incoming relationship paths
 
   final def findAllOutgoingConsecutiveDomainAwareRelationshipPaths(

@@ -18,10 +18,10 @@ package eu.cdevreeze.tqa.xpathaware.extension.table
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.base.relationship.DimensionDomainRelationship
+import eu.cdevreeze.tqa.base.dom.BaseSetKey
+import eu.cdevreeze.tqa.base.queryapi.DomainAwareRelationshipPath
+import eu.cdevreeze.tqa.base.queryapi.DomainMemberRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
-import eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
@@ -77,36 +77,110 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
 object DimensionRelationshipNodeData {
 
   /**
-   * Finds all dimension members referred to by the given dimension relationship node in the given taxonomy.
+   * Finds all "result paths" according to the given dimension relationship node in the given taxonomy.
+   * All concepts in the result paths (including the roots) belong to the resolution of the dimension relationship node.
+   *
+   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
-  def findAllMembersInDimensionRelationshipNode(
+  def findAllResultPaths(
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
+    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
+
+    val relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship] =
+      findAllDomainAwareRelationshipsToRelationshipSources(dimensionRelationshipNode, taxo)(xpathEvaluator, scope)
+
+    val resultPaths: immutable.IndexedSeq[DomainMemberRelationshipPath] =
+      findAllResultPaths(relationshipsToSources, dimensionRelationshipNode, taxo)
+
+    resultPaths
+  }
+
+  /**
+   * Finds all relationships to relationship sources according to the given dimension relationship node in the given taxonomy.
+   *
+   * TODO Come up with invented domain-aware relationships where needed, or, alternatively, do not return relationships but pairs of ELRs and domain-members
+   * (like "keys" of domain-aware relationship targets), including invented ones. Using these pairs, we can compute consecutive relationship paths, without
+   * having to invent relationships.
+   */
+  def findAllDomainAwareRelationshipsToRelationshipSources(
+    dimensionRelationshipNode: DimensionRelationshipNode,
+    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationship] = {
+
+    // Start with reading the needed information in the dimension relationship node.
 
     val dimension: EName = dimensionRelationshipNode.dimensionName
 
     val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
-    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator, scope)
 
     val rawRelationshipSources: immutable.IndexedSeq[EName] =
       dimensionRelationNodeData.relationshipSources(xpathEvaluator, scope)
 
-    // TODO Fix linkrole processing. It must be the ELR of the has-hypercube, not of the dimension-domain!
-
     val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator, scope)
 
-    val startMembers: immutable.IndexedSeq[DimensionMemberTreeWalkSpec.StartMember] = {
-      if (rawRelationshipSources.isEmpty) {
-        val dimDomRelationships =
-          taxo.underlyingTaxonomy.filterOutgoingDimensionDomainRelationships(dimension) { rel =>
-            linkroleOption.forall(_ == rel.elr)
-          }
+    val effectiveLinkrole: String = linkroleOption.getOrElse(BaseSetKey.StandardElr)
 
-        dimDomRelationships.map(rel => new DimensionMemberTreeWalkSpec.DimensionDomainSource(rel))
+    // First find all has-hypercubes matching the given linkrole (default: standard linkrole), and their consecutive hypercube-dimensions.
+    // Note that we interpret the linkrole as the ELR of the has-hypercube relationship(s).
+
+    // Starting with incoming hypercube-dimension relationships for performance.
+
+    val potentialHypercubeDimensions =
+      taxo.underlyingTaxonomy.findAllIncomingHypercubeDimensionRelationships(dimension)
+
+    val potentialHasHypercubes = potentialHypercubeDimensions
+      .flatMap(hd => taxo.underlyingTaxonomy.filterIncomingHasHypercubeRelationships(hd.hypercube)(_.isFollowedBy(hd)))
+      .distinct
+
+    val hasHypercubes = potentialHasHypercubes.filter(hh => hh.elr == effectiveLinkrole)
+
+    val hypercubeDimensions = hasHypercubes
+      .flatMap(hh => taxo.underlyingTaxonomy.findAllConsecutiveHypercubeDimensionRelationships(hh))
+      .filter(_.dimension == dimension)
+      .distinct
+
+    // Next find all domain-aware relationship paths ending in the relationship sources.
+
+    val pathsToRelationshipSources: immutable.IndexedSeq[DomainAwareRelationshipPath] =
+      if (rawRelationshipSources.isEmpty) {
+        hypercubeDimensions
+          .flatMap { hd =>
+            taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { p =>
+              hd.isFollowedBy(p.firstRelationship) && p.relationships.size <= 1
+            }
+          }
+          .filter(_.relationships.size == 1)
+          .distinct
       } else {
-        rawRelationshipSources.map(member => new DimensionMemberTreeWalkSpec.MemberSource(member))
+        val sources: Set[EName] = rawRelationshipSources.toSet
+
+        hypercubeDimensions
+          .flatMap { hd =>
+            taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { p =>
+              hd.isFollowedBy(p.firstRelationship) && p.initOption.forall(_.concepts.toSet.intersect(sources).isEmpty)
+            }
+          }
+          .filter(path => sources.contains(path.targetConcept))
+          .distinct
       }
-    }
+
+    pathsToRelationshipSources.map(_.lastRelationship).distinct
+  }
+
+  /**
+   * Finds all "result paths" starting with the given relationships to sources according to the given dimension relationship node in the given taxonomy.
+   * All concepts in the result paths (including the roots) belong to the resolution of the dimension relationship node.
+   *
+   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
+   */
+  def findAllResultPaths(
+    relationshipsToSources:    immutable.IndexedSeq[DomainAwareRelationship],
+    dimensionRelationshipNode: DimensionRelationshipNode,
+    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
+
+    // Start with reading the needed information in the dimension relationship node.
+
+    val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator, scope)
 
     val includeSelf: Boolean = axis.includesSelf
 
@@ -119,86 +193,28 @@ object DimensionRelationshipNodeData {
       resultOption
     }
 
-    val dimensionMemberTreeWalkSpecs: immutable.IndexedSeq[DimensionMemberTreeWalkSpec] =
-      startMembers map { startMember =>
-        new DimensionMemberTreeWalkSpec(dimension, startMember, includeSelf, effectiveGenerationsOption, linkroleOption)
+    // Next resolve the dimension relationship node
+
+    val parentRelationships: immutable.IndexedSeq[DomainAwareRelationship] =
+      if (includeSelf) {
+        relationshipsToSources
+      } else {
+        relationshipsToSources.flatMap(rel => taxo.underlyingTaxonomy.findAllConsecutiveDomainMemberRelationships(rel)).distinct
       }
 
-    // Find the descendant-or-self or descendant members for the given number of generations, if applicable.
-    val conceptsExcludingSiblings: Set[EName] =
-      (dimensionMemberTreeWalkSpecs.map(spec => filterDescendantOrSelfMembers(spec, taxo))).flatten.toSet
-
-    conceptsExcludingSiblings
-  }
-
-  /**
-   * Returns the descendant-or-self members in a dimension-member tree walk according to the parameter specification of the walk.
-   * If the start member must not be included, the tree walk finds descendant members instead of descendant-or-self members.
-   *
-   * It is assumed yet not checked that the tree walk can be made for the given dimension (so the dimension is indeed an ancestor
-   * in a sequence of consecutive "domain-aware" relationships).
-   *
-   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
-   */
-  def filterDescendantOrSelfMembers(
-    treeWalkSpec: DimensionMemberTreeWalkSpec,
-    taxo:         BasicTableTaxonomy): Set[EName] = {
-
-    // Ignoring unusable members without any usable descendants
-
-    val relationshipPaths =
-      taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainMemberRelationshipPaths(
-        treeWalkSpec.startMemberName) { path =>
-          treeWalkSpec.startMember.incomingRelationshipOption.forall(_.isFollowedBy(path.firstRelationship)) &&
-            path.isConsecutiveRelationshipPath &&
-            treeWalkSpec.generationsOption.forall(gen => path.relationships.size <= gen) &&
-            treeWalkSpec.linkroleOption.forall(lr => treeWalkSpec.elrToCheck(path) == lr)
+    val resultPaths: immutable.IndexedSeq[DomainMemberRelationshipPath] =
+      parentRelationships
+        .flatMap { rel =>
+          taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainMemberRelationshipPaths(rel.targetConceptEName) { path =>
+            rel.isFollowedBy(path.firstRelationship) && effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
+          }
+        }
+        .filter { path =>
+          effectiveGenerationsOption.forall(gen => path.relationships.size == gen)
         }
 
-    val resultIncludingStartMember = relationshipPaths.flatMap(_.concepts).toSet
-    if (treeWalkSpec.includeSelf) resultIncludingStartMember else resultIncludingStartMember.diff(Set(treeWalkSpec.startMemberName))
-  }
+    // TODO Ignore unusable members without any usable descendants
 
-  /**
-   * Specification of a dimension member tree walk for some explicit dimension, starting with one member.
-   * The tree walk finds descendant-or-self members in the network, but if the start member must
-   * be excluded the tree walk only finds descendant members.
-   *
-   * The optional generations cannot contain 0. None means unbounded.
-   */
-  final case class DimensionMemberTreeWalkSpec(
-    val explicitDimension: EName,
-    val startMember:       DimensionMemberTreeWalkSpec.StartMember,
-    val includeSelf:       Boolean,
-    val generationsOption: Option[Int],
-    val linkroleOption:    Option[String]) {
-
-    def startMemberName: EName = startMember.startMemberName
-
-    def elrToCheck(path: InterConceptRelationshipPath[DomainMemberRelationship]): String = {
-      startMember match {
-        case startMember: DimensionMemberTreeWalkSpec.DimensionDomainSource =>
-          startMember.dimensionDomainRelationship.elr
-        case startMember: DimensionMemberTreeWalkSpec.MemberSource =>
-          path.relationships.head.elr
-      }
-    }
-  }
-
-  object DimensionMemberTreeWalkSpec {
-
-    sealed trait StartMember {
-      def startMemberName: EName
-      def incomingRelationshipOption: Option[DomainAwareRelationship]
-    }
-
-    final class DimensionDomainSource(val dimensionDomainRelationship: DimensionDomainRelationship) extends StartMember {
-      def startMemberName: EName = dimensionDomainRelationship.targetConceptEName
-      def incomingRelationshipOption: Option[DomainAwareRelationship] = Some(dimensionDomainRelationship)
-    }
-
-    final class MemberSource(val startMemberName: EName) extends StartMember {
-      def incomingRelationshipOption: Option[DomainAwareRelationship] = None
-    }
+    resultPaths
   }
 }
