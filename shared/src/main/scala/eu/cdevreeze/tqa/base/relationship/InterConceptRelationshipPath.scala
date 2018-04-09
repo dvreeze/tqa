@@ -46,6 +46,10 @@ final case class InterConceptRelationshipPath[A <: InterConceptRelationship] pri
     relationships.map(_.sourceConceptEName) :+ relationships.last.targetConceptEName
   }
 
+  def relationshipTargetConcepts: immutable.IndexedSeq[EName] = {
+    relationships.map(_.targetConceptEName)
+  }
+
   def hasCycle: Boolean = {
     val concepts = relationships.map(_.sourceConceptEName) :+ relationships.last.targetConceptEName
     concepts.distinct.size < concepts.size

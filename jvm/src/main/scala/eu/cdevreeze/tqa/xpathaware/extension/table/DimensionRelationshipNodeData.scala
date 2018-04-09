@@ -20,7 +20,6 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.queryapi.DomainAwareRelationshipPath
-import eu.cdevreeze.tqa.base.queryapi.DomainMemberRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
@@ -78,18 +77,18 @@ object DimensionRelationshipNodeData {
 
   /**
    * Finds all "result paths" according to the given dimension relationship node in the given taxonomy.
-   * All concepts in the result paths (including the roots) belong to the resolution of the dimension relationship node.
+   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the dimension relationship node.
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
   def findAllResultPaths(
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     val relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship] =
       findAllDomainAwareRelationshipsToRelationshipSources(dimensionRelationshipNode, taxo)(xpathEvaluator, scope)
 
-    val resultPaths: immutable.IndexedSeq[DomainMemberRelationshipPath] =
+    val resultPaths: immutable.IndexedSeq[DomainAwareRelationshipPath] =
       findAllResultPaths(relationshipsToSources, dimensionRelationshipNode, taxo)
 
     resultPaths
@@ -97,14 +96,10 @@ object DimensionRelationshipNodeData {
 
   /**
    * Finds all relationships to relationship sources according to the given dimension relationship node in the given taxonomy.
-   *
-   * TODO Come up with invented domain-aware relationships where needed, or, alternatively, do not return relationships but pairs of ELRs and domain-members
-   * (like "keys" of domain-aware relationship targets), including invented ones. Using these pairs, we can compute consecutive relationship paths, without
-   * having to invent relationships.
    */
   def findAllDomainAwareRelationshipsToRelationshipSources(
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationship] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationship] = {
 
     // Start with reading the needed information in the dimension relationship node.
 
@@ -113,7 +108,7 @@ object DimensionRelationshipNodeData {
     val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
 
     val rawRelationshipSources: immutable.IndexedSeq[EName] =
-      dimensionRelationNodeData.relationshipSources(xpathEvaluator, scope)
+      dimensionRelationNodeData.relationshipSources(xpathEvaluator, scope).distinct
 
     val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator, scope)
 
@@ -151,15 +146,16 @@ object DimensionRelationshipNodeData {
           .filter(_.relationships.size == 1)
           .distinct
       } else {
-        val sources: Set[EName] = rawRelationshipSources.toSet
-
-        hypercubeDimensions
-          .flatMap { hd =>
-            taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { p =>
-              hd.isFollowedBy(p.firstRelationship) && p.initOption.forall(_.concepts.toSet.intersect(sources).isEmpty)
-            }
+        rawRelationshipSources
+          .flatMap { source =>
+            hypercubeDimensions
+              .flatMap { hd =>
+                taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
+                  hd.isFollowedBy(path.firstRelationship) && path.initOption.forall(!_.concepts.toSet.contains(source))
+                }
+              }
+              .filter(_.targetConcept == source)
           }
-          .filter(path => sources.contains(path.targetConcept))
           .distinct
       }
 
@@ -168,14 +164,14 @@ object DimensionRelationshipNodeData {
 
   /**
    * Finds all "result paths" starting with the given relationships to sources according to the given dimension relationship node in the given taxonomy.
-   * All concepts in the result paths (including the roots) belong to the resolution of the dimension relationship node.
+   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the dimension relationship node.
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
   def findAllResultPaths(
-    relationshipsToSources:    immutable.IndexedSeq[DomainAwareRelationship],
+    relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship],
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo:                      BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     // Start with reading the needed information in the dimension relationship node.
 
@@ -202,15 +198,15 @@ object DimensionRelationshipNodeData {
         relationshipsToSources.flatMap(rel => taxo.underlyingTaxonomy.findAllConsecutiveDomainMemberRelationships(rel)).distinct
       }
 
-    val resultPaths: immutable.IndexedSeq[DomainMemberRelationshipPath] =
+    val resultPaths: immutable.IndexedSeq[DomainAwareRelationshipPath] =
       parentRelationships
         .flatMap { rel =>
-          taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainMemberRelationshipPaths(rel.targetConceptEName) { path =>
-            rel.isFollowedBy(path.firstRelationship) && effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
+          taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(rel.sourceConceptEName) { path =>
+            (path.firstRelationship == rel) && effectiveGenerationsOption.forall(gen => path.relationships.size - 1 <= gen)
           }
         }
         .filter { path =>
-          effectiveGenerationsOption.forall(gen => path.relationships.size == gen)
+          effectiveGenerationsOption.forall(gen => path.relationships.size - 1 == gen)
         }
 
     // TODO Ignore unusable members without any usable descendants

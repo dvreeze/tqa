@@ -93,7 +93,7 @@ class DimensionRelationshipNodeTest extends FunSuite {
     }
 
     val members: Set[EName] =
-      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
       members
@@ -137,7 +137,7 @@ class DimensionRelationshipNodeTest extends FunSuite {
     }
 
     val members: Set[EName] =
-      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
       members
@@ -181,7 +181,7 @@ class DimensionRelationshipNodeTest extends FunSuite {
     }
 
     val members: Set[EName] =
-      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f1", "f2", "f3", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
       members
@@ -225,7 +225,7 @@ class DimensionRelationshipNodeTest extends FunSuite {
     }
 
     val members: Set[EName] =
-      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
       members
@@ -268,14 +268,12 @@ class DimensionRelationshipNodeTest extends FunSuite {
       dimensionRelationshipNodeData.formulaAxis
     }
 
-    // Fix this in DimensionRelationshipNodeData (inventing relationships where needed incoming to relationship sources)
-    //
-    //    val members: Set[EName] =
-    //      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
-    //
-    //    assertResult(Set("f1", "f2", "f3", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
-    //      members
-    //    }
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f1", "f2", "f3", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
   }
 
   // 3220-dimension-relationship-node-linkrole-testcase-v01i
@@ -313,7 +311,7 @@ class DimensionRelationshipNodeTest extends FunSuite {
     }
 
     val members: Set[EName] =
-      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5").map(nm => EName(tableExampleNs, nm))) {
       members
@@ -355,7 +353,7 @@ class DimensionRelationshipNodeTest extends FunSuite {
     }
 
     val members: Set[EName] =
-      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f0", "f1", "f2", "f3").map(nm => EName(tableExampleNs, nm))) {
       members
@@ -397,7 +395,7 @@ class DimensionRelationshipNodeTest extends FunSuite {
     }
 
     val members: Set[EName] =
-      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
       members
