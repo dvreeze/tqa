@@ -21,6 +21,7 @@ import scala.collection.immutable
 import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.queryapi.DomainAwareRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
+import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
@@ -77,7 +78,8 @@ object DimensionRelationshipNodeData {
 
   /**
    * Finds all "result paths" according to the given dimension relationship node in the given taxonomy.
-   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the dimension relationship node.
+   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the dimension relationship node,
+   * but mind the `usable` property of each relationship in a path.
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
@@ -163,8 +165,9 @@ object DimensionRelationshipNodeData {
   }
 
   /**
-   * Finds all "result paths" starting with the given relationships to sources according to the given dimension relationship node in the given taxonomy.
-   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the dimension relationship node.
+   * Finds all "result paths" according to the given dimension relationship node in the given taxonomy.
+   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the dimension relationship node,
+   * but mind the `usable` property of each relationship in a path.
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
@@ -182,6 +185,7 @@ object DimensionRelationshipNodeData {
 
     // Number of generations (optional), from the perspective of finding the descendant-or-self
     // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
+
     val effectiveGenerationsOption: Option[Int] = {
       val rawValue = dimensionRelationNodeData.generations(xpathEvaluator, scope)
       val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
@@ -191,26 +195,47 @@ object DimensionRelationshipNodeData {
 
     // Next resolve the dimension relationship node
 
-    val parentRelationships: immutable.IndexedSeq[DomainAwareRelationship] =
+    val incomingRelationshipsToHighestResults: immutable.IndexedSeq[DomainAwareRelationship] =
       if (includeSelf) {
         relationshipsToSources
       } else {
         relationshipsToSources.flatMap(rel => taxo.underlyingTaxonomy.findAllConsecutiveDomainMemberRelationships(rel)).distinct
       }
 
-    val resultPaths: immutable.IndexedSeq[DomainAwareRelationshipPath] =
-      parentRelationships
+    val rawResultPaths: immutable.IndexedSeq[DomainAwareRelationshipPath] =
+      incomingRelationshipsToHighestResults
         .flatMap { rel =>
           taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(rel.sourceConceptEName) { path =>
-            (path.firstRelationship == rel) && effectiveGenerationsOption.forall(gen => path.relationships.size - 1 <= gen)
+            (path.firstRelationship == rel) &&
+              effectiveGenerationsOption.forall(gen => compareAgainstGenerations(path, gen, includeSelf))
           }
         }
         .filter { path =>
-          effectiveGenerationsOption.forall(gen => path.relationships.size - 1 == gen)
+          effectiveGenerationsOption.forall(gen => compareAgainstGenerations(path, gen, includeSelf))
         }
 
-    // TODO Ignore unusable members without any usable descendants
+    val resultPaths: immutable.IndexedSeq[DomainAwareRelationshipPath] =
+      rawResultPaths
+        .flatMap { path =>
+          val lastUsableIdx = path.relationships.lastIndexWhere(_.usable)
+          val relationships =
+            if (lastUsableIdx < 0) Vector() else path.relationships.take(lastUsableIdx + 1)
+
+          if (relationships.isEmpty) {
+            None
+          } else {
+            Some(InterConceptRelationshipPath.from(relationships))
+          }
+        }
 
     resultPaths
+  }
+
+  private def compareAgainstGenerations(path: DomainAwareRelationshipPath, gen: Int, includeSelf: Boolean): Boolean = {
+    if (includeSelf) {
+      path.relationships.size - 1 <= gen
+    } else {
+      path.relationships.size <= gen
+    }
   }
 }

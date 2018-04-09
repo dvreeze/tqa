@@ -56,6 +56,98 @@ class DimensionRelationshipNodeTest extends FunSuite {
 
   private val relativeUriTo3200Dir = URI.create("table-linkbase-conf-2015-08-12/conf/tests/3200-dimension-relationship-node/")
 
+  // 3200-dimension-relationship-node-testcase-v01i
+
+  test("testSimpleTable") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "dimension-domain-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3200-dimension-relationship-node-testcase-v03i
+
+  test("testDimensionRelationshipNodeResultingInTreeWithUnusableLeaf") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "dimension-relationship-node-unusable-leaf-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "G")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "g0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    assertResult(4) {
+      dimensionRelationshipNodeData.generations
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("g0", "g1", "g2", "g3", "g4").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
   // 3210-dimension-relationship-node-relationship-source-testcase-v01i
 
   test("testDimensionRelationshipNodeWithRelationshipSourceOmitted") {
@@ -398,6 +490,258 @@ class DimensionRelationshipNodeTest extends FunSuite {
       findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3240-dimension-relationship-node-formula-axis-testcase-v01i
+
+  test("testDimensionRelationshipNodeWithFormulaAxisOmmitted") {
+    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/axis-omitted-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3240-dimension-relationship-node-formula-axis-testcase-v02i
+
+  test("testDimensionRelationshipNodeWithFormulaAxisDescendantOrSelf") {
+    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/descendant-or-self-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3240-dimension-relationship-node-formula-axis-testcase-v03i
+
+  test("testDimensionRelationshipNodeWithFormulaAxisDescendant") {
+    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/descendant-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3240-dimension-relationship-node-formula-axis-testcase-v04i
+
+  test("testDimensionRelationshipNodeWithFormulaAxisChildOrSelf") {
+    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/child-or-self-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.ChildOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f4").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3240-dimension-relationship-node-formula-axis-testcase-v05i
+
+  test("testDimensionRelationshipNodeWithFormulaAxisChild") {
+    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/child-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.ChildAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f1", "f4").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3240-dimension-relationship-node-formula-axis-testcase-v06i
+
+  test("testDimensionRelationshipNodeWithFormulaAxisExpression") {
+    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/axis-expression-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.ChildOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f4").map(nm => EName(tableExampleNs, nm))) {
       members
     }
   }
