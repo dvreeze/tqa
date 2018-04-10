@@ -54,7 +54,8 @@ class DimensionRelationshipNodeTest extends FunSuite {
 
   private val tableExampleNs = "http://www.xbrl.org/table-examples"
 
-  private val relativeUriTo3200Dir = URI.create("table-linkbase-conf-2015-08-12/conf/tests/3200-dimension-relationship-node/")
+  private val relativeUriTo3200Dir =
+    URI.create("table-linkbase-conf-2015-08-12/conf/tests/3200-dimension-relationship-node/")
 
   // 3200-dimension-relationship-node-testcase-v01i
 
@@ -285,7 +286,8 @@ class DimensionRelationshipNodeTest extends FunSuite {
   test("testDimensionRelationshipNodeWithRelationshipSourceExpression") {
     val instance =
       makeTestInstance(
-        relativeUriTo3200Dir.toString + "3210-dimension-relationship-node-relationship-source/dimension-relationship-node-source-expression-instance.xml")
+        relativeUriTo3200Dir.toString +
+          "3210-dimension-relationship-node-relationship-source/dimension-relationship-node-source-expression-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -329,7 +331,8 @@ class DimensionRelationshipNodeTest extends FunSuite {
   test("testDimensionRelationshipNodeWithRelationshipSourcesAndRelationshipSourceExpressions") {
     val instance =
       makeTestInstance(
-        relativeUriTo3200Dir.toString + "3210-dimension-relationship-node-relationship-source/dimension-relationship-node-mixed-sources-instance.xml")
+        relativeUriTo3200Dir.toString +
+          "3210-dimension-relationship-node-relationship-source/dimension-relationship-node-mixed-sources-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -371,7 +374,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3220-dimension-relationship-node-linkrole-testcase-v01i
 
   test("testDimensionRelationshipNodeWithLinkroleOmitted") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3220-dimension-relationship-node-linkrole/linkrole-omitted-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3220-dimension-relationship-node-linkrole/linkrole-omitted-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -413,7 +418,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3220-dimension-relationship-node-linkrole-testcase-v02i
 
   test("testDimensionRelationshipNodeWithTargetRoleSwitch") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3220-dimension-relationship-node-linkrole/target-role-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3220-dimension-relationship-node-linkrole/target-role-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -455,7 +462,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3220-dimension-relationship-node-linkrole-testcase-v07
 
   test("testDimensionRelationshipNodeWithSimpleLinkroleExpression") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3220-dimension-relationship-node-linkrole/linkrole-expression-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3220-dimension-relationship-node-linkrole/linkrole-expression-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -497,7 +506,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3240-dimension-relationship-node-formula-axis-testcase-v01i
 
   test("testDimensionRelationshipNodeWithFormulaAxisOmmitted") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/axis-omitted-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/axis-omitted-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -539,7 +550,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3240-dimension-relationship-node-formula-axis-testcase-v02i
 
   test("testDimensionRelationshipNodeWithFormulaAxisDescendantOrSelf") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/descendant-or-self-axis-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/descendant-or-self-axis-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -581,7 +594,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3240-dimension-relationship-node-formula-axis-testcase-v03i
 
   test("testDimensionRelationshipNodeWithFormulaAxisDescendant") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/descendant-axis-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/descendant-axis-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -623,7 +638,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3240-dimension-relationship-node-formula-axis-testcase-v04i
 
   test("testDimensionRelationshipNodeWithFormulaAxisChildOrSelf") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/child-or-self-axis-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/child-or-self-axis-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -665,7 +682,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3240-dimension-relationship-node-formula-axis-testcase-v05i
 
   test("testDimensionRelationshipNodeWithFormulaAxisChild") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/child-axis-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/child-axis-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -707,7 +726,9 @@ class DimensionRelationshipNodeTest extends FunSuite {
   // 3240-dimension-relationship-node-formula-axis-testcase-v06i
 
   test("testDimensionRelationshipNodeWithFormulaAxisExpression") {
-    val instance = makeTestInstance(relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/axis-expression-instance.xml")
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3240-dimension-relationship-node-formula-axis/axis-expression-instance.xml")
     val basicTaxo = buildTaxonomy(instance)
 
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
@@ -742,6 +763,198 @@ class DimensionRelationshipNodeTest extends FunSuite {
       findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("f0", "f1", "f4").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3250-dimension-relationship-node-generations-testcase-v01i
+
+  test("testDimensionRelationshipNodeWithGenerationsOne") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3250-dimension-relationship-node-generations/single-generation-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    assertResult(1) {
+      dimensionRelationshipNodeData.generations
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f4").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3250-dimension-relationship-node-generations-testcase-v02i
+
+  test("testDimensionRelationshipNodeWithGenerationsTwo") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3250-dimension-relationship-node-generations/multiple-generations-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    assertResult(2) {
+      dimensionRelationshipNodeData.generations
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f2", "f3", "f4").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3250-dimension-relationship-node-generations-testcase-v03i
+
+  test("testDimensionRelationshipNodeWithGenerationsZero") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3250-dimension-relationship-node-generations/zero-generations-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    assertResult(0) {
+      dimensionRelationshipNodeData.generations
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9").map(nm => EName(tableExampleNs, nm))) {
+      members
+    }
+  }
+
+  // 3250-dimension-relationship-node-generations-testcase-v05i
+
+  test("testDimensionRelationshipNodeWithGenerationsExpression") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3200Dir.toString + "3250-dimension-relationship-node-generations/generations-expression-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    val dimensionRelationshipNodes =
+      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+
+    assertResult(1) {
+      dimensionRelationshipNodes.size
+    }
+
+    val dimensionRelationshipNode = dimensionRelationshipNodes.head
+    val dimensionRelationshipNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
+
+    assertResult(EName(tableExampleNs, "F")) {
+      dimensionRelationshipNode.dimensionName
+    }
+
+    assertResult(Some("http://www.xbrl.org/table-examples/dimension-domains")) {
+      dimensionRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(Set(EName(tableExampleNs, "f0"))) {
+      dimensionRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      dimensionRelationshipNodeData.formulaAxis
+    }
+
+    assertResult(2) {
+      dimensionRelationshipNodeData.generations
+    }
+
+    val members: Set[EName] =
+      findAllResultPaths(dimensionRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
+
+    assertResult(Set("f0", "f1", "f2", "f3", "f4").map(nm => EName(tableExampleNs, nm))) {
       members
     }
   }
