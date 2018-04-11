@@ -20,6 +20,7 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.base.relationship.EmptiableInterConceptRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
@@ -85,12 +86,87 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 object ConceptRelationshipNodeData {
 
   /**
+   * Finds all emptiable "result paths" according to the given concept relationship node in the given taxonomy.
+   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the concept relationship node.
+   *
+   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
+   */
+  def findAllResultPaths(
+    conceptRelationshipNode: ConceptRelationshipNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[EmptiableInterConceptRelationshipPath] = {
+
+    val pathsToSources: immutable.IndexedSeq[EmptiableInterConceptRelationshipPath] =
+      findAllEmptiablePathsToRelationshipSources(conceptRelationshipNode, taxo)(xpathEvaluator, scope)
+
+    val resultPaths: immutable.IndexedSeq[EmptiableInterConceptRelationshipPath] =
+      findAllResultPaths(pathsToSources, conceptRelationshipNode, taxo)
+
+    resultPaths
+  }
+
+  /**
+   * Finds all emptiable relationship paths to relationship sources according to the given concept relationship node in the given taxonomy.
+   */
+  def findAllEmptiablePathsToRelationshipSources(
+    conceptRelationshipNode: ConceptRelationshipNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[EmptiableInterConceptRelationshipPath] = {
+
+    require(xpathEvaluator != null && scope != null) // Pleasing the compiler for now.
+
+    // Start with reading the needed information in the concept relationship node.
+
+    // ...
+
+    // Next find all emptiable relationship paths ending in the relationship sources.
+
+    // ...
+
+    ???
+  }
+
+  /**
+   * Finds all emptiable "result paths" according to the given concept relationship node in the given taxonomy.
+   * All `relationshipTargetConcepts` in the result paths belong to the resolution of the concept relationship node.
+   *
+   * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
+   */
+  def findAllResultPaths(
+    pathsToSources: immutable.IndexedSeq[EmptiableInterConceptRelationshipPath],
+    conceptRelationshipNode: ConceptRelationshipNode,
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[EmptiableInterConceptRelationshipPath] = {
+
+    require(xpathEvaluator != null && scope != null) // Pleasing the compiler for now.
+
+    // Start with reading the needed information in the concept relationship node.
+
+    // ...
+
+    // val conceptRelationNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+    // val axis = conceptRelationNodeData.formulaAxis(xpathEvaluator, scope)
+
+    // val includeSelf: Boolean = axis.includesSelf
+
+    // Number of generations (optional), from the perspective of finding the descendant-or-self
+    // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
+
+    // ...
+
+    // Next resolve the concept relationship node
+
+    // ...
+
+    ???
+  }
+
+  // TODO Remove the methods and nested classes below
+
+  /**
    * Finds all concepts referred to by the given concept relationship node in the given taxonomy.
    */
   // scalastyle:off method.length
   def findAllConceptsInConceptRelationshipNode(
     conceptRelationshipNode: ConceptRelationshipNode,
-    taxo:                    BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Set[EName] = {
 
     val conceptRelationNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
     val axis = conceptRelationNodeData.formulaAxis(xpathEvaluator, scope)
@@ -162,7 +238,7 @@ object ConceptRelationshipNodeData {
    */
   def filterDescendantOrSelfConcepts(
     treeWalkSpec: ConceptTreeWalkSpec,
-    taxo:         BasicTableTaxonomy): Set[EName] = {
+    taxo: BasicTableTaxonomy): Set[EName] = {
 
     val relationshipPaths =
       taxo.underlyingTaxonomy.filterOutgoingConsecutiveInterConceptRelationshipPaths(
@@ -182,10 +258,10 @@ object ConceptRelationshipNodeData {
 
   private def resolveXfiRoot(
     linkroleOption: Option[String],
-    arcrole:        String,
+    arcrole: String,
     linknameOption: Option[EName],
-    arcnameOption:  Option[EName],
-    taxo:           BasicTableTaxonomy): Set[EName] = {
+    arcnameOption: Option[EName],
+    taxo: BasicTableTaxonomy): Set[EName] = {
 
     val relationships =
       taxo.underlyingTaxonomy filterInterConceptRelationships { rel =>
@@ -198,12 +274,12 @@ object ConceptRelationshipNodeData {
   }
 
   private def findAllSiblings(
-    concept:        EName,
+    concept: EName,
     linkroleOption: Option[String],
-    arcrole:        String,
+    arcrole: String,
     linknameOption: Option[EName],
-    arcnameOption:  Option[EName],
-    taxo:           BasicTableTaxonomy): Set[EName] = {
+    arcnameOption: Option[EName],
+    taxo: BasicTableTaxonomy): Set[EName] = {
 
     val incomingRelationships =
       taxo.underlyingTaxonomy.filterIncomingInterConceptRelationships(concept) { rel =>
@@ -223,11 +299,11 @@ object ConceptRelationshipNodeData {
   }
 
   private def relationshipMatchesCriteria(
-    relationship:   InterConceptRelationship,
+    relationship: InterConceptRelationship,
     linkroleOption: Option[String],
-    arcrole:        String,
+    arcrole: String,
     linknameOption: Option[EName],
-    arcnameOption:  Option[EName]): Boolean = {
+    arcnameOption: Option[EName]): Boolean = {
 
     linkroleOption.forall(lr => relationship.elr == lr) &&
       (relationship.arcrole == arcrole) &&
@@ -243,11 +319,11 @@ object ConceptRelationshipNodeData {
    * The optional generations cannot contain 0. None means unbounded.
    */
   final case class ConceptTreeWalkSpec(
-    val startConcept:      EName,
-    val includeSelf:       Boolean,
+    val startConcept: EName,
+    val includeSelf: Boolean,
     val generationsOption: Option[Int],
-    val linkroleOption:    Option[String],
-    val arcrole:           String,
-    val linknameOption:    Option[EName],
-    val arcnameOption:     Option[EName])
+    val linkroleOption: Option[String],
+    val arcrole: String,
+    val linknameOption: Option[EName],
+    val arcnameOption: Option[EName])
 }
