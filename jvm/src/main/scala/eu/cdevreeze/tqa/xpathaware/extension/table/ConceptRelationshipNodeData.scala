@@ -86,7 +86,7 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 object ConceptRelationshipNodeData {
 
   /**
-   * Finds all emptiable "result paths" according to the given concept relationship node in the given taxonomy.
+   * Finds all "result paths" according to the given concept relationship node in the given taxonomy.
    * All `relationshipTargetConcepts` in the result paths belong to the resolution of the concept relationship node.
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
@@ -151,7 +151,7 @@ object ConceptRelationshipNodeData {
   }
 
   /**
-   * Finds all emptiable "result paths" according to the given concept relationship node in the given taxonomy.
+   * Finds all "result paths" according to the given concept relationship node in the given taxonomy.
    * All `relationshipTargetConcepts` in the result paths belong to the resolution of the concept relationship node.
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
