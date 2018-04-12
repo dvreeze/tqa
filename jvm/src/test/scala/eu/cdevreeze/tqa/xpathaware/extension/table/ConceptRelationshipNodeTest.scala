@@ -103,7 +103,7 @@ class ConceptRelationshipNodeTest extends FunSuite {
     }
 
     val concepts: Set[EName] =
-      findAllConceptsInConceptRelationshipNode(conceptRelationshipNode, tableTaxo).toSet
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("base", "o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8", "o9").map(nm => EName(tableExampleNs, nm))) {
       concepts
@@ -152,7 +152,7 @@ class ConceptRelationshipNodeTest extends FunSuite {
     }
 
     val concepts: Set[EName] =
-      findAllConceptsInConceptRelationshipNode(conceptRelationshipNode, tableTaxo).toSet
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("base", "o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8", "o9").map(nm => EName(tableExampleNs, nm))) {
       concepts
@@ -201,7 +201,7 @@ class ConceptRelationshipNodeTest extends FunSuite {
     }
 
     val concepts: Set[EName] =
-      findAllConceptsInConceptRelationshipNode(conceptRelationshipNode, tableTaxo).toSet
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
     assertResult(Set("o5", "o6", "o7", "o8", "o9").map(nm => EName(tableExampleNs, nm))) {
       concepts
@@ -250,14 +250,11 @@ class ConceptRelationshipNodeTest extends FunSuite {
     }
 
     val concepts: Set[EName] =
-      findAllConceptsInConceptRelationshipNode(conceptRelationshipNode, tableTaxo).toSet
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.relationshipTargetConcepts).toSet
 
-    // TODO Fix
-
-    assertResult(true)(concepts.nonEmpty)
-    //    assertResult(Set("o2", "o5", "o6", "o7", "o8", "o9").map(nm => EName(tableExampleNs, nm))) {
-    //      concepts
-    //    }
+    assertResult(Set("o2", "o5", "o6", "o7", "o8", "o9").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
   }
 
   // Helper methods
