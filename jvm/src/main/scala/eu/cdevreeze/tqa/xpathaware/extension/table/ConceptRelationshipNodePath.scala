@@ -40,12 +40,12 @@ sealed trait ConceptRelationshipNodePath {
   def sourceConcept: EName
 
   /**
-   * Returns the target concept of the path, which is the same as the source concept for empty paths
+   * Returns the target concept of the path, which is the same as the source concept for single concept paths
    */
   def targetConcept: EName
 
   /**
-   * Returns the source concept of empty paths and descendant-or-self paths, and None otherwise
+   * Returns the source concept of single concept paths and descendant-or-self paths wrapped in an Option, and None otherwise
    */
   def selfConceptOption: Option[EName]
 

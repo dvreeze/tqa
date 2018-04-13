@@ -416,6 +416,589 @@ class ConceptRelationshipNodeTest extends FunSuite {
     }
   }
 
+  // 3160-concept-relationship-node-formula-axis-testcase-v04i
+
+  test("testConceptRelationshipNodeWithFormulaAxisChildOrSelf") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/child-or-self-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "base"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.ChildOrSelfAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("base", "o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("base").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v05i
+
+  test("testConceptRelationshipNodeWithFormulaAxisChild") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/child-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "base"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.ChildAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v06i
+
+  test("testConceptRelationshipNodeWithFormulaAxisSibling") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/sibling-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o2"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("o1", "o3").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v07i
+
+  test("testConceptRelationshipNodeWithFormulaAxisSiblingOrSelf") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/sibling-or-self-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o2"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingOrSelfAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v08i
+
+  test("testConceptRelationshipNodeWithFormulaAxisSiblingOrDescendant") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/sibling-or-descendant-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o2"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingOrDescendantAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o4", "o5", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("o1", "o4", "o5", "o3").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v08ai
+
+  test("testConceptRelationshipNodeWithFormulaAxisSiblingOrDescendantAndNonTrivialTree") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/sibling-or-descendant-axis-descendant-tree-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o3"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingOrDescendantAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o2", "o6", "o7", "o8", "o9").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("o1", "o2", "o6", "o7").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v09i
+
+  test("testConceptRelationshipNodeWithFormulaAxisSiblingOrDescendantOrSelf") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/sibling-or-descendant-or-self-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o2"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingOrDescendantOrSelfAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o2", "o4", "o5", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(List("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).distinct
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v10i
+
+  test("testConceptRelationshipNodeWithFormulaAxisSiblingOrSelfStartingFromNetworkRoot") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/root-sibling-or-self-axis-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o2"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(Some("http://www.xbrl.org/alternative-presentation")) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingOrSelfAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(List("o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).distinct
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v11i
+
+  test("testConceptRelationshipNodeForSiblingsWithFormulaAxisSibling") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/sibling-axis-sibling-sources-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o1"), EName(tableExampleNs, "o2"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(List("o2", "o3", "o1").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).distinct
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v12i
+
+  test("testConceptRelationshipNodeForSiblingsWithFormulaAxisSiblingOrSelf") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/sibling-or-self-axis-sibling-sources-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "o1"), EName(tableExampleNs, "o2"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.SiblingOrSelfAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(List("o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).distinct
+    }
+  }
+
+  // 3160-concept-relationship-node-formula-axis-testcase-v15i
+
+  test("testConceptRelationshipNodeWithFormulaAxisExpression") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3160-concept-relationship-node-formula-axis/axis-expression-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set(EName(tableExampleNs, "base"))) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.ChildOrSelfAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("base", "o1", "o2", "o3").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("base").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+  }
+
   // Helper methods
 
   private def buildTaxonomy(xbrlInstance: XbrlInstance, doResolveProhibitionAndOverriding: Boolean = false): BasicTaxonomy = {

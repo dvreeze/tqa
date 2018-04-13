@@ -191,28 +191,31 @@ object ConceptRelationshipNodeData {
 
     // Next resolve the concept relationship node
 
-    axis match {
-      case ConceptRelationshipNodes.FormulaAxis.DescendantAxis =>
-        findAllDescendants(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
-      case ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis =>
-        findAllDescendantsOrSelf(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
-      case ConceptRelationshipNodes.FormulaAxis.ChildAxis =>
-        findAllChildren(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-      case ConceptRelationshipNodes.FormulaAxis.ChildOrSelfAxis =>
-        findAllChildrenOrSelf(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-      case ConceptRelationshipNodes.FormulaAxis.SiblingAxis =>
-        findAllSiblings(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-      case ConceptRelationshipNodes.FormulaAxis.SiblingOrSelfAxis =>
-        findAllSiblingsOrSelf(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-      case ConceptRelationshipNodes.FormulaAxis.SiblingOrDescendantAxis =>
-        findAllSiblingsOrDescendants(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
-      case ConceptRelationshipNodes.FormulaAxis.SiblingOrDescendantOrSelfAxis =>
-        findAllSiblingsOrDescendantsOrSelf(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
-    }
+    relationshipSources
+      .flatMap { sourceConcept =>
+        axis match {
+          case ConceptRelationshipNodes.FormulaAxis.DescendantAxis =>
+            findAllDescendants(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+          case ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis =>
+            findAllDescendantsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+          case ConceptRelationshipNodes.FormulaAxis.ChildAxis =>
+            findAllDescendants(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, Some(1), taxo)
+          case ConceptRelationshipNodes.FormulaAxis.ChildOrSelfAxis =>
+            findAllDescendantsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, Some(1), taxo)
+          case ConceptRelationshipNodes.FormulaAxis.SiblingAxis =>
+            findAllSiblings(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
+          case ConceptRelationshipNodes.FormulaAxis.SiblingOrSelfAxis =>
+            findAllSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
+          case ConceptRelationshipNodes.FormulaAxis.SiblingOrDescendantAxis =>
+            findAllSiblingsOrDescendants(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+          case ConceptRelationshipNodes.FormulaAxis.SiblingOrDescendantOrSelfAxis =>
+            findAllSiblingsOrDescendantsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+        }
+      }
   }
 
   private def findAllDescendants(
-    relationshipSources: immutable.IndexedSeq[EName],
+    sourceConcept: EName,
     linkrole: String,
     arcrole: String,
     linknameOption: Option[EName],
@@ -220,20 +223,17 @@ object ConceptRelationshipNodeData {
     effectiveGenerationsOption: Option[Int],
     taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
-    relationshipSources
-      .flatMap { sourceConcept =>
-        val paths = taxo.underlyingTaxonomy
-          .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[InterConceptRelationship]) { path =>
-            relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
-              effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
-          }
-
-        paths.map(p => DescendantPath(p))
+    val paths = taxo.underlyingTaxonomy
+      .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[InterConceptRelationship]) { path =>
+        relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
+          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
       }
+
+    paths.map(p => DescendantPath(p))
   }
 
   private def findAllDescendantsOrSelf(
-    relationshipSources: immutable.IndexedSeq[EName],
+    sourceConcept: EName,
     linkrole: String,
     arcrole: String,
     linknameOption: Option[EName],
@@ -241,46 +241,21 @@ object ConceptRelationshipNodeData {
     effectiveGenerationsOption: Option[Int],
     taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
-    relationshipSources
-      .flatMap { sourceConcept =>
-        val paths = taxo.underlyingTaxonomy
-          .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[InterConceptRelationship]) { path =>
-            relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
-              effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
-          }
-
-        if (paths.isEmpty) {
-          immutable.IndexedSeq(SingleConceptPath(sourceConcept))
-        } else {
-          paths.map(p => DescendantOrSelfPath(p))
-        }
+    val paths = taxo.underlyingTaxonomy
+      .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[InterConceptRelationship]) { path =>
+        relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
+          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
       }
-  }
 
-  private def findAllChildren(
-    relationshipSources: immutable.IndexedSeq[EName],
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
-
-    findAllDescendants(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, Some(1), taxo)
-  }
-
-  private def findAllChildrenOrSelf(
-    relationshipSources: immutable.IndexedSeq[EName],
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
-
-    findAllDescendantsOrSelf(relationshipSources, linkrole, arcrole, linknameOption, arcnameOption, Some(1), taxo)
+    if (paths.isEmpty) {
+      immutable.IndexedSeq(SingleConceptPath(sourceConcept))
+    } else {
+      paths.map(p => DescendantOrSelfPath(p))
+    }
   }
 
   private def findAllSiblings(
-    relationshipSources: immutable.IndexedSeq[EName],
+    sourceConcept: EName,
     linkrole: String,
     arcrole: String,
     linknameOption: Option[EName],
@@ -289,19 +264,18 @@ object ConceptRelationshipNodeData {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
-    relationshipSources
-      .flatMap { sourceConcept =>
-        if (roots.contains(sourceConcept)) {
-          roots.filterNot(Set(sourceConcept))
-        } else {
-          findAllNonRootSiblings(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-        }
+    val concepts =
+      if (roots.contains(sourceConcept)) {
+        roots.filterNot(Set(sourceConcept))
+      } else {
+        findAllNonRootSiblings(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
       }
-      .map(concept => SingleConceptPath(concept))
+
+    concepts.map(concept => SingleConceptPath(concept))
   }
 
   private def findAllSiblingsOrSelf(
-    relationshipSources: immutable.IndexedSeq[EName],
+    sourceConcept: EName,
     linkrole: String,
     arcrole: String,
     linknameOption: Option[EName],
@@ -310,19 +284,18 @@ object ConceptRelationshipNodeData {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
-    relationshipSources
-      .flatMap { sourceConcept =>
-        if (roots.contains(sourceConcept)) {
-          roots
-        } else {
-          findAllNonRootSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-        }
+    val concepts =
+      if (roots.contains(sourceConcept)) {
+        roots
+      } else {
+        findAllNonRootSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
       }
-      .map(concept => SingleConceptPath(concept))
+
+    concepts.map(concept => SingleConceptPath(concept))
   }
 
   private def findAllSiblingsOrDescendants(
-    relationshipSources: immutable.IndexedSeq[EName],
+    sourceConcept: EName,
     linkrole: String,
     arcrole: String,
     linknameOption: Option[EName],
@@ -332,27 +305,24 @@ object ConceptRelationshipNodeData {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
-    relationshipSources
-      .flatMap { sourceConcept =>
-        val siblingsOrSelf =
-          if (roots.contains(sourceConcept)) {
-            roots
-          } else {
-            findAllNonRootSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-          }
-
-        siblingsOrSelf.flatMap { concept =>
-          if (concept == sourceConcept) {
-            findAllDescendants(Vector(concept), linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
-          } else {
-            immutable.IndexedSeq(SingleConceptPath(concept))
-          }
-        }
+    val siblingsOrSelf =
+      if (roots.contains(sourceConcept)) {
+        roots
+      } else {
+        findAllNonRootSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
       }
+
+    siblingsOrSelf.flatMap { concept =>
+      if (concept == sourceConcept) {
+        findAllDescendants(concept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+      } else {
+        immutable.IndexedSeq(SingleConceptPath(concept))
+      }
+    }
   }
 
   private def findAllSiblingsOrDescendantsOrSelf(
-    relationshipSources: immutable.IndexedSeq[EName],
+    sourceConcept: EName,
     linkrole: String,
     arcrole: String,
     linknameOption: Option[EName],
@@ -362,23 +332,20 @@ object ConceptRelationshipNodeData {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
-    relationshipSources
-      .flatMap { sourceConcept =>
-        val siblingsOrSelf =
-          if (roots.contains(sourceConcept)) {
-            roots
-          } else {
-            findAllNonRootSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
-          }
-
-        siblingsOrSelf.flatMap { concept =>
-          if (concept == sourceConcept) {
-            findAllDescendantsOrSelf(Vector(concept), linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
-          } else {
-            immutable.IndexedSeq(SingleConceptPath(concept))
-          }
-        }
+    val siblingsOrSelf =
+      if (roots.contains(sourceConcept)) {
+        roots
+      } else {
+        findAllNonRootSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
       }
+
+    siblingsOrSelf.flatMap { concept =>
+      if (concept == sourceConcept) {
+        findAllDescendantsOrSelf(concept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+      } else {
+        immutable.IndexedSeq(SingleConceptPath(concept))
+      }
+    }
   }
 
   private def resolveXfiRoot(
