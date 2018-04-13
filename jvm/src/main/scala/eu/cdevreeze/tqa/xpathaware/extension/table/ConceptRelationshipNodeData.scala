@@ -85,6 +85,8 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
 
 object ConceptRelationshipNodeData {
 
+  import ConceptRelationshipNodePath._
+
   /**
    * Finds all "result paths" according to the given concept relationship node in the given taxonomy.
    * All `relationshipTargetConcepts` in the result paths belong to the resolution of the concept relationship node.
@@ -226,7 +228,7 @@ object ConceptRelationshipNodeData {
               effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
           }
 
-        paths.map(p => ConceptRelationshipNodePath(p))
+        paths.map(p => DescendantPath(p))
       }
   }
 
@@ -248,9 +250,9 @@ object ConceptRelationshipNodeData {
           }
 
         if (paths.isEmpty) {
-          immutable.IndexedSeq(ConceptRelationshipNodePath(sourceConcept))
+          immutable.IndexedSeq(SingleConceptPath(sourceConcept))
         } else {
-          paths.map(p => ConceptRelationshipNodePath(sourceConcept, p))
+          paths.map(p => DescendantOrSelfPath(p))
         }
       }
   }
@@ -295,7 +297,7 @@ object ConceptRelationshipNodeData {
           findAllNonRootSiblings(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
         }
       }
-      .map(concept => ConceptRelationshipNodePath(concept))
+      .map(concept => SingleConceptPath(concept))
   }
 
   private def findAllSiblingsOrSelf(
@@ -316,7 +318,7 @@ object ConceptRelationshipNodeData {
           findAllNonRootSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
         }
       }
-      .map(concept => ConceptRelationshipNodePath(concept))
+      .map(concept => SingleConceptPath(concept))
   }
 
   private def findAllSiblingsOrDescendants(
@@ -343,7 +345,7 @@ object ConceptRelationshipNodeData {
           if (concept == sourceConcept) {
             findAllDescendants(Vector(concept), linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
           } else {
-            immutable.IndexedSeq(ConceptRelationshipNodePath(concept))
+            immutable.IndexedSeq(SingleConceptPath(concept))
           }
         }
       }
@@ -373,7 +375,7 @@ object ConceptRelationshipNodeData {
           if (concept == sourceConcept) {
             findAllDescendantsOrSelf(Vector(concept), linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
           } else {
-            immutable.IndexedSeq(ConceptRelationshipNodePath(concept))
+            immutable.IndexedSeq(SingleConceptPath(concept))
           }
         }
       }

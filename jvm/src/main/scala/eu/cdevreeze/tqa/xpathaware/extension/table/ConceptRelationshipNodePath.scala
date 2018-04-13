@@ -27,71 +27,78 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final case class ConceptRelationshipNodePath(
-  startConceptOption: Option[EName],
-  interConceptRelationshipPathOption: Option[InterConceptRelationshipPath[InterConceptRelationship]]) {
-
-  require(
-    startConceptOption.nonEmpty || interConceptRelationshipPathOption.nonEmpty,
-    s"Both the start concept and the interconcept relationship path are absent, which is not allowed")
+sealed trait ConceptRelationshipNodePath {
 
   /**
    * Returns the relationships of the path, which may be an empty collection
    */
-  def relationships: immutable.IndexedSeq[InterConceptRelationship] = {
-    interConceptRelationshipPathOption.map(_.relationships).getOrElse(immutable.IndexedSeq())
-  }
+  def relationships: immutable.IndexedSeq[InterConceptRelationship]
 
   /**
    * Returns the source concept of the path
    */
-  def sourceConcept: EName = {
-    if (startConceptOption.isEmpty) {
-      interConceptRelationshipPathOption.get.sourceConcept
-    } else {
-      startConceptOption.get
-    }
-  }
+  def sourceConcept: EName
 
   /**
-   * Returns the target concept of the path, which is the same as the source concept for paths without relationships
+   * Returns the target concept of the path, which is the same as the source concept for empty paths
    */
-  def targetConcept: EName = {
-    if (interConceptRelationshipPathOption.isEmpty) {
-      startConceptOption.get
-    } else {
-      interConceptRelationshipPathOption.get.targetConcept
-    }
-  }
+  def targetConcept: EName
 
   /**
-   * Returns the relationship target concepts, if any, preceded by the start concept, if any.
+   * Returns the source concept of empty paths and descendant-or-self paths, and None otherwise
    */
-  def relationshipTargetConcepts: immutable.IndexedSeq[EName] = {
-    if (startConceptOption.isEmpty) {
-      interConceptRelationshipPathOption.get.relationshipTargetConcepts
-    } else if (interConceptRelationshipPathOption.isEmpty) {
-      immutable.IndexedSeq(startConceptOption.get)
-    } else {
-      startConceptOption.get +: interConceptRelationshipPathOption.get.relationshipTargetConcepts
-    }
-  }
+  def selfConceptOption: Option[EName]
+
+  /**
+   * Returns the source concept, target concept and all concepts in between
+   */
+  def concepts: immutable.IndexedSeq[EName]
 }
 
 object ConceptRelationshipNodePath {
 
-  def apply(startConcept: EName): ConceptRelationshipNodePath = {
-    ConceptRelationshipNodePath(Some(startConcept), None)
+  final case class SingleConceptPath(rootConcept: EName) extends ConceptRelationshipNodePath {
+
+    def relationships: immutable.IndexedSeq[InterConceptRelationship] = immutable.IndexedSeq()
+
+    def sourceConcept: EName = rootConcept
+
+    def targetConcept: EName = rootConcept
+
+    def selfConceptOption: Option[EName] = Some(rootConcept)
+
+    def concepts: immutable.IndexedSeq[EName] = immutable.IndexedSeq(rootConcept)
   }
 
-  def apply(interConceptRelationshipPath: InterConceptRelationshipPath[InterConceptRelationship]): ConceptRelationshipNodePath = {
-    ConceptRelationshipNodePath(None, Some(interConceptRelationshipPath))
+  final case class DescendantPath(
+    interConceptRelationshipPath: InterConceptRelationshipPath[InterConceptRelationship]) extends ConceptRelationshipNodePath {
+
+    def relationships: immutable.IndexedSeq[InterConceptRelationship] = interConceptRelationshipPath.relationships
+
+    def sourceConcept: EName = interConceptRelationshipPath.firstRelationship.targetConceptEName
+
+    def targetConcept: EName = interConceptRelationshipPath.targetConcept
+
+    def selfConceptOption: Option[EName] = None
+
+    def concepts: immutable.IndexedSeq[EName] = {
+      interConceptRelationshipPath.relationships.map(_.targetConceptEName)
+    }
   }
 
-  def apply(
-    startConcept: EName,
-    interConceptRelationshipPath: InterConceptRelationshipPath[InterConceptRelationship]): ConceptRelationshipNodePath = {
+  final case class DescendantOrSelfPath(
+    interConceptRelationshipPath: InterConceptRelationshipPath[InterConceptRelationship]) extends ConceptRelationshipNodePath {
 
-    ConceptRelationshipNodePath(Some(startConcept), Some(interConceptRelationshipPath))
+    def relationships: immutable.IndexedSeq[InterConceptRelationship] = interConceptRelationshipPath.relationships
+
+    def sourceConcept: EName = interConceptRelationshipPath.sourceConcept
+
+    def targetConcept: EName = interConceptRelationshipPath.targetConcept
+
+    def selfConceptOption: Option[EName] = Some(sourceConcept)
+
+    def concepts: immutable.IndexedSeq[EName] = {
+      sourceConcept +: interConceptRelationshipPath.relationships.map(_.targetConceptEName)
+    }
   }
 }
