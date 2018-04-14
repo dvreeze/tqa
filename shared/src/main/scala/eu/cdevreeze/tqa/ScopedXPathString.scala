@@ -26,11 +26,6 @@ import eu.cdevreeze.yaidom.core.Scope
  * Scope as stored in this object. For example, the default namespace for evaluating the XPath expression
  * should probably not be the one stored in this object, if any.
  *
- * This class is in the "tqa" root package and not in the "xpath" sub-package. The reason is that this class
- * represents data that requires no XPath evaluator whatsoever, whereas the "xpath" sub-package offers an XPath
- * evaluator abstraction. As a consequence a dependency on the "xpath" sub-package is only needed where XPath
- * evaluation is done.
- *
  * @author Chris de Vreeze
  */
 final case class ScopedXPathString(val xpathExpression: String, val scope: Scope) {

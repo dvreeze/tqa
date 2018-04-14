@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.xpathaware
 import eu.cdevreeze.tqa.StringExpr
 import eu.cdevreeze.tqa.StringValue
 import eu.cdevreeze.tqa.StringValueOrExpr
-import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
@@ -36,7 +35,7 @@ object StringValueOrExprEvaluator extends ValueOrExprEvaluator[String] {
    * Returns the String result of the StringValueOrExpr. If a StringExpr is passed, it is first "compiled"
    * before XPath evaluation.
    */
-  override def evaluate(valueOrExpr: StringValueOrExpr)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): String = valueOrExpr match {
+  override def evaluate(valueOrExpr: StringValueOrExpr)(implicit xpathEvaluator: XPathEvaluator): String = valueOrExpr match {
     case v: StringValue =>
       v.value
     case e: StringExpr =>

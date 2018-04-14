@@ -38,7 +38,6 @@ import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 import eu.cdevreeze.tqa.instance.XbrlInstance
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.saxon.SaxonJaxpXPathEvaluator
 import eu.cdevreeze.yaidom.xpath.saxon.SaxonJaxpXPathEvaluatorFactory
 import net.sf.saxon.s9api.Processor
@@ -1334,8 +1333,6 @@ class ConceptRelationshipNodeTest extends FunSuite {
     SaxonJaxpXPathEvaluatorFactory(processor.getUnderlyingConfiguration)
 
   private implicit val xpathEvaluator: SaxonJaxpXPathEvaluator = xpathEvaluatorFactory.newXPathEvaluator()
-
-  private implicit val xpathScope: Scope = Scope.Empty
 
   private val docBuilder: SaxonDocumentBuilder = {
     val otherRootDir = new File(classOf[ConceptRelationshipNodeTest].getResource("/xbrl-and-w3").toURI)

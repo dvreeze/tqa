@@ -29,7 +29,6 @@ import eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
@@ -46,29 +45,29 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
    */
   def dimensionName: EName = dimensionRelationshipNode.dimensionName
 
-  def relationshipSources(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[EName] = {
+  def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
     dimensionRelationshipNode.sourceValuesOrExpressions.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
-  def linkroleOption(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Option[String] = {
+  def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
     dimensionRelationshipNode.linkroleValueOrExprOption.
-      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
+      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
-  def formulaAxis(implicit xpathEvaluator: XPathEvaluator, scope: Scope): DimensionRelationshipNodes.FormulaAxis = {
+  def formulaAxis(implicit xpathEvaluator: XPathEvaluator): DimensionRelationshipNodes.FormulaAxis = {
     val stringResultOption =
       dimensionRelationshipNode.formulaAxisValueOrExprOption.
-        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
+        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
     stringResultOption.map(v => DimensionRelationshipNodes.FormulaAxis.fromString(v)).
       getOrElse(DimensionRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
-  def generations(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Int = {
+  def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
     val resultAsBigDecimalOption =
       dimensionRelationshipNode.generationsValueOrExprOption.
-        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
+        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
     resultAsBigDecimalOption.map(_.toInt).getOrElse(0)
   }
@@ -85,10 +84,10 @@ object DimensionRelationshipNodeData {
    */
   def findAllResultPaths(
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     val relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship] =
-      findAllDomainAwareRelationshipsToRelationshipSources(dimensionRelationshipNode, taxo)(xpathEvaluator, scope)
+      findAllDomainAwareRelationshipsToRelationshipSources(dimensionRelationshipNode, taxo)(xpathEvaluator)
 
     val resultPaths: immutable.IndexedSeq[DomainAwareRelationshipPath] =
       findAllResultPaths(relationshipsToSources, dimensionRelationshipNode, taxo)
@@ -101,7 +100,7 @@ object DimensionRelationshipNodeData {
    */
   def findAllDomainAwareRelationshipsToRelationshipSources(
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationship] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationship] = {
 
     // Start with reading the needed information in the dimension relationship node.
 
@@ -110,9 +109,9 @@ object DimensionRelationshipNodeData {
     val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
 
     val rawRelationshipSources: immutable.IndexedSeq[EName] =
-      dimensionRelationNodeData.relationshipSources(xpathEvaluator, scope).distinct
+      dimensionRelationNodeData.relationshipSources(xpathEvaluator).distinct
 
-    val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator, scope)
+    val linkroleOption: Option[String] = dimensionRelationNodeData.linkroleOption(xpathEvaluator)
 
     val effectiveLinkrole: String = linkroleOption.getOrElse(BaseSetKey.StandardElr)
 
@@ -174,12 +173,12 @@ object DimensionRelationshipNodeData {
   def findAllResultPaths(
     relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship],
     dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
+    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     // Start with reading the needed information in the dimension relationship node.
 
     val dimensionRelationNodeData = new DimensionRelationshipNodeData(dimensionRelationshipNode)
-    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator, scope)
+    val axis = dimensionRelationNodeData.formulaAxis(xpathEvaluator)
 
     val includeSelf: Boolean = axis.includesSelf
 
@@ -187,7 +186,7 @@ object DimensionRelationshipNodeData {
     // (or only descendant) concepts. So 1 for the child axis, for example. 0 becomes None.
 
     val effectiveGenerationsOption: Option[Int] = {
-      val rawValue = dimensionRelationNodeData.generations(xpathEvaluator, scope)
+      val rawValue = dimensionRelationNodeData.generations(xpathEvaluator)
       val optionalRawResult = if (rawValue == 0) None else Some(rawValue)
       val resultOption = if (axis.includesChildrenButNotDeeperDescendants) Some(1) else optionalRawResult
       resultOption

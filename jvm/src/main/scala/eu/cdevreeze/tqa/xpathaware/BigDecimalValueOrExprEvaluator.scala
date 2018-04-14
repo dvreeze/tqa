@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.xpathaware
 import eu.cdevreeze.tqa.BigDecimalExpr
 import eu.cdevreeze.tqa.BigDecimalValue
 import eu.cdevreeze.tqa.BigDecimalValueOrExpr
-import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
@@ -36,7 +35,7 @@ object BigDecimalValueOrExprEvaluator extends ValueOrExprEvaluator[BigDecimal] {
    * Returns the BigDecimal result of the BigDecimalValueOrExpr. If a BigDecimalExpr is passed, it is first "compiled"
    * before XPath evaluation.
    */
-  override def evaluate(valueOrExpr: BigDecimalValueOrExpr)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): BigDecimal = valueOrExpr match {
+  override def evaluate(valueOrExpr: BigDecimalValueOrExpr)(implicit xpathEvaluator: XPathEvaluator): BigDecimal = valueOrExpr match {
     case v: BigDecimalValue =>
       v.value
     case e: BigDecimalExpr =>

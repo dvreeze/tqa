@@ -17,7 +17,6 @@
 package eu.cdevreeze.tqa.xpathaware
 
 import eu.cdevreeze.tqa.ValueOrExpr
-import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
@@ -29,5 +28,5 @@ trait ValueOrExprEvaluator[A] {
 
   type ValueOrExprType <: ValueOrExpr[A]
 
-  def evaluate(valueOrExpr: ValueOrExprType)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): A
+  def evaluate(valueOrExpr: ValueOrExprType)(implicit xpathEvaluator: XPathEvaluator): A
 }

@@ -18,7 +18,7 @@ package eu.cdevreeze.tqa
 
 /**
  * XPath-aware taxonomy querying support. In TQA no taxonomy XPath awareness is anywhere outside of this namespace.
- * This implies that all of TQA outside of this namespace (and the xpath namespace) can be used without the need for
+ * This implies that all of TQA outside of this namespace can be used without the need for
  * any XPath processor. Everything inside this namespace does need an XPath processor, though.
  *
  * Dependency on XPath processing for taxonomy querying and processing is not without its costs:

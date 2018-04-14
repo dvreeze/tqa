@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.xpathaware.extension.formula
 import eu.cdevreeze.tqa.extension.formula.dom.ExplicitDimensionAspect
 import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
@@ -36,8 +35,8 @@ final class ExplicitDimensionAspectData(val dimensionAspect: ExplicitDimensionAs
 
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
-  def memberOption(implicit xpathEvaluator: XPathEvaluator, scope: Scope): Option[EName] = {
+  def memberOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
     dimensionAspect.memberElemOption.map(_.qnameValueOrExpr).
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator, scope))
+      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 }

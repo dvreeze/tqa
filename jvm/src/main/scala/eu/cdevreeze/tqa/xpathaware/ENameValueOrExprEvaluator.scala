@@ -20,7 +20,6 @@ import eu.cdevreeze.tqa.ENameExpr
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.ENameValueOrExpr
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
 
 /**
@@ -37,7 +36,7 @@ object ENameValueOrExprEvaluator extends ValueOrExprEvaluator[EName] {
    * Returns the EName result of the ENameValueOrExpr. If a ENameExpr is passed, it is first "compiled"
    * before XPath evaluation.
    */
-  override def evaluate(valueOrExpr: ENameValueOrExpr)(implicit xpathEvaluator: XPathEvaluator, scope: Scope): EName = valueOrExpr match {
+  override def evaluate(valueOrExpr: ENameValueOrExpr)(implicit xpathEvaluator: XPathEvaluator): EName = valueOrExpr match {
     case v: ENameValue =>
       v.value
     case e: ENameExpr =>
