@@ -214,6 +214,7 @@ object ConceptRelationshipNodeData {
         }
       }
       .flatMap(path => skipAbstractLeaves(path, taxo))
+      .distinct
   }
 
   private def findAllDescendants(
