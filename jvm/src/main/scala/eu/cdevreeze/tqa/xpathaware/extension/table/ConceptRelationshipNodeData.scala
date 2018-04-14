@@ -22,6 +22,7 @@ import scala.reflect.classTag
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
@@ -212,6 +213,7 @@ object ConceptRelationshipNodeData {
             findAllSiblingsOrDescendantsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
         }
       }
+      .flatMap(path => skipAbstractLeaves(path, taxo))
   }
 
   private def findAllDescendants(
@@ -422,5 +424,52 @@ object ConceptRelationshipNodeData {
   private def sortConcepts(concepts: Set[EName]): immutable.IndexedSeq[EName] = {
     concepts.toIndexedSeq
       .sortBy(concept => (concept.namespaceUriOption.getOrElse(""), concept.localPart))
+  }
+
+  private def skipAbstractLeaves(
+    path: ConceptRelationshipNodePath,
+    taxo: BasicTableTaxonomy): Option[ConceptRelationshipNodePath] = {
+
+    path match {
+      case path @ SingleConceptPath(c) =>
+        val hasAbstractLeave =
+          taxo.underlyingTaxonomy.findConceptDeclaration(c).forall(_.isAbstract)
+
+        if (hasAbstractLeave) None else Some(path)
+      case path @ DescendantPath(p) =>
+        val hasAbstractLeave =
+          taxo.underlyingTaxonomy.findConceptDeclaration(p.targetConcept).forall(_.isAbstract)
+
+        if (hasAbstractLeave) {
+          if (path.relationships.size == 1) {
+            None
+          } else {
+            // Recursive call
+
+            skipAbstractLeaves(
+              DescendantPath(InterConceptRelationshipPath.from(path.relationships.init)),
+              taxo)
+          }
+        } else {
+          Some(path)
+        }
+      case path @ DescendantOrSelfPath(p) =>
+        val hasAbstractLeave =
+          taxo.underlyingTaxonomy.findConceptDeclaration(p.targetConcept).forall(_.isAbstract)
+
+        if (hasAbstractLeave) {
+          if (path.relationships.size == 1) {
+            None
+          } else {
+            // Recursive call
+
+            skipAbstractLeaves(
+              DescendantOrSelfPath(InterConceptRelationshipPath.from(path.relationships.init)),
+              taxo)
+          }
+        } else {
+          Some(path)
+        }
+    }
   }
 }
