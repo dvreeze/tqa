@@ -1231,6 +1231,67 @@ class ConceptRelationshipNodeTest extends FunSuite {
     }
   }
 
+  // 3180-concept-relationship-node-tag-selectors-testcase-v01
+
+  test("testConceptRelationshipNodeWithBothInstantAndDurationConcepts") {
+    val instance =
+      makeTestInstance(
+        relativeUriTo3100Dir.toString +
+          "3180-concept-relationship-node-tag-selectors/period-line-up-instance.xml")
+    val basicTaxo = buildTaxonomy(instance)
+
+    val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
+
+    assertResult(true) {
+      tableTaxo.underlyingTaxonomy.findAllParentChildRelationships.nonEmpty
+    }
+
+    val conceptRelationshipNodes =
+      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+
+    assertResult(1) {
+      conceptRelationshipNodes.size
+    }
+
+    val conceptRelationshipNode = conceptRelationshipNodes.head
+    val conceptRelationshipNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
+
+    assertResult(Set.empty) {
+      conceptRelationshipNodeData.relationshipSources.toSet
+    }
+
+    assertResult(None) {
+      conceptRelationshipNodeData.linkroleOption
+    }
+
+    assertResult(BaseSetKey.forParentChildArc(BaseSetKey.StandardElr).arcrole) {
+      conceptRelationshipNodeData.arcrole
+    }
+
+    assertResult(FormulaAxis.DescendantOrSelfAxis) {
+      conceptRelationshipNodeData.formulaAxis
+    }
+
+    assertResult(0) {
+      conceptRelationshipNodeData.generations
+    }
+
+    val concepts: Set[EName] =
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).flatMap(_.concepts).toSet
+
+    assertResult(Set("base", "o1", "o2", "o3", "m1").map(nm => EName(tableExampleNs, nm))) {
+      concepts
+    }
+
+    assertResult(Set("base").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.sourceConcept).toSet
+    }
+
+    assertResult(List("m1", "o2", "o3", "m1").map(nm => EName(tableExampleNs, nm))) {
+      findAllResultPaths(conceptRelationshipNode, tableTaxo).map(_.targetConcept)
+    }
+  }
+
   // Helper methods
 
   private def buildTaxonomy(xbrlInstance: XbrlInstance, doResolveProhibitionAndOverriding: Boolean = false): BasicTaxonomy = {

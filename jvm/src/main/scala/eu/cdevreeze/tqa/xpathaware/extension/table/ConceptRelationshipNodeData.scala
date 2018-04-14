@@ -213,8 +213,6 @@ object ConceptRelationshipNodeData {
             findAllSiblingsOrDescendantsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
         }
       }
-      .flatMap(path => skipAbstractLeaves(path, taxo))
-      .distinct
   }
 
   private def findAllDescendants(
@@ -229,7 +227,8 @@ object ConceptRelationshipNodeData {
     val paths = taxo.underlyingTaxonomy
       .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[InterConceptRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
-          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
+          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
+          hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
       }
 
     paths.map(p => DescendantPath(p))
@@ -247,7 +246,8 @@ object ConceptRelationshipNodeData {
     val paths = taxo.underlyingTaxonomy
       .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[InterConceptRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
-          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen)
+          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
+          hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
       }
 
     if (paths.isEmpty) {
@@ -427,50 +427,24 @@ object ConceptRelationshipNodeData {
       .sortBy(concept => (concept.namespaceUriOption.getOrElse(""), concept.localPart))
   }
 
-  private def skipAbstractLeaves(
-    path: ConceptRelationshipNodePath,
-    taxo: BasicTableTaxonomy): Option[ConceptRelationshipNodePath] = {
+  private def hasMoreMatchingDescendantsIfEndingInAbstract(
+    path: InterConceptRelationshipPath[InterConceptRelationship],
+    effectiveGenerationsOption: Option[Int],
+    taxo: BasicTableTaxonomy): Boolean = {
 
-    path match {
-      case path @ SingleConceptPath(c) =>
-        val hasAbstractLeave =
-          taxo.underlyingTaxonomy.findConceptDeclaration(c).forall(_.isAbstract)
+    val endsInAbstract = taxo.underlyingTaxonomy.findConceptDeclaration(path.targetConcept).filter(_.isAbstract).nonEmpty
 
-        if (hasAbstractLeave) None else Some(path)
-      case path @ DescendantPath(p) =>
-        val hasAbstractLeave =
-          taxo.underlyingTaxonomy.findConceptDeclaration(p.targetConcept).forall(_.isAbstract)
-
-        if (hasAbstractLeave) {
-          if (path.relationships.size == 1) {
-            None
-          } else {
-            // Recursive call
-
-            skipAbstractLeaves(
-              DescendantPath(InterConceptRelationshipPath.from(path.relationships.init)),
-              taxo)
-          }
-        } else {
-          Some(path)
+    if (endsInAbstract) {
+      val followingPathsWithConcreteConcepts =
+        taxo.underlyingTaxonomy.filterOutgoingConsecutiveInterConceptRelationshipPaths(path.targetConcept, classTag[InterConceptRelationship]) { p =>
+          path.lastRelationship.isFollowedBy(p.firstRelationship) &&
+            effectiveGenerationsOption.forall(gen => path.relationships.size + p.relationships.size <= gen) &&
+            p.relationships.map(_.targetConceptEName).exists(c => taxo.underlyingTaxonomy.findConceptDeclaration(c).map(_.isConcrete).getOrElse(false))
         }
-      case path @ DescendantOrSelfPath(p) =>
-        val hasAbstractLeave =
-          taxo.underlyingTaxonomy.findConceptDeclaration(p.targetConcept).forall(_.isAbstract)
 
-        if (hasAbstractLeave) {
-          if (path.relationships.size == 1) {
-            None
-          } else {
-            // Recursive call
-
-            skipAbstractLeaves(
-              DescendantOrSelfPath(InterConceptRelationshipPath.from(path.relationships.init)),
-              taxo)
-          }
-        } else {
-          Some(path)
-        }
+      followingPathsWithConcreteConcepts.nonEmpty
+    } else {
+      true
     }
   }
 }
