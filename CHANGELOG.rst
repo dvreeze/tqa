@@ -3,6 +3,88 @@ CHANGELOG
 =========
 
 
+0.8.1
+=====
+
+Compared with release 0.8.0, the main changes in this version are:
+
+* Completely reworked (and tested) ``ConceptRelationshipNodeData`` and ``DimensionRelationshipNodeData``
+* Added some methods to ``DimensionalRelationshipContainerApi``
+* Bug fix: it is no longer required that a ``TaxonomyDocument`` holds a schema or linkbase
+
+There are many breaking changes (only) in the "xpathaware" namespace, but this part of TQA has rarely been used so far. The most important change
+in this respect is that XPath evaluation no longer needs an implicit Scope.
+
+Breaking changes compared to version 0.8.0 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method evaluate(eu.cdevreeze.tqa.StringValueOrExpr,eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)java.lang.String in object eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator.evaluate")
+* method evaluate(eu.cdevreeze.tqa.ENameValueOrExpr,eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)eu.cdevreeze.yaidom.core.EName in object eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator.evaluate")
+* method evaluate(eu.cdevreeze.tqa.BigDecimalValueOrExpr,eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.math.BigDecimal in object eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.BigDecimalValueOrExprEvaluator.evaluate")
+* abstract method evaluate(eu.cdevreeze.tqa.ValueOrExpr,eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)java.lang.Object in interface eu.cdevreeze.tqa.xpathaware.ValueOrExprEvaluator does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.ValueOrExprEvaluator.evaluate")
+* abstract method evaluate(eu.cdevreeze.tqa.ValueOrExpr,eu.cdevreeze.yaidom.xpath.XPathEvaluator)java.lang.Object in interface eu.cdevreeze.tqa.xpathaware.ValueOrExprEvaluator is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.ValueOrExprEvaluator.evaluate")
+* method memberOption(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.Option in class eu.cdevreeze.tqa.xpathaware.extension.formula.ExplicitDimensionAspectData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.formula.ExplicitDimensionAspectData.memberOption")
+* method qnameValueOption(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.Option in class eu.cdevreeze.tqa.xpathaware.extension.formula.ConceptAspectData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.formula.ConceptAspectData.qnameValueOption")
+* method relationshipSources(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.relationshipSources")
+* method linknameOption(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.Option in class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.linknameOption")
+* method generations(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)Int in class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.generations")
+* method arcrole(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)java.lang.String in class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.arcrole")
+* method arcnameOption(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.Option in class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.arcnameOption")
+* method formulaAxis(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes#FormulaAxis in class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.formulaAxis")
+* method linkroleOption(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.Option in class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.linkroleOption")
+* object eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData#ConceptTreeWalkSpec does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData$ConceptTreeWalkSpec$")
+* class eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData#DimensionMemberTreeWalkSpec#MemberSource does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData$DimensionMemberTreeWalkSpec$MemberSource")
+* object eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData#DimensionMemberTreeWalkSpec does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData$DimensionMemberTreeWalkSpec$")
+* class eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData#DimensionMemberTreeWalkSpec#DimensionDomainSource does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData$DimensionMemberTreeWalkSpec$DimensionDomainSource")
+* interface eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData#DimensionMemberTreeWalkSpec#StartMember does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData$DimensionMemberTreeWalkSpec$StartMember")
+* method findAllMembersInDimensionRelationshipNode(eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode,eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy,eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.collection.immutable.Set in object eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData.findAllMembersInDimensionRelationshipNode")
+* method filterDescendantOrSelfMembers(eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData#DimensionMemberTreeWalkSpec,eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy)scala.collection.immutable.Set in object eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData.filterDescendantOrSelfMembers")
+* class eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData#ConceptTreeWalkSpec does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData$ConceptTreeWalkSpec")
+* class eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData#DimensionMemberTreeWalkSpec does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData$DimensionMemberTreeWalkSpec")
+* method relationshipSources(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData.relationshipSources")
+* method generations(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)Int in class eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData.generations")
+* method formulaAxis(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes#FormulaAxis in class eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData.formulaAxis")
+* method linkroleOption(eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.Option in class eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.DimensionRelationshipNodeData.linkroleOption")
+* method findAllConceptsInConceptRelationshipNode(eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode,eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy,eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)scala.collection.immutable.Set in object eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.findAllConceptsInConceptRelationshipNode")
+* method filterDescendantOrSelfConcepts(eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData#ConceptTreeWalkSpec,eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy)scala.collection.immutable.Set in object eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.extension.table.ConceptRelationshipNodeData.filterDescendantOrSelfConcepts")
+* abstract method filterIncomingHypercubeDimensionRelationships(eu.cdevreeze.yaidom.core.EName,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.filterIncomingHypercubeDimensionRelationships")
+* abstract method filterIncomingHasHypercubeRelationships(eu.cdevreeze.yaidom.core.EName,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.filterIncomingHasHypercubeRelationships")
+* abstract method findAllIncomingHasHypercubeRelationships(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.findAllIncomingHasHypercubeRelationships")
+* abstract method findAllIncomingHypercubeDimensionRelationships(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.findAllIncomingHypercubeDimensionRelationships")
+
+
 0.8.0
 =====
 
