@@ -25,33 +25,127 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-sealed trait Aspect
+sealed trait Aspect {
+
+  /**
+   * Returns true if this aspect applies to both tuples and numeric and non-numeric items
+   */
+  final def appliesToAllFacts: Boolean = {
+    appliesToTuples && appliesToNonNumericItems
+  }
+
+  /**
+   * Returns true if this aspect applies only to (some or all) items and not to tuples
+   */
+  final def appliesToItemsOnly: Boolean = {
+    !appliesToTuples
+  }
+
+  /**
+   * Returns true if this aspect applies only to numeric items and neither to non-numeric items nor to tuples
+   */
+  final def appliesToNumericItemsOnly: Boolean = {
+    appliesToItemsOnly && !appliesToNonNumericItems
+  }
+
+  /**
+   * Returns true if this aspect applies to tuples (as well as items)
+   */
+  def appliesToTuples: Boolean
+
+  /**
+   * Returns true if this aspect applies to non-numeric items (and not just numeric ones)
+   */
+  def appliesToNonNumericItems: Boolean
+
+  /**
+   * Returns true if this aspect is included in all aspect models.
+   *
+   * Assuming the existence of only 2 aspect models (dimensional and non-dimensional) this is the same
+   * as methods `isIncludedInDimensionalAspectModel` and `isIncludedInNonDimensionalAspectModel` both returning true.
+   */
+  final def isIncludedInAllAspectModels: Boolean = {
+    isIncludedInDimensionalAspectModel && isIncludedInNonDimensionalAspectModel
+  }
+
+  def isIncludedInDimensionalAspectModel: Boolean
+
+  def isIncludedInNonDimensionalAspectModel: Boolean
+}
 
 object Aspect {
+
+  /**
+   * All well-known aspects, so all aspects except for dimension aspects (since we do not know them upfront).
+   */
+  val wellKnownAspects: Set[Aspect] = {
+    Set[Aspect](LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect)
+      .union(OccAspect.occAspects.asInstanceOf[Set[Aspect]])
+  }
 
   // First the required aspects, for both aspect models (dimensional and non-dimensional)
 
   case object LocationAspect extends Aspect {
+
+    def appliesToTuples: Boolean = true
+
+    def appliesToNonNumericItems: Boolean = true
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = true
 
     override def toString: String = "location"
   }
 
   case object ConceptAspect extends Aspect {
 
+    def appliesToTuples: Boolean = true
+
+    def appliesToNonNumericItems: Boolean = true
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = true
+
     override def toString: String = "concept"
   }
 
   case object EntityIdentifierAspect extends Aspect {
+
+    def appliesToTuples: Boolean = false
+
+    def appliesToNonNumericItems: Boolean = true
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = true
 
     override def toString: String = "entityIdentifier"
   }
 
   case object PeriodAspect extends Aspect {
 
+    def appliesToTuples: Boolean = false
+
+    def appliesToNonNumericItems: Boolean = true
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = true
+
     override def toString: String = "period"
   }
 
   case object UnitAspect extends Aspect {
+
+    def appliesToTuples: Boolean = false
+
+    def appliesToNonNumericItems: Boolean = false
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = true
 
     override def toString: String = "unit"
   }
@@ -61,12 +155,28 @@ object Aspect {
   /**
    * Open context component aspect, so a segment or a scenario.
    */
-  sealed trait OccAspect extends Aspect
+  sealed trait OccAspect extends Aspect {
+
+    final def appliesToTuples: Boolean = false
+
+    final def appliesToNonNumericItems: Boolean = true
+  }
+
+  object OccAspect {
+
+    val occAspects: Set[OccAspect] = {
+      Set(NonXDTSegmentAspect, CompleteSegmentAspect, NonXDTScenarioAspect, CompleteScenarioAspect)
+    }
+  }
 
   /**
    * NonXDTSegmentAspect, in the dimensional aspect model
    */
   case object NonXDTSegmentAspect extends OccAspect {
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = false
 
     override def toString: String = "nonXDTSegment"
   }
@@ -76,6 +186,10 @@ object Aspect {
    */
   case object CompleteSegmentAspect extends OccAspect {
 
+    def isIncludedInDimensionalAspectModel: Boolean = false
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = true
+
     override def toString: String = "completeSegment"
   }
 
@@ -83,6 +197,10 @@ object Aspect {
    * NonXDTScenarioAspect, in the dimensional aspect model
    */
   case object NonXDTScenarioAspect extends OccAspect {
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = false
 
     override def toString: String = "nonXDTScenario"
   }
@@ -92,6 +210,10 @@ object Aspect {
    */
   case object CompleteScenarioAspect extends OccAspect {
 
+    def isIncludedInDimensionalAspectModel: Boolean = false
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = true
+
     override def toString: String = "completeScenario"
   }
 
@@ -99,6 +221,14 @@ object Aspect {
    * A dimensional aspect (for either an explicit or typed dimension), in the dimensional aspect model
    */
   final case class DimensionAspect(dimension: EName) extends Aspect {
+
+    def appliesToTuples: Boolean = false
+
+    def appliesToNonNumericItems: Boolean = true
+
+    def isIncludedInDimensionalAspectModel: Boolean = true
+
+    def isIncludedInNonDimensionalAspectModel: Boolean = false
 
     override def toString: String = dimension.toString
   }

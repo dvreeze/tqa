@@ -50,8 +50,8 @@ case object UnitAspectSpec extends AspectSpec {
 }
 
 final case class DimensionAspectSpec(
-    dimension: EName,
-    isIncludeUnreportedValue: Boolean) extends AspectSpec {
+  dimension: EName,
+  isIncludeUnreportedValue: Boolean) extends AspectSpec {
 
   def aspect: Aspect = Aspect.DimensionAspect(dimension)
 }

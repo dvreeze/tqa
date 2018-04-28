@@ -21,50 +21,11 @@ package eu.cdevreeze.tqa.aspect
  *
  * @author Chris de Vreeze
  */
-sealed trait AspectModel {
-
-  /**
-   * Returns all known aspects. That is, returns all aspects, except for dimension aspects (in the
-   * dimensional aspect model), because they are unknown upfront.
-   */
-  def wellKnownAspects: Set[Aspect]
-
-  /**
-   * Returns all known item aspects shared by numeric and non-numeric items.
-   */
-  def requiredItemAspects: Set[Aspect]
-
-  /**
-   * Returns all known aspects of numeric items.
-   */
-  def requiredNumericItemAspects: Set[Aspect]
-}
+sealed trait AspectModel
 
 object AspectModel {
 
-  import Aspect._
+  case object NonDimensionalAspectModel extends AspectModel
 
-  case object NonDimensionalAspectModel extends AspectModel {
-
-    val wellKnownAspects: Set[Aspect] =
-      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, CompleteSegmentAspect, CompleteScenarioAspect)
-
-    val requiredItemAspects: Set[Aspect] =
-      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect)
-
-    val requiredNumericItemAspects: Set[Aspect] =
-      requiredItemAspects.union(Set(UnitAspect))
-  }
-
-  case object DimensionalAspectModel extends AspectModel {
-
-    val wellKnownAspects: Set[Aspect] =
-      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect, UnitAspect, NonXDTSegmentAspect, NonXDTScenarioAspect)
-
-    val requiredItemAspects: Set[Aspect] =
-      Set(LocationAspect, ConceptAspect, PeriodAspect, EntityIdentifierAspect)
-
-    val requiredNumericItemAspects: Set[Aspect] =
-      requiredItemAspects.union(Set(UnitAspect))
-  }
+  case object DimensionalAspectModel extends AspectModel
 }
