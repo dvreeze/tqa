@@ -16,12 +16,16 @@
 
 package eu.cdevreeze.tqa.extension.table.layoutmodel.common
 
+import eu.cdevreeze.tqa.aspect
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 
 /**
  * Utility holding a type for aspects in a layout model.
+ *
+ * This utility supports easy conversions from and to `aspect.Aspect` objects in the
+ * dimensional aspect model.
  *
  * @author Chris de Vreeze
  */
@@ -33,6 +37,16 @@ object LayoutModelAspects {
   sealed trait Aspect {
 
     import Aspect._
+
+    final def aspectInDimensionalAspectModel: aspect.Aspect = this match {
+      case Concept => aspect.Aspect.ConceptAspect
+      case EntityIdentifier => aspect.Aspect.EntityIdentifierAspect
+      case Period => aspect.Aspect.PeriodAspect
+      case UnitAspect => aspect.Aspect.UnitAspect
+      case Segment => aspect.Aspect.NonXDTSegmentAspect
+      case Scenario => aspect.Aspect.NonXDTScenarioAspect
+      case Dimension(dim) => aspect.Aspect.DimensionAspect(dim)
+    }
 
     final override def toString: String = this match {
       case Concept => "concept"
@@ -77,6 +91,17 @@ object LayoutModelAspects {
     case object Scenario extends Aspect
 
     final case class Dimension(dimension: EName) extends Aspect
+
+    def fromAspectInDimensionalAspectModel(asp: aspect.Aspect): Aspect = asp match {
+      case aspect.Aspect.ConceptAspect => Concept
+      case aspect.Aspect.EntityIdentifierAspect => EntityIdentifier
+      case aspect.Aspect.PeriodAspect => Period
+      case aspect.Aspect.UnitAspect => UnitAspect
+      case aspect.Aspect.NonXDTSegmentAspect => Segment
+      case aspect.Aspect.NonXDTScenarioAspect => Scenario
+      case aspect.Aspect.DimensionAspect(dim) => Dimension(dim)
+      case _ => sys.error(s"Aspect '$asp' not supported in layout model")
+    }
 
     def fromString(s: String): Aspect = s match {
       case "concept" => Concept

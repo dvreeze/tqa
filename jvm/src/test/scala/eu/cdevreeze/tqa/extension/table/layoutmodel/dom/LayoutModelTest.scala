@@ -82,9 +82,8 @@ class LayoutModelTest extends FunSuite {
 
     val rendO8HeaderCells =
       table.filterHeaderCells { header =>
-        header.findAllConstraints.exists { c =>
-          c.aspect == LayoutModelAspects.Aspect.Concept &&
-            c.getValueElem.textAsResolvedQName == EName(ns, "o8")
+        header.findAllConceptAspectConstraints.exists { c =>
+          c.conceptAspectValue == EName(ns, "o8")
         }
       }
 
@@ -116,7 +115,7 @@ class LayoutModelTest extends FunSuite {
 
     assertResult(List(EName(ns, "o5"), EName(ns, "o7"), EName(ns, "o8"))) {
       table.findHeadersElemByAxis(TableAxis.YAxis).get.getHeaderCellsAtSliceIndex(sliceIndex)
-        .flatMap(_.findAllConstraints).map(_.getValueElem).map(_.textAsResolvedQName)
+        .flatMap(_.findAllConceptAspectConstraints).map(_.conceptAspectValue)
     }
 
     assertResult(List("o8_2001", "o8_2002")) {
@@ -140,9 +139,8 @@ class LayoutModelTest extends FunSuite {
 
     val rendO6HeaderCells =
       table.filterHeaderCells { header =>
-        header.findAllConstraints.exists { c =>
-          c.aspect == LayoutModelAspects.Aspect.Concept &&
-            c.getValueElem.textAsResolvedQName == EName(ns, "o6")
+        header.findAllConceptAspectConstraints.exists { c =>
+          c.conceptAspectValue == EName(ns, "o6")
         }
       }
 
@@ -174,7 +172,7 @@ class LayoutModelTest extends FunSuite {
 
     assertResult(List(EName(ns, "o5"), EName(ns, "o6"))) {
       table.findHeadersElemByAxis(TableAxis.YAxis).get.getHeaderCellsAtSliceIndex(sliceIndex)
-        .flatMap(_.findAllConstraints).map(_.getValueElem).map(_.textAsResolvedQName)
+        .flatMap(_.findAllConceptAspectConstraints).map(_.conceptAspectValue)
     }
 
     assertResult(List("o6_2001", "o6_2002")) {

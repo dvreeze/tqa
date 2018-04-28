@@ -19,8 +19,10 @@ package eu.cdevreeze.tqa.extension.table.layoutmodel.dom
 import scala.collection.immutable
 import scala.annotation.tailrec
 import scala.reflect.classTag
+import scala.util.Try
 
 import LayoutModelElem._
+import eu.cdevreeze.tqa
 import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.tqa.extension.table.common.TableAxis
@@ -398,6 +400,34 @@ final class HeaderCell private[dom] (
     findAllChildElemsOfType(classTag[Constraint])
   }
 
+  def findAllConceptAspectConstraints: immutable.IndexedSeq[ConceptAspectConstraint] = {
+    findAllChildElemsOfType(classTag[ConceptAspectConstraint])
+  }
+
+  def findAllEntityIdentifierAspectConstraints: immutable.IndexedSeq[EntityIdentifierAspectConstraint] = {
+    findAllChildElemsOfType(classTag[EntityIdentifierAspectConstraint])
+  }
+
+  def findAllPeriodAspectConstraints: immutable.IndexedSeq[PeriodAspectConstraint] = {
+    findAllChildElemsOfType(classTag[PeriodAspectConstraint])
+  }
+
+  def findAllUnitAspectConstraints: immutable.IndexedSeq[UnitAspectConstraint] = {
+    findAllChildElemsOfType(classTag[UnitAspectConstraint])
+  }
+
+  def findAllSegmentAspectConstraints: immutable.IndexedSeq[SegmentAspectConstraint] = {
+    findAllChildElemsOfType(classTag[SegmentAspectConstraint])
+  }
+
+  def findAllScenarioAspectConstraints: immutable.IndexedSeq[ScenarioAspectConstraint] = {
+    findAllChildElemsOfType(classTag[ScenarioAspectConstraint])
+  }
+
+  def findAllDimensionAspectConstraints: immutable.IndexedSeq[DimensionAspectConstraint] = {
+    findAllChildElemsOfType(classTag[DimensionAspectConstraint])
+  }
+
   def findAllLabels: immutable.IndexedSeq[Label] = {
     findAllChildElemsOfType(classTag[Label])
   }
@@ -471,7 +501,7 @@ final class HeaderCell private[dom] (
  *
  * @author Chris de Vreeze
  */
-final class Constraint private[dom] (
+sealed abstract class Constraint private[dom] (
   override val backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[LayoutModelElem]) extends LayoutModelElem(backingElem, childElems) {
 
@@ -481,7 +511,7 @@ final class Constraint private[dom] (
    * Returns the mandatory aspect child element.
    * This may fail with an exception if the document is not schema-valid.
    */
-  def getAspectElem: AspectElem = {
+  final def getAspectElem: AspectElem = {
     getChildElemOfType(classTag[AspectElem])(_ => true)
   }
 
@@ -489,17 +519,115 @@ final class Constraint private[dom] (
    * Returns the mandatory value child element.
    * This may fail with an exception if the document is not schema-valid.
    */
-  def getValueElem: ValueElem = {
+  final def getValueElem: ValueElem = {
     getChildElemOfType(classTag[ValueElem])(_ => true)
   }
 
-  def tagOption: Option[String] = {
+  final def tagOption: Option[String] = {
     attributeOption(TagEName)
   }
 
-  def aspect: LayoutModelAspects.Aspect = {
+  final def aspect: LayoutModelAspects.Aspect = {
     getAspectElem.aspect
   }
+
+  final def aspectInDimensionalAspectModel: tqa.aspect.Aspect = {
+    aspect.aspectInDimensionalAspectModel
+  }
+}
+
+/**
+ * Concept aspect constraint in a table model
+ *
+ * @author Chris de Vreeze
+ */
+final class ConceptAspectConstraint private[dom] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends Constraint(backingElem, childElems) {
+
+  require(aspect == LayoutModelAspects.Aspect.Concept, s"Expected aspect ${LayoutModelAspects.Aspect.Concept} but found $aspect")
+
+  /**
+   * Returns the concept aspect value.
+   * This may fail with an exception if the document is not (schema-)valid.
+   */
+  def conceptAspectValue: EName = getValueElem.textAsResolvedQName
+}
+
+/**
+ * Entity identifier aspect constraint in a table model
+ *
+ * @author Chris de Vreeze
+ */
+final class EntityIdentifierAspectConstraint private[dom] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends Constraint(backingElem, childElems) {
+
+  require(aspect == LayoutModelAspects.Aspect.EntityIdentifier, s"Expected aspect ${LayoutModelAspects.Aspect.EntityIdentifier} but found $aspect")
+}
+
+/**
+ * Period aspect constraint in a table model
+ *
+ * @author Chris de Vreeze
+ */
+final class PeriodAspectConstraint private[dom] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends Constraint(backingElem, childElems) {
+
+  require(aspect == LayoutModelAspects.Aspect.Period, s"Expected aspect ${LayoutModelAspects.Aspect.Period} but found $aspect")
+}
+
+/**
+ * Unit aspect constraint in a table model
+ *
+ * @author Chris de Vreeze
+ */
+final class UnitAspectConstraint private[dom] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends Constraint(backingElem, childElems) {
+
+  require(aspect == LayoutModelAspects.Aspect.UnitAspect, s"Expected aspect ${LayoutModelAspects.Aspect.UnitAspect} but found $aspect")
+}
+
+/**
+ * Segment aspect constraint in a table model
+ *
+ * @author Chris de Vreeze
+ */
+final class SegmentAspectConstraint private[dom] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends Constraint(backingElem, childElems) {
+
+  require(aspect == LayoutModelAspects.Aspect.Segment, s"Expected aspect ${LayoutModelAspects.Aspect.Segment} but found $aspect")
+}
+
+/**
+ * Scenario aspect constraint in a table model
+ *
+ * @author Chris de Vreeze
+ */
+final class ScenarioAspectConstraint private[dom] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends Constraint(backingElem, childElems) {
+
+  require(aspect == LayoutModelAspects.Aspect.Scenario, s"Expected aspect ${LayoutModelAspects.Aspect.Scenario} but found $aspect")
+}
+
+/**
+ * Dimension aspect constraint in a table model
+ *
+ * @author Chris de Vreeze
+ */
+final class DimensionAspectConstraint private[dom] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends Constraint(backingElem, childElems) {
+
+  /**
+   * Returns the dimension aspect value, if it is an explicit dimension member.
+   * This may fail with an exception if the document is not (schema-)valid.
+   */
+  def dimensionAspectENameValue: EName = getValueElem.textAsResolvedQName
 }
 
 /**
@@ -656,11 +784,36 @@ object LayoutModelElem {
       case ModelCellEName if elem.parentOption.map(_.resolvedName).contains(ModelHeaderEName) =>
         new HeaderCell(elem, childElems)
       case ModelCellEName => new NonHeaderCell(elem, childElems)
-      case ModelConstraintEName => new Constraint(elem, childElems)
+      case ModelConstraintEName =>
+        Constraint.opt(elem, childElems).getOrElse(new OtherLayoutModelElem(elem, childElems))
       case ModelAspectEName => new AspectElem(elem, childElems)
       case ModelValueEName => new ValueElem(elem, childElems)
       case ModelFactEName => new FactElem(elem, childElems)
       case _ => new OtherLayoutModelElem(elem, childElems)
+    }
+  }
+}
+
+object Constraint {
+
+  private[dom] def opt(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[LayoutModelElem]): Option[Constraint] = {
+    elem.resolvedName match {
+      case ModelConstraintEName =>
+        val aspectOption: Option[LayoutModelAspects.Aspect] =
+          elem.findChildElem(_.resolvedName == ModelAspectEName)
+            .flatMap(e => Try(LayoutModelAspects.Aspect.fromDisplayString(e.text, e.scope)).toOption)
+
+        aspectOption.map(_.aspectInDimensionalAspectModel) match {
+          case Some(tqa.aspect.Aspect.ConceptAspect) => Some(new ConceptAspectConstraint(elem, childElems))
+          case Some(tqa.aspect.Aspect.EntityIdentifierAspect) => Some(new EntityIdentifierAspectConstraint(elem, childElems))
+          case Some(tqa.aspect.Aspect.PeriodAspect) => Some(new PeriodAspectConstraint(elem, childElems))
+          case Some(tqa.aspect.Aspect.UnitAspect) => Some(new UnitAspectConstraint(elem, childElems))
+          case Some(tqa.aspect.Aspect.NonXDTSegmentAspect) => Some(new SegmentAspectConstraint(elem, childElems))
+          case Some(tqa.aspect.Aspect.NonXDTScenarioAspect) => Some(new ScenarioAspectConstraint(elem, childElems))
+          case Some(tqa.aspect.Aspect.DimensionAspect(dim)) => Some(new DimensionAspectConstraint(elem, childElems))
+          case _ => None
+        }
+      case _ => None
     }
   }
 }
