@@ -93,7 +93,7 @@ final case class XbrliCommentNode(text: String) extends CanBeXbrliDocumentChild 
  *
  * @author Chris de Vreeze
  */
-sealed class XbrliElem private[instance] (
+sealed abstract class XbrliElem private[instance] (
   val backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[XbrliElem]) extends CanBeXbrliDocumentChild
   with ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
@@ -1155,6 +1155,15 @@ final class TypedMember private[instance] (
   }
 }
 
+/**
+ * Other element in an XBRL instance
+ *
+ * @author Chris de Vreeze
+ */
+final class OtherXbrliElem private[instance] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems)
+
 // Companion objects
 
 object XbrliElem {
@@ -1255,7 +1264,7 @@ object XbrliElem {
       case XbrliStartDateEName => new StartDate(elem, childElems)
       case XbrliEndDateEName => new EndDate(elem, childElems)
       case XbrliForeverEName => new Forever(elem, childElems)
-      case _ => new XbrliElem(elem, childElems)
+      case _ => new OtherXbrliElem(elem, childElems)
     }
   }
 
@@ -1269,7 +1278,7 @@ object XbrliElem {
       case LinkFootnoteArcEName => new FootnoteArc(elem, childElems)
       case LinkFootnoteEName => new Footnote(elem, childElems)
       case LinkLocEName => new StandardLoc(elem, childElems)
-      case _ => new XbrliElem(elem, childElems)
+      case _ => new OtherXbrliElem(elem, childElems)
     }
   }
 
@@ -1277,14 +1286,14 @@ object XbrliElem {
     elem.resolvedName match {
       case XbrldiExplicitMemberEName => new ExplicitMember(elem, childElems)
       case XbrldiTypedMemberEName => new TypedMember(elem, childElems)
-      case _ => new XbrliElem(elem, childElems)
+      case _ => new OtherXbrliElem(elem, childElems)
     }
   }
 
   private[instance] def applyForOtherNamespace(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
     elem.resolvedName match {
       case _ if Fact.accepts(elem) => Fact(elem, childElems)
-      case _ => new XbrliElem(elem, childElems)
+      case _ => new OtherXbrliElem(elem, childElems)
     }
   }
 }

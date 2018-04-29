@@ -48,7 +48,7 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  *
  * @author Chris de Vreeze
  */
-sealed class TaxonomyPackageElem private[taxonomybuilder] (
+sealed abstract class TaxonomyPackageElem private[taxonomybuilder] (
   val backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyPackageElem]) extends ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
@@ -490,6 +490,15 @@ final class TaxonomyPackageRef private[taxonomybuilder] (
   def value: URI = URI.create(text)
 }
 
+/**
+ * Other element in a taxonomy package
+ *
+ * @author Chris de Vreeze
+ */
+final class OtherTaxonomyPackageElem private[taxonomybuilder] (
+  override val backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems)
+
 // Companion objects
 
 object TaxonomyPackageElem {
@@ -549,7 +558,7 @@ object TaxonomyPackageElem {
       case TpNameEName => new Name(elem, childElems)
       case TpDescriptionEName => new Description(elem, childElems)
       case TpLanguageEName => new Language(elem, childElems)
-      case _ => new TaxonomyPackageElem(elem, childElems)
+      case _ => new OtherTaxonomyPackageElem(elem, childElems)
     }
   }
 }
