@@ -46,6 +46,10 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  *
  * This class hierarchy depends on Java 8 or later, due to the use of Java 8 time API.
  *
+ * Creation of `TaxonomyPackageElem` objects is designed not to fail, even if the XML element is not taxonomy package element content.
+ * Of course, after creation many query methods may fail in such cases. It is also possible to use these data classes for
+ * taxonomy package elements embedded in other XML elements, or only for parts of taxonomy package elements.
+ *
  * @author Chris de Vreeze
  */
 sealed abstract class TaxonomyPackageElem private[taxonomybuilder] (

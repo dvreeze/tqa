@@ -18,6 +18,8 @@ package eu.cdevreeze.tqa.base.taxonomybuilder
 
 import java.net.URI
 
+import scala.reflect.classTag
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -25,6 +27,10 @@ import org.scalatest.junit.JUnitRunner
 import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.simple
 import net.sf.saxon.s9api.Processor
 
 /**
@@ -40,6 +46,34 @@ class TaxonomyPackageTest extends FunSuite {
 
     val taxonomyPackage: TaxonomyPackage = TaxonomyPackage.build(docBuilder.build(taxoPkgFileUri).documentElement)
 
+    doTestQueryTaxonomyPackage(taxonomyPackage)
+  }
+
+  test("testParseNonTaxonomyPackage") {
+    val uri = classOf[TaxonomyPackageTest].getResource("/sample-instances/sample-xbrl-instance.xml").toURI
+
+    val taxonomyPackageElem: TaxonomyPackageElem = TaxonomyPackageElem.build(docBuilder.build(uri).documentElement)
+
+    assertResult(true) {
+      taxonomyPackageElem.findAllElemsOrSelf.forall(_.isInstanceOf[OtherTaxonomyPackageElem])
+    }
+    assertResult(true) {
+      taxonomyPackageElem.findAllElemsOrSelf.flatMap(_.relativePathOption).isEmpty
+    }
+  }
+
+  test("testQueryWrappedTaxonomyPackage") {
+    val taxoPkgFileUri = classOf[TaxonomyPackageTest].getResource("/taxonomyPackage.xml").toURI
+
+    val unwrappedTaxonomyPackage: TaxonomyPackage = TaxonomyPackage.build(docBuilder.build(taxoPkgFileUri).documentElement)
+
+    val taxonomyPackageElem: TaxonomyPackageElem = addWrapperRootElem(unwrappedTaxonomyPackage, emptyWrapperElem)
+    val taxonomyPackage: TaxonomyPackage = taxonomyPackageElem.findChildElemOfType(classTag[TaxonomyPackage])(_ => true).get
+
+    doTestQueryTaxonomyPackage(taxonomyPackage)
+  }
+
+  private def doTestQueryTaxonomyPackage(taxonomyPackage: TaxonomyPackage): Unit = {
     assertResult(URI.create("urn:banken-taxonomie-12")) {
       taxonomyPackage.getIdentifier.value
     }
@@ -104,11 +138,23 @@ class TaxonomyPackageTest extends FunSuite {
     }
   }
 
+  private def addWrapperRootElem(rootElem: TaxonomyPackageElem, emptyWrapperElem: simple.Elem): TaxonomyPackageElem = {
+    val simpleRootElem = simple.Elem.from(rootElem.backingElem)
+
+    val wrapperElem = emptyWrapperElem.plusChild(simpleRootElem).notUndeclaringPrefixes(rootElem.scope)
+
+    TaxonomyPackageElem.build(indexed.Elem(wrapperElem))
+  }
+
   private val processor = new Processor(false)
 
   private val docBuilder: SaxonDocumentBuilder = {
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
       UriResolvers.fromUriConverter(UriConverters.identity))
+  }
+
+  private val emptyWrapperElem: simple.Elem = {
+    simple.Node.emptyElem(QName("wrapperElem"), Scope.Empty)
   }
 }

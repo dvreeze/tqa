@@ -88,8 +88,11 @@ final case class XbrliCommentNode(text: String) extends CanBeXbrliDocumentChild 
  *
  * This class hierarchy depends on Java 8 or later, due to the use of Java 8 time API.
  *
- * TODO Make useful for situations where element xbrli:xbrl is not the root element. For example, multiple XBRL instances
- * combined in an XML document, or parts of XBRL instances in a table layout model.
+ * Creation of `XbrliElem` objects is designed not to fail, even if the XML element is not an XBRL instance or part thereof.
+ * Of course, after creation many query methods may fail in such cases. It is also possible to use these data classes for
+ * XBRL instances embedded in other XML elements, or only for parts of XBRL instances. As an example of the latter, table layout
+ * models may contain pieces of XBRL context data, such as periods. Their parent elements can be parsed into an `XbrliElem`,
+ * thus offering the XBRL instance query API on such XBRL context data.
  *
  * @author Chris de Vreeze
  */

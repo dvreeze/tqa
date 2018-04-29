@@ -47,6 +47,10 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  *
  * Note that the backing element implementation can be any implementation of yaidom query API trait `BackingNodes.Elem`.
  *
+ * Creation of `LayoutModelElem` objects is designed not to fail, even if the XML element is not layout model content.
+ * Of course, after creation many query methods may fail in such cases. It is also possible to use these data classes for
+ * layout model elements embedded in other XML elements, or only for parts of layout models.
+ *
  * @author Chris de Vreeze
  */
 sealed abstract class LayoutModelElem private[dom] (

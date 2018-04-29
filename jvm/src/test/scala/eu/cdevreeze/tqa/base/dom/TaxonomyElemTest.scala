@@ -33,7 +33,11 @@ import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import eu.cdevreeze.yaidom.simple
 
 /**
  * Taxonomy test case. It uses test data from the XBRL Core Conformance Suite.
@@ -53,6 +57,47 @@ class TaxonomyElemTest extends FunSuite {
     val rootElem = docBuilder.build(docUri).documentElement
 
     val xsdSchema = XsdSchema.build(rootElem)
+
+    doTestParseSchemaWithEmbeddedLinkbase(xsdSchema)
+  }
+
+  test("testParseNonTaxonomyContent") {
+    // Using a test overview file, which is not taxonomy content.
+
+    val docBuilder = getDocumentBuilder()
+
+    val docUri = URI.create("file:///conf-suite/xbrl.xml")
+
+    val rootElem = docBuilder.build(docUri).documentElement
+
+    val taxoElem = TaxonomyElem.build(rootElem)
+
+    assertResult(Set(EName("testcases"), EName("testcase"))) {
+      val otherElems = taxoElem.findAllElemsOrSelfOfType(classTag[OtherNonXLinkElem])
+
+      otherElems.map(_.resolvedName).toSet
+    }
+  }
+
+  test("testParseWrappedSchemaWithEmbeddedLinkbase") {
+    // Using an embedded linkbase from the XBRL Core Conformance Suite.
+
+    val docBuilder = getDocumentBuilder()
+
+    val docUri = URI.create("file:///conf-suite/Common/200-linkbase/292-00-Embeddedlinkbaseinthexsd.xsd")
+
+    val rootElem = docBuilder.build(docUri).documentElement
+
+    val unwrappedElem = TaxonomyElem.build(rootElem)
+
+    val taxoElem: TaxonomyElem = addWrapperRootElem(unwrappedElem, emptyWrapperElem)
+    val xsdSchema: XsdSchema = taxoElem.findChildElemOfType(classTag[XsdSchema])(_ => true).get
+
+    doTestParseSchemaWithEmbeddedLinkbase(xsdSchema)
+  }
+
+  private def doTestParseSchemaWithEmbeddedLinkbase(xsdSchema: XsdSchema): Unit = {
+    // Using an embedded linkbase from the XBRL Core Conformance Suite.
 
     val embeddedLinks = xsdSchema.findAllElemsOfType(classTag[StandardExtendedLink])
 
@@ -120,6 +165,18 @@ class TaxonomyElemTest extends FunSuite {
     assertResult(conceptDecls) {
       conceptDecls collect { case primaryItemDecl: PrimaryItemDeclaration => primaryItemDecl }
     }
+  }
+
+  private def addWrapperRootElem(rootElem: TaxonomyElem, emptyWrapperElem: simple.Elem): TaxonomyElem = {
+    val simpleRootElem = simple.Elem.from(rootElem.backingElem)
+
+    val wrapperElem = emptyWrapperElem.plusChild(simpleRootElem).notUndeclaringPrefixes(rootElem.scope)
+
+    TaxonomyElem.build(indexed.Elem(wrapperElem))
+  }
+
+  private val emptyWrapperElem: simple.Elem = {
+    simple.Node.emptyElem(QName("wrapperElem"), Scope.Empty)
   }
 
   private val zipFile: ZipFile = {

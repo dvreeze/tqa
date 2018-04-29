@@ -28,9 +28,12 @@ import eu.cdevreeze.tqa.Namespaces.XbrliNamespace
 import eu.cdevreeze.tqa.extension.table.common.TableAxis
 import eu.cdevreeze.tqa.extension.table.layoutmodel.common.LayoutModelAspects
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import eu.cdevreeze.yaidom.resolved
+import eu.cdevreeze.yaidom.simple
 
 /**
  * Layout model test case. The test data comes from the XBRL table conformance suite.
@@ -189,6 +192,28 @@ class LayoutModelTest extends FunSuite {
     }
   }
 
+  test("testParseNonLayoutModel") {
+    val uri = classOf[LayoutModelTest].getResource("/sample-instances/sample-xbrl-instance.xml").toURI
+
+    val taxonomyPackageElem: LayoutModelElem =
+      LayoutModelElem.build(indexed.Elem(docParser.parse(uri).documentElement))
+
+    assertResult(true) {
+      taxonomyPackageElem.findAllElemsOrSelf.forall(_.isInstanceOf[OtherLayoutModelElem])
+    }
+  }
+
+  test("testQueryWrappedLayoutModel") {
+    val unwrappedLayoutModel: TableModel = tableModel3
+
+    val layoutModelElem: LayoutModelElem = addWrapperRootElem(unwrappedLayoutModel, emptyWrapperElem)
+    val layoutModel: TableModel = layoutModelElem.findChildElemOfType(classTag[TableModel])(_ => true).get
+
+    testCreatedTypedLayoutModel(layoutModel)
+    testTotalSpans(layoutModel)
+    testCellCoordinates(layoutModel)
+  }
+
   private def testCreatedTypedLayoutModel(tableModel: TableModel): Unit = {
     val otherLayoutModelElems = tableModel.findAllElemsOrSelfOfType(classTag[OtherLayoutModelElem])
 
@@ -240,5 +265,17 @@ class LayoutModelTest extends FunSuite {
     assertResult(Set(headers.head.findAllHeaderCells.map(_.span).sum)) {
       headers.map(_.totalSpan).toSet
     }
+  }
+
+  private def addWrapperRootElem(rootElem: LayoutModelElem, emptyWrapperElem: simple.Elem): LayoutModelElem = {
+    val simpleRootElem = simple.Elem.from(rootElem.backingElem)
+
+    val wrapperElem = emptyWrapperElem.plusChild(simpleRootElem).notUndeclaringPrefixes(rootElem.scope)
+
+    LayoutModelElem.build(indexed.Elem(wrapperElem))
+  }
+
+  private val emptyWrapperElem: simple.Elem = {
+    simple.Node.emptyElem(QName("wrapperElem"), Scope.Empty)
   }
 }

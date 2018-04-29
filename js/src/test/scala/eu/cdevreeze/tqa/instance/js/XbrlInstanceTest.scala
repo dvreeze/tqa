@@ -18,10 +18,17 @@ package eu.cdevreeze.tqa.instance.js
 
 import java.time.LocalDate
 
+import scala.reflect.classTag
+
 import org.scalatest.FunSuite
 
 import eu.cdevreeze.tqa.instance._
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.resolved
+import eu.cdevreeze.yaidom.simple
 import eu.cdevreeze.yaidom.jsdom.JsDomDocument
 import org.scalajs.dom.experimental.domparser.DOMParser
 import org.scalajs.dom.experimental.domparser.SupportedType
@@ -39,7 +46,76 @@ class XbrlInstanceTest extends FunSuite {
 
     val xbrlInstance: XbrlInstance = XbrlInstance.build(domDoc.documentElement)
 
+    doTestCreateAndQueryInstance(xbrlInstance)
+  }
+
+  test("testParseNonXbrlInstance") {
+    val db = new DOMParser()
+    val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(nonInstanceString, SupportedType.`text/xml`))
+
+    val nonInstance: XbrliElem = XbrliElem.build(domDoc.documentElement)
+
+    assertResult(true) {
+      nonInstance.findAllElemsOrSelf.forall(e => e.isInstanceOf[OtherXbrliElem] || e.isInstanceOf[StandardLoc])
+    }
+    assertResult(true) {
+      nonInstance.findAllElemsOrSelf.flatMap(_.relativePathOption).isEmpty
+    }
+  }
+
+  test("testParseLayoutModel") {
+    val db = new DOMParser()
+    val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(layoutModelString, SupportedType.`text/xml`))
+
+    val nonInstance: XbrliElem = XbrliElem.build(domDoc.documentElement)
+
+    assertResult(true) {
+      nonInstance.findAllElemsOrSelf
+        .forall(e => e.isInstanceOf[OtherXbrliElem] || e.isInstanceOf[StartDate] || e.isInstanceOf[EndDate])
+    }
+    assertResult(true) {
+      nonInstance.findAllElemsOrSelf.flatMap(_.relativePathOption).isEmpty
+    }
+
+    val startDateParents = nonInstance.findAllElemsOfType(classTag[StartDate]).map(_.backingElem.parent)
+
+    assertResult(2) {
+      startDateParents.size
+    }
+
+    val copiedStartDateParents = startDateParents.map(e => XbrliElem.build(e))
+
+    assertResult(startDateParents.map(e => resolved.Elem.from(e))) {
+      copiedStartDateParents.map(e => resolved.Elem.from(e))
+    }
+
+    assertResult(startDateParents.map(_.path)) {
+      copiedStartDateParents.map(_.backingElem.path)
+    }
+
+    assertResult(nonInstance.findAllElemsOfType(classTag[StartDate]).map(e => resolved.Elem.from(e))) {
+      copiedStartDateParents.flatMap(_.findAllElemsOfType(classTag[StartDate])).map(e => resolved.Elem.from(e))
+    }
+  }
+
+  test("testCreateAndQueryWrappedInstance") {
+    val db = new DOMParser()
+    val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(xbrlInstanceString, SupportedType.`text/xml`))
+
+    val unwrappedXbrlInstance: XbrlInstance = XbrlInstance.build(domDoc.documentElement)
+
+    val xbrliElem: XbrliElem = addWrapperRootElem(unwrappedXbrlInstance, emptyWrapperElem)
+    val xbrlInstance: XbrlInstance = xbrliElem.findChildElemOfType(classTag[XbrlInstance])(_ => true).get
+
+    doTestCreateAndQueryInstance(xbrlInstance)
+  }
+
+  private def doTestCreateAndQueryInstance(xbrlInstance: XbrlInstance): Unit = {
     val tns = "http://xbrl.org/together"
+
+    assertResult(true) {
+      xbrlInstance.findAllElemsOrSelf.flatMap(_.relativePathOption).nonEmpty
+    }
 
     assertResult(List.fill(4)(EName(tns, "Primary01"))) {
       xbrlInstance.findAllFacts.map(_.resolvedName)
@@ -68,6 +144,159 @@ class XbrlInstanceTest extends FunSuite {
       f_03_04Ctx.explicitDimensionMembers
     }
   }
+
+  private val nonInstanceString = """
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file is part of the OCW taxonomy, which is an extension on the Dutch taxonomy (NT, Nederlandse Taxonomie) 
+  Intellectual Property of the State of the Netherlands, Ministry of Culture, Education and Sciences (OCW, Ministerie van Onderwijs, Cultuur en Wetenschappen)
+  Architecture: NT12
+  Version: 20180221
+  Released by: Dienst Uitvoering Onderwijs (DUO)
+  Release date: Fri Dec 15 17:07:52 CET 2017
+-->
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<link:labelLink xlink:role="http://www.xbrl.org/2003/role/link" xlink:type="extended">
+		<link:loc xlink:href="ocw-axes.xsd#ocw-dim_ExpenseClaimsManagingDirectorsAxis" xlink:label="ocw-dim_ExpenseClaimsManagingDirectorsAxis_loc" xlink:type="locator"/>
+		<link:label id="ocw-dim_ExpenseClaimsManagingDirectorsAxis_terse_en" xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xlink:label="ocw-dim_ExpenseClaimsManagingDirectorsAxis_terse_en" xml:lang="en">Expense claims of managing directors</link:label>
+		<link:labelArc xlink:from="ocw-dim_ExpenseClaimsManagingDirectorsAxis_loc" xlink:to="ocw-dim_ExpenseClaimsManagingDirectorsAxis_terse_en" xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label"/>
+	</link:labelLink>
+</link:linkbase>
+   """.trim
+
+  private val layoutModelString = """
+<?xml version='1.0' encoding='utf-8'?>
+<tableModel xmlns="http://xbrl.org/2014/table/model" xmlns:rend="http://www.xbrl.org/table-examples" xmlns:xbrli="http://www.xbrl.org/2003/instance" xml:base="..">
+  <tableSet>
+    <label>Concept relationship node with multiple relationship sources</label>
+    <table>
+      <headers axis="y">
+        <group>
+          <label>Presentation tree for primary items</label>
+          <header>
+            <cell>
+              <constraint>
+                <aspect>concept</aspect>
+                <value>rend:o2</value>
+              </constraint>
+            </cell>
+            <cell span="4">
+              <constraint>
+                <aspect>concept</aspect>
+                <value>rend:o5</value>
+              </constraint>
+            </cell>
+          </header>
+          <header>
+            <cell rollup="true"/>
+            <cell rollup="true"/>
+            <cell>
+              <constraint>
+                <aspect>concept</aspect>
+                <value>rend:o6</value>
+              </constraint>
+            </cell>
+            <cell span="2">
+              <constraint>
+                <aspect>concept</aspect>
+                <value>rend:o7</value>
+              </constraint>
+            </cell>
+          </header>
+          <header>
+            <cell rollup="true"/>
+            <cell rollup="true"/>
+            <cell rollup="true"/>
+            <cell>
+              <constraint>
+                <aspect>concept</aspect>
+                <value>rend:o8</value>
+              </constraint>
+            </cell>
+            <cell>
+              <constraint>
+                <aspect>concept</aspect>
+                <value>rend:o9</value>
+              </constraint>
+            </cell>
+          </header>
+        </group>
+      </headers>
+      <headers axis="x">
+        <group>
+          <label>Two columns (periods 2001, 2002)</label>
+          <header>
+            <cell>
+              <label>Label: 2001</label>
+              <constraint>
+                <aspect>period</aspect>
+                <value>
+                  <xbrli:startDate>2001-01-01T00:00:00.000Z</xbrli:startDate>
+                  <xbrli:endDate>2002-01-01T00:00:00.000Z</xbrli:endDate>
+                </value>
+              </constraint>
+            </cell>
+            <cell>
+              <label>Label: 2002</label>
+              <constraint>
+                <aspect>period</aspect>
+                <value>
+                  <xbrli:startDate>2002-01-01T00:00:00.000Z</xbrli:startDate>
+                  <xbrli:endDate>2003-01-01T00:00:00.000Z</xbrli:endDate>
+                </value>
+              </constraint>
+            </cell>
+          </header>
+        </group>
+      </headers>
+      <cells axis="z">
+        <cells axis="y">
+          <cells axis="x">
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o2_2001</fact>
+            </cell>
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o2_2002</fact>
+            </cell>
+          </cells>
+          <cells axis="x">
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o5_2001</fact>
+            </cell>
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o5_2002</fact>
+            </cell>
+          </cells>
+          <cells axis="x">
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o6_2001</fact>
+            </cell>
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o6_2002</fact>
+            </cell>
+          </cells>
+          <cells axis="x">
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o8_2001</fact>
+            </cell>
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o8_2002</fact>
+            </cell>
+          </cells>
+          <cells axis="x">
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o9_2001</fact>
+            </cell>
+            <cell>
+              <fact>concept-relationship-node-multiple-sources-instance.xml#o9_2002</fact>
+            </cell>
+          </cells>
+        </cells>
+      </cells>
+    </table>
+  </tableSet>
+</tableModel>
+   """.trim
 
   private val xbrlInstanceString = """
 <?xml version="1.0" encoding="US-ASCII"?>
@@ -125,4 +354,16 @@ class XbrlInstanceTest extends FunSuite {
   <together:Primary01 decimals="0" contextRef="F" unitRef="Monetary">2000</together:Primary01>
 </xbrli:xbrl>
     """.trim
+
+  private def addWrapperRootElem(rootElem: XbrliElem, emptyWrapperElem: simple.Elem): XbrliElem = {
+    val simpleRootElem = simple.Elem.from(rootElem.backingElem)
+
+    val wrapperElem = emptyWrapperElem.plusChild(simpleRootElem).notUndeclaringPrefixes(rootElem.scope)
+
+    XbrliElem.build(indexed.Elem(wrapperElem))
+  }
+
+  private val emptyWrapperElem: simple.Elem = {
+    simple.Node.emptyElem(QName("wrapperElem"), Scope.Empty)
+  }
 }
