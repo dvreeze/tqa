@@ -74,7 +74,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "junit" % "junit" % "4.12" % "test",
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.0")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.1")
   )
   .jsSettings(
     // Do we need this jsEnv?
@@ -94,7 +94,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     parallelExecution in Test := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.0")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.1")
   )
 
 lazy val tqaJVM = tqa.jvm

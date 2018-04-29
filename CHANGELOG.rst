@@ -3,6 +3,56 @@ CHANGELOG
 =========
 
 
+0.8.2
+=====
+
+Compared with release 0.8.1, the main changes in this version are:
+
+* Added a yaidom dialect for table layout models, with rather rich query support
+* Enhanced the aspect support in the Aspect type, at the expense of AspectModel methods that have been removed
+* "Hardened" the lenient creation APIs for the different yaidom dialects (for taxonomies, instances, taxonomy packages and layout models)
+* These yaidom dialects now also support nesting the expected root elements in other elements
+
+Breaking changes compared to version 0.8.1 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* abstract method wellKnownAspects()scala.collection.immutable.Set in interface eu.cdevreeze.tqa.aspect.AspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel.wellKnownAspects")
+* abstract method requiredNumericItemAspects()scala.collection.immutable.Set in interface eu.cdevreeze.tqa.aspect.AspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel.requiredNumericItemAspects")
+* abstract method requiredItemAspects()scala.collection.immutable.Set in interface eu.cdevreeze.tqa.aspect.AspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel.requiredItemAspects")
+* method wellKnownAspects()scala.collection.immutable.Set in object eu.cdevreeze.tqa.aspect.AspectModel#DimensionalAspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel#DimensionalAspectModel.wellKnownAspects")
+* method requiredNumericItemAspects()scala.collection.immutable.Set in object eu.cdevreeze.tqa.aspect.AspectModel#DimensionalAspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel#DimensionalAspectModel.requiredNumericItemAspects")
+* method requiredItemAspects()scala.collection.immutable.Set in object eu.cdevreeze.tqa.aspect.AspectModel#DimensionalAspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel#DimensionalAspectModel.requiredItemAspects")
+* abstract method isIncludedInDimensionalAspectModel()Boolean in interface eu.cdevreeze.tqa.aspect.Aspect is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.aspect.Aspect.isIncludedInDimensionalAspectModel")
+* abstract method appliesToNonNumericItems()Boolean in interface eu.cdevreeze.tqa.aspect.Aspect is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.aspect.Aspect.appliesToNonNumericItems")
+* abstract method isIncludedInNonDimensionalAspectModel()Boolean in interface eu.cdevreeze.tqa.aspect.Aspect is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.aspect.Aspect.isIncludedInNonDimensionalAspectModel")
+* abstract method appliesToTuples()Boolean in interface eu.cdevreeze.tqa.aspect.Aspect is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.aspect.Aspect.appliesToTuples")
+* method wellKnownAspects()scala.collection.immutable.Set in object eu.cdevreeze.tqa.aspect.AspectModel#NonDimensionalAspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel#NonDimensionalAspectModel.wellKnownAspects")
+* method requiredNumericItemAspects()scala.collection.immutable.Set in object eu.cdevreeze.tqa.aspect.AspectModel#NonDimensionalAspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel#NonDimensionalAspectModel.requiredNumericItemAspects")
+* method requiredItemAspects()scala.collection.immutable.Set in object eu.cdevreeze.tqa.aspect.AspectModel#NonDimensionalAspectModel does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel#NonDimensionalAspectModel.requiredItemAspects")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem)eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackage in object eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackage does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackage.apply")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem)eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackageElem in object eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackageElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackageElem.apply")
+* class eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackageElem was concrete; is declared abstract in current version
+  filter with: ProblemFilters.exclude[AbstractClassProblem]("eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyPackageElem")
+* method isFactPath(eu.cdevreeze.yaidom.core.Path)Boolean in object eu.cdevreeze.tqa.instance.Fact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Fact.isFactPath")
+* class eu.cdevreeze.tqa.instance.XbrliElem was concrete; is declared abstract in current version
+  filter with: ProblemFilters.exclude[AbstractClassProblem]("eu.cdevreeze.tqa.instance.XbrliElem")
+
+
 0.8.1
 =====
 
