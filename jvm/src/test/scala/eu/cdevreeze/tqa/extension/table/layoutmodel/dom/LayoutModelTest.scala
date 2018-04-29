@@ -84,8 +84,8 @@ class LayoutModelTest extends FunSuite {
     val table = tableModel3.firstTable
 
     val rendO8HeaderCells =
-      table.filterHeaderCells { header =>
-        header.findAllConceptAspectConstraints.exists { c =>
+      table.filterHeaderCells { headerCell =>
+        headerCell.findAllConceptAspectConstraints.exists { c =>
           c.conceptAspectValue == EName(ns, "o8")
         }
       }
@@ -112,12 +112,19 @@ class LayoutModelTest extends FunSuite {
     }
 
     assertResult(List(LayoutModelAspects.Aspect.Concept)) {
-      table.findHeadersElemByAxis(TableAxis.YAxis).get.getHeaderCellsAtSliceIndex(sliceIndex)
+      table.getHeadersElemByAxis(TableAxis.YAxis).getHeaderCellsAtSliceIndex(sliceIndex)
         .flatMap(_.findAllConstraints).map(_.aspect).distinct
     }
 
+    val tagSelectors = Set.empty[String]
+
+    assertResult(List(LayoutModelAspects.Aspect.Concept)) {
+      table.getHeadersElemByAxis(TableAxis.YAxis).getHeaderCellsAtSliceIndex(sliceIndex)
+        .flatMap(_.filterConstraintsMatchingTagSelectors(tagSelectors)).map(_.aspect).distinct
+    }
+
     assertResult(List(EName(ns, "o5"), EName(ns, "o7"), EName(ns, "o8"))) {
-      table.findHeadersElemByAxis(TableAxis.YAxis).get.getHeaderCellsAtSliceIndex(sliceIndex)
+      table.getHeadersElemByAxis(TableAxis.YAxis).getHeaderCellsAtSliceIndex(sliceIndex)
         .flatMap(_.findAllConceptAspectConstraints).map(_.conceptAspectValue)
     }
 
@@ -141,8 +148,8 @@ class LayoutModelTest extends FunSuite {
     val table = tableModel3.firstTable
 
     val rendO6HeaderCells =
-      table.filterHeaderCells { header =>
-        header.findAllConceptAspectConstraints.exists { c =>
+      table.filterHeaderCells { headerCell =>
+        headerCell.findAllConceptAspectConstraints.exists { c =>
           c.conceptAspectValue == EName(ns, "o6")
         }
       }
@@ -169,12 +176,19 @@ class LayoutModelTest extends FunSuite {
     }
 
     assertResult(List(LayoutModelAspects.Aspect.Concept)) {
-      table.findHeadersElemByAxis(TableAxis.YAxis).get.getHeaderCellsAtSliceIndex(sliceIndex)
+      table.getHeadersElemByAxis(TableAxis.YAxis).getHeaderCellsAtSliceIndex(sliceIndex)
         .flatMap(_.findAllConstraints).map(_.aspect).distinct
     }
 
+    val tagSelectors = Set.empty[String]
+
+    assertResult(List(LayoutModelAspects.Aspect.Concept)) {
+      table.getHeadersElemByAxis(TableAxis.YAxis).getHeaderCellsAtSliceIndex(sliceIndex)
+        .flatMap(_.filterConstraintsMatchingTagSelectors(tagSelectors)).map(_.aspect).distinct
+    }
+
     assertResult(List(EName(ns, "o5"), EName(ns, "o6"))) {
-      table.findHeadersElemByAxis(TableAxis.YAxis).get.getHeaderCellsAtSliceIndex(sliceIndex)
+      table.getHeadersElemByAxis(TableAxis.YAxis).getHeaderCellsAtSliceIndex(sliceIndex)
         .flatMap(_.findAllConceptAspectConstraints).map(_.conceptAspectValue)
     }
 

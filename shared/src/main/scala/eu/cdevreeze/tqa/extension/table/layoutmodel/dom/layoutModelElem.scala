@@ -173,6 +173,14 @@ final class Table private[dom] (
   }
 
   /**
+   * Returns `findHeadersElemByAxis(axis).get`, failing with an exception of there is not headers element
+   * for the given axis.
+   */
+  def getHeadersElemByAxis(axis: TableAxis): HeadersElem = {
+    findHeadersElemByAxis(axis).getOrElse(sys.error(s"Missing headers element for axis '$axis'"))
+  }
+
+  /**
    * Filters the descendant header cell elements that obey the given predicate.
    *
    * This method is useful to find header cells having certain constraints, e.g. those that contain given
@@ -261,7 +269,7 @@ final class Label private[dom] (
 // Headers and their content
 
 /**
- * Headers element in a table model
+ * Headers element in a table model. It represents one axis of the table.
  *
  * @author Chris de Vreeze
  */
@@ -271,6 +279,9 @@ final class HeadersElem private[dom] (
 
   require(resolvedName == ModelHeadersEName, s"Expected EName $ModelHeadersEName but found $resolvedName")
 
+  /**
+   * Finds all groups, returning them in the correct order.
+   */
   def findAllGroups: immutable.IndexedSeq[Group] = {
     findAllChildElemsOfType(classTag[Group])
   }
@@ -285,6 +296,7 @@ final class HeadersElem private[dom] (
 
   /**
    * Returns the collection of header cells at the given zero-based slice index, one header cell per header.
+   * The result is ordered, starting with the outermost header cells and ending with the innermost header cells.
    * This may fail with an exception if the document is not schema-valid.
    */
   def getHeaderCellsAtSliceIndex(sliceIndex: Int): immutable.IndexedSeq[HeaderCell] = {
@@ -313,6 +325,9 @@ final class Group private[dom] (
 
   require(resolvedName == ModelGroupEName, s"Expected EName $ModelGroupEName but found $resolvedName")
 
+  /**
+   * Finds all header elements, returning them in the correct order.
+   */
   def findAllHeaders: immutable.IndexedSeq[Header] = {
     findAllChildElemsOfType(classTag[Header])
   }
@@ -323,6 +338,7 @@ final class Group private[dom] (
 
   /**
    * Returns the collection of header cells at the given zero-based slice index, one header cell per header.
+   * The result is ordered, starting with the outermost header cells and ending with the innermost header cells.
    * This may fail with an exception if the document is not schema-valid.
    */
   def getHeaderCellsAtSliceIndex(sliceIndex: Int): immutable.IndexedSeq[HeaderCell] = {
@@ -497,6 +513,27 @@ final class HeaderCell private[dom] (
 
   def aspects: Set[LayoutModelAspects.Aspect] = {
     findAllConstraints.map(_.aspect).toSet
+  }
+
+  /**
+   * Filters the constraints by taking tag selectors into account. This is inspired by the table specification, section 7.6.
+   * At most one constraint set is returned. Therefore the result can be used for its optional tag, which can be used in queries
+   * for specific types of constraints.
+   */
+  def filterConstraintsMatchingTagSelectors(tagSelectors: Set[String]): immutable.IndexedSeq[Constraint] = {
+    val constraintSetsByTagOption: Map[Option[String], immutable.IndexedSeq[Constraint]] =
+      findAllConstraints.groupBy(_.tagOption)
+
+    val overlappingTags: Set[String] =
+      constraintSetsByTagOption.keySet.flatten.intersect(tagSelectors)
+
+    if (overlappingTags.isEmpty) {
+      constraintSetsByTagOption.getOrElse(None, immutable.IndexedSeq())
+    } else if (overlappingTags.size == 1) {
+      constraintSetsByTagOption.apply(Option(overlappingTags.head))
+    } else {
+      immutable.IndexedSeq()
+    }
   }
 }
 
