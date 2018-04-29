@@ -25,6 +25,7 @@ import scala.reflect.classTag
 import TaxonomyPackageElem._
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Path
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
@@ -90,6 +91,20 @@ sealed class TaxonomyPackageElem private[taxonomybuilder] (
 
   final override def hashCode: Int = backingElem.hashCode
 
+  /**
+   * Returns the optional path of the ancestor-or-self taxonomy package root element.
+   */
+  final def taxonomyPackageRootElemPathOption: Option[Path] = {
+    backingElem.findAncestorOrSelf(_.resolvedName == TpTaxonomyPackageEName).map(_.path)
+  }
+
+  /**
+   * Returns the optional relative path to the (optional) taxonomy package root element path.
+   */
+  final def relativePathOption: Option[Path] = {
+    taxonomyPackageRootElemPathOption.map(rootPath => backingElem.path.skippingPath(rootPath))
+  }
+
   private def msg(s: String): String = s"${s} (${backingElem.key})"
 }
 
@@ -105,7 +120,6 @@ final class TaxonomyPackage private[taxonomybuilder] (
   childElems: immutable.IndexedSeq[TaxonomyPackageElem]) extends TaxonomyPackageElem(backingElem, childElems) {
 
   require(resolvedName == TpTaxonomyPackageEName, s"Expected EName $TpTaxonomyPackageEName but found $resolvedName")
-  require(backingElem.path.isEmpty, s"The TaxonomyPackage must be the root element")
 
   def filterEntryPoints(p: EntryPoint => Boolean): immutable.IndexedSeq[EntryPoint] = {
     filterElemsOfType(classTag[EntryPoint])(p)
