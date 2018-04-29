@@ -821,7 +821,7 @@ object Constraint {
 object TableModel {
 
   def build(elem: BackingNodes.Elem): TableModel = {
-    require(elem.resolvedName == ModelTableModelEName)
+    require(elem.resolvedName == ModelTableModelEName, s"Expected $ModelTableModelEName but found ${elem.resolvedName}")
     LayoutModelElem.build(elem).asInstanceOf[TableModel]
   }
 }

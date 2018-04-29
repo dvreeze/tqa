@@ -1263,7 +1263,7 @@ object XbrliElem {
 object XbrlInstance {
 
   def build(elem: BackingNodes.Elem): XbrlInstance = {
-    require(elem.resolvedName == XbrliXbrlEName)
+    require(elem.resolvedName == XbrliXbrlEName, s"Expected $XbrliXbrlEName but found ${elem.resolvedName}")
     XbrliElem.build(elem).asInstanceOf[XbrlInstance]
   }
 }
