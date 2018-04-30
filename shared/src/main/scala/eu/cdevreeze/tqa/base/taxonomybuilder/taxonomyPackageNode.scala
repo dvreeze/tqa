@@ -34,6 +34,22 @@ import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 
 /**
+ * "Taxonomy package DOM node".
+ *
+ * @author Chris de Vreeze
+ */
+sealed abstract class TaxonomyPackageNode extends ScopedNodes.Node
+
+sealed abstract class CanBeTaxonomyPackageDocumentChild extends TaxonomyPackageNode with ScopedNodes.CanBeDocumentChild
+
+final case class TaxonomyPackageTextNode(text: String) extends TaxonomyPackageNode with ScopedNodes.Text
+
+final case class TaxonomyPackageProcessingInstructionNode(target: String, data: String) extends CanBeTaxonomyPackageDocumentChild
+  with ScopedNodes.ProcessingInstruction
+
+final case class TaxonomyPackageCommentNode(text: String) extends CanBeTaxonomyPackageDocumentChild with ScopedNodes.Comment
+
+/**
  * XML element inside a taxonomy package XML tree. This API is immutable, provided the backing element is immutable.
  *
  * The yaidom `SubtypeAwareElemApi` and `ScopedElemApi` query API is offered.
@@ -54,7 +70,8 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  */
 sealed abstract class TaxonomyPackageElem private[taxonomybuilder] (
   val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyPackageElem]) extends ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
+  childElems: immutable.IndexedSeq[TaxonomyPackageElem]) extends CanBeTaxonomyPackageDocumentChild
+  with ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
   // TODO Restore old equality on the backing elements themselves (after JS DOM wrappers have appropriate equality)
   assert(
@@ -63,13 +80,30 @@ sealed abstract class TaxonomyPackageElem private[taxonomybuilder] (
 
   type ThisElem = TaxonomyPackageElem
 
-  type ThisNode = TaxonomyPackageElem
+  type ThisNode = TaxonomyPackageNode
 
   final def thisElem: ThisElem = this
 
   // We are not interested in non-element children
 
-  final def children: immutable.IndexedSeq[ThisNode] = findAllChildElems
+  final def children: immutable.IndexedSeq[ThisNode] = {
+    var childElemIdx = 0
+
+    backingElem.children flatMap {
+      case che: BackingNodes.Elem =>
+        val e = childElems(childElemIdx)
+        childElemIdx += 1
+        Some(e)
+      case ch: BackingNodes.Text =>
+        Some(TaxonomyPackageTextNode(ch.text))
+      case ch: BackingNodes.Comment =>
+        Some(TaxonomyPackageCommentNode(ch.text))
+      case ch: BackingNodes.ProcessingInstruction =>
+        Some(TaxonomyPackageProcessingInstructionNode(ch.target, ch.data))
+      case ch =>
+        None
+    } ensuring (childElemIdx == childElems.size)
+  }
 
   /**
    * Very fast implementation of findAllChildElems, for fast querying

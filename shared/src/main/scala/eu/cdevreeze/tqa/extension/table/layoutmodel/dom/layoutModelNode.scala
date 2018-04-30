@@ -37,6 +37,22 @@ import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 
 /**
+ * "Layout model DOM node".
+ *
+ * @author Chris de Vreeze
+ */
+sealed abstract class LayoutModelNode extends ScopedNodes.Node
+
+sealed abstract class CanBeLayoutModelDocumentChild extends LayoutModelNode with ScopedNodes.CanBeDocumentChild
+
+final case class LayoutModelTextNode(text: String) extends LayoutModelNode with ScopedNodes.Text
+
+final case class LayoutModelProcessingInstructionNode(target: String, data: String) extends CanBeLayoutModelDocumentChild
+  with ScopedNodes.ProcessingInstruction
+
+final case class LayoutModelCommentNode(text: String) extends CanBeLayoutModelDocumentChild with ScopedNodes.Comment
+
+/**
  * XML element inside a table layout model. This API is immutable, provided the backing element is immutable.
  *
  * The yaidom `SubtypeAwareElemApi` and `ScopedElemApi` query API is offered.
@@ -55,7 +71,8 @@ import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
  */
 sealed abstract class LayoutModelElem private[dom] (
   val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[LayoutModelElem]) extends ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
+  childElems: immutable.IndexedSeq[LayoutModelElem]) extends CanBeLayoutModelDocumentChild
+  with ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
   // TODO Restore old equality on the backing elements themselves (after JS DOM wrappers have appropriate equality)
   assert(
@@ -64,13 +81,30 @@ sealed abstract class LayoutModelElem private[dom] (
 
   type ThisElem = LayoutModelElem
 
-  type ThisNode = LayoutModelElem
+  type ThisNode = LayoutModelNode
 
   final def thisElem: ThisElem = this
 
   // We are not interested in non-element children
 
-  final def children: immutable.IndexedSeq[ThisNode] = findAllChildElems
+  final def children: immutable.IndexedSeq[ThisNode] = {
+    var childElemIdx = 0
+
+    backingElem.children flatMap {
+      case che: BackingNodes.Elem =>
+        val e = childElems(childElemIdx)
+        childElemIdx += 1
+        Some(e)
+      case ch: BackingNodes.Text =>
+        Some(LayoutModelTextNode(ch.text))
+      case ch: BackingNodes.Comment =>
+        Some(LayoutModelCommentNode(ch.text))
+      case ch: BackingNodes.ProcessingInstruction =>
+        Some(LayoutModelProcessingInstructionNode(ch.target, ch.data))
+      case ch =>
+        None
+    } ensuring (childElemIdx == childElems.size)
+  }
 
   /**
    * Very fast implementation of findAllChildElems, for fast querying
