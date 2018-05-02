@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.instance.js
 
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 import scala.reflect.classTag
 
@@ -43,6 +44,15 @@ class XbrlInstanceTest extends FunSuite {
   test("testCreateAndQueryInstance") {
     val db = new DOMParser()
     val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(xbrlInstanceString, SupportedType.`text/xml`))
+
+    val xbrlInstance: XbrlInstance = XbrlInstance.build(domDoc.documentElement)
+
+    doTestCreateAndQueryInstance(xbrlInstance)
+  }
+
+  test("testCreateAndQueryInstanceWithTimezonesInPeriods") {
+    val db = new DOMParser()
+    val domDoc: JsDomDocument = JsDomDocument.wrapDocument(db.parseFromString(editedXbrlInstanceString, SupportedType.`text/xml`))
 
     val xbrlInstance: XbrlInstance = XbrlInstance.build(domDoc.documentElement)
 
@@ -132,7 +142,10 @@ class XbrlInstanceTest extends FunSuite {
     val fCtx = xbrlInstance.allContextsById("F")
 
     assertResult(LocalDate.parse("2010-01-01").atStartOfDay) {
-      fCtx.period.asInstantPeriod.instantDateTime
+      fCtx.period.asInstantPeriod.instantDateTime match {
+        case dt: ZonedDateTime => dt.toLocalDateTime
+        case dt => dt
+      }
     }
 
     val f_03_04Ctx = xbrlInstance.allContextsById("F_Member03_Member04")
@@ -354,6 +367,9 @@ class XbrlInstanceTest extends FunSuite {
   <together:Primary01 decimals="0" contextRef="F" unitRef="Monetary">2000</together:Primary01>
 </xbrli:xbrl>
     """.trim
+
+  private val editedXbrlInstanceString =
+    xbrlInstanceString.replace("2009-12-31", "2010-01-01T00:00:00Z").ensuring(_.length > xbrlInstanceString.length)
 
   private def addWrapperRootElem(rootElem: XbrliElem, emptyWrapperElem: simple.Elem): XbrliElem = {
     val simpleRootElem = simple.Elem.from(rootElem.backingElem)

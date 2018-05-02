@@ -364,7 +364,7 @@ final class PublicationDate private[taxonomybuilder] (
 
   require(resolvedName == TpPublicationDateEName, s"Expected EName $TpPublicationDateEName but found $resolvedName")
 
-  // TODO What about timezones?
+  // Ignoring time zones, because dates without times are unlikely to contain time zones.
   def value: LocalDate = LocalDate.parse(text)
 }
 
