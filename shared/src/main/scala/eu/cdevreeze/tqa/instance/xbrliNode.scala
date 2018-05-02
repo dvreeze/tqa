@@ -19,9 +19,12 @@ package eu.cdevreeze.tqa.instance
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.temporal.Temporal
 
 import scala.collection.immutable
 import scala.reflect.classTag
+import scala.util.Try
 
 import XbrliElem._
 import eu.cdevreeze.tqa.ENames
@@ -929,11 +932,9 @@ final class InstantPeriod private[instance] (
 
   require(isInstantPeriod)
 
-  // TODO How about time zones?
-
   def instant: Instant = getChildElemOfType(classTag[Instant])(anyElem)
 
-  def instantDateTime: LocalDateTime = instant.dateTime
+  def instantDateTime: Temporal = instant.dateTime
 }
 
 /**
@@ -947,15 +948,13 @@ final class StartEndDatePeriod private[instance] (
 
   require(isStartEndDatePeriod)
 
-  // TODO How about time zones?
-
   def startDate: StartDate = getChildElemOfType(classTag[StartDate])(anyElem)
 
   def endDate: EndDate = getChildElemOfType(classTag[EndDate])(anyElem)
 
-  def startDateTime: LocalDateTime = startDate.dateTime
+  def startDateTime: Temporal = startDate.dateTime
 
-  def endDateTime: LocalDateTime = endDate.dateTime
+  def endDateTime: Temporal = endDate.dateTime
 }
 
 /**
@@ -981,7 +980,7 @@ final class Instant private[instance] (
 
   require(resolvedName == XbrliInstantEName, s"Expected EName $XbrliInstantEName but found $resolvedName")
 
-  def dateTime: LocalDateTime = {
+  def dateTime: Temporal = {
     Period.parseInstantOrEndDate(text)
   }
 }
@@ -997,7 +996,7 @@ final class StartDate private[instance] (
 
   require(resolvedName == XbrliStartDateEName, s"Expected EName $XbrliStartDateEName but found $resolvedName")
 
-  def dateTime: LocalDateTime = {
+  def dateTime: Temporal = {
     Period.parseStartDate(text)
   }
 }
@@ -1013,7 +1012,7 @@ final class EndDate private[instance] (
 
   require(resolvedName == XbrliEndDateEName, s"Expected EName $XbrliEndDateEName but found $resolvedName")
 
-  def dateTime: LocalDateTime = {
+  def dateTime: Temporal = {
     Period.parseInstantOrEndDate(text)
   }
 }
@@ -1333,17 +1332,19 @@ object Period {
     elem.findChildElem(XbrliForeverEName).isDefined
   }
 
-  private[instance] def parseStartDate(s: String): LocalDateTime = {
+  private[instance] def parseStartDate(s: String): Temporal = {
     if (s.contains('T')) {
-      LocalDateTime.parse(s)
+      Try(LocalDateTime.parse(s))
+        .getOrElse(ZonedDateTime.parse(s))
     } else {
       LocalDate.parse(s).atStartOfDay
     }
   }
 
-  private[instance] def parseInstantOrEndDate(s: String): LocalDateTime = {
+  private[instance] def parseInstantOrEndDate(s: String): Temporal = {
     if (s.contains('T')) {
-      LocalDateTime.parse(s)
+      Try(LocalDateTime.parse(s))
+        .getOrElse(ZonedDateTime.parse(s))
     } else {
       LocalDate.parse(s).plusDays(1).atStartOfDay
     }

@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.clientapp
 
 import java.net.URI
-import java.time.LocalDateTime
+import java.time.temporal.Temporal
 
 import scala.collection.immutable
 import scala.reflect.classTag
@@ -185,9 +185,9 @@ object XbrlInstanceViewer {
   }
 
   private def convertAspectsToTable(
-    fact:          Fact,
+    fact: Fact,
     contextOption: Option[XbrliContext],
-    unitOption:    Option[XbrliUnit]): HTMLTableElement = {
+    unitOption: Option[XbrliUnit]): HTMLTableElement = {
 
     val coreAspectValues: Map[Aspect, Any] = extractCoreAspectValues(fact, contextOption, unitOption)
 
@@ -225,16 +225,16 @@ object XbrlInstanceViewer {
                 td("value"),
                 td(valueString)))
           case (Aspect.PeriodAspect, optStartOptEnd) =>
-            val optionalStartOptionalEnd: (Option[LocalDateTime], Option[LocalDateTime]) =
-              optStartOptEnd.asInstanceOf[(Option[LocalDateTime], Option[LocalDateTime])]
+            val optionalStartOptionalEnd: (Option[Temporal], Option[Temporal]) =
+              optStartOptEnd.asInstanceOf[(Option[Temporal], Option[Temporal])]
 
             val periodStartString = optionalStartOptionalEnd._1.map(_.toString).getOrElse("")
             val periodEndString = optionalStartOptionalEnd._2.map(_.toString).getOrElse("")
 
             val startDateLabel = (periodStartString, periodEndString) match {
               case ("", "") => ""
-              case (_, "")  => "instant"
-              case (_, _)   => "start"
+              case (_, "") => "instant"
+              case (_, _) => "start"
             }
 
             val firstRow =
@@ -302,16 +302,16 @@ object XbrlInstanceViewer {
   }
 
   private def extractCoreAspectValues(
-    fact:          Fact,
+    fact: Fact,
     contextOption: Option[XbrliContext],
-    unitOption:    Option[XbrliUnit]): Map[Aspect, Any] = {
+    unitOption: Option[XbrliUnit]): Map[Aspect, Any] = {
 
     import eu.cdevreeze.tqa.aspect.Aspect._
 
     val entityIdentifierOption =
       contextOption.map(ctx => (ctx.entity.identifierScheme, ctx.entity.identifierValue))
 
-    val optStartOptEnd: (Option[LocalDateTime], Option[LocalDateTime]) =
+    val optStartOptEnd: (Option[Temporal], Option[Temporal]) =
       contextOption.map(_.period) map {
         case p if p.isInstantPeriod =>
           (Some(p.asInstantPeriod.instantDateTime), None)
@@ -422,7 +422,7 @@ object XbrlInstanceViewer {
       n match {
         case e: simple.Elem => printElem(e, parentScope, sb)
         case t: simple.Text => printText(t, sb)
-        case n              => ()
+        case n => ()
       }
     }
 
