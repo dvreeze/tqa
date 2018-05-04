@@ -29,6 +29,7 @@ import eu.cdevreeze.tqa.base.dom.RoleRef
 import eu.cdevreeze.tqa.base.dom.StandardLoc
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
+import eu.cdevreeze.tqa.base.dom.TaxonomyRootElem
 import eu.cdevreeze.tqa.base.dom.XsdSchema
 
 /**
@@ -38,12 +39,22 @@ import eu.cdevreeze.tqa.base.dom.XsdSchema
  * This document collector works well with XBRL Taxonomy Packages, passing an entry point in such a
  * taxonomy package, and using a document builder that uses the XML catalog of the taxonomy package.
  *
+ * DTS discovery also works if one or more taxonomy schemas and/or linkbases have been combined in the
+ * same XML document, below another (wrapper) root element. Embedded linkbases are also picked up.
+ *
  * @author Chris de Vreeze
  */
 final class DefaultDtsCollector extends AbstractDtsCollector {
 
   def findAllUsedDocUris(taxonomyDoc: TaxonomyDocument): Set[URI] = {
-    taxonomyDoc.documentElement match {
+    val taxoRootElems =
+      taxonomyDoc.documentElement.findTopmostElemsOrSelfOfType(classTag[TaxonomyRootElem])(_ => true)
+
+    taxoRootElems.flatMap(e => findAllUsedDocUris(e)).toSet
+  }
+
+  def findAllUsedDocUris(taxonomyRootElem: TaxonomyRootElem): Set[URI] = {
+    taxonomyRootElem match {
       case xsdSchema: XsdSchema =>
         // Minding embedded linkbases
 
@@ -52,8 +63,6 @@ final class DefaultDtsCollector extends AbstractDtsCollector {
         }
       case linkbase: Linkbase =>
         findAllUsedDocUrisInLinkbase(linkbase)
-      case _: TaxonomyElem =>
-        Set.empty
     }
   }
 
