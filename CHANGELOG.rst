@@ -3,6 +3,35 @@ CHANGELOG
 =========
 
 
+0.8.3
+=====
+
+Compared with release 0.8.2, the main changes in this version are:
+
+* DTS discovery no longer expects "taxonomy document" roots to be XML document roots
+* The taxonomy package and layout model "yaidom dialects" now also contain non-element nodes, to make (direct) conversion to resolved elements work
+* Periods in XBRL instances can now have timezones (for datetime period data)
+
+Breaking changes compared to version 0.8.2 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method parseStartDate(java.lang.String)java.time.LocalDateTime in object eu.cdevreeze.tqa.instance.Period has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.Period.parseStartDate")
+* method parseInstantOrEndDate(java.lang.String)java.time.LocalDateTime in object eu.cdevreeze.tqa.instance.Period has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.Period.parseInstantOrEndDate")
+* method instantDateTime()java.time.LocalDateTime in class eu.cdevreeze.tqa.instance.InstantPeriod has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.InstantPeriod.instantDateTime")
+* method dateTime()java.time.LocalDateTime in class eu.cdevreeze.tqa.instance.StartDate has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.StartDate.dateTime")
+* method endDateTime()java.time.LocalDateTime in class eu.cdevreeze.tqa.instance.StartEndDatePeriod has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.StartEndDatePeriod.endDateTime")
+* method startDateTime()java.time.LocalDateTime in class eu.cdevreeze.tqa.instance.StartEndDatePeriod has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.StartEndDatePeriod.startDateTime")
+* method dateTime()java.time.LocalDateTime in class eu.cdevreeze.tqa.instance.Instant has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.Instant.dateTime")
+* method dateTime()java.time.LocalDateTime in class eu.cdevreeze.tqa.instance.EndDate has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.EndDate.dateTime")
+
+
 0.8.2
 =====
 
