@@ -65,6 +65,13 @@ import net.sf.saxon.s9api.Processor
  * documents and these alternative taxonomy documents, and features like networks of relationships must
  * keep working in the alternative representation.
  *
+ * TODO For XBRL validity of the experimental taxonomy representation, embed linkbases in schemas that
+ * contain the roleTypes and arcroleTypes referred to by roleRefs and arcroleRefs in the same document
+ * (so first make sure to keep those roleRefs and arcroleRefs, instead of throwing them away). Also make
+ * sure that across documents roleTypes and arcroleTypes for the same URIs are the same. In this way we can
+ * make the alternative XBRL taxonomy representation XBRL-valid. Note that this solution still requires
+ * href URIs, but at least they are same-document URIs.
+ *
  * @author Chris de Vreeze
  */
 @RunWith(classOf[JUnitRunner])
