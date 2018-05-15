@@ -438,7 +438,7 @@ final class AspectNode(underlyingResource: tqa.base.dom.NonStandardResource) ext
 object TableResource {
 
   /**
-   * Lenient method to optionally create a TableResource from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a TableResource from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[TableResource] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.TableNamespace)) {

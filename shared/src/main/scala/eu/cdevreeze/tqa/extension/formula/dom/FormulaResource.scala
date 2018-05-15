@@ -1242,7 +1242,7 @@ final class ConceptRelationFilter(underlyingResource: tqa.base.dom.NonStandardRe
 object FormulaResource {
 
   /**
-   * Lenient method to optionally create a FormulaResource from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a FormulaResource from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[FormulaResource] = {
     underlyingResource.resolvedName match {
@@ -1273,7 +1273,7 @@ object FormulaResource {
 object Filter {
 
   /**
-   * Lenient method to optionally create a Filter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a Filter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[Filter] = {
     underlyingResource.resolvedName.namespaceUriOption.getOrElse("") match {
@@ -1299,7 +1299,7 @@ object Filter {
 object ConceptFilter {
 
   /**
-   * Lenient method to optionally create a ConceptFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a ConceptFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[ConceptFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.CfNamespace)) {
@@ -1321,7 +1321,7 @@ object ConceptFilter {
 object BooleanFilter {
 
   /**
-   * Lenient method to optionally create a BooleanFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a BooleanFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[BooleanFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.BfNamespace)) {
@@ -1339,7 +1339,7 @@ object BooleanFilter {
 object DimensionFilter {
 
   /**
-   * Lenient method to optionally create a DimensionFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a DimensionFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[DimensionFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.DfNamespace)) {
@@ -1357,7 +1357,7 @@ object DimensionFilter {
 object EntityFilter {
 
   /**
-   * Lenient method to optionally create an EntityFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create an EntityFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[EntityFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.EfNamespace)) {
@@ -1378,7 +1378,7 @@ object EntityFilter {
 object GeneralFilter {
 
   /**
-   * Lenient method to optionally create a GeneralFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a GeneralFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[GeneralFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.GfNamespace)) {
@@ -1395,7 +1395,7 @@ object GeneralFilter {
 object MatchFilter {
 
   /**
-   * Lenient method to optionally create a MatchFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a MatchFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[MatchFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.MfNamespace)) {
@@ -1421,7 +1421,7 @@ object MatchFilter {
 object PeriodAspectFilter {
 
   /**
-   * Lenient method to optionally create a PeriodAspectFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a PeriodAspectFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[PeriodAspectFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.PfNamespace)) {
@@ -1443,7 +1443,7 @@ object PeriodAspectFilter {
 object RelativeFilter {
 
   /**
-   * Lenient method to optionally create a RelativeFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a RelativeFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[RelativeFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.RfNamespace)) {
@@ -1460,7 +1460,7 @@ object RelativeFilter {
 object SegmentScenarioFilter {
 
   /**
-   * Lenient method to optionally create a SegmentScenarioFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a SegmentScenarioFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[SegmentScenarioFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.SsfNamespace)) {
@@ -1478,7 +1478,7 @@ object SegmentScenarioFilter {
 object TupleFilter {
 
   /**
-   * Lenient method to optionally create a TupleFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a TupleFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[TupleFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.TfNamespace)) {
@@ -1498,7 +1498,7 @@ object TupleFilter {
 object UnitFilter {
 
   /**
-   * Lenient method to optionally create a UnitFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a UnitFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[UnitFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.UfNamespace)) {
@@ -1516,7 +1516,7 @@ object UnitFilter {
 object ValueFilter {
 
   /**
-   * Lenient method to optionally create a ValueFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a ValueFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[ValueFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.VfNamespace)) {
@@ -1534,7 +1534,7 @@ object ValueFilter {
 object AspectCoverFilter {
 
   /**
-   * Lenient method to optionally create a AspectCoverFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a AspectCoverFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[AspectCoverFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.AcfNamespace)) {
@@ -1551,7 +1551,7 @@ object AspectCoverFilter {
 object ConceptRelationFilter {
 
   /**
-   * Lenient method to optionally create a ConceptRelationFilter from an underlying tqa.base.dom.StandardResource.
+   * Lenient method to optionally create a ConceptRelationFilter from an underlying tqa.base.dom.NonStandardResource.
    */
   def opt(underlyingResource: tqa.base.dom.NonStandardResource): Option[ConceptRelationFilter] = {
     if (underlyingResource.resolvedName.namespaceUriOption.contains(Namespaces.CrfNamespace)) {
