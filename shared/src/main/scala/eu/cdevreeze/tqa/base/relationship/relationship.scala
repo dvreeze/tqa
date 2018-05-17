@@ -21,6 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 import scala.reflect.classTag
 
+import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.ENames.GplPreferredLabelEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
@@ -119,6 +120,10 @@ sealed abstract class Relationship(
   final def priority: Int = arc.priority
 
   final def order: BigDecimal = arc.order
+
+  final def uniqueKey: Relationship.UniqueKey = {
+    Relationship.UniqueKey(arc.key, sourceElem.key, targetElem.key)
+  }
 
   final override def equals(obj: Any): Boolean = obj match {
     case other: Relationship =>
@@ -546,6 +551,19 @@ final class OtherNonStandardRelationship(
 // Companion objects
 
 object Relationship {
+
+  /**
+   * Unique key of a relationship. It is not to be confused with a relationship key that is the same for equivalent
+   * relationships (used for determining networks of relationships).
+   *
+   * The unique relationship key consists of the key of the underlying arc, the source element key, and the
+   * target element key. The latter two are needed because one arc can represent more than one relationship.
+   *
+   * This unique key can be useful as Map keys where the Map keys represent relationships. For example, Maps from
+   * has-hypercube relationships to their dimension-members can use the has-hypercube unique relationship key
+   * as Map key.
+   */
+  final case class UniqueKey(arcKey: XmlFragmentKey, sourceElemKey: XmlFragmentKey, targetElemKey: XmlFragmentKey)
 
   /**
    * Builds a [[eu.cdevreeze.tqa.base.relationship.Relationship]] from an underlying [[eu.cdevreeze.tqa.base.dom.XLinkArc]],
