@@ -84,9 +84,17 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.5",
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-java-time" % "0.2.4",
+    // It turns out that scalajs-jsjoda is far more complete than scalajs-java-time!
+
+    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda" % "1.1.1",
+
+    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda-as-java-time" % "1.1.1",
 
     libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.6.7" % "optional",
+
+    jsDependencies += "org.webjars.npm" % "js-joda" % "1.3.0" / "dist/js-joda.js" minified "dist/js-joda.min.js",
+
+    jsDependencies += "org.webjars.npm" % "js-joda-timezone" % "1.0.0" / "dist/js-joda-timezone.js" minified "dist/js-joda-timezone.min.js",
 
     parallelExecution in Test := false,
 
