@@ -40,6 +40,8 @@ lazy val commonSettings = Seq(
 
   libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.8.0",
 
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.0",
+
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.5",
 
   libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % "test"
@@ -64,11 +66,9 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-10",
 
-    libraryDependencies += "com.google.guava" % "guava" % "24.1-jre",
+    libraryDependencies += "com.google.guava" % "guava" % "25.1-jre",
 
-    libraryDependencies += "com.google.code.findbugs" % "jsr305" % "1.3.9",
-
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.0",
+    libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2",
 
     libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.8.0",
 
@@ -84,17 +84,9 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.5",
 
-    // We use some JDK 8 java.time classes in shared code ...
-
-    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda" % "1.1.1",
-
-    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda-as-java-time" % "1.1.1",
+    libraryDependencies += "org.scala-js" %%% "scalajs-java-time" % "0.2.4",
 
     libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.6.7" % "optional",
-
-    jsDependencies += "org.webjars.npm" % "js-joda" % "1.3.0" / "dist/js-joda.js" minified "dist/js-joda.min.js",
-
-    jsDependencies += "org.webjars.npm" % "js-joda-timezone" % "1.0.0" / "dist/js-joda-timezone.js" minified "dist/js-joda-timezone.min.js",
 
     parallelExecution in Test := false,
 
