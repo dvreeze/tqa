@@ -3,6 +3,13 @@ CHANGELOG
 =========
 
 
+0.8.5
+=====
+
+Version 0.8.5 is like version 0.8.4, but it uses yaidom 1.8.1 instead of yaidom 1.8.0, in order to prevent
+any dependency conflicts in the Scala.js artifacts from occurring.
+
+
 0.8.4
 =====
 
