@@ -3,6 +3,750 @@ CHANGELOG
 =========
 
 
+0.8.4
+=====
+
+Compared with release 0.8.3, the main changes in this version are:
+
+* The ("XML-free") models for formulas and tables now hold the optional IDs for "resources"
+* Added class ``Relationship.UniqueKey``
+
+Breaking changes compared to version 0.8.3 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.SegmentFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.SegmentFilter$")
+* method apply(scala.Option)eu.cdevreeze.tqa.extension.formula.model.SegmentFilter in object eu.cdevreeze.tqa.extension.formula.model.SegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SegmentFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion is different in current version. Missing types {scala.runtime.AbstractFunction6}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion$")
+* method apply(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion in object eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class VariableOrParameter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class MatchFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.LocationFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.LocationFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.LocationFilter in object eu.cdevreeze.tqa.extension.formula.model.LocationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.LocationFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class UnitFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.Parameter is different in current version. Missing types {scala.runtime.AbstractFunction4}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.Parameter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,scala.Option,scala.Option,scala.Option)eu.cdevreeze.tqa.extension.formula.model.Parameter in object eu.cdevreeze.tqa.extension.formula.model.Parameter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Parameter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class Filter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ScopedXPathString rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter in class eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter.this")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr)eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter in class eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr)Unit in class eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter.this")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr)eu.cdevreeze.tqa.extension.formula.model.ParentFilter in class eu.cdevreeze.tqa.extension.formula.model.ParentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ParentFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ParentFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ParentFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr)Unit in class eu.cdevreeze.tqa.extension.formula.model.ParentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ParentFilter.this")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter.this")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class PeriodAspectFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* synthetic method copy$default$6()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.Formula has a different result type in current version, where it is scala.collection.immutable.IndexedSeq rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy$default$6")
+* synthetic method copy$default$2()eu.cdevreeze.tqa.aspect.AspectModel in class eu.cdevreeze.tqa.extension.formula.model.Formula has a different result type in current version, where it is Boolean rather than eu.cdevreeze.tqa.aspect.AspectModel
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy$default$2")
+* synthetic method copy$default$5()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.Formula has a different result type in current version, where it is eu.cdevreeze.tqa.ScopedXPathString rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy$default$5")
+* synthetic method copy$default$8()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.Formula has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy$default$8")
+* method copy(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,scala.Option,eu.cdevreeze.tqa.ScopedXPathString,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.Formula in class eu.cdevreeze.tqa.extension.formula.model.Formula does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy")
+* synthetic method copy$default$1()Boolean in class eu.cdevreeze.tqa.extension.formula.model.Formula has a different result type in current version, where it is scala.Option rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy$default$1")
+* synthetic method copy$default$4()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.Formula has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy$default$4")
+* synthetic method copy$default$3()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.Formula has a different result type in current version, where it is eu.cdevreeze.tqa.aspect.AspectModel rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.copy$default$3")
+* method this(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,scala.Option,eu.cdevreeze.tqa.ScopedXPathString,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.Formula does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ParentFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ParentFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr)eu.cdevreeze.tqa.extension.formula.model.ParentFilter in object eu.cdevreeze.tqa.extension.formula.model.ParentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ParentFilter.apply")
+* synthetic method copy$default$2()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.LocationFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.LocationFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.LocationFilter in class eu.cdevreeze.tqa.extension.formula.model.LocationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.LocationFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.LocationFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.LocationFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.LocationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.LocationFilter.this")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr,Boolean)eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter in object eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.Precondition is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.Precondition$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.Precondition in object eu.cdevreeze.tqa.extension.formula.model.Precondition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Precondition.apply")
+* method copy(eu.cdevreeze.yaidom.core.EName,eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter.copy$default$1")
+* synthetic method copy$default$3()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter.copy$default$3")
+* method this(eu.cdevreeze.yaidom.core.EName,eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter is different in current version. Missing types {scala.runtime.AbstractFunction3}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter$")
+* method apply(scala.collection.immutable.Set,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter in object eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class DimensionFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ForeverFilter is different in current version. Missing types {eu.cdevreeze.tqa.extension.formula.model.Filter,scala.Product,eu.cdevreeze.tqa.extension.formula.model.PeriodAspectFilter,scala.Equals}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ForeverFilter$")
+* method productElement(Int)java.lang.Object in object eu.cdevreeze.tqa.extension.formula.model.ForeverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ForeverFilter.productElement")
+* method productArity()Int in object eu.cdevreeze.tqa.extension.formula.model.ForeverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ForeverFilter.productArity")
+* method canEqual(java.lang.Object)Boolean in object eu.cdevreeze.tqa.extension.formula.model.ForeverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ForeverFilter.canEqual")
+* method productIterator()scala.collection.Iterator in object eu.cdevreeze.tqa.extension.formula.model.ForeverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ForeverFilter.productIterator")
+* method productPrefix()java.lang.String in object eu.cdevreeze.tqa.extension.formula.model.ForeverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ForeverFilter.productPrefix")
+* method toString()java.lang.String in object eu.cdevreeze.tqa.extension.formula.model.ForeverFilter is declared final in current version
+  filter with: ProblemFilters.exclude[FinalMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ForeverFilter.toString")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter in class eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter.this")
+* synthetic method copy$default$2()java.lang.String in class eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than java.lang.String
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,java.lang.String)eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter in class eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,java.lang.String)Unit in class eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString,eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter in object eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter in object eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr,scala.Option)eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter in object eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.PeriodFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.PeriodFilter in object eu.cdevreeze.tqa.extension.formula.model.PeriodFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodFilter.apply")
+* synthetic method copy$default$2()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.GeneralVariable has a different result type in current version, where it is Boolean rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralVariable.copy$default$2")
+* method copy(Boolean,eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.GeneralVariable in class eu.cdevreeze.tqa.extension.formula.model.GeneralVariable does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralVariable.copy")
+* synthetic method copy$default$1()Boolean in class eu.cdevreeze.tqa.extension.formula.model.GeneralVariable has a different result type in current version, where it is scala.Option rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralVariable.copy$default$1")
+* method this(Boolean,eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.GeneralVariable does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralVariable.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter in object eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchSegmentFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class ValueFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class ConceptFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* synthetic method copy$default$2()eu.cdevreeze.tqa.aspect.AspectModel in class eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion has a different result type in current version, where it is Boolean rather than eu.cdevreeze.tqa.aspect.AspectModel
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion.copy$default$2")
+* method copy(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion in class eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion.copy")
+* synthetic method copy$default$1()Boolean in class eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion has a different result type in current version, where it is scala.Option rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion.copy$default$1")
+* synthetic method copy$default$4()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion.copy$default$4")
+* synthetic method copy$default$3()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion has a different result type in current version, where it is eu.cdevreeze.tqa.aspect.AspectModel rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion.copy$default$3")
+* method this(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ExistenceAssertion.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.GeneralFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralFilter$")
+* method apply(scala.Option)eu.cdevreeze.tqa.extension.formula.model.GeneralFilter in object eu.cdevreeze.tqa.extension.formula.model.GeneralFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralFilter.apply")
+* synthetic method copy$default$2()eu.cdevreeze.tqa.aspect.AspectModel in class eu.cdevreeze.tqa.extension.formula.model.ValueAssertion has a different result type in current version, where it is Boolean rather than eu.cdevreeze.tqa.aspect.AspectModel
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion.copy$default$2")
+* method copy(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,eu.cdevreeze.tqa.ScopedXPathString,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ValueAssertion in class eu.cdevreeze.tqa.extension.formula.model.ValueAssertion does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion.copy")
+* synthetic method copy$default$1()Boolean in class eu.cdevreeze.tqa.extension.formula.model.ValueAssertion has a different result type in current version, where it is scala.Option rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion.copy$default$1")
+* synthetic method copy$default$4()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.ValueAssertion has a different result type in current version, where it is eu.cdevreeze.tqa.ScopedXPathString rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion.copy$default$4")
+* synthetic method copy$default$3()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.ValueAssertion has a different result type in current version, where it is eu.cdevreeze.tqa.aspect.AspectModel rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion.copy$default$3")
+* method this(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,eu.cdevreeze.tqa.ScopedXPathString,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.ValueAssertion does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion.this")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr)eu.cdevreeze.tqa.extension.formula.model.AncestorFilter in class eu.cdevreeze.tqa.extension.formula.model.AncestorFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AncestorFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.AncestorFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.AncestorFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr)Unit in class eu.cdevreeze.tqa.extension.formula.model.AncestorFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AncestorFilter.this")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter.this")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ENameValueOrExpr rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr,scala.Option)eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter in class eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr,scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchUnitFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ValueAssertion is different in current version. Missing types {scala.runtime.AbstractFunction6}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion$")
+* method apply(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,eu.cdevreeze.tqa.ScopedXPathString,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ValueAssertion in object eu.cdevreeze.tqa.extension.formula.model.ValueAssertion does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ValueAssertion.apply")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString,eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter in class eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString,eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificIdentifierFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.FactVariable is different in current version. Missing types {scala.runtime.AbstractFunction5}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.FactVariable$")
+* method apply(Boolean,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.FactVariable in object eu.cdevreeze.tqa.extension.formula.model.FactVariable does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.FactVariable.apply")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter in class eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.SiblingFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.SiblingFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName)eu.cdevreeze.tqa.extension.formula.model.SiblingFilter in object eu.cdevreeze.tqa.extension.formula.model.SiblingFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SiblingFilter.apply")
+* method copy(scala.Option)eu.cdevreeze.tqa.extension.formula.model.GeneralFilter in class eu.cdevreeze.tqa.extension.formula.model.GeneralFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralFilter.copy")
+* method this(scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.GeneralFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralFilter.this")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ENameValueOrExpr rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr,Boolean)eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter in class eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,java.lang.String)eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter in object eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.InstantDurationFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter$")
+* method apply(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter in object eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter.apply")
+* method copy(scala.Option)eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter in class eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter.copy")
+* method this(scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter.this")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter in object eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.IdentifierFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter$")
+* method apply(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter in object eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter.apply")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter in class eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SpecificSchemeFilter.this")
+* method copy(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter in class eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter.copy")
+* synthetic method copy$default$1()java.lang.String in class eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter has a different result type in current version, where it is scala.Option rather than java.lang.String
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter.copy$default$1")
+* method this(java.lang.String)Unit in class eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptBalanceFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter$")
+* method apply(scala.Option)eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter in object eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ScenarioFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.GeneralVariable is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralVariable$")
+* method apply(Boolean,eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.GeneralVariable in object eu.cdevreeze.tqa.extension.formula.model.GeneralVariable does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralVariable.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchConceptFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class SegmentScenarioFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class EntityFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* method copy(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter in class eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter.copy")
+* synthetic method copy$default$1()java.lang.String in class eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter has a different result type in current version, where it is scala.Option rather than java.lang.String
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter.copy$default$1")
+* method this(java.lang.String)Unit in class eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter.this")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class TupleFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* method copy(scala.Option)eu.cdevreeze.tqa.extension.formula.model.SegmentFilter in class eu.cdevreeze.tqa.extension.formula.model.SegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SegmentFilter.copy")
+* method this(scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.SegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SegmentFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter$")
+* method apply(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter in object eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter.apply")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter in object eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodEndFilter.apply")
+* method copy(eu.cdevreeze.yaidom.core.EName)eu.cdevreeze.tqa.extension.formula.model.SiblingFilter in class eu.cdevreeze.tqa.extension.formula.model.SiblingFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SiblingFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.SiblingFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.SiblingFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName)Unit in class eu.cdevreeze.tqa.extension.formula.model.SiblingFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SiblingFilter.this")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ScopedXPathString rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter in class eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter.this")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.AndFilter in class eu.cdevreeze.tqa.extension.formula.model.AndFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AndFilter.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.AndFilter has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.AndFilter.copy$default$1")
+* method this(scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.AndFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AndFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr)eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter in object eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.SingleMeasureFilter.apply")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter in class eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter.copy$default$1")
+* method this(scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter in object eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.GeneralMeasuresFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class VariableSet in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter is different in current version. Missing types {scala.runtime.AbstractFunction8}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters#Axis,scala.Option,scala.Option)eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter in object eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.apply")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter in class eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter.this")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class VariableSetAssertion in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.RelativeFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.RelativeFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName)eu.cdevreeze.tqa.extension.formula.model.RelativeFilter in object eu.cdevreeze.tqa.extension.formula.model.RelativeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RelativeFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTSegmentFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr,Boolean)eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter in object eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptSubstitutionGroupFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class Variable in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter in object eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PrecisionFilter.apply")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ENameValueOrExpr rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr,Boolean)eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter in class eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptDataTypeFilter.this")
+* synthetic method copy$default$6()eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters#Axis in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters#Axis
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy$default$6")
+* synthetic method copy$default$2()eu.cdevreeze.tqa.StringValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ENameValueOrExpr rather than eu.cdevreeze.tqa.StringValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy$default$2")
+* synthetic method copy$default$5()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter has a different result type in current version, where it is eu.cdevreeze.tqa.StringValueOrExpr rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy$default$5")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters#Axis,scala.Option,scala.Option)eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy")
+* synthetic method copy$default$7()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter has a different result type in current version, where it is eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters#Axis rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy$default$7")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy$default$1")
+* synthetic method copy$default$4()eu.cdevreeze.tqa.StringValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.StringValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy$default$4")
+* synthetic method copy$default$3()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter has a different result type in current version, where it is eu.cdevreeze.tqa.StringValueOrExpr rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.copy$default$3")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,eu.cdevreeze.tqa.extension.formula.common.ConceptRelationFilters#Axis,scala.Option,scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptRelationFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.OrFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.OrFilter$")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.OrFilter in object eu.cdevreeze.tqa.extension.formula.model.OrFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.OrFilter.apply")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.FactVariable has a different result type in current version, where it is Boolean rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.FactVariable.copy$default$2")
+* synthetic method copy$default$5()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.FactVariable has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.FactVariable.copy$default$5")
+* method copy(Boolean,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.FactVariable in class eu.cdevreeze.tqa.extension.formula.model.FactVariable does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.FactVariable.copy")
+* synthetic method copy$default$1()Boolean in class eu.cdevreeze.tqa.extension.formula.model.FactVariable has a different result type in current version, where it is scala.Option rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.FactVariable.copy$default$1")
+* method this(Boolean,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.FactVariable does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.FactVariable.this")
+* synthetic method copy$default$2()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ENameValueOrExpr rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter in class eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ExplicitDimensionFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter$")
+* method apply(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter in object eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpSchemeFilter.apply")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchLocationFilter.this")
+* method copy(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter in class eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter.copy")
+* synthetic method copy$default$1()java.lang.String in class eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter has a different result type in current version, where it is scala.Option rather than java.lang.String
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter.copy$default$1")
+* method this(java.lang.String)Unit in class eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptPeriodTypeFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.AncestorFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.AncestorFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr)eu.cdevreeze.tqa.extension.formula.model.AncestorFilter in object eu.cdevreeze.tqa.extension.formula.model.AncestorFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AncestorFilter.apply")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.OrFilter in class eu.cdevreeze.tqa.extension.formula.model.OrFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.OrFilter.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.OrFilter has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.OrFilter.copy$default$1")
+* method this(scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.OrFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.OrFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchScenarioFilter.apply")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter.this")
+* method copy(eu.cdevreeze.yaidom.core.EName)eu.cdevreeze.tqa.extension.formula.model.RelativeFilter in class eu.cdevreeze.tqa.extension.formula.model.RelativeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RelativeFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.RelativeFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.RelativeFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName)Unit in class eu.cdevreeze.tqa.extension.formula.model.RelativeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RelativeFilter.this")
+* synthetic method copy$default$2()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter has a different result type in current version, where it is scala.collection.immutable.Set rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter.copy$default$2")
+* method copy(scala.collection.immutable.Set,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter in class eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter.copy")
+* synthetic method copy$default$1()scala.collection.immutable.Set in class eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.Set
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter.copy$default$1")
+* method this(scala.collection.immutable.Set,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AspectCoverFilter.this")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.Parameter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Parameter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,scala.Option,scala.Option,scala.Option)eu.cdevreeze.tqa.extension.formula.model.Parameter in class eu.cdevreeze.tqa.extension.formula.model.Parameter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Parameter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.Parameter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Parameter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,scala.Option,scala.Option,scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.Parameter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Parameter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchEntityIdentifierFilter.apply")
+* method copy(java.lang.String)eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter in class eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter.copy")
+* synthetic method copy$default$1()java.lang.String in class eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter has a different result type in current version, where it is scala.Option rather than java.lang.String
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter.copy$default$1")
+* method this(java.lang.String)Unit in class eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.RegexpIdentifierFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter is different in current version. Missing types {scala.runtime.AbstractFunction3}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchDimensionFilter.apply")
+* synthetic method copy$default$2()Boolean in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter.copy$default$2")
+* method copy(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter.copy$default$1")
+* method this(eu.cdevreeze.yaidom.core.EName,Boolean)Unit in class eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchNonXDTScenarioFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter$")
+* method apply(eu.cdevreeze.yaidom.core.EName,Boolean)eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter in object eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.MatchPeriodFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter$")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter in object eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptNameFilter.apply")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.PeriodFilter in class eu.cdevreeze.tqa.extension.formula.model.PeriodFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.PeriodFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.PeriodFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter in object eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class BooleanFilter in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter$")
+* method apply(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter in object eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodStartFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.AndFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.AndFilter$")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.AndFilter in object eu.cdevreeze.tqa.extension.formula.model.AndFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.AndFilter.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.Formula is different in current version. Missing types {scala.runtime.AbstractFunction10}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula$")
+* method apply(Boolean,eu.cdevreeze.tqa.aspect.AspectModel,scala.Option,eu.cdevreeze.tqa.ScopedXPathString,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.formula.model.Formula in object eu.cdevreeze.tqa.extension.formula.model.Formula does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Formula.apply")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ENameValueOrExpr rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ENameValueOrExpr,scala.Option)eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter in class eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ENameValueOrExpr in class eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ENameValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ENameValueOrExpr,scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.ConceptCustomAttributeFilter.this")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString)eu.cdevreeze.tqa.extension.formula.model.Precondition in class eu.cdevreeze.tqa.extension.formula.model.Precondition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Precondition.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.Precondition has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.Precondition.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString)Unit in class eu.cdevreeze.tqa.extension.formula.model.Precondition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Precondition.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.NilFilter is different in current version. Missing types {eu.cdevreeze.tqa.extension.formula.model.Filter,scala.Product,eu.cdevreeze.tqa.extension.formula.model.ValueFilter,scala.Equals}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.NilFilter$")
+* method productElement(Int)java.lang.Object in object eu.cdevreeze.tqa.extension.formula.model.NilFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.NilFilter.productElement")
+* method productArity()Int in object eu.cdevreeze.tqa.extension.formula.model.NilFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.NilFilter.productArity")
+* method canEqual(java.lang.Object)Boolean in object eu.cdevreeze.tqa.extension.formula.model.NilFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.NilFilter.canEqual")
+* method productIterator()scala.collection.Iterator in object eu.cdevreeze.tqa.extension.formula.model.NilFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.NilFilter.productIterator")
+* method productPrefix()java.lang.String in object eu.cdevreeze.tqa.extension.formula.model.NilFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.NilFilter.productPrefix")
+* method toString()java.lang.String in object eu.cdevreeze.tqa.extension.formula.model.NilFilter is declared final in current version
+  filter with: ProblemFilters.exclude[FinalMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.NilFilter.toString")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter has a different result type in current version, where it is eu.cdevreeze.tqa.ScopedXPathString rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter.copy$default$2")
+* method copy(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter in class eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.ScopedXPathString in class eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.ScopedXPathString
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter.copy$default$1")
+* method this(eu.cdevreeze.tqa.ScopedXPathString,scala.Option)Unit in class eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.PeriodInstantFilter.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter$")
+* method apply(eu.cdevreeze.tqa.ENameValueOrExpr,scala.Option)eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter in object eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.TypedDimensionFilter.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.formula.model.Resource is inherited by class Assertion in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.formula.model.Resource.idOption")
+* synthetic method copy$default$6()eu.cdevreeze.tqa.StringValueOrExpr in class eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.StringValueOrExpr
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.copy$default$6")
+* synthetic method copy$default$10()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.copy$default$10")
+* method copy(scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode in class eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.copy")
+* synthetic method copy$default$7()scala.Option in class eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode has a different result type in current version, where it is eu.cdevreeze.tqa.StringValueOrExpr rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.copy$default$7")
+* synthetic method copy$default$4()scala.Option in class eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode has a different result type in current version, where it is scala.collection.immutable.IndexedSeq rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.copy$default$4")
+* synthetic method copy$default$3()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.copy$default$3")
+* method this(scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.this")
+* synthetic method copy$default$2()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.Breakdown has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.Breakdown.copy$default$2")
+* method copy(scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.Breakdown in class eu.cdevreeze.tqa.extension.table.model.Breakdown does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Breakdown.copy")
+* method this(scala.Option,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.table.model.Breakdown does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Breakdown.this")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.table.model.Resource is inherited by class RelationshipNode in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode is different in current version. Missing types {scala.runtime.AbstractFunction8}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode$")
+* method apply(scala.Option,scala.Option,eu.cdevreeze.yaidom.core.EName,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode in object eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode is different in current version. Missing types {scala.runtime.AbstractFunction10}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode$")
+* method apply(scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,eu.cdevreeze.tqa.StringValueOrExpr,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode in object eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.ConceptRelationshipNode.apply")
+* synthetic method copy$default$5()scala.Option in class eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode has a different result type in current version, where it is scala.collection.immutable.IndexedSeq rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode.copy$default$5")
+* synthetic method copy$default$8()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode.copy$default$8")
+* method copy(scala.Option,scala.Option,eu.cdevreeze.yaidom.core.EName,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode in class eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode.copy")
+* synthetic method copy$default$4()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode has a different result type in current version, where it is eu.cdevreeze.yaidom.core.EName rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode.copy$default$4")
+* synthetic method copy$default$3()eu.cdevreeze.yaidom.core.EName in class eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.yaidom.core.EName
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode.copy$default$3")
+* method this(scala.Option,scala.Option,eu.cdevreeze.yaidom.core.EName,scala.collection.immutable.IndexedSeq,scala.Option,scala.Option,scala.Option,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.DimensionRelationshipNode.this")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.table.model.Breakdown is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.table.model.Breakdown$")
+* method apply(scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.Breakdown in object eu.cdevreeze.tqa.extension.table.model.Breakdown does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Breakdown.apply")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.table.model.AspectNode is different in current version. Missing types {scala.runtime.AbstractFunction3}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.table.model.AspectNode$")
+* method apply(eu.cdevreeze.tqa.extension.table.model.AspectSpec,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.AspectNode in object eu.cdevreeze.tqa.extension.table.model.AspectNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.AspectNode.apply")
+* synthetic method copy$default$2()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.Table has a different result type in current version, where it is eu.cdevreeze.tqa.extension.table.common.ParentChildOrder rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.Table.copy$default$2")
+* method copy(eu.cdevreeze.tqa.extension.table.common.ParentChildOrder,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.Table in class eu.cdevreeze.tqa.extension.table.model.Table does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Table.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.extension.table.common.ParentChildOrder in class eu.cdevreeze.tqa.extension.table.model.Table has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.Table.copy$default$1")
+* method this(eu.cdevreeze.tqa.extension.table.common.ParentChildOrder,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.table.model.Table does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Table.this")
+* synthetic method copy$default$5()Boolean in class eu.cdevreeze.tqa.extension.table.model.RuleNode has a different result type in current version, where it is scala.collection.immutable.IndexedSeq rather than Boolean
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.RuleNode.copy$default$5")
+* method copy(scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,Boolean,Boolean,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.RuleNode in class eu.cdevreeze.tqa.extension.table.model.RuleNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.RuleNode.copy")
+* synthetic method copy$default$7()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.RuleNode has a different result type in current version, where it is Boolean rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.RuleNode.copy$default$7")
+* synthetic method copy$default$3()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.RuleNode has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.RuleNode.copy$default$3")
+* method this(scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,Boolean,Boolean,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.table.model.RuleNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.RuleNode.this")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.table.model.Resource is inherited by class OpenDefinitionNode in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.table.model.RuleNode is different in current version. Missing types {scala.runtime.AbstractFunction7}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.table.model.RuleNode$")
+* method apply(scala.Option,scala.Option,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,Boolean,Boolean,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.RuleNode in object eu.cdevreeze.tqa.extension.table.model.RuleNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.RuleNode.apply")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.table.model.Resource is inherited by class ClosedDefinitionNode in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Resource.idOption")
+* the type hierarchy of object eu.cdevreeze.tqa.extension.table.model.Table is different in current version. Missing types {scala.runtime.AbstractFunction2}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.table.model.Table$")
+* method apply(eu.cdevreeze.tqa.extension.table.common.ParentChildOrder,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.Table in object eu.cdevreeze.tqa.extension.table.model.Table does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Table.apply")
+* synthetic method copy$default$2()scala.Option in class eu.cdevreeze.tqa.extension.table.model.AspectNode has a different result type in current version, where it is eu.cdevreeze.tqa.extension.table.model.AspectSpec rather than scala.Option
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.AspectNode.copy$default$2")
+* method copy(eu.cdevreeze.tqa.extension.table.model.AspectSpec,scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.extension.table.model.AspectNode in class eu.cdevreeze.tqa.extension.table.model.AspectNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.AspectNode.copy")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.extension.table.model.AspectSpec in class eu.cdevreeze.tqa.extension.table.model.AspectNode has a different result type in current version, where it is scala.Option rather than eu.cdevreeze.tqa.extension.table.model.AspectSpec
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.AspectNode.copy$default$1")
+* synthetic method copy$default$3()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.extension.table.model.AspectNode has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.model.AspectNode.copy$default$3")
+* method this(eu.cdevreeze.tqa.extension.table.model.AspectSpec,scala.Option,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.extension.table.model.AspectNode does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.extension.table.model.AspectNode.this")
+* abstract method idOption()scala.Option in interface eu.cdevreeze.tqa.extension.table.model.Resource is inherited by class DefinitionNode in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.extension.table.model.Resource.idOption")
+
+
 0.8.3
 =====
 
