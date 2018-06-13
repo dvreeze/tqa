@@ -27,7 +27,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-sealed trait VariableSet {
+sealed trait VariableSet extends Resource {
 
   def implicitFiltering: Boolean
 
@@ -43,6 +43,7 @@ sealed trait VariableSet {
 sealed trait VariableSetAssertion extends VariableSet with Assertion
 
 final case class ValueAssertion(
+  idOption: Option[String],
   implicitFiltering: Boolean,
   aspectModel: AspectModel,
   testExpr: ScopedXPathString,
@@ -51,6 +52,7 @@ final case class ValueAssertion(
   variableSetVariablesOrParameters: immutable.IndexedSeq[VariableSetVariableOrParameter]) extends VariableSetAssertion
 
 final case class ExistenceAssertion(
+  idOption: Option[String],
   implicitFiltering: Boolean,
   aspectModel: AspectModel,
   testExprOption: Option[ScopedXPathString],
@@ -59,6 +61,7 @@ final case class ExistenceAssertion(
   variableSetVariablesOrParameters: immutable.IndexedSeq[VariableSetVariableOrParameter]) extends VariableSetAssertion
 
 final case class Formula(
+  idOption: Option[String],
   implicitFiltering: Boolean,
   aspectModel: AspectModel,
   sourceOption: Option[EName],

@@ -5,7 +5,9 @@
 // See https://github.com/cquiroz/scala-java-time/blob/master/build.sbt as a "template" for this build file.
 
 
-val scalaVer = "2.12.5"
+// Note that 2.12.5 does not work for Scalatest in sbt (https://github.com/scalatest/scalatest/issues/1342).
+
+val scalaVer = "2.12.6"
 
 // I wanted to cross-build for Scala 2.13.0-M2 as well, but then miss library scalajs-jsjoda-as-java-time
 

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.extension.formula.model
-
-import eu.cdevreeze.tqa.ScopedXPathString
+package eu.cdevreeze.tqa.extension.table.model
 
 /**
- * Precondition.
+ * Resource, typically corresponding to an XLink resource.
  *
  * @author Chris de Vreeze
  */
-final case class Precondition(idOption: Option[String], testExpr: ScopedXPathString) extends Resource
+trait Resource {
+
+  def idOption: Option[String]
+}

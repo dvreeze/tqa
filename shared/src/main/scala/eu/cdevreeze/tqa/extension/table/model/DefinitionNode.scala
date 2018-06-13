@@ -31,7 +31,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-sealed trait DefinitionNode {
+sealed trait DefinitionNode extends Resource {
 
   def tagSelectorOption: Option[String]
 
@@ -68,6 +68,7 @@ sealed trait OpenDefinitionNode extends DefinitionNode
 sealed trait RelationshipNode extends ClosedDefinitionNode
 
 final case class ConceptRelationshipNode(
+  idOption: Option[String],
   parentChildOrderOption: Option[ParentChildOrder],
   tagSelectorOption: Option[String],
   relationshipSourceNamesOrExprs: immutable.IndexedSeq[ENameValueOrExpr],
@@ -80,6 +81,7 @@ final case class ConceptRelationshipNode(
   definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]) extends RelationshipNode
 
 final case class DimensionRelationshipNode(
+  idOption: Option[String],
   parentChildOrderOption: Option[ParentChildOrder],
   tagSelectorOption: Option[String],
   dimension: EName,
@@ -90,13 +92,14 @@ final case class DimensionRelationshipNode(
   definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]) extends RelationshipNode
 
 final case class RuleNode(
-    parentChildOrderOption: Option[ParentChildOrder],
-    tagSelectorOption: Option[String],
-    untaggedAspects: immutable.IndexedSeq[AspectRule],
-    ruleSets: immutable.IndexedSeq[RuleSet],
-    isAbstract: Boolean,
-    isMerged: Boolean,
-    definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]) extends ClosedDefinitionNode {
+  idOption: Option[String],
+  parentChildOrderOption: Option[ParentChildOrder],
+  tagSelectorOption: Option[String],
+  untaggedAspects: immutable.IndexedSeq[AspectRule],
+  ruleSets: immutable.IndexedSeq[RuleSet],
+  isAbstract: Boolean,
+  isMerged: Boolean,
+  definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]) extends ClosedDefinitionNode {
 
   def allAspectRules: immutable.IndexedSeq[AspectRule] = {
     untaggedAspects ++ (ruleSets.flatMap(_.aspects))
@@ -117,6 +120,7 @@ final case class RuleNode(
 }
 
 final case class AspectNode(
+  idOption: Option[String],
   aspectSpec: AspectSpec,
   tagSelectorOption: Option[String],
   definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]) extends OpenDefinitionNode

@@ -36,14 +36,14 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
   private val filterConverter = new FilterConverter(formulaTaxonomy)
 
   def tryToConvertVariableSet(domVariableSet: dom.VariableSet): Try[model.VariableSet] = domVariableSet match {
-    case f: dom.ValueAssertion     => tryToConvertValueAssertion(f)
+    case f: dom.ValueAssertion => tryToConvertValueAssertion(f)
     case f: dom.ExistenceAssertion => tryToConvertExistenceAssertion(f)
-    case f: dom.Formula            => tryToConvertFormula(f)
+    case f: dom.Formula => tryToConvertFormula(f)
   }
 
   def tryToConvertVariableSetAssertion(domVariableSetAssertion: dom.VariableSetAssertion): Try[model.VariableSetAssertion] = {
     domVariableSetAssertion match {
-      case f: dom.ValueAssertion     => tryToConvertValueAssertion(f)
+      case f: dom.ValueAssertion => tryToConvertValueAssertion(f)
       case f: dom.ExistenceAssertion => tryToConvertExistenceAssertion(f)
     }
   }
@@ -60,6 +60,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         extractVariableSetVariablesOrParameters(domVariableSet)
 
       model.ValueAssertion(
+        domVariableSet.underlyingResource.idOption,
         domVariableSet.implicitFiltering,
         domVariableSet.aspectModel,
         domVariableSet.testExpr,
@@ -81,6 +82,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         extractVariableSetVariablesOrParameters(domVariableSet)
 
       model.ExistenceAssertion(
+        domVariableSet.underlyingResource.idOption,
         domVariableSet.implicitFiltering,
         domVariableSet.aspectModel,
         domVariableSet.testExprOption,
@@ -105,6 +107,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
         extractAspectRuleGroups(domVariableSet)
 
       model.Formula(
+        domVariableSet.underlyingResource.idOption,
         domVariableSet.implicitFiltering,
         domVariableSet.aspectModel,
         domVariableSet.sourceOption,
@@ -146,7 +149,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
     val variableSetPreconditions: immutable.IndexedSeq[model.VariableSetPrecondition] =
       varSetPreconditionRelationships map { rel =>
-        val precondition = model.Precondition(rel.precondition.testExpr)
+        val precondition = model.Precondition(rel.precondition.underlyingResource.idOption, rel.precondition.testExpr)
 
         model.VariableSetPrecondition(
           model.CommonRelationshipAttributes(
@@ -170,9 +173,9 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
         val varOrPar: model.VariableOrParameter = domVarOrPar match {
           case par: dom.Parameter =>
-            model.Parameter(par.name, par.selectExprOption, par.requiredOption, par.asOption)
+            model.Parameter(par.underlyingResource.idOption, par.name, par.selectExprOption, par.requiredOption, par.asOption)
           case genVar: dom.GeneralVariable =>
-            model.GeneralVariable(genVar.bindAsSequence, genVar.selectExpr)
+            model.GeneralVariable(genVar.underlyingResource.idOption, genVar.bindAsSequence, genVar.selectExpr)
           case factVar: dom.FactVariable =>
             val varFilterRelationships =
               formulaTaxonomy.findAllOutgoingVariableFilterRelationships(factVar).sortBy(_.order)
@@ -192,7 +195,13 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
                 filter)
             }
 
-            model.FactVariable(factVar.bindAsSequence, factVar.fallbackValueExprOption, factVar.matchesOption, factVar.nilsOption, variableFilters)
+            model.FactVariable(
+              factVar.underlyingResource.idOption,
+              factVar.bindAsSequence,
+              factVar.fallbackValueExprOption,
+              factVar.matchesOption,
+              factVar.nilsOption,
+              variableFilters)
         }
 
         model.VariableSetVariableOrParameter(

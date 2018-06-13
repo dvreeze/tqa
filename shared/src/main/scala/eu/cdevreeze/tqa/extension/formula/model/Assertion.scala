@@ -21,4 +21,4 @@ package eu.cdevreeze.tqa.extension.formula.model
  *
  * @author Chris de Vreeze
  */
-trait Assertion
+trait Assertion extends Resource

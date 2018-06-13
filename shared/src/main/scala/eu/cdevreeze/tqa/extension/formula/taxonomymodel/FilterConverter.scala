@@ -33,19 +33,19 @@ import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
 final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
   def tryToConvertFilter(domFilter: dom.Filter): Try[model.Filter] = domFilter match {
-    case f: dom.ConceptFilter         => tryToConvertConceptFilter(f)
-    case f: dom.BooleanFilter         => tryToConvertBooleanFilter(f)
-    case f: dom.DimensionFilter       => tryToConvertDimensionFilter(f)
-    case f: dom.EntityFilter          => tryToConvertEntityFilter(f)
-    case f: dom.GeneralFilter         => tryToConvertGeneralFilter(f)
-    case f: dom.MatchFilter           => tryToConvertMatchFilter(f)
-    case f: dom.PeriodAspectFilter    => tryToConvertPeriodAspectFilter(f)
-    case f: dom.RelativeFilter        => tryToConvertRelativeFilter(f)
+    case f: dom.ConceptFilter => tryToConvertConceptFilter(f)
+    case f: dom.BooleanFilter => tryToConvertBooleanFilter(f)
+    case f: dom.DimensionFilter => tryToConvertDimensionFilter(f)
+    case f: dom.EntityFilter => tryToConvertEntityFilter(f)
+    case f: dom.GeneralFilter => tryToConvertGeneralFilter(f)
+    case f: dom.MatchFilter => tryToConvertMatchFilter(f)
+    case f: dom.PeriodAspectFilter => tryToConvertPeriodAspectFilter(f)
+    case f: dom.RelativeFilter => tryToConvertRelativeFilter(f)
     case f: dom.SegmentScenarioFilter => tryToConvertSegmentScenarioFilter(f)
-    case f: dom.TupleFilter           => tryToConvertTupleFilter(f)
-    case f: dom.UnitFilter            => tryToConvertUnitFilter(f)
-    case f: dom.ValueFilter           => tryToConvertValueFilter(f)
-    case f: dom.AspectCoverFilter     => tryToConvertAspectCoverFilter(f)
+    case f: dom.TupleFilter => tryToConvertTupleFilter(f)
+    case f: dom.UnitFilter => tryToConvertUnitFilter(f)
+    case f: dom.ValueFilter => tryToConvertValueFilter(f)
+    case f: dom.AspectCoverFilter => tryToConvertAspectCoverFilter(f)
     case f: dom.ConceptRelationFilter => tryToConvertConceptRelationFilter(f)
   }
 
@@ -53,17 +53,17 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.ConceptNameFilter =>
-          model.ConceptNameFilter(f.concepts.map(_.qnameValueOrExpr))
+          model.ConceptNameFilter(f.underlyingResource.idOption, f.concepts.map(_.qnameValueOrExpr))
         case f: dom.ConceptPeriodTypeFilter =>
-          model.ConceptPeriodTypeFilter(f.periodType)
+          model.ConceptPeriodTypeFilter(f.underlyingResource.idOption, f.periodType)
         case f: dom.ConceptBalanceFilter =>
-          model.ConceptBalanceFilter(f.balance)
+          model.ConceptBalanceFilter(f.underlyingResource.idOption, f.balance)
         case f: dom.ConceptCustomAttributeFilter =>
-          model.ConceptCustomAttributeFilter(f.customAttribute.qnameValueOrExpr, f.valueExprOption)
+          model.ConceptCustomAttributeFilter(f.underlyingResource.idOption, f.customAttribute.qnameValueOrExpr, f.valueExprOption)
         case f: dom.ConceptDataTypeFilter =>
-          model.ConceptDataTypeFilter(f.conceptDataType.qnameValueOrExpr, f.strict)
+          model.ConceptDataTypeFilter(f.underlyingResource.idOption, f.conceptDataType.qnameValueOrExpr, f.strict)
         case f: dom.ConceptSubstitutionGroupFilter =>
-          model.ConceptSubstitutionGroupFilter(f.conceptSubstitutionGroup.qnameValueOrExpr, f.strict)
+          model.ConceptSubstitutionGroupFilter(f.underlyingResource.idOption, f.conceptSubstitutionGroup.qnameValueOrExpr, f.strict)
       }
     }
   }
@@ -92,9 +92,9 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
       domFilter match {
         case f: dom.AndFilter =>
-          model.AndFilter(subFilters)
+          model.AndFilter(f.underlyingResource.idOption, subFilters)
         case f: dom.OrFilter =>
-          model.OrFilter(subFilters)
+          model.OrFilter(f.underlyingResource.idOption, subFilters)
       }
     }
   }
@@ -111,9 +111,9 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
               mem.axisElemOption.map(_.axis))
           }
 
-          model.ExplicitDimensionFilter(f.dimension.qnameValueOrExpr, dimMembers)
+          model.ExplicitDimensionFilter(f.underlyingResource.idOption, f.dimension.qnameValueOrExpr, dimMembers)
         case f: dom.TypedDimensionFilter =>
-          model.TypedDimensionFilter(f.dimension.qnameValueOrExpr, f.testExprOption)
+          model.TypedDimensionFilter(f.underlyingResource.idOption, f.dimension.qnameValueOrExpr, f.testExprOption)
       }
     }
   }
@@ -122,22 +122,22 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.IdentifierFilter =>
-          model.IdentifierFilter(f.testExpr)
+          model.IdentifierFilter(f.underlyingResource.idOption, f.testExpr)
         case f: dom.SpecificSchemeFilter =>
-          model.SpecificSchemeFilter(f.schemeExpr)
+          model.SpecificSchemeFilter(f.underlyingResource.idOption, f.schemeExpr)
         case f: dom.RegexpSchemeFilter =>
-          model.RegexpSchemeFilter(f.pattern)
+          model.RegexpSchemeFilter(f.underlyingResource.idOption, f.pattern)
         case f: dom.SpecificIdentifierFilter =>
-          model.SpecificIdentifierFilter(f.schemeExpr, f.valueExpr)
+          model.SpecificIdentifierFilter(f.underlyingResource.idOption, f.schemeExpr, f.valueExpr)
         case f: dom.RegexpIdentifierFilter =>
-          model.RegexpIdentifierFilter(f.pattern)
+          model.RegexpIdentifierFilter(f.underlyingResource.idOption, f.pattern)
       }
     }
   }
 
   def tryToConvertGeneralFilter(domFilter: dom.GeneralFilter): Try[model.GeneralFilter] = {
     Try {
-      model.GeneralFilter(domFilter.testExprOption)
+      model.GeneralFilter(domFilter.underlyingResource.idOption, domFilter.testExprOption)
     }
   }
 
@@ -145,25 +145,25 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.MatchConceptFilter =>
-          model.MatchConceptFilter(f.variable, f.matchAny)
+          model.MatchConceptFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchLocationFilter =>
-          model.MatchLocationFilter(f.variable, f.matchAny)
+          model.MatchLocationFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchUnitFilter =>
-          model.MatchUnitFilter(f.variable, f.matchAny)
+          model.MatchUnitFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchEntityIdentifierFilter =>
-          model.MatchEntityIdentifierFilter(f.variable, f.matchAny)
+          model.MatchEntityIdentifierFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchPeriodFilter =>
-          model.MatchPeriodFilter(f.variable, f.matchAny)
+          model.MatchPeriodFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchSegmentFilter =>
-          model.MatchSegmentFilter(f.variable, f.matchAny)
+          model.MatchSegmentFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchScenarioFilter =>
-          model.MatchScenarioFilter(f.variable, f.matchAny)
+          model.MatchScenarioFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchNonXDTSegmentFilter =>
-          model.MatchNonXDTSegmentFilter(f.variable, f.matchAny)
+          model.MatchNonXDTSegmentFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchNonXDTScenarioFilter =>
-          model.MatchNonXDTScenarioFilter(f.variable, f.matchAny)
+          model.MatchNonXDTScenarioFilter(f.underlyingResource.idOption, f.variable, f.matchAny)
         case f: dom.MatchDimensionFilter =>
-          model.MatchDimensionFilter(f.dimension, f.variable, f.matchAny)
+          model.MatchDimensionFilter(f.underlyingResource.idOption, f.dimension, f.variable, f.matchAny)
       }
     }
   }
@@ -172,24 +172,24 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.PeriodFilter =>
-          model.PeriodFilter(f.testExpr)
+          model.PeriodFilter(f.underlyingResource.idOption, f.testExpr)
         case f: dom.PeriodStartFilter =>
-          model.PeriodStartFilter(f.dateExpr, f.timeExprOption)
+          model.PeriodStartFilter(f.underlyingResource.idOption, f.dateExpr, f.timeExprOption)
         case f: dom.PeriodEndFilter =>
-          model.PeriodEndFilter(f.dateExpr, f.timeExprOption)
+          model.PeriodEndFilter(f.underlyingResource.idOption, f.dateExpr, f.timeExprOption)
         case f: dom.PeriodInstantFilter =>
-          model.PeriodInstantFilter(f.dateExpr, f.timeExprOption)
+          model.PeriodInstantFilter(f.underlyingResource.idOption, f.dateExpr, f.timeExprOption)
         case f: dom.ForeverFilter =>
-          model.ForeverFilter
+          model.ForeverFilter(f.underlyingResource.idOption)
         case f: dom.InstantDurationFilter =>
-          model.InstantDurationFilter(f.variable, f.boundary)
+          model.InstantDurationFilter(f.underlyingResource.idOption, f.variable, f.boundary)
       }
     }
   }
 
   def tryToConvertRelativeFilter(domFilter: dom.RelativeFilter): Try[model.RelativeFilter] = {
     Try {
-      model.RelativeFilter(domFilter.variable)
+      model.RelativeFilter(domFilter.underlyingResource.idOption, domFilter.variable)
     }
   }
 
@@ -197,9 +197,9 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.SegmentFilter =>
-          model.SegmentFilter(f.testExprOption)
+          model.SegmentFilter(f.underlyingResource.idOption, f.testExprOption)
         case f: dom.ScenarioFilter =>
-          model.ScenarioFilter(f.testExprOption)
+          model.ScenarioFilter(f.underlyingResource.idOption, f.testExprOption)
       }
     }
   }
@@ -208,13 +208,13 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.ParentFilter =>
-          model.ParentFilter(f.parent.qnameValueOrExpr)
+          model.ParentFilter(f.underlyingResource.idOption, f.parent.qnameValueOrExpr)
         case f: dom.AncestorFilter =>
-          model.AncestorFilter(f.ancestor.qnameValueOrExpr)
+          model.AncestorFilter(f.underlyingResource.idOption, f.ancestor.qnameValueOrExpr)
         case f: dom.SiblingFilter =>
-          model.SiblingFilter(f.variable)
+          model.SiblingFilter(f.underlyingResource.idOption, f.variable)
         case f: dom.LocationFilter =>
-          model.LocationFilter(f.variable, f.locationExpr)
+          model.LocationFilter(f.underlyingResource.idOption, f.variable, f.locationExpr)
       }
     }
   }
@@ -223,9 +223,9 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.SingleMeasureFilter =>
-          model.SingleMeasureFilter(f.measure.qnameValueOrExpr)
+          model.SingleMeasureFilter(f.underlyingResource.idOption, f.measure.qnameValueOrExpr)
         case f: dom.GeneralMeasuresFilter =>
-          model.GeneralMeasuresFilter(f.testExpr)
+          model.GeneralMeasuresFilter(f.underlyingResource.idOption, f.testExpr)
       }
     }
   }
@@ -234,9 +234,9 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.NilFilter =>
-          model.NilFilter
+          model.NilFilter(f.underlyingResource.idOption)
         case f: dom.PrecisionFilter =>
-          model.PrecisionFilter(f.minimumExpr)
+          model.PrecisionFilter(f.underlyingResource.idOption, f.minimumExpr)
       }
     }
   }
@@ -244,6 +244,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
   def tryToConvertAspectCoverFilter(domFilter: dom.AspectCoverFilter): Try[model.AspectCoverFilter] = {
     Try {
       model.AspectCoverFilter(
+        domFilter.underlyingResource.idOption,
         domFilter.aspects.map(_.aspectValue).toSet,
         domFilter.dimensions.map(_.qnameValueOrExpr),
         domFilter.excludeDimensions.map(_.qnameValueOrExpr))
@@ -253,6 +254,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
   def tryToConvertConceptRelationFilter(domFilter: dom.ConceptRelationFilter): Try[model.ConceptRelationFilter] = {
     Try {
       model.ConceptRelationFilter(
+        domFilter.underlyingResource.idOption,
         domFilter.sourceValueOrExpr,
         domFilter.linkroleValueOrExpr,
         domFilter.linknameValueOrExprOption,

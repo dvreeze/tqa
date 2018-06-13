@@ -26,5 +26,6 @@ import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
  * @author Chris de Vreeze
  */
 final case class Table(
+  idOption: Option[String],
   parentChildOrder: ParentChildOrder,
-  tableBreakdowns: immutable.IndexedSeq[TableBreakdown])
+  tableBreakdowns: immutable.IndexedSeq[TableBreakdown]) extends Resource

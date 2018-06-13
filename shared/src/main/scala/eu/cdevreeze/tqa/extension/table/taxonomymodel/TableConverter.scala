@@ -43,7 +43,7 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
       val tableBreakdowns =
         tableBreakdownRelationships.map(rel => convertTableBreakdownRelationship(rel))
 
-      model.Table(domTable.parentChildOrder, tableBreakdowns)
+      model.Table(domTable.underlyingResource.idOption, domTable.parentChildOrder, tableBreakdowns)
     }
   }
 
@@ -69,7 +69,7 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
     val breakdownTrees: immutable.IndexedSeq[model.BreakdownTree] =
       breakdownTreeRelationships.map(rel => convertBreakdownTreeRelationship(rel))
 
-    model.Breakdown(domBreakdown.parentChildOrderOption, breakdownTrees)
+    model.Breakdown(domBreakdown.underlyingResource.idOption, domBreakdown.parentChildOrderOption, breakdownTrees)
   }
 
   private def convertBreakdownTreeRelationship(
@@ -87,10 +87,10 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
   }
 
   private def convertDefinitionNode(domNode: dom.DefinitionNode): model.DefinitionNode = domNode match {
-    case n: dom.RuleNode                  => convertRuleNode(n)
-    case n: dom.ConceptRelationshipNode   => convertConceptRelationshipNode(n)
+    case n: dom.RuleNode => convertRuleNode(n)
+    case n: dom.ConceptRelationshipNode => convertConceptRelationshipNode(n)
     case n: dom.DimensionRelationshipNode => convertDimensionRelationshipNode(n)
-    case n: dom.AspectNode                => convertAspectNode(n)
+    case n: dom.AspectNode => convertAspectNode(n)
   }
 
   private def convertDefinitionNodeSubtreeRelationship(
@@ -120,6 +120,7 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
     val ruleSets = domNode.ruleSets.map(ruleSet => convertRuleSet(ruleSet))
 
     model.RuleNode(
+      domNode.underlyingResource.idOption,
       domNode.parentChildOrderOption,
       domNode.tagSelectorOption,
       untaggedAspects,
@@ -137,6 +138,7 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
       definitionNodeSubtreeRelationships.map(rel => convertDefinitionNodeSubtreeRelationship(rel))
 
     model.ConceptRelationshipNode(
+      domNode.underlyingResource.idOption,
       domNode.parentChildOrderOption,
       domNode.tagSelectorOption,
       domNode.sourceValuesOrExpressions,
@@ -157,6 +159,7 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
       definitionNodeSubtreeRelationships.map(rel => convertDefinitionNodeSubtreeRelationship(rel))
 
     model.DimensionRelationshipNode(
+      domNode.underlyingResource.idOption,
       domNode.parentChildOrderOption,
       domNode.tagSelectorOption,
       domNode.dimensionName,
@@ -177,6 +180,7 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
     val aspectSpec: model.AspectSpec = convertAspectSpec(domNode.aspectSpec)
 
     model.AspectNode(
+      domNode.underlyingResource.idOption,
       aspectSpec,
       domNode.tagSelectorOption,
       definitionNodeSubtrees)
@@ -189,10 +193,10 @@ final class TableConverter(val tableTaxonomy: BasicTableTaxonomy) {
   }
 
   private def convertAspectSpec(domAspectSpec: dom.AspectSpec): model.AspectSpec = domAspectSpec match {
-    case e: dom.ConceptAspectSpec          => model.ConceptAspectSpec
-    case e: dom.UnitAspectSpec             => model.UnitAspectSpec
+    case e: dom.ConceptAspectSpec => model.ConceptAspectSpec
+    case e: dom.UnitAspectSpec => model.UnitAspectSpec
     case e: dom.EntityIdentifierAspectSpec => model.EntityIdentifierAspectSpec
-    case e: dom.PeriodAspectSpec           => model.PeriodAspectSpec
-    case e: dom.DimensionAspectSpec        => model.DimensionAspectSpec(e.dimension, e.isIncludeUnreportedValue)
+    case e: dom.PeriodAspectSpec => model.PeriodAspectSpec
+    case e: dom.DimensionAspectSpec => model.DimensionAspectSpec(e.dimension, e.isIncludeUnreportedValue)
   }
 }

@@ -26,8 +26,9 @@ import eu.cdevreeze.tqa.extension.table.common.ParentChildOrder
  * @author Chris de Vreeze
  */
 final case class Breakdown(
-    parentChildOrderOption: Option[ParentChildOrder],
-    breakdownTrees: immutable.IndexedSeq[BreakdownTree]) {
+  idOption: Option[String],
+  parentChildOrderOption: Option[ParentChildOrder],
+  breakdownTrees: immutable.IndexedSeq[BreakdownTree]) extends Resource {
 
   final def children: immutable.IndexedSeq[DefinitionNode] = {
     breakdownTrees.map(_.target)

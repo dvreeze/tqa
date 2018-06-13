@@ -26,11 +26,12 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-sealed trait VariableOrParameter
+sealed trait VariableOrParameter extends Resource
 
 sealed trait Variable extends VariableOrParameter
 
 final case class FactVariable(
+  idOption: Option[String],
   bindAsSequence: Boolean,
   fallbackValueExprOption: Option[ScopedXPathString],
   matchesOption: Option[Boolean],
@@ -38,10 +39,12 @@ final case class FactVariable(
   variableFilters: immutable.IndexedSeq[VariableFilter]) extends Variable
 
 final case class GeneralVariable(
+  idOption: Option[String],
   bindAsSequence: Boolean,
   selectExpr: ScopedXPathString) extends Variable
 
 final case class Parameter(
+  idOption: Option[String],
   name: EName,
   selectExprOption: Option[ScopedXPathString],
   requiredOption: Option[Boolean],

@@ -94,7 +94,7 @@ class FormulaQueryApiTest extends FunSuite {
     val varSetVarOrPar @ VariableSetVariableOrParameter(
       CommonRelationshipAttributes(elr, order, priority, use),
       ename,
-      factVariable @ FactVariable(_, _, _, _, variableFilters)) = varSetVariablesOrParameters.head
+      factVariable @ FactVariable(_, _, _, _, _, variableFilters)) = varSetVariablesOrParameters.head
 
     assertResult(Elr) {
       elr
@@ -134,7 +134,7 @@ class FormulaQueryApiTest extends FunSuite {
         CommonRelationshipAttributes(elr2, order2, priority2, use2),
         complement2,
         cover2,
-        filter2 @ ConceptNameFilter(conceptNamesOrExprs))) = variableFilters
+        filter2 @ ConceptNameFilter(_, conceptNamesOrExprs))) = variableFilters
 
     assertResult(Elr) {
       elr2
@@ -225,7 +225,7 @@ class FormulaQueryApiTest extends FunSuite {
     val varSetVarOrPar @ VariableSetVariableOrParameter(
       CommonRelationshipAttributes(elr, order, priority, use),
       ename,
-      factVariable @ FactVariable(_, _, _, _, variableFilters)) = valueAssertion.variableSetVariablesOrParameters.head
+      factVariable @ FactVariable(_, _, _, _, _, variableFilters)) = valueAssertion.variableSetVariablesOrParameters.head
 
     assertResult(Elr) {
       elr
@@ -270,7 +270,7 @@ class FormulaQueryApiTest extends FunSuite {
       variableFilters.map(_.commonAttributes.order).toSet
     }
 
-    val explicitDimensionFilter @ ExplicitDimensionFilter(dim, mems) =
+    val explicitDimensionFilter @ ExplicitDimensionFilter(_, dim, mems) =
       variableFilters.filter(_.commonAttributes.order == BigDecimal(2)).head.filter
 
     val guessedScope = taxo.guessedScope
