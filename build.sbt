@@ -9,7 +9,7 @@
 
 val scalaVer = "2.12.6"
 
-// I wanted to cross-build for Scala 2.13.0-M2 as well, but then miss library scalajs-jsjoda-as-java-time
+// I wanted to cross-build for Scala 2.13.0-M4 as well, but then miss library scalajs-jsjoda-as-java-time
 
 val crossScalaVer = Seq(scalaVer, "2.11.12")
 
