@@ -20,11 +20,14 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
+import scala.reflect.classTag
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
@@ -82,6 +85,28 @@ class InternalConsistencyTest extends FunSuite {
     assertResult(sourceKeys) {
       targetKeys.toSeq.flatMap(k => dts.findAllIncomingNonStandardRelationships(k))
         .map(_.sourceElem.key).toSet
+    }
+  }
+
+  test("testQueryingForInterConceptRelationshipPaths") {
+    val interConceptRelationships = dts.findAllInterConceptRelationships.ensuring(_.nonEmpty)
+
+    val sourceConcepts = interConceptRelationships.map(_.sourceConceptEName).toSet
+    val targetConcepts = interConceptRelationships.map(_.targetConceptEName).toSet
+
+    val rootConcepts = sourceConcepts.diff(targetConcepts)
+    val leafConcepts = targetConcepts.diff(sourceConcepts)
+
+    assertResult(leafConcepts) {
+      rootConcepts.toSeq
+        .flatMap(c => dts.filterOutgoingConsecutiveInterConceptRelationshipPaths(c, classTag[InterConceptRelationship])(_ => true))
+        .map(_.targetConcept).toSet
+    }
+
+    assertResult(rootConcepts) {
+      leafConcepts.toSeq
+        .flatMap(c => dts.filterIncomingConsecutiveInterConceptRelationshipPaths(c, classTag[InterConceptRelationship])(_ => true))
+        .map(_.sourceConcept).toSet
     }
   }
 
