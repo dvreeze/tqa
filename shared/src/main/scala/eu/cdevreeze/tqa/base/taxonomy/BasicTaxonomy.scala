@@ -59,13 +59,14 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * @author Chris de Vreeze
  */
 final class BasicTaxonomy private (
-  val taxonomyBase:                      TaxonomyBase,
-  val extraSubstitutionGroupMap:         SubstitutionGroupMap,
-  val netSubstitutionGroupMap:           SubstitutionGroupMap,
-  val relationships:                     immutable.IndexedSeq[Relationship],
-  val conceptDeclarationsByEName:        Map[EName, ConceptDeclaration],
-  val standardRelationshipsBySource:     Map[EName, immutable.IndexedSeq[StandardRelationship]],
-  val nonStandardRelationshipsBySource:  Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
+  val taxonomyBase: TaxonomyBase,
+  val extraSubstitutionGroupMap: SubstitutionGroupMap,
+  val netSubstitutionGroupMap: SubstitutionGroupMap,
+  val relationships: immutable.IndexedSeq[Relationship],
+  val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
+  val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
+  val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
+  val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
   val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
   val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
 
@@ -158,6 +159,7 @@ final class BasicTaxonomy private (
       conceptDeclarationsByEName.filter(kv => docUris.contains(kv._2.globalElementDeclaration.docUri)),
       standardRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
       nonStandardRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
+      nonStandardRelationshipsByTarget.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
       interConceptRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
       interConceptRelationshipsByTarget.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty))
   }
@@ -176,6 +178,7 @@ final class BasicTaxonomy private (
       conceptDeclarationsByEName,
       standardRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
       nonStandardRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
+      nonStandardRelationshipsByTarget.mapValues(_.filter(p)).filter(_._2.nonEmpty),
       interConceptRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
       interConceptRelationshipsByTarget.mapValues(_.filter(p)).filter(_._2.nonEmpty))
   }
@@ -220,9 +223,9 @@ object BasicTaxonomy {
    * This method invokes the overloaded build method having as 4th parameter the arc filter that always returns true.
    */
   def build(
-    taxonomyBase:              TaxonomyBase,
+    taxonomyBase: TaxonomyBase,
     extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationshipFactory:       RelationshipFactory): BasicTaxonomy = {
+    relationshipFactory: RelationshipFactory): BasicTaxonomy = {
 
     build(taxonomyBase, extraSubstitutionGroupMap, relationshipFactory, _ => true)
   }
@@ -236,10 +239,10 @@ object BasicTaxonomy {
    * The arc filter is only used during relationship extraction. It is not used to filter any taxonomy DOM content.
    */
   def build(
-    taxonomyBase:              TaxonomyBase,
+    taxonomyBase: TaxonomyBase,
     extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationshipFactory:       RelationshipFactory,
-    arcFilter:                 XLinkArc => Boolean): BasicTaxonomy = {
+    relationshipFactory: RelationshipFactory,
+    arcFilter: XLinkArc => Boolean): BasicTaxonomy = {
 
     val relationships = relationshipFactory.extractRelationships(taxonomyBase, arcFilter)
 
@@ -251,9 +254,9 @@ object BasicTaxonomy {
    * Make sure that the relationships are backed by arcs in the underlying taxonomy. This is not checked.
    */
   def build(
-    taxonomyBase:              TaxonomyBase,
+    taxonomyBase: TaxonomyBase,
     extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationships:             immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
+    relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
     val netSubstitutionGroupMap =
       taxonomyBase.computeDerivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)
@@ -279,6 +282,10 @@ object BasicTaxonomy {
       nonStandardRelationships groupBy (_.sourceElem.key)
     }
 
+    val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
+      nonStandardRelationships groupBy (_.targetElem.key)
+    }
+
     val interConceptRelationships = standardRelationships collect { case rel: InterConceptRelationship => rel }
 
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
@@ -297,6 +304,7 @@ object BasicTaxonomy {
       conceptDeclarationsByEName,
       standardRelationshipsBySource,
       nonStandardRelationshipsBySource,
+      nonStandardRelationshipsByTarget,
       interConceptRelationshipsBySource,
       interConceptRelationshipsByTarget)
   }

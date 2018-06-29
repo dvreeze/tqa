@@ -37,6 +37,11 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
    */
   def nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]]
 
+  /**
+   * Returns a map from target XML fragment keys to non-standard relationships. Must be fast in order for this trait to be fast.
+   */
+  def nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]]
+
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
@@ -71,17 +76,44 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
   }
 
   final def findAllOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey:        XmlFragmentKey,
+    sourceKey: XmlFragmentKey,
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterOutgoingNonStandardRelationshipsOfType(sourceKey, relationshipType)(_ => true)
   }
 
   final def filterOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey:        XmlFragmentKey,
+    sourceKey: XmlFragmentKey,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType
     nonStandardRelationshipsBySource.getOrElse(sourceKey, Vector()) collect { case relationship: A if p(relationship) => relationship }
+  }
+
+  final def findAllIncomingNonStandardRelationships(
+    targetKey: XmlFragmentKey): immutable.IndexedSeq[NonStandardRelationship] = {
+
+    filterIncomingNonStandardRelationships(targetKey)(_ => true)
+  }
+
+  final def filterIncomingNonStandardRelationships(
+    targetKey: XmlFragmentKey)(p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
+
+    nonStandardRelationshipsByTarget.getOrElse(targetKey, Vector()).filter(p)
+  }
+
+  final def findAllIncomingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
+    targetKey: XmlFragmentKey,
+    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+
+    filterIncomingNonStandardRelationshipsOfType(targetKey, relationshipType)(_ => true)
+  }
+
+  final def filterIncomingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
+    targetKey: XmlFragmentKey,
+    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+
+    implicit val relationshipClassTag = relationshipType
+    nonStandardRelationshipsByTarget.getOrElse(targetKey, Vector()) collect { case relationship: A if p(relationship) => relationship }
   }
 }
