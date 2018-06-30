@@ -22,6 +22,7 @@ import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
+import eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath
 
 /**
  * Partial implementation of `NonStandardRelationshipContainerApi`.
@@ -115,5 +116,67 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
 
     implicit val relationshipClassTag = relationshipType
     nonStandardRelationshipsByTarget.getOrElse(targetKey, Vector()) collect { case relationship: A if p(relationship) => relationship }
+  }
+
+  final def filterOutgoingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
+    sourceKey: XmlFragmentKey,
+    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]] = {
+
+    val nextRelationships = filterOutgoingNonStandardRelationshipsOfType(sourceKey, relationshipType)(rel => p(NonStandardRelationshipPath(rel)))
+
+    val paths = nextRelationships.flatMap(rel => filterOutgoingUnrestrictedNonStandardRelationshipPaths(NonStandardRelationshipPath(rel), relationshipType)(p))
+    paths
+  }
+
+  final def filterIncomingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
+    targetKey: XmlFragmentKey,
+    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]] = {
+
+    val prevRelationships = filterIncomingNonStandardRelationshipsOfType(targetKey, relationshipType)(rel => p(NonStandardRelationshipPath(rel)))
+
+    val paths = prevRelationships.flatMap(rel => filterIncomingUnrestrictedNonStandardRelationshipPaths(NonStandardRelationshipPath(rel), relationshipType)(p))
+    paths
+  }
+
+  // Private methods
+
+  private def filterOutgoingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
+    path: NonStandardRelationshipPath[A],
+    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]] = {
+
+    val nextRelationships =
+      filterOutgoingNonStandardRelationshipsOfType(
+        path.targetKey, relationshipType)(relationship => !path.hasCycle && p(path.append(relationship)))
+
+    val nextPaths = nextRelationships.map(rel => path.append(rel))
+
+    if (nextPaths.isEmpty) {
+      immutable.IndexedSeq(path)
+    } else {
+      nextPaths flatMap { nextPath =>
+        // Recursive calls
+        filterOutgoingUnrestrictedNonStandardRelationshipPaths(nextPath, relationshipType)(p)
+      }
+    }
+  }
+
+  private def filterIncomingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
+    path: NonStandardRelationshipPath[A],
+    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]] = {
+
+    val prevRelationships =
+      filterIncomingNonStandardRelationshipsOfType(
+        path.sourceKey, relationshipType)(relationship => !path.hasCycle && p(path.prepend(relationship)))
+
+    val prevPaths = prevRelationships.map(rel => path.prepend(rel))
+
+    if (prevPaths.isEmpty) {
+      immutable.IndexedSeq(path)
+    } else {
+      prevPaths flatMap { prevPath =>
+        // Recursive calls
+        filterIncomingUnrestrictedNonStandardRelationshipPaths(prevPath, relationshipType)(p)
+      }
+    }
   }
 }

@@ -21,6 +21,7 @@ import scala.reflect.ClassTag
 
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
+import eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath
 
 /**
  * Purely abstract trait offering a non-standard relationship query API.
@@ -97,4 +98,24 @@ trait NonStandardRelationshipContainerApi {
   def filterIncomingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
     targetKey: XmlFragmentKey,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+
+  /**
+   * Filters the non-standard relationship paths that are outgoing from the given XML element and
+   * whose relationships are of the given type. Only relationship paths for which all (non-empty) "inits"
+   * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
+   * but on encountering a cycle in a path it stops growing.
+   */
+  def filterOutgoingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
+    sourceKey: XmlFragmentKey,
+    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]]
+
+  /**
+   * Filters the non-standard relationship paths that are incoming to the given XML element and
+   * whose relationships are of the given type. Only relationship paths for which all (non-empty) "tails"
+   * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
+   * but on encountering a cycle in a path it stops growing.
+   */
+  def filterIncomingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
+    targetKey: XmlFragmentKey,
+    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]]
 }

@@ -28,6 +28,7 @@ import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
@@ -107,6 +108,32 @@ class InternalConsistencyTest extends FunSuite {
       leafConcepts.toSeq
         .flatMap(c => dts.filterIncomingConsecutiveInterConceptRelationshipPaths(c, classTag[InterConceptRelationship])(_ => true))
         .map(_.sourceConcept).toSet
+    }
+  }
+
+  test("testQueryingForNonStandardRelationshipPaths") {
+    val nonStandardRelationships = dts.findAllNonStandardRelationships.ensuring(_.nonEmpty)
+
+    val sourceKeys = nonStandardRelationships.map(_.sourceElem.key).toSet
+    val targetKeys = nonStandardRelationships.map(_.targetElem.key).toSet
+
+    val rootKeys = sourceKeys.diff(targetKeys)
+    val leafKeys = targetKeys.diff(sourceKeys)
+
+    assertResult(leafKeys) {
+      rootKeys.toSeq
+        .flatMap { c =>
+          dts.filterOutgoingUnrestrictedNonStandardRelationshipPaths(c, classTag[NonStandardRelationship])(_.isSingleElrRelationshipPath)
+        }
+        .map(_.targetKey).toSet
+    }
+
+    assertResult(rootKeys) {
+      leafKeys.toSeq
+        .flatMap { c =>
+          dts.filterIncomingUnrestrictedNonStandardRelationshipPaths(c, classTag[NonStandardRelationship])(_.isSingleElrRelationshipPath)
+        }
+        .map(_.sourceKey).toSet
     }
   }
 
