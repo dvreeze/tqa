@@ -1215,15 +1215,19 @@ object XbrliElem {
   }
 
   /**
-   * Returns the optional first found ancestor that is in the xbrli namespace.
+   * Returns the optional first found ancestor that is in the xbrli or link namespace.
+   *
+   * If the xbrli:xbrl root element is returned, this element must be a fact.
    */
-  final def findAncestorInXbrliNamespace(elem: BackingNodes.Elem): Option[BackingNodes.Elem] = {
+  final def findAncestorInXbrliOrLinkNamespace(elem: BackingNodes.Elem): Option[BackingNodes.Elem] = {
     elem.parentOption.flatMap { pe =>
-      if (pe.resolvedName.namespaceUriOption.contains(XbrliNs)) {
+      val nsOption = pe.resolvedName.namespaceUriOption
+
+      if (nsOption.contains(XbrliNs) || nsOption.contains(LinkNs)) {
         Some(pe)
       } else {
         // Recursive call
-        findAncestorInXbrliNamespace(pe)
+        findAncestorInXbrliOrLinkNamespace(pe)
       }
     }
   }
@@ -1355,7 +1359,7 @@ object Period {
 object Fact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    findAncestorInXbrliNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
+    findAncestorInXbrliOrLinkNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
   }
 
   private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): Fact =
@@ -1365,9 +1369,7 @@ object Fact {
 object ItemFact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    val isFact = findAncestorInXbrliNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
-
-    isFact && elem.attributeOption(ContextRefEName).isDefined
+    Fact.accepts(elem) && elem.attributeOption(ContextRefEName).isDefined
   }
 
   private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): ItemFact = {
@@ -1388,9 +1390,7 @@ object ItemFact {
 object TupleFact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    val isFact = findAncestorInXbrliNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
-
-    isFact && elem.attributeOption(ContextRefEName).isEmpty
+    Fact.accepts(elem) && elem.attributeOption(ContextRefEName).isEmpty
   }
 
   private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): TupleFact = {
