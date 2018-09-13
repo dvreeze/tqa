@@ -69,7 +69,7 @@ class XbrlInstanceTest extends FunSuite {
       nonInstance.findAllElemsOrSelf.forall(e => e.isInstanceOf[OtherXbrliElem] || e.isInstanceOf[StandardLoc])
     }
     assertResult(true) {
-      nonInstance.findAllElemsOrSelf.flatMap(_.relativePathOption).isEmpty
+      nonInstance.findAllElemsOrSelf.flatMap(e => XbrliElem.findXbrliXbrlAncestor(e.backingElem)).isEmpty
     }
   }
 
@@ -84,7 +84,7 @@ class XbrlInstanceTest extends FunSuite {
         .forall(e => e.isInstanceOf[OtherXbrliElem] || e.isInstanceOf[StartDate] || e.isInstanceOf[EndDate])
     }
     assertResult(true) {
-      nonInstance.findAllElemsOrSelf.flatMap(_.relativePathOption).isEmpty
+      nonInstance.findAllElemsOrSelf.flatMap(e => XbrliElem.findXbrliXbrlAncestor(e.backingElem)).isEmpty
     }
 
     val startDateParents = nonInstance.findAllElemsOfType(classTag[StartDate]).map(_.backingElem.parent)
@@ -124,7 +124,7 @@ class XbrlInstanceTest extends FunSuite {
     val tns = "http://xbrl.org/together"
 
     assertResult(true) {
-      xbrlInstance.findAllElemsOrSelf.flatMap(_.relativePathOption).nonEmpty
+      xbrlInstance.findAllElemsOrSelf.flatMap(e => XbrliElem.findXbrliXbrlAncestor(e.backingElem)).nonEmpty
     }
 
     assertResult(List.fill(4)(EName(tns, "Primary01"))) {

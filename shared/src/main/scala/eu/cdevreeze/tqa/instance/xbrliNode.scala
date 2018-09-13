@@ -158,20 +158,6 @@ sealed abstract class XbrliElem private[instance] (
 
   final override def hashCode: Int = backingElem.hashCode
 
-  /**
-   * Returns the optional path of the ancestor-or-self XBRL instance root element.
-   */
-  final def xbrlInstanceRootElemPathOption: Option[Path] = {
-    XbrliElem.xbrlInstanceRootElemPathOption(backingElem)
-  }
-
-  /**
-   * Returns the optional relative path to the (optional) XBRL instance root element path.
-   */
-  final def relativePathOption: Option[Path] = {
-    XbrliElem.relativePathOption(backingElem)
-  }
-
   private def msg(s: String): String = s"${s} (${backingElem.key})"
 }
 
@@ -668,7 +654,9 @@ abstract class Fact private[instance] (
   override val backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
 
-  final def isTopLevel: Boolean = relativePath.entries.size == 1
+  final def isTopLevel: Boolean = {
+    backingElem.parentOption.exists(_.resolvedName == XbrliXbrlEName)
+  }
 
   final def isNil: Boolean = attributeOption(XsiNilEName).contains("true")
 
@@ -678,8 +666,6 @@ abstract class Fact private[instance] (
   final def conceptEName: EName = resolvedName
 
   final def path: Path = backingElem.path
-
-  final def relativePath: Path = relativePathOption.getOrElse(sys.error(s"Missing ancestor-or-self root element path"))
 }
 
 /**
@@ -1229,17 +1215,31 @@ object XbrliElem {
   }
 
   /**
-   * Returns the optional path of the ancestor-or-self XBRL instance root element.
+   * Returns the optional first found ancestor that is in the xbrli namespace.
    */
-  final def xbrlInstanceRootElemPathOption(elem: BackingNodes.Elem): Option[Path] = {
-    elem.findAncestorOrSelf(_.resolvedName == XbrliXbrlEName).map(_.path)
+  final def findAncestorInXbrliNamespace(elem: BackingNodes.Elem): Option[BackingNodes.Elem] = {
+    elem.parentOption.flatMap { pe =>
+      if (pe.resolvedName.namespaceUriOption.contains(XbrliNs)) {
+        Some(pe)
+      } else {
+        // Recursive call
+        findAncestorInXbrliNamespace(pe)
+      }
+    }
   }
 
   /**
-   * Returns the optional relative path to the (optional) XBRL instance root element path.
+   * Returns the optional first found ancestor that is an xbrli:xbrl element.
    */
-  final def relativePathOption(elem: BackingNodes.Elem): Option[Path] = {
-    xbrlInstanceRootElemPathOption(elem).map(rootPath => elem.path.skippingPath(rootPath))
+  final def findXbrliXbrlAncestor(elem: BackingNodes.Elem): Option[BackingNodes.Elem] = {
+    elem.parentOption.flatMap { pe =>
+      if (pe.resolvedName == XbrliXbrlEName) {
+        Some(pe)
+      } else {
+        // Recursive call
+        findXbrliXbrlAncestor(pe)
+      }
+    }
   }
 
   private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
@@ -1294,7 +1294,8 @@ object XbrliElem {
 
   private[instance] def applyForOtherNamespace(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
     elem.resolvedName match {
-      case _ if Fact.accepts(elem) => Fact(elem, childElems)
+      case _ if ItemFact.accepts(elem) => ItemFact(elem, childElems)
+      case _ if TupleFact.accepts(elem) => TupleFact(elem, childElems)
       case _ => new OtherXbrliElem(elem, childElems)
     }
   }
@@ -1353,36 +1354,23 @@ object Period {
 
 object Fact {
 
-  def accepts(elem: BackingNodes.Elem): Boolean = ItemFact.accepts(elem) || TupleFact.accepts(elem)
+  def accepts(elem: BackingNodes.Elem): Boolean = {
+    findAncestorInXbrliNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
+  }
 
   private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): Fact =
     if (ItemFact.accepts(elem)) ItemFact(elem, childElems) else TupleFact(elem, childElems)
-
-  def isFactRelativePath(relativePath: Path): Boolean = {
-    relativePath.nonEmpty &&
-      !Set(Option(LinkNs), Option(XbrliNs)).contains(relativePath.firstEntry.elementName.namespaceUriOption)
-  }
 }
 
 object ItemFact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    val relativePathOption = XbrliElem.relativePathOption(elem)
+    val isFact = findAncestorInXbrliNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
 
-    relativePathOption match {
-      case None => false
-      case Some(relativePath) =>
-        Fact.isFactRelativePath(relativePath) &&
-          elem.attributeOption(ContextRefEName).isDefined
-    }
+    isFact && elem.attributeOption(ContextRefEName).isDefined
   }
 
   private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): ItemFact = {
-    val relativePathOption = XbrliElem.relativePathOption(elem)
-    require(relativePathOption.nonEmpty)
-    require(Fact.isFactRelativePath(relativePathOption.get))
-    require(elem.attributeOption(ContextRefEName).isDefined)
-
     val unitRefOption = elem.attributeOption(UnitRefEName)
 
     if (unitRefOption.isEmpty) new NonNumericItemFact(elem, childElems)
@@ -1400,22 +1388,12 @@ object ItemFact {
 object TupleFact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    val relativePathOption = XbrliElem.relativePathOption(elem)
+    val isFact = findAncestorInXbrliNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
 
-    relativePathOption match {
-      case None => false
-      case Some(relativePath) =>
-        Fact.isFactRelativePath(relativePath) &&
-          elem.attributeOption(ContextRefEName).isEmpty
-    }
+    isFact && elem.attributeOption(ContextRefEName).isEmpty
   }
 
   private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): TupleFact = {
-    val relativePathOption = XbrliElem.relativePathOption(elem)
-    require(relativePathOption.nonEmpty)
-    require(Fact.isFactRelativePath(relativePathOption.get))
-    require(elem.attributeOption(ContextRefEName).isEmpty)
-
     new TupleFact(elem, childElems)
   }
 }
