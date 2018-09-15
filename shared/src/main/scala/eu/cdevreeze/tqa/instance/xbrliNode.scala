@@ -178,39 +178,52 @@ sealed abstract class XbrliElem private[instance] (
 final class XbrlInstance private[instance] (
   override val backingElem: BackingNodes.Elem,
   override val ancestorOrSelfENames: List[EName],
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
+  childElems: immutable.IndexedSeq[XbrliElem],
+  allContextsById: Map[String, XbrliContext],
+  allUnitsById: Map[String, XbrliUnit],
+  allFactsByEName: Map[EName, immutable.IndexedSeq[Fact]]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliXbrlEName, s"Expected EName $XbrliXbrlEName but found $resolvedName")
 
-  val allContexts: immutable.IndexedSeq[XbrliContext] =
+  // Find/get methods using some key
+
+  def findContextById(id: String): Option[XbrliContext] = {
+    allContextsById.get(id)
+  }
+
+  def getContextById(id: String): XbrliContext = {
+    allContextsById.getOrElse(id, sys.error(s"Missing context with ID $id"))
+  }
+
+  def findUnitById(id: String): Option[XbrliUnit] = {
+    allUnitsById.get(id)
+  }
+
+  def getUnitById(id: String): XbrliUnit = {
+    allUnitsById.getOrElse(id, sys.error(s"Missing unit with ID $id"))
+  }
+
+  def filterFactsByEName(factName: EName): immutable.IndexedSeq[Fact] = {
+    allFactsByEName.getOrElse(factName, immutable.IndexedSeq())
+  }
+
+  def filterItemsByEName(factName: EName): immutable.IndexedSeq[ItemFact] = {
+    filterFactsByEName(factName).collect { case f: ItemFact => f }
+  }
+
+  def filterTuplesByEName(factName: EName): immutable.IndexedSeq[TupleFact] = {
+    filterFactsByEName(factName).collect { case f: TupleFact => f }
+  }
+
+  // FindAll/filter methods
+
+  def findAllContexts: immutable.IndexedSeq[XbrliContext] = {
     findAllChildElemsOfType(classTag[XbrliContext])
+  }
 
-  val allContextsById: Map[String, XbrliContext] =
-    allContexts.groupBy(_.id) mapValues (_.head)
-
-  val allUnits: immutable.IndexedSeq[XbrliUnit] =
+  def findAllUnits: immutable.IndexedSeq[XbrliUnit] = {
     findAllChildElemsOfType(classTag[XbrliUnit])
-
-  val allUnitsById: Map[String, XbrliUnit] =
-    allUnits.groupBy(_.id) mapValues (_.head)
-
-  val allTopLevelFacts: immutable.IndexedSeq[Fact] =
-    findAllChildElemsOfType(classTag[Fact])
-
-  val allTopLevelItems: immutable.IndexedSeq[ItemFact] =
-    findAllChildElemsOfType(classTag[ItemFact])
-
-  val allTopLevelTuples: immutable.IndexedSeq[TupleFact] =
-    findAllChildElemsOfType(classTag[TupleFact])
-
-  val allTopLevelFactsByEName: Map[EName, immutable.IndexedSeq[Fact]] =
-    allTopLevelFacts groupBy (_.resolvedName)
-
-  val allTopLevelItemsByEName: Map[EName, immutable.IndexedSeq[ItemFact]] =
-    allTopLevelItems groupBy (_.resolvedName)
-
-  val allTopLevelTuplesByEName: Map[EName, immutable.IndexedSeq[TupleFact]] =
-    allTopLevelTuples groupBy (_.resolvedName)
+  }
 
   def filterContexts(p: XbrliContext => Boolean): immutable.IndexedSeq[XbrliContext] = {
     filterChildElemsOfType(classTag[XbrliContext])(p)
@@ -218,6 +231,18 @@ final class XbrlInstance private[instance] (
 
   def filterUnits(p: XbrliUnit => Boolean): immutable.IndexedSeq[XbrliUnit] = {
     filterChildElemsOfType(classTag[XbrliUnit])(p)
+  }
+
+  def findAllTopLevelFacts: immutable.IndexedSeq[Fact] = {
+    findAllChildElemsOfType(classTag[Fact])
+  }
+
+  def findAllTopLevelItems: immutable.IndexedSeq[ItemFact] = {
+    findAllChildElemsOfType(classTag[ItemFact])
+  }
+
+  def findAllTopLevelTuples: immutable.IndexedSeq[TupleFact] = {
+    findAllChildElemsOfType(classTag[TupleFact])
   }
 
   def filterTopLevelFacts(p: Fact => Boolean): immutable.IndexedSeq[Fact] = {
@@ -1280,7 +1305,8 @@ object XbrliElem {
     childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
 
     elem.resolvedName match {
-      case XbrliXbrlEName => new XbrlInstance(elem, ancestorOrSelfENames, childElems)
+      case XbrliXbrlEName =>
+        XbrlInstance(elem, ancestorOrSelfENames, childElems)
       case XbrliContextEName => new XbrliContext(elem, ancestorOrSelfENames, childElems)
       case XbrliUnitEName => new XbrliUnit(elem, ancestorOrSelfENames, childElems)
       case XbrliEntityEName => new Entity(elem, ancestorOrSelfENames, childElems)
@@ -1347,6 +1373,23 @@ object XbrlInstance {
   def build(elem: BackingNodes.Elem): XbrlInstance = {
     require(elem.resolvedName == XbrliXbrlEName, s"Expected $XbrliXbrlEName but found ${elem.resolvedName}")
     XbrliElem.build(elem).asInstanceOf[XbrlInstance]
+  }
+
+  private[instance] def apply(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): XbrlInstance = {
+
+    val allContextsById: Map[String, XbrliContext] =
+      childElems.collect { case e: XbrliContext => e }.groupBy(_.id).mapValues(_.head)
+
+    val allUnitsById: Map[String, XbrliUnit] =
+      childElems.collect { case e: XbrliUnit => e }.groupBy(_.id).mapValues(_.head)
+
+    val allFactsByEName: Map[EName, immutable.IndexedSeq[Fact]] =
+      childElems.flatMap(_.findAllElemsOrSelfOfType(classTag[Fact])).groupBy(_.resolvedName)
+
+    new XbrlInstance(elem, ancestorOrSelfENames, childElems, allContextsById, allUnitsById, allFactsByEName)
   }
 }
 

@@ -60,10 +60,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
 
     assertResult(Set(EName(productTns, "Cars"), EName(productTns, "Wine"))) {
-      instance.allContexts.flatMap(_.explicitDimensionMembers.get(EName(tns, "ProductDim"))).toSet
+      instance.findAllContexts.flatMap(_.explicitDimensionMembers.get(EName(tns, "ProductDim"))).toSet
     }
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(3) {
       dimContexts.size
@@ -85,10 +85,10 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
 
     assertResult(Set(EName(productTns, "AllProducts"), EName(productTns, "Cars"), EName(productTns, "Wine"))) {
-      instance.allContexts.flatMap(_.explicitDimensionMembers.get(EName(tns, "ProductDim"))).toSet
+      instance.findAllContexts.flatMap(_.explicitDimensionMembers.get(EName(tns, "ProductDim"))).toSet
     }
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(3) {
       dimContexts.size
@@ -111,16 +111,16 @@ class DimensionalInstanceValidationTest extends FunSuite {
       validator.taxonomy.findAllHasHypercubeRelationships.map(_.contextElement)
     }
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
     }
     assertResult(1) {
-      instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).size
+      instance.findAllContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).size
     }
     assertResult(1) {
-      instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).map(_.dimension).distinct.size
+      instance.findAllContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).map(_.dimension).distinct.size
     }
     assertResult(List(false)) {
       dimContexts.map(_.hasRepeatedDimensions)
@@ -135,16 +135,16 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/contextContainsRepeatedDimension.xbrl")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
     }
     assertResult(2) {
-      instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).size
+      instance.findAllContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).size
     }
     assertResult(1) {
-      instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).map(_.dimension).distinct.size
+      instance.findAllContexts.flatMap(_.entity.segmentOption).flatMap(_.typedMembers).map(_.dimension).distinct.size
     }
     assertResult(List(true)) {
       dimContexts.map(_.hasRepeatedDimensions)
@@ -167,17 +167,17 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
 
     assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
-      instance.allTopLevelItems.flatMap(fact => validator.taxonomy.findAllOwnOrInheritedHasHypercubes(fact.resolvedName)).
+      instance.findAllTopLevelItems.flatMap(fact => validator.taxonomy.findAllOwnOrInheritedHasHypercubes(fact.resolvedName)).
         map(_.contextElement).toSet
     }
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
     }
     assertResult(1) {
-      instance.allContexts.flatMap(_.entity.segmentOption).flatMap(_.explicitMembers).size
+      instance.findAllContexts.flatMap(_.entity.segmentOption).flatMap(_.explicitMembers).size
     }
     assertResult(List(false)) {
       dimContexts.map(_.hasRepeatedDimensions)
@@ -197,11 +197,11 @@ class DimensionalInstanceValidationTest extends FunSuite {
     }
 
     assertResult(Set(ContextElement.Segment, ContextElement.Scenario)) {
-      instance.allTopLevelItems.flatMap(fact => validator.taxonomy.findAllOwnOrInheritedHasHypercubes(fact.resolvedName)).
+      instance.findAllTopLevelItems.flatMap(fact => validator.taxonomy.findAllOwnOrInheritedHasHypercubes(fact.resolvedName)).
         map(_.contextElement).toSet
     }
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -221,7 +221,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
   test("testRepeatedDimensionInScenario") {
     val instance = makeTestInstance("200-xbrldie/204-RepeatedDimensionInInstanceError/repeatedDimensionInScenario.xbrl")
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -243,7 +243,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/205-TypedMemberNotTypedDimensionError/typedMemberIsExplicitInvalid.xbrl")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -259,7 +259,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/206-ExplicitMemberNotExplicitDimensionError/contextMemberNotExplicitDimension.xbrl")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -275,7 +275,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/contextExplicitDimDomainMemberNotFound.xbrl")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -289,7 +289,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/contextExplicitDimDomainMemberNotFound.xbrl")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -303,7 +303,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/EmptyDimensionAndNotAllHypercube-4.xbrl")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -317,7 +317,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/207-ExplicitMemberUndefinedQNameError/EmptyDimensionAndNotAllHypercube-5.xbrl")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -333,7 +333,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimSegValid-instance.xml")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -347,7 +347,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimScenValid-instance.xml")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -361,7 +361,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimSegInvalid-instance.xml")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -375,7 +375,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimScenInvalid-instance.xml")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -389,7 +389,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimSegUnused-instance.xml")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size
@@ -403,7 +403,7 @@ class DimensionalInstanceValidationTest extends FunSuite {
     val instance = makeTestInstance("200-xbrldie/208-IllegalTypedDimensionContentError/typedDimScenUnused-instance.xml")
     val validator = makeValidator(instance)
 
-    val dimContexts = instance.allContexts.map(contextToDimensionalContext)
+    val dimContexts = instance.findAllContexts.map(contextToDimensionalContext)
 
     assertResult(1) {
       dimContexts.size

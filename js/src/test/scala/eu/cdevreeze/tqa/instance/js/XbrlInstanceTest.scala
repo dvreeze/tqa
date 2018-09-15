@@ -132,14 +132,14 @@ class XbrlInstanceTest extends FunSuite {
     }
 
     assertResult(Set("F_Member03_Member04", "F_Member03", "F_Member04", "F")) {
-      xbrlInstance.allContextsById.keySet
+      xbrlInstance.findAllContexts.groupBy(_.id).keySet
     }
 
-    assertResult(xbrlInstance.allContextsById.keySet) {
-      xbrlInstance.allTopLevelItems.map(_.contextRef).toSet
+    assertResult(xbrlInstance.findAllContexts.groupBy(_.id).keySet) {
+      xbrlInstance.findAllTopLevelItems.map(_.contextRef).toSet
     }
 
-    val fCtx = xbrlInstance.allContextsById("F")
+    val fCtx = xbrlInstance.getContextById("F")
 
     assertResult(LocalDate.parse("2010-01-01").atStartOfDay) {
       fCtx.period.asInstantPeriod.instantDateTime match {
@@ -148,7 +148,7 @@ class XbrlInstanceTest extends FunSuite {
       }
     }
 
-    val f_03_04Ctx = xbrlInstance.allContextsById("F_Member03_Member04")
+    val f_03_04Ctx = xbrlInstance.getContextById("F_Member03_Member04")
 
     assertResult(Map(
       EName(tns, "Dimension01") -> EName(tns, "Member03"),

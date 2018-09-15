@@ -169,7 +169,7 @@ object XbrlInstanceViewer {
   private def findContext(fact: Fact, xbrlInstance: XbrlInstance): Option[XbrliContext] = {
     fact match {
       case item: ItemFact =>
-        xbrlInstance.allContextsById.get(item.contextRef)
+        xbrlInstance.findContextById(item.contextRef)
       case tuple: TupleFact =>
         None
     }
@@ -178,7 +178,7 @@ object XbrlInstanceViewer {
   private def findUnit(fact: Fact, xbrlInstance: XbrlInstance): Option[XbrliUnit] = {
     fact match {
       case numericItem: NumericItemFact =>
-        xbrlInstance.allUnitsById.get(numericItem.unitRef)
+        xbrlInstance.findUnitById(numericItem.unitRef)
       case _ =>
         None
     }

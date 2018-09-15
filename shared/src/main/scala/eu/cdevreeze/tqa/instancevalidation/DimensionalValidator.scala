@@ -47,12 +47,12 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 final class DimensionalValidator private (
-    val taxonomy: TaxonomyApi,
-    val hasHypercubesByElrAndPrimary: Map[String, Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]],
-    val hypercubeDimensionsByElrAndHypercube: Map[String, Map[EName, immutable.IndexedSeq[HypercubeDimensionRelationship]]],
-    val dimensionDomainsByElrAndDimension: Map[String, Map[EName, immutable.IndexedSeq[DimensionDomain]]],
-    val dimensionDefaults: Map[EName, EName],
-    val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]]) {
+  val taxonomy: TaxonomyApi,
+  val hasHypercubesByElrAndPrimary: Map[String, Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]],
+  val hypercubeDimensionsByElrAndHypercube: Map[String, Map[EName, immutable.IndexedSeq[HypercubeDimensionRelationship]]],
+  val dimensionDomainsByElrAndDimension: Map[String, Map[EName, immutable.IndexedSeq[DimensionDomain]]],
+  val dimensionDefaults: Map[EName, EName],
+  val hasHypercubeInheritanceOrSelf: Map[EName, Map[String, Set[EName]]]) {
 
   /**
    * Validates the given item fact in the given XBRL instance dimensionally. It invokes the
@@ -64,7 +64,7 @@ final class DimensionalValidator private (
     instance: XbrlInstance): Try[Boolean] = {
 
     val ctxRef = itemFact.contextRef
-    val context = instance.allContextsById(ctxRef)
+    val context = instance.getContextById(ctxRef)
     val dimensionalContext = DimensionalContext.contextToDimensionalContext(context)
 
     validateDimensionally(itemFact.resolvedName, dimensionalContext)
