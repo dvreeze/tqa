@@ -65,7 +65,8 @@ final case class XbrliCommentNode(text: String) extends CanBeXbrliDocumentChild 
  *
  * The yaidom `SubtypeAwareElemApi` and `ScopedElemApi` query API is offered.
  *
- * Also note that the package-private constructor contains redundant data, in order to speed up (yaidom-based) querying.
+ * Also note that the package-private constructor contains redundant data, in order to speed up (yaidom-based) querying,
+ * at the expense of (expensive recursive element) creation.
  *
  * These XBRL instance elements are just an XBRL instance view on the underlying "backing element" tree, and
  * therefore do not know about the taxonomy describing the XBRL instance (other than the href to the DTS entry point).
@@ -101,6 +102,7 @@ final case class XbrliCommentNode(text: String) extends CanBeXbrliDocumentChild 
  */
 sealed abstract class XbrliElem private[instance] (
   val backingElem: BackingNodes.Elem,
+  val ancestorOrSelfENames: List[EName],
   childElems: immutable.IndexedSeq[XbrliElem]) extends CanBeXbrliDocumentChild
   with ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
@@ -175,7 +177,8 @@ sealed abstract class XbrliElem private[instance] (
  */
 final class XbrlInstance private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliXbrlEName, s"Expected EName $XbrliXbrlEName but found $resolvedName")
 
@@ -521,7 +524,8 @@ sealed trait SimpleLink extends XLinkLink with xlink.SimpleLink {
  */
 final class SchemaRef private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with SimpleLink {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with SimpleLink {
 
   require(resolvedName == LinkSchemaRefEName, s"Expected EName $LinkSchemaRefEName but found $resolvedName")
 }
@@ -533,7 +537,8 @@ final class SchemaRef private[instance] (
  */
 final class LinkbaseRef private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with SimpleLink {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with SimpleLink {
 
   require(resolvedName == LinkLinkbaseRefEName, s"Expected EName $LinkLinkbaseRefEName but found $resolvedName")
 }
@@ -545,7 +550,8 @@ final class LinkbaseRef private[instance] (
  */
 final class RoleRef private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with SimpleLink {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with SimpleLink {
 
   require(resolvedName == LinkRoleRefEName, s"Expected EName $LinkRoleRefEName but found $resolvedName")
 }
@@ -557,7 +563,8 @@ final class RoleRef private[instance] (
  */
 final class ArcroleRef private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with SimpleLink {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with SimpleLink {
 
   require(resolvedName == LinkArcroleRefEName, s"Expected EName $LinkArcroleRefEName but found $resolvedName")
 }
@@ -569,7 +576,8 @@ final class ArcroleRef private[instance] (
  */
 final class XbrliContext private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliContextEName, s"Expected EName $XbrliContextEName but found $resolvedName")
 
@@ -618,7 +626,8 @@ final class XbrliContext private[instance] (
  */
 final class XbrliUnit private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliUnitEName, s"Expected EName $XbrliUnitEName but found $resolvedName")
 
@@ -652,7 +661,8 @@ final class XbrliUnit private[instance] (
  */
 abstract class Fact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   final def isTopLevel: Boolean = {
     backingElem.parentOption.exists(_.resolvedName == XbrliXbrlEName)
@@ -675,7 +685,8 @@ abstract class Fact private[instance] (
  */
 abstract class ItemFact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends Fact(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends Fact(backingElem, ancestorOrSelfENames, childElems) {
 
   require(attributeOption(ContextRefEName).isDefined, s"Expected attribute $ContextRefEName")
 
@@ -691,7 +702,8 @@ abstract class ItemFact private[instance] (
  */
 final class NonNumericItemFact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends ItemFact(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends ItemFact(backingElem, ancestorOrSelfENames, childElems) {
 
   require(attributeOption(UnitRefEName).isEmpty, s"Expected no attribute $UnitRefEName")
 
@@ -705,7 +717,8 @@ final class NonNumericItemFact private[instance] (
  */
 abstract class NumericItemFact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends ItemFact(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends ItemFact(backingElem, ancestorOrSelfENames, childElems) {
 
   require(attributeOption(UnitRefEName).isDefined, s"Expected attribute $UnitRefEName")
 
@@ -721,7 +734,8 @@ abstract class NumericItemFact private[instance] (
  */
 final class NilNumericItemFact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends NumericItemFact(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends NumericItemFact(backingElem, ancestorOrSelfENames, childElems) {
 
   require(isNil, s"Expected nil numeric item fact")
 }
@@ -733,7 +747,8 @@ final class NilNumericItemFact private[instance] (
  */
 final class NonNilNonFractionNumericItemFact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends NumericItemFact(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends NumericItemFact(backingElem, ancestorOrSelfENames, childElems) {
 
   require(!isNil, s"Expected non-nil numeric item fact")
 
@@ -749,7 +764,8 @@ final class NonNilNonFractionNumericItemFact private[instance] (
  */
 final class NonNilFractionItemFact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends NumericItemFact(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends NumericItemFact(backingElem, ancestorOrSelfENames, childElems) {
 
   require(!isNil, s"Expected non-nil numeric item fact")
 
@@ -773,7 +789,8 @@ final class NonNilFractionItemFact private[instance] (
  */
 final class TupleFact private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends Fact(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends Fact(backingElem, ancestorOrSelfENames, childElems) {
 
   def findAllChildFacts: immutable.IndexedSeq[Fact] = {
     findAllChildElemsOfType(classTag[Fact])
@@ -799,7 +816,8 @@ final class TupleFact private[instance] (
  */
 final class FootnoteLink private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with ExtendedLink {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with ExtendedLink {
 
   require(resolvedName == LinkFootnoteLinkEName, s"Expected EName $LinkFootnoteLinkEName but found $resolvedName")
 }
@@ -811,7 +829,8 @@ final class FootnoteLink private[instance] (
  */
 final class FootnoteArc private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with XLinkArc {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with XLinkArc {
 
   require(resolvedName == LinkFootnoteArcEName, s"Expected EName $LinkFootnoteArcEName but found $resolvedName")
 }
@@ -823,7 +842,8 @@ final class FootnoteArc private[instance] (
  */
 final class Footnote private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with XLinkResource {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with XLinkResource {
 
   require(resolvedName == LinkFootnoteEName, s"Expected EName $LinkFootnoteEName but found $resolvedName")
 }
@@ -835,7 +855,8 @@ final class Footnote private[instance] (
  */
 final class StandardLoc private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with XLinkLocator {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with XLinkLocator {
 
   require(resolvedName == LinkLocEName, s"Expected EName $LinkLocEName but found $resolvedName")
 }
@@ -847,7 +868,8 @@ final class StandardLoc private[instance] (
  */
 final class Entity private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliEntityEName, s"Expected EName $XbrliEntityEName but found $resolvedName")
 
@@ -875,7 +897,8 @@ final class Entity private[instance] (
  */
 abstract class Period private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliPeriodEName, s"Expected EName $XbrliPeriodEName but found $resolvedName")
 
@@ -914,7 +937,8 @@ abstract class Period private[instance] (
  */
 final class InstantPeriod private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends Period(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends Period(backingElem, ancestorOrSelfENames, childElems) {
 
   require(isInstantPeriod)
 
@@ -930,7 +954,8 @@ final class InstantPeriod private[instance] (
  */
 final class StartEndDatePeriod private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends Period(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends Period(backingElem, ancestorOrSelfENames, childElems) {
 
   require(isStartEndDatePeriod)
 
@@ -950,7 +975,8 @@ final class StartEndDatePeriod private[instance] (
  */
 final class ForeverPeriod private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends Period(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends Period(backingElem, ancestorOrSelfENames, childElems) {
 
   require(isForeverPeriod)
 }
@@ -962,7 +988,8 @@ final class ForeverPeriod private[instance] (
  */
 final class Instant private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliInstantEName, s"Expected EName $XbrliInstantEName but found $resolvedName")
 
@@ -978,7 +1005,8 @@ final class Instant private[instance] (
  */
 final class StartDate private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliStartDateEName, s"Expected EName $XbrliStartDateEName but found $resolvedName")
 
@@ -994,7 +1022,8 @@ final class StartDate private[instance] (
  */
 final class EndDate private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliEndDateEName, s"Expected EName $XbrliEndDateEName but found $resolvedName")
 
@@ -1010,7 +1039,8 @@ final class EndDate private[instance] (
  */
 final class Forever private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliForeverEName, s"Expected EName $XbrliForeverEName but found $resolvedName")
 }
@@ -1055,7 +1085,8 @@ sealed trait MayContainDimensions extends XbrliElem {
  */
 final class Scenario private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with MayContainDimensions {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with MayContainDimensions {
 
   require(resolvedName == XbrliScenarioEName, s"Expected EName $XbrliScenarioEName but found $resolvedName")
 }
@@ -1067,7 +1098,8 @@ final class Scenario private[instance] (
  */
 final class Segment private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) with MayContainDimensions {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) with MayContainDimensions {
 
   require(resolvedName == XbrliSegmentEName, s"Expected EName $XbrliSegmentEName but found $resolvedName")
 }
@@ -1079,7 +1111,8 @@ final class Segment private[instance] (
  */
 final class Identifier private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliIdentifierEName, s"Expected EName $XbrliIdentifierEName but found $resolvedName")
 
@@ -1095,7 +1128,8 @@ final class Identifier private[instance] (
  */
 final class Divide private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrliDivideEName, s"Expected EName $XbrliDivideEName but found $resolvedName")
 
@@ -1114,7 +1148,8 @@ final class Divide private[instance] (
 
 final class ExplicitMember private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrldiExplicitMemberEName, s"Expected EName $XbrldiExplicitMemberEName but found $resolvedName")
 
@@ -1129,7 +1164,8 @@ final class ExplicitMember private[instance] (
 
 final class TypedMember private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems) {
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems) {
 
   require(resolvedName == XbrldiTypedMemberEName, s"Expected EName $XbrldiTypedMemberEName but found $resolvedName")
 
@@ -1150,7 +1186,8 @@ final class TypedMember private[instance] (
  */
 final class OtherXbrliElem private[instance] (
   override val backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, childElems)
+  override val ancestorOrSelfENames: List[EName],
+  childElems: immutable.IndexedSeq[XbrliElem]) extends XbrliElem(backingElem, ancestorOrSelfENames, childElems)
 
 // Companion objects
 
@@ -1209,98 +1246,98 @@ object XbrliElem {
    * Expensive method to create an XbrliElem tree
    */
   def build(elem: BackingNodes.Elem): XbrliElem = {
+    val ancestorOrSelfENames: List[EName] = elem.ancestorsOrSelf.map(_.resolvedName).toList
+
+    build(elem, ancestorOrSelfENames)
+  }
+
+  /**
+   * Expensive recursive method to create an XbrliElem tree
+   */
+  private[instance] def build(elem: BackingNodes.Elem, ancestorOrSelfENames: List[EName]): XbrliElem = {
     // Recursive calls
-    val childElems = elem.findAllChildElems.map(e => build(e))
-    apply(elem, childElems)
+    val childElems = elem.findAllChildElems.map(e => build(e, e.resolvedName :: ancestorOrSelfENames))
+
+    apply(elem, ancestorOrSelfENames, childElems)
   }
 
-  /**
-   * Returns the optional first found ancestor that is in the xbrli or link namespace.
-   *
-   * If the xbrli:xbrl root element is returned, this element must be a fact.
-   */
-  final def findAncestorInXbrliOrLinkNamespace(elem: BackingNodes.Elem): Option[BackingNodes.Elem] = {
-    elem.parentOption.flatMap { pe =>
-      val nsOption = pe.resolvedName.namespaceUriOption
+  private[instance] def apply(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
 
-      if (nsOption.contains(XbrliNs) || nsOption.contains(LinkNs)) {
-        Some(pe)
-      } else {
-        // Recursive call
-        findAncestorInXbrliOrLinkNamespace(pe)
-      }
-    }
-  }
-
-  /**
-   * Returns the optional first found ancestor that is an xbrli:xbrl element.
-   */
-  final def findXbrliXbrlAncestor(elem: BackingNodes.Elem): Option[BackingNodes.Elem] = {
-    elem.parentOption.flatMap { pe =>
-      if (pe.resolvedName == XbrliXbrlEName) {
-        Some(pe)
-      } else {
-        // Recursive call
-        findXbrliXbrlAncestor(pe)
-      }
-    }
-  }
-
-  private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
     elem.resolvedName.namespaceUriOption match {
-      case Some(XbrliNs) => applyForXbrliNamespace(elem, childElems)
-      case Some(LinkNs) => applyForLinkNamespace(elem, childElems)
-      case Some(XbrldiNs) => applyForXbrldiNamespace(elem, childElems)
-      case _ => applyForOtherNamespace(elem, childElems)
+      case Some(XbrliNs) => applyForXbrliNamespace(elem, ancestorOrSelfENames, childElems)
+      case Some(LinkNs) => applyForLinkNamespace(elem, ancestorOrSelfENames, childElems)
+      case Some(XbrldiNs) => applyForXbrldiNamespace(elem, ancestorOrSelfENames, childElems)
+      case _ => applyForOtherNamespace(elem, ancestorOrSelfENames, childElems)
     }
   }
 
-  private[instance] def applyForXbrliNamespace(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+  private[instance] def applyForXbrliNamespace(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+
     elem.resolvedName match {
-      case XbrliXbrlEName => new XbrlInstance(elem, childElems)
-      case XbrliContextEName => new XbrliContext(elem, childElems)
-      case XbrliUnitEName => new XbrliUnit(elem, childElems)
-      case XbrliEntityEName => new Entity(elem, childElems)
-      case XbrliPeriodEName if Period.accepts(elem) => Period(elem, childElems)
-      case XbrliScenarioEName => new Scenario(elem, childElems)
-      case XbrliSegmentEName => new Segment(elem, childElems)
-      case XbrliIdentifierEName => new Identifier(elem, childElems)
-      case XbrliDivideEName => new Divide(elem, childElems)
-      case XbrliInstantEName => new Instant(elem, childElems)
-      case XbrliStartDateEName => new StartDate(elem, childElems)
-      case XbrliEndDateEName => new EndDate(elem, childElems)
-      case XbrliForeverEName => new Forever(elem, childElems)
-      case _ => new OtherXbrliElem(elem, childElems)
+      case XbrliXbrlEName => new XbrlInstance(elem, ancestorOrSelfENames, childElems)
+      case XbrliContextEName => new XbrliContext(elem, ancestorOrSelfENames, childElems)
+      case XbrliUnitEName => new XbrliUnit(elem, ancestorOrSelfENames, childElems)
+      case XbrliEntityEName => new Entity(elem, ancestorOrSelfENames, childElems)
+      case XbrliPeriodEName if Period.accepts(elem) =>
+        Period(elem, ancestorOrSelfENames, childElems)
+      case XbrliScenarioEName => new Scenario(elem, ancestorOrSelfENames, childElems)
+      case XbrliSegmentEName => new Segment(elem, ancestorOrSelfENames, childElems)
+      case XbrliIdentifierEName => new Identifier(elem, ancestorOrSelfENames, childElems)
+      case XbrliDivideEName => new Divide(elem, ancestorOrSelfENames, childElems)
+      case XbrliInstantEName => new Instant(elem, ancestorOrSelfENames, childElems)
+      case XbrliStartDateEName => new StartDate(elem, ancestorOrSelfENames, childElems)
+      case XbrliEndDateEName => new EndDate(elem, ancestorOrSelfENames, childElems)
+      case XbrliForeverEName => new Forever(elem, ancestorOrSelfENames, childElems)
+      case _ => new OtherXbrliElem(elem, ancestorOrSelfENames, childElems)
     }
   }
 
-  private[instance] def applyForLinkNamespace(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+  private[instance] def applyForLinkNamespace(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+
     elem.resolvedName match {
-      case LinkSchemaRefEName => new SchemaRef(elem, childElems)
-      case LinkLinkbaseRefEName => new LinkbaseRef(elem, childElems)
-      case LinkRoleRefEName => new RoleRef(elem, childElems)
-      case LinkArcroleRefEName => new ArcroleRef(elem, childElems)
-      case LinkFootnoteLinkEName => new FootnoteLink(elem, childElems)
-      case LinkFootnoteArcEName => new FootnoteArc(elem, childElems)
-      case LinkFootnoteEName => new Footnote(elem, childElems)
-      case LinkLocEName => new StandardLoc(elem, childElems)
-      case _ => new OtherXbrliElem(elem, childElems)
+      case LinkSchemaRefEName => new SchemaRef(elem, ancestorOrSelfENames, childElems)
+      case LinkLinkbaseRefEName => new LinkbaseRef(elem, ancestorOrSelfENames, childElems)
+      case LinkRoleRefEName => new RoleRef(elem, ancestorOrSelfENames, childElems)
+      case LinkArcroleRefEName => new ArcroleRef(elem, ancestorOrSelfENames, childElems)
+      case LinkFootnoteLinkEName => new FootnoteLink(elem, ancestorOrSelfENames, childElems)
+      case LinkFootnoteArcEName => new FootnoteArc(elem, ancestorOrSelfENames, childElems)
+      case LinkFootnoteEName => new Footnote(elem, ancestorOrSelfENames, childElems)
+      case LinkLocEName => new StandardLoc(elem, ancestorOrSelfENames, childElems)
+      case _ => new OtherXbrliElem(elem, ancestorOrSelfENames, childElems)
     }
   }
 
-  private[instance] def applyForXbrldiNamespace(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+  private[instance] def applyForXbrldiNamespace(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+
     elem.resolvedName match {
-      case XbrldiExplicitMemberEName => new ExplicitMember(elem, childElems)
-      case XbrldiTypedMemberEName => new TypedMember(elem, childElems)
-      case _ => new OtherXbrliElem(elem, childElems)
+      case XbrldiExplicitMemberEName => new ExplicitMember(elem, ancestorOrSelfENames, childElems)
+      case XbrldiTypedMemberEName => new TypedMember(elem, ancestorOrSelfENames, childElems)
+      case _ => new OtherXbrliElem(elem, ancestorOrSelfENames, childElems)
     }
   }
 
-  private[instance] def applyForOtherNamespace(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+  private[instance] def applyForOtherNamespace(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): XbrliElem = {
+
     elem.resolvedName match {
-      case _ if ItemFact.accepts(elem) => ItemFact(elem, childElems)
-      case _ if TupleFact.accepts(elem) => TupleFact(elem, childElems)
-      case _ => new OtherXbrliElem(elem, childElems)
+      case _ if Fact.accepts(elem, ancestorOrSelfENames) =>
+        Fact(elem, ancestorOrSelfENames, childElems)
+      case _ =>
+        new OtherXbrliElem(elem, ancestorOrSelfENames, childElems)
     }
   }
 }
@@ -1319,10 +1356,14 @@ object Period {
     elem.resolvedName == XbrliPeriodEName && (isInstant(elem) || isFiniteDuration(elem) || isForever(elem))
   }
 
-  private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): Period = {
-    if (isInstant(elem)) new InstantPeriod(elem, childElems)
-    else if (isFiniteDuration(elem)) new StartEndDatePeriod(elem, childElems)
-    else new ForeverPeriod(elem, childElems)
+  private[instance] def apply(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): Period = {
+
+    if (isInstant(elem)) new InstantPeriod(elem, ancestorOrSelfENames, childElems)
+    else if (isFiniteDuration(elem)) new StartEndDatePeriod(elem, ancestorOrSelfENames, childElems)
+    else new ForeverPeriod(elem, ancestorOrSelfENames, childElems)
   }
 
   private def isInstant(elem: BackingNodes.Elem): Boolean = {
@@ -1359,30 +1400,60 @@ object Period {
 object Fact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    findAncestorInXbrliOrLinkNamespace(elem).map(_.resolvedName).contains(XbrliXbrlEName)
+    val ancestorOrSelfENames: List[EName] = elem.ancestorsOrSelf.map(_.resolvedName).toList
+
+    accepts(elem, ancestorOrSelfENames)
   }
 
-  private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): Fact =
-    if (ItemFact.accepts(elem)) ItemFact(elem, childElems) else TupleFact(elem, childElems)
+  private[instance] def accepts(elem: BackingNodes.Elem, ancestorOrSelfENames: List[EName]): Boolean = {
+    require(ancestorOrSelfENames.nonEmpty)
+
+    val xbrliOrLinkAncestorENameOption: Option[EName] =
+      ancestorOrSelfENames.tail.find(en => en.namespaceUriOption.contains(XbrliNs) || en.namespaceUriOption.contains(LinkNs))
+
+    xbrliOrLinkAncestorENameOption.contains(XbrliXbrlEName)
+  }
+
+  private[instance] def apply(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): Fact = {
+
+    if (elem.attributeOption(ContextRefEName).isDefined) {
+      ItemFact(elem, ancestorOrSelfENames, childElems)
+    } else {
+      TupleFact(elem, ancestorOrSelfENames, childElems)
+    }
+  }
 }
 
 object ItemFact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    Fact.accepts(elem) && elem.attributeOption(ContextRefEName).isDefined
+    val ancestorOrSelfENames: List[EName] = elem.ancestorsOrSelf.map(_.resolvedName).toList
+
+    accepts(elem, ancestorOrSelfENames)
   }
 
-  private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): ItemFact = {
+  private[instance] def accepts(elem: BackingNodes.Elem, ancestorOrSelfENames: List[EName]): Boolean = {
+    Fact.accepts(elem, ancestorOrSelfENames) && elem.attributeOption(ContextRefEName).isDefined
+  }
+
+  private[instance] def apply(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): ItemFact = {
+
     val unitRefOption = elem.attributeOption(UnitRefEName)
 
-    if (unitRefOption.isEmpty) new NonNumericItemFact(elem, childElems)
+    if (unitRefOption.isEmpty) new NonNumericItemFact(elem, ancestorOrSelfENames, childElems)
     else {
       if (elem.attributeOption(XsiNilEName).contains("true"))
-        new NilNumericItemFact(elem, childElems)
+        new NilNumericItemFact(elem, ancestorOrSelfENames, childElems)
       else if (elem.findChildElem(withEName(XbrliNumeratorEName)).isDefined)
-        new NonNilFractionItemFact(elem, childElems)
+        new NonNilFractionItemFact(elem, ancestorOrSelfENames, childElems)
       else
-        new NonNilNonFractionNumericItemFact(elem, childElems)
+        new NonNilNonFractionNumericItemFact(elem, ancestorOrSelfENames, childElems)
     }
   }
 }
@@ -1390,10 +1461,20 @@ object ItemFact {
 object TupleFact {
 
   def accepts(elem: BackingNodes.Elem): Boolean = {
-    Fact.accepts(elem) && elem.attributeOption(ContextRefEName).isEmpty
+    val ancestorOrSelfENames: List[EName] = elem.ancestorsOrSelf.map(_.resolvedName).toList
+
+    accepts(elem, ancestorOrSelfENames)
   }
 
-  private[instance] def apply(elem: BackingNodes.Elem, childElems: immutable.IndexedSeq[XbrliElem]): TupleFact = {
-    new TupleFact(elem, childElems)
+  private[instance] def accepts(elem: BackingNodes.Elem, ancestorOrSelfENames: List[EName]): Boolean = {
+    Fact.accepts(elem, ancestorOrSelfENames) && elem.attributeOption(ContextRefEName).isEmpty
+  }
+
+  private[instance] def apply(
+    elem: BackingNodes.Elem,
+    ancestorOrSelfENames: List[EName],
+    childElems: immutable.IndexedSeq[XbrliElem]): TupleFact = {
+
+    new TupleFact(elem, ancestorOrSelfENames, childElems)
   }
 }
