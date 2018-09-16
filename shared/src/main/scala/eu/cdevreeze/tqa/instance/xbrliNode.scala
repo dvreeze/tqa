@@ -1380,14 +1380,19 @@ object XbrlInstance {
     ancestorOrSelfENames: List[EName],
     childElems: immutable.IndexedSeq[XbrliElem]): XbrlInstance = {
 
+    val (nonFacts, facts) = childElems.partition { e =>
+      e.resolvedName.namespaceUriOption.contains(XbrliNs) ||
+        e.resolvedName.namespaceUriOption.contains(LinkNs)
+    }
+
     val allContextsById: Map[String, XbrliContext] =
-      childElems.collect { case e: XbrliContext => e }.groupBy(_.id).mapValues(_.head)
+      nonFacts.collect { case e: XbrliContext => e }.groupBy(_.id).mapValues(_.head)
 
     val allUnitsById: Map[String, XbrliUnit] =
-      childElems.collect { case e: XbrliUnit => e }.groupBy(_.id).mapValues(_.head)
+      nonFacts.collect { case e: XbrliUnit => e }.groupBy(_.id).mapValues(_.head)
 
     val allFactsByEName: Map[EName, immutable.IndexedSeq[Fact]] =
-      childElems.flatMap(_.findAllElemsOrSelfOfType(classTag[Fact])).groupBy(_.resolvedName)
+      facts.flatMap(_.findAllElemsOrSelfOfType(classTag[Fact])).groupBy(_.resolvedName)
 
     new XbrlInstance(elem, ancestorOrSelfENames, childElems, allContextsById, allUnitsById, allFactsByEName)
   }
