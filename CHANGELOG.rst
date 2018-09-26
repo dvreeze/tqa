@@ -3,6 +3,168 @@ CHANGELOG
 =========
 
 
+0.8.6
+=====
+
+The main changes in this version, some of them breaking, are:
+
+* Enhanced query API for non-standard relationships (incoming, and relationship paths)
+* Changed ``XbrlInstance`` API, making it "more regular"
+* Class ``XbrliElem`` and its sub-types now carry more state, for fast fact recognition, regardless of the backing element implementation
+* Upgraded yaidom dependency to 1.9.0 (and upgraded some other dependencies as well)
+
+One of the things that this release tries to accomplish is that very large instances (> 100 MB, > 1000000 XML elements)
+must be feasible too. Yaidom 1.9.0 improved the Saxon "backing elements", and creation of XbrlInstance objects
+is now relatively fast regardless of whether these Saxon backing elements are used or not.
+
+Breaking changes compared to version 0.8.5 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method cache()com.google.common.cache.LoadingCache in class eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder has a different result type in current version, where it is com.github.benmanes.caffeine.cache.LoadingCache rather than com.google.common.cache.LoadingCache
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder.cache")
+* method this(com.google.common.cache.LoadingCache)Unit in class eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder's type is different in current version, where it is (com.github.benmanes.caffeine.cache.LoadingCache)Unit instead of (com.google.common.cache.LoadingCache)Unit
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder.this")
+* method createCache(eu.cdevreeze.tqa.docbuilder.DocumentBuilder,Int)com.google.common.cache.LoadingCache in object eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder has a different result type in current version, where it is com.github.benmanes.caffeine.cache.LoadingCache rather than com.google.common.cache.LoadingCache
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder.createCache")
+* method this(eu.cdevreeze.tqa.base.dom.TaxonomyBase,eu.cdevreeze.tqa.SubstitutionGroupMap,eu.cdevreeze.tqa.SubstitutionGroupMap,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.this")
+* abstract method findAllIncomingNonStandardRelationshipsOfType(eu.cdevreeze.tqa.XmlFragmentKey,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi.findAllIncomingNonStandardRelationshipsOfType")
+* abstract method findAllIncomingNonStandardRelationships(eu.cdevreeze.tqa.XmlFragmentKey)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi.findAllIncomingNonStandardRelationships")
+* abstract method filterIncomingUnrestrictedNonStandardRelationshipPaths(eu.cdevreeze.tqa.XmlFragmentKey,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi.filterIncomingUnrestrictedNonStandardRelationshipPaths")
+* abstract method filterOutgoingUnrestrictedNonStandardRelationshipPaths(eu.cdevreeze.tqa.XmlFragmentKey,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi.filterOutgoingUnrestrictedNonStandardRelationshipPaths")
+* abstract method filterIncomingNonStandardRelationships(eu.cdevreeze.tqa.XmlFragmentKey,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi.filterIncomingNonStandardRelationships")
+* abstract method filterIncomingNonStandardRelationshipsOfType(eu.cdevreeze.tqa.XmlFragmentKey,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerApi.filterIncomingNonStandardRelationshipsOfType")
+* abstract method nonStandardRelationshipsByTarget()scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerLike is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerLike.nonStandardRelationshipsByTarget")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Identifier does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Identifier.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Segment does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Segment.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.SchemaRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.SchemaRef.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.Period in object eu.cdevreeze.tqa.instance.Period does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Period.apply")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.InstantPeriod does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.InstantPeriod.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.ArcroleRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.ArcroleRef.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.NonNumericItemFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.NonNumericItemFact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Scenario does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Scenario.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.StandardLoc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.StandardLoc.this")
+* method isFactRelativePath(eu.cdevreeze.yaidom.core.Path)Boolean in object eu.cdevreeze.tqa.instance.Fact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Fact.isFactRelativePath")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.Fact in object eu.cdevreeze.tqa.instance.Fact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Fact.apply")
+* method relativePath()eu.cdevreeze.yaidom.core.Path in class eu.cdevreeze.tqa.instance.Fact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Fact.relativePath")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Fact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Fact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.TypedMember does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.TypedMember.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.StartDate does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.StartDate.this")
+* method relativePathOption(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem)scala.Option in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.relativePathOption")
+* method applyForLinkNamespace(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.XbrliElem in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.applyForLinkNamespace")
+* method applyForOtherNamespace(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.XbrliElem in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.applyForOtherNamespace")
+* method applyForXbrldiNamespace(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.XbrliElem in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.applyForXbrldiNamespace")
+* method xbrlInstanceRootElemPathOption(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem)scala.Option in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.xbrlInstanceRootElemPathOption")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.XbrliElem in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.apply")
+* method applyForXbrliNamespace(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.XbrliElem in object eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.applyForXbrliNamespace")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.FootnoteLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.FootnoteLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.LinkbaseRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.LinkbaseRef.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.FootnoteArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.FootnoteArc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.ItemFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.ItemFact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.NilNumericItemFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.NilNumericItemFact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.StartEndDatePeriod does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.StartEndDatePeriod.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.XbrliContext does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliContext.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.OtherXbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.OtherXbrliElem.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Footnote does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Footnote.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Period does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Period.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.TupleFact in object eu.cdevreeze.tqa.instance.TupleFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.TupleFact.apply")
+* method allTopLevelItemsByEName()scala.collection.immutable.Map in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allTopLevelItemsByEName")
+* method allTopLevelTuples()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allTopLevelTuples")
+* method allContextsById()scala.collection.immutable.Map in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allContextsById")
+* method allTopLevelTuplesByEName()scala.collection.immutable.Map in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allTopLevelTuplesByEName")
+* method allTopLevelItems()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allTopLevelItems")
+* method allTopLevelFactsByEName()scala.collection.immutable.Map in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allTopLevelFactsByEName")
+* method allUnitsById()scala.collection.immutable.Map in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allUnitsById")
+* method allUnits()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allUnits")
+* method allTopLevelFacts()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allTopLevelFacts")
+* method allContexts()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.allContexts")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.XbrlInstance does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrlInstance.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Forever does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Forever.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Divide does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Divide.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Entity does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Entity.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.NumericItemFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.NumericItemFact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.NonNilNonFractionNumericItemFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.NonNilNonFractionNumericItemFact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.ExplicitMember does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.ExplicitMember.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.RoleRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.RoleRef.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.ForeverPeriod does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.ForeverPeriod.this")
+* method relativePathOption()scala.Option in class eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.relativePathOption")
+* method xbrlInstanceRootElemPathOption()scala.Option in class eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.xbrlInstanceRootElemPathOption")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.XbrliElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliElem.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.TupleFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.TupleFact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.NonNilFractionItemFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.NonNilFractionItemFact.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.Instant does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.Instant.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.XbrliUnit does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.XbrliUnit.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.instance.EndDate does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.EndDate.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.instance.ItemFact in object eu.cdevreeze.tqa.instance.ItemFact does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.instance.ItemFact.apply")
+
+
 0.8.5
 =====
 
