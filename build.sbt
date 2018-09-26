@@ -84,7 +84,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
     // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.5",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.6",
 
     // It turns out that scalajs-jsjoda is far more complete than scalajs-java-time!
 
