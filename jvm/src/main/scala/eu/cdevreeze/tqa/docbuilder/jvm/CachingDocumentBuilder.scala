@@ -18,15 +18,15 @@ package eu.cdevreeze.tqa.docbuilder.jvm
 
 import java.net.URI
 
-import com.google.common.cache.CacheBuilder
-import com.google.common.cache.CacheLoader
-import com.google.common.cache.LoadingCache
+import com.github.benmanes.caffeine.cache.CacheLoader
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.LoadingCache
 
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 
 /**
- * DocumentBuilder using a Guava document cache. By all means, reuse the underlying document cache
+ * DocumentBuilder using a Caffeine document cache. By all means, reuse the underlying document cache
  * as much as possible.
  *
  * @author Chris de Vreeze
@@ -42,14 +42,14 @@ final class CachingDocumentBuilder[D <: BackingDocumentApi](
 object CachingDocumentBuilder {
 
   /**
-   * Factory method to create a Google Guava BackingDoc cache.
+   * Factory method to create a Caffeine BackingDoc cache.
    */
   def createCache[D <: BackingDocumentApi](
     wrappedDocBuilder: DocumentBuilder.Aux[D],
-    cacheSize:         Int): LoadingCache[URI, D] = {
+    cacheSize: Int): LoadingCache[URI, D] = {
 
-    val cacheBuilder: CacheBuilder[URI, D] =
-      CacheBuilder.newBuilder().maximumSize(cacheSize).recordStats().asInstanceOf[CacheBuilder[URI, D]]
+    val cacheBuilder: Caffeine[URI, D] =
+      Caffeine.newBuilder().maximumSize(cacheSize).recordStats().asInstanceOf[Caffeine[URI, D]]
 
     val cacheLoader = new CacheLoader[URI, D] {
 

@@ -70,8 +70,6 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2",
 
-    libraryDependencies += "com.google.guava" % "guava" % "25.1-jre",
-
     libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.9.0",
 
     libraryDependencies += "org.scalameta" %%% "scalameta" % "3.7.4" % "test",
