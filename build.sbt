@@ -38,7 +38,7 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.8.1",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.9.0",
 
   libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.0",
 
@@ -64,19 +64,21 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-10",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-14",
 
-    libraryDependencies += "com.google.guava" % "guava" % "25.1-jre",
+    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.6.2",
 
     libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2",
 
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.8.0",
+    libraryDependencies += "com.google.guava" % "guava" % "25.1-jre",
 
-    libraryDependencies += "org.scalameta" %%% "scalameta" % "3.6.0" % "test",
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.9.0",
+
+    libraryDependencies += "org.scalameta" %%% "scalameta" % "3.7.4" % "test",
 
     libraryDependencies += "junit" % "junit" % "4.12" % "test",
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.3")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.5")
   )
   .jsSettings(
     // Do we need this jsEnv?
@@ -98,7 +100,7 @@ lazy val tqa = crossProject.crossType(CrossType.Full).in(file("."))
 
     parallelExecution in Test := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.3")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.5")
   )
 
 lazy val tqaJVM = tqa.jvm

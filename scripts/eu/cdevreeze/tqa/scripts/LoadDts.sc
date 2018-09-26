@@ -4,7 +4,7 @@
 
 // Taking TQA version 0.8.5
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.8.5`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.8.6-SNAPSHOT`
 
 // Imports that (must) remain available after this initialization script
 
