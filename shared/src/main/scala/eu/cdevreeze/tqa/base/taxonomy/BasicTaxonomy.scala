@@ -151,23 +151,21 @@ final class BasicTaxonomy private (
    * to the subset BasicTaxonomy.
    */
   def filteringDocumentUris(docUris: Set[URI]): BasicTaxonomy = {
-    new BasicTaxonomy(
+    val filteredRelationships: immutable.IndexedSeq[Relationship] =
+      relationships.groupBy(_.docUri).filterKeys(docUris).values.toIndexedSeq.flatten
+
+    BasicTaxonomy.build(
       taxonomyBase.filteringDocumentUris(docUris),
       netSubstitutionGroupMap,
-      netSubstitutionGroupMap,
-      relationships.filter(rel => docUris.contains(rel.docUri)),
-      conceptDeclarationsByEName.filter(kv => docUris.contains(kv._2.globalElementDeclaration.docUri)),
-      standardRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
-      nonStandardRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
-      nonStandardRelationshipsByTarget.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
-      interConceptRelationshipsBySource.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty),
-      interConceptRelationshipsByTarget.mapValues(_.filter(rel => docUris.contains(rel.docUri))).filter(_._2.nonEmpty))
+      filteredRelationships)
   }
 
   /**
    * Creates a "sub-taxonomy" in which only relationships passing the filter occur.
    * Schema and linkbase DOM content remains the same. Only relationships are filtered.
    * It can be used to make query methods (not taking an EName) cheaper.
+   *
+   * This is an expensive method.
    */
   def filteringRelationships(p: Relationship => Boolean): BasicTaxonomy = {
     new BasicTaxonomy(
@@ -258,8 +256,7 @@ object BasicTaxonomy {
     extraSubstitutionGroupMap: SubstitutionGroupMap,
     relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
-    val netSubstitutionGroupMap =
-      taxonomyBase.computeDerivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)
+    val netSubstitutionGroupMap = taxonomyBase.derivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)
 
     val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
 
