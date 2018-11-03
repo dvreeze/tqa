@@ -164,21 +164,12 @@ final class BasicTaxonomy private (
    * Creates a "sub-taxonomy" in which only relationships passing the filter occur.
    * Schema and linkbase DOM content remains the same. Only relationships are filtered.
    * It can be used to make query methods (not taking an EName) cheaper.
-   *
-   * This is an expensive method.
    */
   def filteringRelationships(p: Relationship => Boolean): BasicTaxonomy = {
-    new BasicTaxonomy(
+    BasicTaxonomy.build(
       taxonomyBase,
       extraSubstitutionGroupMap,
-      netSubstitutionGroupMap,
-      relationships.filter(p),
-      conceptDeclarationsByEName,
-      standardRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
-      nonStandardRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
-      nonStandardRelationshipsByTarget.mapValues(_.filter(p)).filter(_._2.nonEmpty),
-      interConceptRelationshipsBySource.mapValues(_.filter(p)).filter(_._2.nonEmpty),
-      interConceptRelationshipsByTarget.mapValues(_.filter(p)).filter(_._2.nonEmpty))
+      relationships.filter(p))
   }
 
   /**
