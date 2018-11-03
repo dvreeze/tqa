@@ -105,7 +105,12 @@ final class DefaultDtsCollector extends AbstractDtsCollector {
   }
 
   private def removeFragment(uri: URI): URI = {
-    new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
+    if (uri.getFragment == null) {
+      // No need to create a new URI in this case
+      uri
+    } else {
+      new URI(uri.getScheme, uri.getSchemeSpecificPart, null)
+    }
   }
 
   private val EmptyUri = URI.create("")
