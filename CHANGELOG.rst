@@ -3,6 +3,26 @@ CHANGELOG
 =========
 
 
+0.8.7
+=====
+
+This release is about trying to make creation of taxonomies and especially "sub-taxonomies" (like DTSes as subsets from
+"universe taxonomies") faster. The main changes in this version, some of them breaking, are:
+
+* Attempted to optimize creation of a ``TaxonomyBase``
+* Attempted to optimize method ``TaxonomyBase.filteringDocumentUris``
+* Class ``TaxonomyBase`` now stores the "derived substitution group map", to avoid re-computation of this data
+* Attempted to optimize methods ``BasicTaxonomy.filteringDocumentUris`` and ``BasicTaxonomy.filteringRelationships``
+* Indirectly method ``BasicTaxonomy.filteringDocumentUris`` should benefit from the optimizations in method ``TaxonomyBase.filteringDocumentUris``
+
+Breaking changes compared to version 0.8.6 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method computeDerivedSubstitutionGroupMap()eu.cdevreeze.tqa.SubstitutionGroupMap in class eu.cdevreeze.tqa.base.dom.TaxonomyBase does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyBase.computeDerivedSubstitutionGroupMap")
+* method this(scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.dom.TaxonomyBase does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyBase.this")
+
+
 0.8.6
 =====
 
