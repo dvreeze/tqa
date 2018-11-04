@@ -10,7 +10,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 // Note that 2.12.5 does not work for Scalatest in sbt (https://github.com/scalatest/scalatest/issues/1342).
 
-val scalaVer = "2.12.6"
+val scalaVer = "2.12.7"
 
 // I wanted to cross-build for Scala 2.13.0-M4 as well, but then miss library scalajs-jsjoda-as-java-time
 
@@ -43,7 +43,7 @@ lazy val commonSettings = Seq(
 
   libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.9.0",
 
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.0",
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.1",
 
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.5",
 
@@ -77,11 +77,11 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.9.0",
 
-    libraryDependencies += "org.scalameta" %%% "scalameta" % "3.7.4" % "test",
+    libraryDependencies += "org.scalameta" %%% "scalameta" % "4.0.0" % "test",
 
     libraryDependencies += "junit" % "junit" % "4.12" % "test",
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.5")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.6")
   )
   .jsSettings(
     // Do we need this jsEnv?
@@ -103,7 +103,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     parallelExecution in Test := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.5")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.6")
   )
 
 lazy val tqaJVM = tqa.jvm
