@@ -126,15 +126,17 @@ object XPointer {
    * Parses the given string into an XPointer, and throws an exception if parsing fails.
    */
   def parse(s: String): XPointer = s match {
-    case s if !s.startsWith("element(") => ShorthandPointer(s)
+    case s if !s.startsWith("element(") =>
+      ShorthandPointer(s)
     case s if s.endsWith(")") && s.indexOf('/') < 0 =>
       val data = parseElementSchemeData(s)
       IdPointer(data)
     case s if s.endsWith(")") =>
       val data = parseElementSchemeData(s)
 
-      if (data.startsWith("/")) ChildSequencePointer(data.substring(1).split('/').toList.map(_.toInt))
-      else {
+      if (data.startsWith("/")) {
+        ChildSequencePointer(data.substring(1).split('/').toList.map(_.toInt))
+      } else {
         val parts = data.split('/').toList
         IdChildSequencePointer(parts.head, parts.tail.map(_.toInt))
       }
@@ -147,8 +149,9 @@ object XPointer {
   def parseXPointers(s: String): List[XPointer] = {
     val idx = s.indexOf(")element(")
 
-    if (idx < 0) List(parse(s))
-    else {
+    if (idx < 0) {
+      List(parse(s))
+    } else {
       // Recursive call
       parse(s.substring(0, idx + 1)) :: parseXPointers(s.substring(idx + 1))
     } ensuring { result =>

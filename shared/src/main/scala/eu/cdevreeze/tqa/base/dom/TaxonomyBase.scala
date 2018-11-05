@@ -86,7 +86,7 @@ final class TaxonomyBase private (
     require(elemUri.isAbsolute, s"URI '${elemUri}' is not absolute")
 
     if (elemUri.getFragment == null) {
-      rootElemUriMap.get(elemUri)
+      taxonomyDocUriMap.get(elemUri).map(_.documentElement)
     } else {
       val xpointers = XPointer.parseXPointers(elemUri.getFragment)
 
@@ -95,7 +95,7 @@ final class TaxonomyBase private (
           // Do a fast map lookup on the entire URI with fragment
           elemUriMap.get(elemUri)
         case _ =>
-          val rootElemOption = rootElemUriMap.get(removeFragment(elemUri))
+          val rootElemOption = taxonomyDocUriMap.get(removeFragment(elemUri)).map(_.documentElement)
           rootElemOption.flatMap(e => XPointer.findElem(e, xpointers))
       }
     }
