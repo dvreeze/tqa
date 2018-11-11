@@ -17,10 +17,10 @@
 package eu.cdevreeze.tqa
 
 /**
- * Aspects and aspect models.
+ * Formula and table support.
  *
- * This namespace is still experimental!
+ * This namespace is still experimental, and is expected to change a lot!
  *
  * @author Chris de Vreeze
  */
-package object aspect
+package object extension

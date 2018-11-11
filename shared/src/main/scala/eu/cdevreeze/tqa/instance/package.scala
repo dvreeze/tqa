@@ -19,6 +19,9 @@ package eu.cdevreeze.tqa
 /**
  * Model of XBRL instances, as "yaidom dialect".
  *
+ * This namespace is still experimental, but is not expected to change a lot. It is expected, however, that
+ * OIM support will be added, with wrappers for XML-based XBRL instances (that conform to OIM).
+ *
  * @author Chris de Vreeze
  */
 package object instance

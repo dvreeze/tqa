@@ -17,10 +17,11 @@
 package eu.cdevreeze.tqa
 
 /**
- * Aspects and aspect models.
+ * The base taxonomy querying support, with knowledge about XBRL Core and Dimensions.
  *
- * This namespace is still experimental!
+ * This namespace is pretty much stable in its API, in that most of the API is expected to remain backward
+ * compatible.
  *
  * @author Chris de Vreeze
  */
-package object aspect
+package object base
