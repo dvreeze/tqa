@@ -51,6 +51,7 @@ object PartialUriConverters {
    * as file protocol URI, for sub-directory "www.example.com" of the given root directory.
    */
   // scalastyle:off null
+  @deprecated(message = "This method has too little control over URIs to convert. Use 'fromCatalog' instead.", since = "0.8.8")
   def fromLocalMirrorRootDirectory(rootDir: File): PartialUriConverter = {
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
     require(rootDir.isAbsolute, s"Not an absolute path: $rootDir")
@@ -82,6 +83,7 @@ object PartialUriConverters {
    * used to specify the relative path of the local mirror.
    */
   // scalastyle:off null
+  @deprecated(message = "This method has too little control over URIs to convert. Use 'fromCatalog' instead.", since = "0.8.8")
   def fromLocalMirrorInZipFile(parentPathOption: Option[URI]): PartialUriConverter = {
     require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
 

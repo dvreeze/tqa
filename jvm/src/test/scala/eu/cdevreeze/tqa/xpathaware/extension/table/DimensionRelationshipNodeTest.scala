@@ -1005,7 +1005,14 @@ class DimensionRelationshipNodeTest extends FunSuite {
     val otherRootDir = new File(classOf[DimensionRelationshipNodeTest].getResource("/xbrl-and-w3").toURI)
     val zipFile = new File(classOf[DimensionRelationshipNodeTest].getResource("/table-linkbase-conf-2015-08-12.zip").toURI)
 
-    val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromLocalMirrorRootDirectory(otherRootDir)
+    val xbrlCatalog =
+      SimpleCatalog(
+        None,
+        Vector(
+          SimpleCatalog.UriRewrite(None, "http://www.xbrl.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.xbrl.org/"),
+          SimpleCatalog.UriRewrite(None, "http://www.w3.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.w3.org/")))
+
+    val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromCatalog(xbrlCatalog)
 
     val catalog =
       SimpleCatalog(

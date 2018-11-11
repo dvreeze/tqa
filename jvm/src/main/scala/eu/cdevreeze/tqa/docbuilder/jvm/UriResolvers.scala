@@ -110,28 +110,109 @@ object UriResolvers {
   /**
    * Returns `fromUriConverter(UriConverters.fromCatalog(catalog))`.
    */
+  @deprecated(message = "Use method 'fromCatalogWithFallback' instead", since = "0.8.8")
   def fromCatalog(catalog: SimpleCatalog): UriResolver = {
     fromUriConverter(UriConverters.fromCatalog(catalog))
   }
 
   /**
-   * Returns `fromUriConverter(UriConverters.fromLocalMirrorRootDirectory(rootDir))`.
+   * Returns `fromUriConverter(UriConverters.fromCatalogFallingBackToIdentity(catalog))`.
+   */
+  def fromCatalogWithFallback(catalog: SimpleCatalog): UriResolver = {
+    fromUriConverter(UriConverters.fromCatalogFallingBackToIdentity(catalog))
+  }
+
+  /**
+   * Returns `fromUriConverter(UriConverters.fromCatalogWithoutFallback(catalog))`.
+   */
+  def fromCatalogWithoutFallback(catalog: SimpleCatalog): UriResolver = {
+    fromUriConverter(UriConverters.fromCatalogWithoutFallback(catalog))
+  }
+
+  /**
+   * Returns an URI resolver that expects all files to be found in a local mirror, with the host name
+   * of the URI mirrored under the given root directory. The protocol (HTTP or HTTPS) is not represented in
+   * the local mirror.
    */
   def fromLocalMirrorRootDirectory(rootDir: File): UriResolver = {
-    fromUriConverter(UriConverters.fromLocalMirrorRootDirectory(rootDir))
+    require(rootDir.isDirectory, s"Not a directory: $rootDir")
+    require(rootDir.isAbsolute, s"Not an absolute path: $rootDir")
+
+    def convertUri(uri: URI): URI = {
+      require(uri.getHost != null, s"Missing host name in URI '$uri'")
+      require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
+
+      val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
+      val rewritePrefix = returnWithTrailingSlash((new File(rootDir, uri.getHost)).toURI)
+
+      val catalog =
+        SimpleCatalog(
+          None,
+          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+
+      val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
+      mappedUri
+    }
+
+    fromUriConverter(convertUri)
   }
 
   /**
    * Returns `forZipFile(zipFile, UriConverters.fromCatalog(catalog))`.
    */
+  @deprecated(message = "Use method 'forZipFileUsingCatalogWithFallback' instead", since = "0.8.8")
   def forZipFileUsingCatalog(zipFile: ZipFile, catalog: SimpleCatalog): UriResolver = {
     forZipFile(zipFile, UriConverters.fromCatalog(catalog))
   }
 
   /**
-   * Returns `forZipFile(zipFile, UriConverters.fromLocalMirrorInZipFile(parentPathOption))`.
+   * Returns an URI resolver that expects all files to be found in a local mirror in a ZIP file, with the host name
+   * of the URI mirrored under the given optional parent directory. The protocol (HTTP or HTTPS) is not represented in
+   * the local mirror.
    */
   def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
-    forZipFile(zipFile, UriConverters.fromLocalMirrorInZipFile(parentPathOption))
+    require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
+
+    def convertUri(uri: URI): URI = {
+      require(uri.getHost != null, s"Missing host name in URI '$uri'")
+      require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
+
+      val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
+
+      val hostAsRelativeUri = URI.create(uri.getHost + "/")
+
+      val rewritePrefix =
+        parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri)).
+          getOrElse(hostAsRelativeUri).toString.ensuring(_.endsWith("/"))
+
+      val catalog =
+        SimpleCatalog(
+          None,
+          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+
+      val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
+      mappedUri
+    }
+
+    forZipFile(zipFile, convertUri)
+  }
+
+  /**
+   * Returns `forZipFile(zipFile, UriConverters.fromCatalogFallingBackToIdentity(catalog))`.
+   */
+  def forZipFileUsingCatalogWithFallback(zipFile: ZipFile, catalog: SimpleCatalog): UriResolver = {
+    forZipFile(zipFile, UriConverters.fromCatalogFallingBackToIdentity(catalog))
+  }
+
+  /**
+   * Returns `forZipFile(zipFile, UriConverters.fromCatalogWithoutFallback(catalog))`.
+   */
+  def forZipFileUsingCatalogWithoutFallback(zipFile: ZipFile, catalog: SimpleCatalog): UriResolver = {
+    forZipFile(zipFile, UriConverters.fromCatalogWithoutFallback(catalog))
+  }
+
+  private def returnWithTrailingSlash(uri: URI): String = {
+    val s = uri.toString
+    if (s.endsWith("/")) s else s + "/"
   }
 }

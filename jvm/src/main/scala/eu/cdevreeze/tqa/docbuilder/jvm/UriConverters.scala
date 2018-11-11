@@ -82,6 +82,7 @@ object UriConverters {
   /**
    * Like `PartialUriConverters.fromLocalMirrorRootDirectory(rootDir)`, but otherwise the identity function.
    */
+  @deprecated(message = "Use method 'fromCatalogFallingBackToIdentity' instead", since = "0.8.8")
   def fromLocalMirrorRootDirectory(rootDir: File): UriConverter = {
     fromPartialUriConvertersFallingBackToIdentity(
       Vector(PartialUriConverters.fromLocalMirrorRootDirectory(rootDir)))
@@ -90,6 +91,7 @@ object UriConverters {
   /**
    * Like `PartialUriConverters.fromLocalMirrorInZipFile`, but otherwise the identity function.
    */
+  @deprecated(message = "Use method 'fromCatalogFallingBackToIdentity' instead", since = "0.8.8")
   def fromLocalMirrorInZipFile(parentPathOption: Option[URI]): UriConverter = {
     fromPartialUriConvertersFallingBackToIdentity(
       Vector(PartialUriConverters.fromLocalMirrorInZipFile(parentPathOption)))
@@ -98,8 +100,24 @@ object UriConverters {
   /**
    * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise the identity function.
    */
+  @deprecated(message = "Use method 'fromCatalogFallingBackToIdentity' instead", since = "0.8.8")
   def fromCatalog(catalog: SimpleCatalog): UriConverter = {
+    fromCatalogFallingBackToIdentity(catalog)
+  }
+
+  /**
+   * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise the identity function.
+   */
+  def fromCatalogFallingBackToIdentity(catalog: SimpleCatalog): UriConverter = {
     fromPartialUriConvertersFallingBackToIdentity(
+      Vector(PartialUriConverters.fromCatalog(catalog)))
+  }
+
+  /**
+   * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise throwing an exception.
+   */
+  def fromCatalogWithoutFallback(catalog: SimpleCatalog): UriConverter = {
+    fromPartialUriConvertersWithoutFallback(
       Vector(PartialUriConverters.fromCatalog(catalog)))
   }
 }

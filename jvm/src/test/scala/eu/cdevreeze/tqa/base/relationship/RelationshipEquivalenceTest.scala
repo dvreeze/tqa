@@ -701,7 +701,7 @@ class RelationshipEquivalenceTest extends FunSuite {
         Vector(
           SimpleCatalog.UriRewrite(None, "file:///conf-suite/", "XBRL-CONF-2014-12-10/")))
 
-    val uriResolver = UriResolvers.forZipFileUsingCatalog(zipFile, catalog)
+    val uriResolver = UriResolvers.forZipFileUsingCatalogWithFallback(zipFile, catalog)
 
     IndexedDocumentBuilder(docParser, uriResolver)
   }

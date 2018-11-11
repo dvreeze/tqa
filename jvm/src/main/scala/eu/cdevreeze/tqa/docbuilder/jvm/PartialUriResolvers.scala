@@ -106,6 +106,7 @@ object PartialUriResolvers {
   /**
    * Returns `fromPartialUriConverter(PartialUriConverters.fromLocalMirrorRootDirectory(rootDir))`.
    */
+  @deprecated(message = "This method has too little control over URIs to convert. Use 'fromCatalog' instead.", since = "0.8.8")
   def fromLocalMirrorRootDirectory(rootDir: File): PartialUriResolver = {
     fromPartialUriConverter(PartialUriConverters.fromLocalMirrorRootDirectory(rootDir))
   }
@@ -120,6 +121,7 @@ object PartialUriResolvers {
   /**
    * Returns `forZipFile(zipFile, PartialUriConverters.fromLocalMirrorInZipFile(parentPathOption))`.
    */
+  @deprecated(message = "This method has too little control over URIs to convert. Use 'forZipFileUsingCatalog' instead.", since = "0.8.8")
   def forZipFileContainingLocalMirror(
     zipFile: ZipFile,
     parentPathOption: Option[URI]): PartialUriResolver = {

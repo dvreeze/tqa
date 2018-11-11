@@ -800,7 +800,14 @@ class DimensionalRelationshipSourceTest extends FunSuite {
     val otherRootDir = new File(classOf[DimensionalRelationshipSourceTest].getResource("/xbrl-and-w3").toURI)
     val zipFile = new File(classOf[DimensionalRelationshipSourceTest].getResource("/xdt-conf-cr4-2009-10-06.zip").toURI)
 
-    val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromLocalMirrorRootDirectory(otherRootDir)
+    val xbrlCatalog =
+      SimpleCatalog(
+        None,
+        Vector(
+          SimpleCatalog.UriRewrite(None, "http://www.xbrl.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.xbrl.org/"),
+          SimpleCatalog.UriRewrite(None, "http://www.w3.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.w3.org/")))
+
+    val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromCatalog(xbrlCatalog)
 
     val catalog =
       SimpleCatalog(

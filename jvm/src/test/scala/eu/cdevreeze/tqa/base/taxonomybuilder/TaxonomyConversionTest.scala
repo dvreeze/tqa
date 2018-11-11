@@ -470,7 +470,7 @@ class TaxonomyConversionTest extends FunSuite {
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      UriResolvers.forZipFileUsingCatalog(new ZipFile(zipFile), catalog))
+      UriResolvers.forZipFileUsingCatalogWithFallback(new ZipFile(zipFile), catalog))
   }
 
   private def taxonomyBuilder(zipFileUri: URI): TaxonomyBuilder = {
