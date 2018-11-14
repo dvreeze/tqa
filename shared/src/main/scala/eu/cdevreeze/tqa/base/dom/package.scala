@@ -98,4 +98,17 @@ package eu.cdevreeze.tqa.base
  *
  * @author Chris de Vreeze
  */
-package object dom
+package object dom {
+
+  type XsdElem = ElemInXsdNamespace
+
+  val XsdElem = ElemInXsdNamespace
+
+  type LinkElem = ElemInLinkNamespace
+
+  val LinkElem = ElemInLinkNamespace
+
+  type OtherXsdElem = OtherElemInXsdNamespace
+
+  type OtherLinkElem = OtherElemInLinkNamespace
+}

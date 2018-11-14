@@ -28,7 +28,7 @@ import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.RefEName
 import eu.cdevreeze.tqa.ENames.XsElementEName
 import eu.cdevreeze.tqa.base.dom.ConceptLabelResource
-import eu.cdevreeze.tqa.base.dom.OtherXsdElem
+import eu.cdevreeze.tqa.base.dom.OtherElemInXsdNamespace
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
@@ -102,7 +102,7 @@ class ExtractUnknownRelationshipsTest extends FunSuite {
     }
 
     assertResult(true) {
-      unknownRelationships.head.sourceElem.isInstanceOf[OtherXsdElem]
+      unknownRelationships.head.sourceElem.isInstanceOf[OtherElemInXsdNamespace]
     }
     assertResult(XsElementEName) {
       unknownRelationships.head.sourceElem.resolvedName
