@@ -98,7 +98,7 @@ final case class TaxonomyCommentNode(text: String) extends CanBeTaxonomyDocument
  * content, the resulting object may be something like `OtherXsdElem`, `OtherLinkElem` or `OtherNonXLinkElem`. For example,
  * an element named xs:element with both a name and ref attribute cannot be both an element declaration and element
  * reference, and will be instantiated as an `OtherXsdElem`. A non-standard XLink arc, whether a known generic arc or some
- * unknown and potentially erroneous arc, becomes a `NonStandardArc`, etc.
+ * unknown and potentially erroneous arc, becomes an instance of `NonStandardArc` or one of its sub-types, etc.
  *
  * Some '''instance methods''' may fail, however, if taxonomy content is invalid, and if it is '''schema-invalid''' in particular.
  * All instance methods must not fail on schema-valid content, unless mentioned otherwise.
@@ -1309,40 +1309,75 @@ final class ConceptReferenceResource private[dom] (
  * Note that in general it is very hard to determine if a non-standard link is a generic link by looking
  * at the link element itself, because we need substitution group (inheritance) context.
  */
-final class NonStandardExtendedLink private[dom] (
+sealed abstract class NonStandardExtendedLink private[dom] (
   backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ExtendedLink
 
 /**
+ * Non-standard extended link that is not in one of the known namespaces.
+ */
+final class OtherNonStandardExtendedLink private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardExtendedLink(backingElem, childElems)
+
+/**
  * Non-standard simple link, so an XLink simple link that is not a standard simple link. Rarely, if ever, encountered in practice.
  */
-final class NonStandardSimpleLink private[dom] (
+sealed abstract class NonStandardSimpleLink private[dom] (
   backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with SimpleLink
+
+/**
+ * Non-standard simple link that is not in one of the known namespaces.
+ */
+final class OtherNonStandardSimpleLink private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardSimpleLink(backingElem, childElems)
 
 /**
  * Non-standard arc, so an XLink arc that is not a standard arc. Typically it is a generic arc.
  * Some well-known formula/table-related arcs also fall into this category. Finally, unknown (and
  * possibly incorrect) arcs also fall into this category.
  */
-final class NonStandardArc private[dom] (
+sealed abstract class NonStandardArc private[dom] (
   backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkArc
+
+/**
+ * Non-standard XLink arc that is not in one of the known namespaces.
+ */
+final class OtherNonStandardArc private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardArc(backingElem, childElems)
 
 /**
  * Non-standard resource, so an XLink resource that is not a standard resource. Typically it is a generic label or generic reference.
  * Formula/table-related XLink resources also fall into this category.
  */
-final class NonStandardResource private[dom] (
+sealed abstract class NonStandardResource private[dom] (
   backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkResource
 
 /**
+ * Non-standard XLink resource that is not in one of the known namespaces.
+ */
+final class OtherNonStandardResource private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardResource(backingElem, childElems)
+
+/**
  * Non-standard locator, so an XLink locator that is not a standard locator. Rarely, if ever, encountered in practice.
  */
-final class NonStandardLocator private[dom] (
+sealed abstract class NonStandardLocator private[dom] (
   backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkLocator
+
+/**
+ * Non-standard XLink locator that is not in one of the known namespaces.
+ */
+final class OtherNonStandardLocator private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardLocator(backingElem, childElems)
 
 // Known simple links etc.
 
@@ -1472,7 +1507,7 @@ final class OtherLinkElem private[dom] (
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with LinkElem
 
 /**
- * Any element that is neither an `XsdElem` nor a `LinkElem`, and that is also not recognized as a non-standard link,
+ * Any element that is not in one of the "known" namespaces, and that is also not recognized as a non-standard link,
  * non-standard arc or non-standard resource. It may still be valid taxonomy content, but even in taxonomies with XBRL formulas
  * or XBRL tables most non-standard linkbase content is still XLink arc or resource content, and therefore does not fall in
  * this `OtherNonXLinkElem` category.
@@ -1506,12 +1541,19 @@ object TaxonomyElem {
     apply(backingElem, childElems)
   }
 
+  /**
+   * Returns the namespaces for which type-safe DOM elements have been modeled as `TaxonomyElem` sub-types.
+   */
+  def knownNamespaces: Set[String] = {
+    Set(XsNamespace, LinkNamespace)
+  }
+
   private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyElem = {
     backingElem.resolvedName.namespaceUriOption match {
       case Some(XsNamespace) => XsdElem(backingElem, childElems)
       case Some(LinkNamespace) => LinkElem(backingElem, childElems)
       case _ =>
-        // Elements not in the "xs" and "link" namespaces, but that may still be XLink elements.
+        // Elements not in one of the "known" namespaces, but that may still be XLink elements.
         // Note that a NonStandardArc may be a known generic arc, or an unknown or even incorrect arc.
 
         // Also note that if by the element name we know that the element must be an arc, but if the
@@ -1519,11 +1561,11 @@ object TaxonomyElem {
         // Analogous remarks apply to extended links and XLink resources.
 
         backingElem.attributeOption(ENames.XLinkTypeEName) match {
-          case Some("extended") => new NonStandardExtendedLink(backingElem, childElems)
-          case Some("simple") => new NonStandardSimpleLink(backingElem, childElems)
-          case Some("arc") => new NonStandardArc(backingElem, childElems)
-          case Some("resource") => new NonStandardResource(backingElem, childElems)
-          case Some("locator") => new NonStandardLocator(backingElem, childElems)
+          case Some("extended") => new OtherNonStandardExtendedLink(backingElem, childElems)
+          case Some("simple") => new OtherNonStandardSimpleLink(backingElem, childElems)
+          case Some("arc") => new OtherNonStandardArc(backingElem, childElems)
+          case Some("resource") => new OtherNonStandardResource(backingElem, childElems)
+          case Some("locator") => new OtherNonStandardLocator(backingElem, childElems)
           case _ => new OtherNonXLinkElem(backingElem, childElems)
         }
     }
