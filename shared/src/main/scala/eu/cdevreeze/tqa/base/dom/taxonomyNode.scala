@@ -1632,12 +1632,18 @@ object ElemInXsdNamespace {
 
     backingElem.resolvedName match {
       case ENames.XsSchemaEName => new XsdSchema(backingElem, childElems)
-      case ENames.XsElementEName => ElementDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
-      case ENames.XsAttributeEName => AttributeDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
-      case ENames.XsSimpleTypeEName => SimpleTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
-      case ENames.XsComplexTypeEName => ComplexTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
-      case ENames.XsGroupEName => ModelGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
-      case ENames.XsAttributeGroupEName => AttributeGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+      case ENames.XsElementEName =>
+        ElementDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+      case ENames.XsAttributeEName =>
+        AttributeDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+      case ENames.XsSimpleTypeEName =>
+        SimpleTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+      case ENames.XsComplexTypeEName =>
+        ComplexTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+      case ENames.XsGroupEName =>
+        ModelGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+      case ENames.XsAttributeGroupEName =>
+        AttributeGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
       case ENames.XsSequenceEName => new SequenceModelGroup(backingElem, childElems)
       case ENames.XsChoiceEName => new ChoiceModelGroup(backingElem, childElems)
       case ENames.XsAllEName => new AllModelGroup(backingElem, childElems)
