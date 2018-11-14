@@ -22,7 +22,9 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.Namespaces.LabelNamespace
 import eu.cdevreeze.tqa.Namespaces.LinkNamespace
+import eu.cdevreeze.tqa.Namespaces.ReferenceNamespace
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
 import eu.cdevreeze.tqa.SubstitutionGroupMap
@@ -524,7 +526,7 @@ sealed trait SimpleLink extends XLinkLink with xlink.SimpleLink {
   }
 }
 
-// Schema content or linkbase content.
+// Schema content or linkbase content, or any element in one of the other known namespaces.
 
 /**
  * Element in the XML Schema namespace ("http://www.w3.org/2001/XMLSchema").
@@ -544,6 +546,16 @@ sealed trait ElemInXsdNamespace extends TaxonomyElem {
  * Element in the link namespace ("http://www.xbrl.org/2003/linkbase").
  */
 sealed trait ElemInLinkNamespace extends TaxonomyElem
+
+/**
+ * Element in the label namespace ("http://xbrl.org/2008/label").
+ */
+sealed trait ElemInLabelNamespace extends TaxonomyElem
+
+/**
+ * Element in the reference namespace ("http://xbrl.org/2008/reference").
+ */
+sealed trait ElemInReferenceNamespace extends TaxonomyElem
 
 // The "capabilities" of schema content.
 
@@ -1359,6 +1371,20 @@ sealed abstract class NonStandardResource private[dom] (
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkResource
 
 /**
+ * A label:label element. Not any element in that substitution group, but only a label:label element.
+ */
+final class LabelInLabelNamespace private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardResource(backingElem, childElems) with ElemInLabelNamespace
+
+/**
+ * A reference:reference element. Not any element in that substitution group, but only a reference:reference element.
+ */
+final class ReferenceInReferenceNamespace private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardResource(backingElem, childElems) with ElemInReferenceNamespace
+
+/**
  * Non-standard XLink resource that is not in one of the known namespaces.
  */
 final class OtherNonStandardResource private[dom] (
@@ -1507,6 +1533,22 @@ final class OtherElemInLinkNamespace private[dom] (
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace
 
 /**
+ * Any `ElemInLabelNamespace` not recognized as an instance of one of the other concrete `ElemInLabelNamespace` sub-types. This means that either
+ * this is valid linkbase content not modeled in the `ElemInLabelNamespace` sub-type hierarchy, or it is syntactically incorrect.
+ */
+final class OtherElemInLabelNamespace private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLabelNamespace
+
+/**
+ * Any `ElemInReferenceNamespace` not recognized as an instance of one of the other concrete `ElemInReferenceNamespace` sub-types. This means that either
+ * this is valid linkbase content not modeled in the `ElemInReferenceNamespace` sub-type hierarchy, or it is syntactically incorrect.
+ */
+final class OtherElemInReferenceNamespace private[dom] (
+  backingElem: BackingNodes.Elem,
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInReferenceNamespace
+
+/**
  * Any element that is not in one of the "known" namespaces, and that is also not recognized as a non-standard link,
  * non-standard arc or non-standard resource. It may still be valid taxonomy content, but even in taxonomies with XBRL formulas
  * or XBRL tables most non-standard linkbase content is still XLink arc or resource content, and therefore does not fall in
@@ -1545,13 +1587,15 @@ object TaxonomyElem {
    * Returns the namespaces for which type-safe DOM elements have been modeled as `TaxonomyElem` sub-types.
    */
   def knownNamespaces: Set[String] = {
-    Set(XsNamespace, LinkNamespace)
+    Set(XsNamespace, LinkNamespace, LabelNamespace, ReferenceNamespace)
   }
 
   private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyElem = {
     backingElem.resolvedName.namespaceUriOption match {
       case Some(XsNamespace) => ElemInXsdNamespace(backingElem, childElems)
       case Some(LinkNamespace) => ElemInLinkNamespace(backingElem, childElems)
+      case Some(LabelNamespace) => ElemInLabelNamespace(backingElem, childElems)
+      case Some(ReferenceNamespace) => ElemInReferenceNamespace(backingElem, childElems)
       case _ =>
         // Elements not in one of the "known" namespaces, but that may still be XLink elements.
         // Note that a NonStandardArc may be a known generic arc, or an unknown or even incorrect arc.
@@ -1689,6 +1733,30 @@ object ElemInLinkNamespace {
       case ENames.LinkDefinitionEName => new Definition(backingElem, childElems)
       case ENames.LinkUsedOnEName => new UsedOn(backingElem, childElems)
       case _ => new OtherElemInLinkNamespace(backingElem, childElems)
+    }
+  }
+}
+
+object ElemInLabelNamespace {
+
+  private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInLabelNamespace = {
+    require(backingElem.resolvedName.namespaceUriOption.contains(LabelNamespace))
+
+    backingElem.resolvedName match {
+      case ENames.LabelLabelEName => new LabelInLabelNamespace(backingElem, childElems)
+      case _ => new OtherElemInLabelNamespace(backingElem, childElems)
+    }
+  }
+}
+
+object ElemInReferenceNamespace {
+
+  private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInReferenceNamespace = {
+    require(backingElem.resolvedName.namespaceUriOption.contains(ReferenceNamespace))
+
+    backingElem.resolvedName match {
+      case ENames.ReferenceReferenceEName => new ReferenceInReferenceNamespace(backingElem, childElems)
+      case _ => new OtherElemInReferenceNamespace(backingElem, childElems)
     }
   }
 }
