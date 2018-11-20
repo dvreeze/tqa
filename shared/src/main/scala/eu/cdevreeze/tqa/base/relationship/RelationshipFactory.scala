@@ -65,13 +65,14 @@ trait RelationshipFactory {
   /**
    * Returns all relationships (typically one) having the given underlying XLink arc in the given `TaxonomyBase`.
    * For performance a mapping from XLink labels to XLink locators and resources must be provided, and this mapping
-   * should be computed only once per extended link.
+   * should be computed only once per extended link. For performance the optional parent base URI is passed as well.
    *
    * This method must respect the configuration of this RelationshipFactory.
    */
   def extractRelationshipsFromArc(
     arc: XLinkArc,
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
+    parentBaseUriOption: Option[URI],
     taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship]
 
   /**
@@ -118,9 +119,9 @@ object RelationshipFactory {
    * @param allowUnresolvedLocator if true, allows "dead" locator href URIs within the taxonomy
    */
   final case class Config(
-      val allowSyntaxError: Boolean,
-      val allowUnresolvedXLinkLabel: Boolean,
-      val allowUnresolvedLocator: Boolean) {
+    val allowSyntaxError: Boolean,
+    val allowUnresolvedXLinkLabel: Boolean,
+    val allowUnresolvedLocator: Boolean) {
 
     /**
      * Returns true if XPointer syntax errors in any locator href URI fragment are allowed

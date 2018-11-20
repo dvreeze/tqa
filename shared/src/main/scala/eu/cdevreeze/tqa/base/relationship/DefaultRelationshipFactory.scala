@@ -53,6 +53,7 @@ import eu.cdevreeze.tqa.base.dom.XLinkLocator
 import eu.cdevreeze.tqa.base.dom.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
+import eu.cdevreeze.yaidom.queryapi.XmlBaseSupport
 
 /**
  * Default extractor of relationships from a "taxonomy base".
@@ -101,15 +102,17 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
     val labeledXlinkMap = extendedLink.labeledXlinkMap
+    val extLinkBaseUriOption = extendedLink.baseUriOption
 
     extendedLink.arcs.filter(arcFilter) flatMap { arc =>
-      extractRelationshipsFromArc(arc, labeledXlinkMap, taxonomyBase)
+      extractRelationshipsFromArc(arc, labeledXlinkMap, extLinkBaseUriOption, taxonomyBase)
     }
   }
 
   def extractRelationshipsFromArc(
     arc: XLinkArc,
     labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
+    parentBaseUriOption: Option[URI],
     taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship] = {
 
     if (config.allowMissingArcrole && arc.attributeOption(XLinkArcroleEName).isEmpty) {
@@ -129,9 +132,9 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
       val relationships =
         for {
           fromXLink <- fromXLinks.toIndexedSeq
-          resolvedFrom <- optionallyResolve(fromXLink, taxonomyBase).toIndexedSeq
+          resolvedFrom <- optionallyResolve(fromXLink, parentBaseUriOption, taxonomyBase).toIndexedSeq
           toXLink <- toXLinks.toIndexedSeq
-          resolvedTo <- optionallyResolve(toXLink, taxonomyBase).toIndexedSeq
+          resolvedTo <- optionallyResolve(toXLink, parentBaseUriOption, taxonomyBase).toIndexedSeq
         } yield {
           Relationship(arc, resolvedFrom, resolvedTo)
         }
@@ -164,13 +167,20 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
 
   private def optionallyResolve(
     xlink: LabeledXLink,
+    parentBaseUriOption: Option[URI],
     taxonomyBase: TaxonomyBase): Option[ResolvedLocatorOrResource[_ <: TaxonomyElem]] = {
 
     xlink match {
       case res: XLinkResource =>
         Some(new ResolvedLocatorOrResource.Resource(res))
       case loc: XLinkLocator =>
-        val elemUri = loc.baseUri.resolve(loc.rawHref)
+        // Faster than loc.baseUri in general, which counts, because this method must be very fast
+
+        val baseUri: URI =
+          XmlBaseSupport.findBaseUriByParentBaseUri(parentBaseUriOption, loc)(XmlBaseSupport.JdkUriResolver)
+            .getOrElse(DefaultRelationshipFactory.EmptyUri)
+
+        val elemUri = baseUri.resolve(loc.rawHref)
 
         val optTaxoElem =
           Try(taxonomyBase.findElemByUri(elemUri)) match {
@@ -273,4 +283,6 @@ object DefaultRelationshipFactory {
   val LenientInstance = new DefaultRelationshipFactory(RelationshipFactory.Config.Lenient)
 
   val StrictInstance = new DefaultRelationshipFactory(RelationshipFactory.Config.Strict)
+
+  private val EmptyUri = URI.create("")
 }
