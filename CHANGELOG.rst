@@ -3,6 +3,186 @@ CHANGELOG
 =========
 
 
+0.8.8
+=====
+
+This release is about small performance improvements and minor cleanups, such as:
+
+* Faster relationship factory, due to fewer base URI computations
+* Deprecated semantically unclear (partial) URI converter and resolver methods
+* Renamed some type-safe DOM classes for clarity, but retained the old names through aliases
+* Added type-safe DOM classes for non-standard labels and references (in the corresponding namespaces)
+
+Breaking changes compared to version 0.8.7 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Appinfo is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Appinfo")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.StandardLoc is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.StandardLoc")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ReferenceLink is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ReferenceLink")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.AttributeGroupReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AttributeGroupReference")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.LocalElementDeclaration is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.LocalElementDeclaration")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.DefinitionArc is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.DefinitionArc")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.LocalAttributeDeclaration is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.LocalAttributeDeclaration")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.SimpleTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.SimpleTypeDefinition")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.LinkbaseRef is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.LinkbaseRef")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.AnonymousComplexTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AnonymousComplexTypeDefinition")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.Reference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Reference")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Extension is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Extension")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.AnonymousTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AnonymousTypeDefinition")
+* class eu.cdevreeze.tqa.base.dom.OtherXsdElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.OtherXsdElem")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.AnonymousSimpleTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AnonymousSimpleTypeDefinition")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.AttributeDeclarationOrReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AttributeDeclarationOrReference")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.ElementDeclaration is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ElementDeclaration")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ModelGroupReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ModelGroupReference")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.SequenceModelGroup is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.SequenceModelGroup")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.NamedDeclOrDef is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.NamedDeclOrDef")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.CanBeAbstract is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.CanBeAbstract")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ConceptLabelResource is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ConceptLabelResource")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Annotation is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Annotation")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.AttributeGroupDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AttributeGroupDefinition")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Definition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Definition")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.LabelArc is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.LabelArc")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.SchemaRef is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.SchemaRef")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.RoleType is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.RoleType")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.AttributeGroupDefinitionOrReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AttributeGroupDefinitionOrReference")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.CalculationArc is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.CalculationArc")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.GlobalElementDeclaration is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.GlobalElementDeclaration")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.NamedSimpleTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.NamedSimpleTypeDefinition")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.Particle is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Particle")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Linkbase is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Linkbase")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Restriction is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Restriction")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.StandardExtendedLink is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.StandardExtendedLink")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.ElementDeclarationOrReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ElementDeclarationOrReference")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.CalculationLink is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.CalculationLink")
+* object eu.cdevreeze.tqa.base.dom.XsdElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.XsdElem$")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.LabelLink is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.LabelLink")
+* class eu.cdevreeze.tqa.base.dom.NonStandardLocator was concrete; is declared abstract in current version
+  filter with: ProblemFilters.exclude[AbstractClassProblem]("eu.cdevreeze.tqa.base.dom.NonStandardLocator")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.ComplexTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ComplexTypeDefinition")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.Content is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Content")
+* class eu.cdevreeze.tqa.base.dom.NonStandardSimpleLink was concrete; is declared abstract in current version
+  filter with: ProblemFilters.exclude[AbstractClassProblem]("eu.cdevreeze.tqa.base.dom.NonStandardSimpleLink")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.AllModelGroup is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AllModelGroup")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.StandardResource is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.StandardResource")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.AttributeDeclaration is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AttributeDeclaration")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ChoiceModelGroup is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ChoiceModelGroup")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Import is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Import")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.StandardArc is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.StandardArc")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ArcroleType is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ArcroleType")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.AttributeReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.AttributeReference")
+* class eu.cdevreeze.tqa.base.dom.NonStandardExtendedLink was concrete; is declared abstract in current version
+  filter with: ProblemFilters.exclude[AbstractClassProblem]("eu.cdevreeze.tqa.base.dom.NonStandardExtendedLink")
+* interface eu.cdevreeze.tqa.base.dom.LinkElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.LinkElem")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.PresentationArc is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.PresentationArc")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ConceptReferenceResource is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ConceptReferenceResource")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ModelGroupDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ModelGroupDefinition")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ArcroleRef is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ArcroleRef")
+* class eu.cdevreeze.tqa.base.dom.OtherLinkElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.OtherLinkElem")
+* object eu.cdevreeze.tqa.base.dom.LinkElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.LinkElem$")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.DefinitionLink is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.DefinitionLink")
+* interface eu.cdevreeze.tqa.base.dom.XsdElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.XsdElem")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.ModelGroup is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ModelGroup")
+* class eu.cdevreeze.tqa.base.dom.NonStandardResource was concrete; is declared abstract in current version
+  filter with: ProblemFilters.exclude[AbstractClassProblem]("eu.cdevreeze.tqa.base.dom.NonStandardResource")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.NamedTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.NamedTypeDefinition")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.XsdSchema is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.XsdSchema")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ComplexContent is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ComplexContent")
+* class eu.cdevreeze.tqa.base.dom.NonStandardArc was concrete; is declared abstract in current version
+  filter with: ProblemFilters.exclude[AbstractClassProblem]("eu.cdevreeze.tqa.base.dom.NonStandardArc")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.NamedComplexTypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.NamedComplexTypeDefinition")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.PresentationLink is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.PresentationLink")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.Include is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Include")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.ModelGroupDefinitionOrReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ModelGroupDefinitionOrReference")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.RestrictionOrExtension is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.RestrictionOrExtension")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.GlobalAttributeDeclaration is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.GlobalAttributeDeclaration")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ReferenceArc is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ReferenceArc")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.dom.TypeDefinition is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.TypeDefinition")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.RoleRef is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.RoleRef")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.ElementReference is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.ElementReference")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.SimpleContent is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.SimpleContent")
+* the type hierarchy of class eu.cdevreeze.tqa.base.dom.UsedOn is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.LinkElem}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.UsedOn")
+* abstract method extractRelationshipsFromArc(eu.cdevreeze.tqa.base.dom.XLinkArc,scala.collection.immutable.Map,eu.cdevreeze.tqa.base.dom.TaxonomyBase)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.relationship.RelationshipFactory does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.RelationshipFactory.extractRelationshipsFromArc")
+* abstract method extractRelationshipsFromArc(eu.cdevreeze.tqa.base.dom.XLinkArc,scala.collection.immutable.Map,scala.Option,eu.cdevreeze.tqa.base.dom.TaxonomyBase)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.relationship.RelationshipFactory is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.RelationshipFactory.extractRelationshipsFromArc")
+* method extractRelationshipsFromArc(eu.cdevreeze.tqa.base.dom.XLinkArc,scala.collection.immutable.Map,eu.cdevreeze.tqa.base.dom.TaxonomyBase)scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory.extractRelationshipsFromArc")
+
+
 0.8.7
 =====
 
