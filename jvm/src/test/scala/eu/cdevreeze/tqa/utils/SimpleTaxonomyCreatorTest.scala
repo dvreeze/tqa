@@ -80,16 +80,24 @@ class SimpleTaxonomyCreatorTest extends FunSuite {
       AllArc(EName(tns, "c2"), EName(hypercubeTns, "Hypercube1"), Map(ENames.OrderEName -> "2")),
       AllArc(EName(tns, "c3"), EName(hypercubeTns, "Hypercube2"), Map(ENames.OrderEName -> "3")))
 
+    val hdArcs = Vector(
+      HypercubeDimensionArc(EName(hypercubeTns, "Hypercube1"), EName(hypercubeTns, "RegionAxis"), Map(ENames.OrderEName -> "1")),
+      HypercubeDimensionArc(EName(hypercubeTns, "Hypercube1"), EName(hypercubeTns, "ProductAxis"), Map(ENames.OrderEName -> "2")),
+      HypercubeDimensionArc(EName(hypercubeTns, "Hypercube2"), EName(hypercubeTns, "RegionAxis"), Map(ENames.OrderEName -> "3")))
+
     val taxoCreator: SimpleTaxonomyCreator =
       SimpleTaxonomyCreator(taxo)
         .addParentChildArcs(presDocUri, pElr, pArcs)
-        .addDimensionalAllArcs(hypercubeDocUri, hypercubeElr, allArcs)
+        .addDimensionalArcs(hypercubeDocUri, hypercubeElr, allArcs ++ hdArcs)
 
     assertResult(5) {
       taxoCreator.startTaxonomy.findAllParentChildRelationships.size
     }
     assertResult(3) {
       taxoCreator.startTaxonomy.computeHasHypercubeInheritanceOrSelf.keySet.size
+    }
+    assertResult(3) {
+      taxoCreator.startTaxonomy.findAllHypercubeDimensionRelationships.size
     }
   }
 

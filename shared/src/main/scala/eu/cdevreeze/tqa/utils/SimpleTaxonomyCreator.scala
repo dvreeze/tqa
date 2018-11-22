@@ -68,9 +68,9 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
   }
 
   /**
-   * Adds the given "all" arcs, expecting an empty definition link to start with.
+   * Adds the given dimensional arcs, expecting an empty definition link to start with.
    */
-  def addDimensionalAllArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.AllArc]): SimpleTaxonomyCreator = {
+  def addDimensionalArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.DimensionalArc]): SimpleTaxonomyCreator = {
     // Do some validations
 
     validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkDefinitionLinkEName)
@@ -85,122 +85,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     // Edit
 
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeAllArc _)
-
-    new SimpleTaxonomyCreator(endTaxo)
-  }
-
-  /**
-   * Adds the given "notAll" arcs, expecting an empty definition link to start with.
-   */
-  def addDimensionalNotAllArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.NotAllArc]): SimpleTaxonomyCreator = {
-    // Do some validations
-
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkDefinitionLinkEName)
-
-    val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
-    val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
-
-    val extLink: ExtendedLink =
-      startLinkbase.findAllExtendedLinks.collect {
-        case extLink: ExtendedLink if extLink.resolvedName == ENames.LinkDefinitionLinkEName && extLink.role == elr => extLink
-      }.last
-
-    // Edit
-
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeNotAllArc _)
-
-    new SimpleTaxonomyCreator(endTaxo)
-  }
-
-  /**
-   * Adds the given hypercube-dimension arcs, expecting an empty definition link to start with.
-   */
-  def addHypercubeDimensionArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.HypercubeDimensionArc]): SimpleTaxonomyCreator = {
-    // Do some validations
-
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkDefinitionLinkEName)
-
-    val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
-    val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
-
-    val extLink: ExtendedLink =
-      startLinkbase.findAllExtendedLinks.collect {
-        case extLink: ExtendedLink if extLink.resolvedName == ENames.LinkDefinitionLinkEName && extLink.role == elr => extLink
-      }.last
-
-    // Edit
-
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeHypercubeDimensionArc _)
-
-    new SimpleTaxonomyCreator(endTaxo)
-  }
-
-  /**
-   * Adds the given dimension-domain arcs, expecting an empty definition link to start with.
-   */
-  def addDimensionDomainArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.DimensionDomainArc]): SimpleTaxonomyCreator = {
-    // Do some validations
-
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkDefinitionLinkEName)
-
-    val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
-    val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
-
-    val extLink: ExtendedLink =
-      startLinkbase.findAllExtendedLinks.collect {
-        case extLink: ExtendedLink if extLink.resolvedName == ENames.LinkDefinitionLinkEName && extLink.role == elr => extLink
-      }.last
-
-    // Edit
-
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeDimensionDomainArc _)
-
-    new SimpleTaxonomyCreator(endTaxo)
-  }
-
-  /**
-   * Adds the given domain-member arcs, expecting an empty definition link to start with.
-   */
-  def addDomainMembeArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.DomainMemberArc]): SimpleTaxonomyCreator = {
-    // Do some validations
-
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkDefinitionLinkEName)
-
-    val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
-    val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
-
-    val extLink: ExtendedLink =
-      startLinkbase.findAllExtendedLinks.collect {
-        case extLink: ExtendedLink if extLink.resolvedName == ENames.LinkDefinitionLinkEName && extLink.role == elr => extLink
-      }.last
-
-    // Edit
-
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeDomainMemberArc _)
-
-    new SimpleTaxonomyCreator(endTaxo)
-  }
-
-  /**
-   * Adds the given dimension-default arcs, expecting an empty definition link to start with.
-   */
-  def addDimensionDefaultArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.DimensionDefaultArc]): SimpleTaxonomyCreator = {
-    // Do some validations
-
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkDefinitionLinkEName)
-
-    val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
-    val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
-
-    val extLink: ExtendedLink =
-      startLinkbase.findAllExtendedLinks.collect {
-        case extLink: ExtendedLink if extLink.resolvedName == ENames.LinkDefinitionLinkEName && extLink.role == elr => extLink
-      }.last
-
-    // Edit
-
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeDimensionDefaultArc _)
+    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeDimensionalArc _)
 
     new SimpleTaxonomyCreator(endTaxo)
   }
@@ -328,6 +213,23 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
   private def makeParentChildArc(arc: SimpleTaxonomyCreator.ParentChildArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
     makePresentationArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://www.xbrl.org/2003/arcrole/parent-child")
+  }
+
+  private def makeDimensionalArc(arc: SimpleTaxonomyCreator.DimensionalArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
+    arc match {
+      case arc: SimpleTaxonomyCreator.AllArc =>
+        makeAllArc(arc, sourceXLinkLabel, targetXLinkLabel)
+      case arc: SimpleTaxonomyCreator.NotAllArc =>
+        makeNotAllArc(arc, sourceXLinkLabel, targetXLinkLabel)
+      case arc: SimpleTaxonomyCreator.HypercubeDimensionArc =>
+        makeHypercubeDimensionArc(arc, sourceXLinkLabel, targetXLinkLabel)
+      case arc: SimpleTaxonomyCreator.DimensionDomainArc =>
+        makeDimensionDomainArc(arc, sourceXLinkLabel, targetXLinkLabel)
+      case arc: SimpleTaxonomyCreator.DomainMemberArc =>
+        makeDomainMemberArc(arc, sourceXLinkLabel, targetXLinkLabel)
+      case arc: SimpleTaxonomyCreator.DimensionDefaultArc =>
+        makeDimensionDefaultArc(arc, sourceXLinkLabel, targetXLinkLabel)
+    }
   }
 
   private def makeAllArc(arc: SimpleTaxonomyCreator.AllArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
