@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema targetNamespace="http://www.test.com/test/axes" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrli="http://www.xbrl.org/2003/instance">
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" />
+  <xs:element id="Hypercube1" name="Hypercube1" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" abstract="true" nillable="false" />
+  <xs:element id="Hypercube2" name="Hypercube2" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" abstract="true" nillable="false" />
+  <xs:element id="RegionAxis" name="RegionAxis" type="xbrli:stringItemType" substitutionGroup="xbrldt:dimensionItem" xbrli:periodType="duration" abstract="true" nillable="false" />
+  <xs:element id="ProductAxis" name="ProductAxis" type="xbrli:stringItemType" substitutionGroup="xbrldt:dimensionItem" xbrli:periodType="duration" abstract="true" nillable="false" />
+  <xs:element id="EuropeMember" name="EuropeMember" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" abstract="true" nillable="false" />
+  <xs:element id="AsiaMember" name="AsiaMember" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" abstract="true" nillable="false" />
+  <xs:element id="AmericaMember" name="AmericaMember" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" abstract="true" nillable="false" />
+</xs:schema>

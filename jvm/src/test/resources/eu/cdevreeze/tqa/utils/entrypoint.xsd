@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema targetNamespace="http://www.test.com/test/axes" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xbrli="http://www.xbrl.org/2003/instance">
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xlink:href="./presentation.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:type="simple"/>
+      <link:linkbaseRef xlink:href="./hypercubes.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:type="simple"/>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" />
+  <xs:import namespace="http://www.test.com/test/data" schemaLocation="http://www.test.com/test/data.xsd" />
+  <xs:import namespace="http://www.test.com/test/axes" schemaLocation="http://www.test.com/test/axes.xsd" />
+</xs:schema>

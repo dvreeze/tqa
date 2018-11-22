@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <link:presentationLink xlink:role="urn:test:linkrole:my-report" xlink:type="extended">
+  </link:presentationLink>
+</link:linkbase>
