@@ -18,7 +18,7 @@ package eu.cdevreeze.tqa.xpathaware.extension.table
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.base.dom.BaseSetKey
+import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.queryapi.DomainAwareRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath

@@ -21,9 +21,9 @@ import java.net.URI
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.Namespaces
+import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.dom.AnyTaxonomyElem
-import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.NonStandardArc
 import eu.cdevreeze.tqa.base.dom.NonStandardResource
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship

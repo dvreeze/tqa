@@ -17,7 +17,7 @@
 package eu.cdevreeze.tqa.base.relationship
 
 import eu.cdevreeze.tqa.XmlFragmentKey
-import eu.cdevreeze.tqa.base.dom.BaseSetKey
+import eu.cdevreeze.tqa.base.common.BaseSetKey
 
 /**
  * Relationship key. It has been designed for value equality.

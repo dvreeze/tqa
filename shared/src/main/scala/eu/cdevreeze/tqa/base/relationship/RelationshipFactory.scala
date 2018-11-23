@@ -21,7 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.base.dom.BaseSetKey
+import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.ExtendedLink
 import eu.cdevreeze.tqa.base.dom.LabeledXLink
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase

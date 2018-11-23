@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.dom
+package eu.cdevreeze.tqa.base.common
 
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationLinkEName

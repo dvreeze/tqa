@@ -37,11 +37,11 @@ import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
+import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.common.StandardLabelRoles
 import eu.cdevreeze.tqa.base.common.StandardReferenceRoles
 import eu.cdevreeze.tqa.base.common.Use
-import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.CalculationArc
 import eu.cdevreeze.tqa.base.dom.ConceptLabelResource
 import eu.cdevreeze.tqa.base.dom.ConceptReferenceResource

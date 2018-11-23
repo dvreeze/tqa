@@ -42,8 +42,8 @@ import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XbrliBalanceEName
 import eu.cdevreeze.tqa.ENames.XbrliPeriodTypeEName
 import eu.cdevreeze.tqa.Namespaces.XLinkNamespace
+import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.common.Use
-import eu.cdevreeze.tqa.base.dom.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.ExtendedLink
 import eu.cdevreeze.tqa.base.dom.LabeledXLink
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase

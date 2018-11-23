@@ -31,6 +31,7 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.tqa.XsdBooleans
+import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.common.CyclesAllowed
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.base.common.StandardLabelRoles
