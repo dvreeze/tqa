@@ -157,12 +157,13 @@ sealed trait ConceptResourceRelationship extends StandardRelationship {
 final case class ConceptLabelRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.ConceptLabelResource,
   nonXLinkArcAttributes: Map[EName, String]) extends ConceptResourceRelationship {
 
   def resource: RelationshipNode.ConceptLabelResource = target
+
+  def arcrole: String = BaseSetKey.forConceptLabelArc(elr).arcrole
 
   def resourceRole: String = resource.roleOption.getOrElse(StandardLabelRoles.StandardLabel)
 
@@ -193,10 +194,12 @@ sealed trait PresentationRelationship extends InterConceptRelationship {
 final case class ParentChildRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
-  nonXLinkArcAttributes: Map[EName, String]) extends PresentationRelationship
+  nonXLinkArcAttributes: Map[EName, String]) extends PresentationRelationship {
+
+  def arcrole: String = BaseSetKey.forParentChildArc(elr).arcrole
+}
 
 final case class OtherPresentationRelationship(
   docUri: URI,
@@ -216,10 +219,12 @@ sealed trait CalculationRelationship extends InterConceptRelationship {
 final case class SummationItemRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
-  nonXLinkArcAttributes: Map[EName, String]) extends CalculationRelationship
+  nonXLinkArcAttributes: Map[EName, String]) extends CalculationRelationship {
+
+  def arcrole: String = BaseSetKey.forSummationItemArc(elr).arcrole
+}
 
 final case class OtherCalculationRelationship(
   docUri: URI,
@@ -239,34 +244,42 @@ sealed trait DefinitionRelationship extends InterConceptRelationship {
 final case class GeneralSpecialRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship
+  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+
+  def arcrole: String = BaseSetKey.forGeneralSpecialArc(elr).arcrole
+}
 
 final case class EssenceAliasRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship
+  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+
+  def arcrole: String = BaseSetKey.forEssenceAliasArc(elr).arcrole
+}
 
 final case class SimilarTuplesRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship
+  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+
+  def arcrole: String = BaseSetKey.forSimilarTuplesArc(elr).arcrole
+}
 
 final case class RequiresElementRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship
+  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+
+  def arcrole: String = BaseSetKey.forRequiresElementArc(elr).arcrole
+}
 
 sealed trait DimensionalRelationship extends DefinitionRelationship
 
@@ -303,29 +316,30 @@ sealed trait HasHypercubeRelationship extends DimensionalRelationship {
 final case class AllRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
   nonXLinkArcAttributes: Map[EName, String]) extends HasHypercubeRelationship {
 
   def isAllRelationship: Boolean = true
+
+  def arcrole: String = BaseSetKey.forAllArc(elr).arcrole
 }
 
 final case class NotAllRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
   nonXLinkArcAttributes: Map[EName, String]) extends HasHypercubeRelationship {
 
   def isAllRelationship: Boolean = false
+
+  def arcrole: String = BaseSetKey.forNotAllArc(elr).arcrole
 }
 
 final case class HypercubeDimensionRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
   nonXLinkArcAttributes: Map[EName, String]) extends DimensionalRelationship {
@@ -333,6 +347,8 @@ final case class HypercubeDimensionRelationship(
   def hypercube: EName = sourceConceptEName
 
   def dimension: EName = targetConceptEName
+
+  def arcrole: String = BaseSetKey.forHypercubeDimensionArc(elr).arcrole
 
   override def effectiveTargetRole: String = {
     nonXLinkArcAttributes.get(ENames.XbrldtTargetRoleEName).getOrElse(elr)
@@ -361,7 +377,6 @@ sealed trait DomainAwareRelationship extends DimensionalRelationship {
 final case class DimensionDomainRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
   nonXLinkArcAttributes: Map[EName, String]) extends DomainAwareRelationship {
@@ -369,12 +384,13 @@ final case class DimensionDomainRelationship(
   def dimension: EName = sourceConceptEName
 
   def domain: EName = targetConceptEName
+
+  def arcrole: String = BaseSetKey.forDimensionDomainArc(elr).arcrole
 }
 
 final case class DomainMemberRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
   nonXLinkArcAttributes: Map[EName, String]) extends DomainAwareRelationship {
@@ -382,12 +398,13 @@ final case class DomainMemberRelationship(
   def domain: EName = sourceConceptEName
 
   def member: EName = targetConceptEName
+
+  def arcrole: String = BaseSetKey.forDomainMemberArc(elr).arcrole
 }
 
 final case class DimensionDefaultRelationship(
   docUri: URI,
   elr: String,
-  arcrole: String,
   source: RelationshipNode.Concept,
   target: RelationshipNode.Concept,
   nonXLinkArcAttributes: Map[EName, String]) extends DimensionalRelationship {
@@ -395,6 +412,8 @@ final case class DimensionDefaultRelationship(
   def dimension: EName = sourceConceptEName
 
   def defaultOfDimension: EName = targetConceptEName
+
+  def arcrole: String = BaseSetKey.forDimensionDefaultArc(elr).arcrole
 }
 
 final case class OtherDefinitionRelationship(
