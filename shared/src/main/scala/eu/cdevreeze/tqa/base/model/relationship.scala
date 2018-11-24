@@ -397,4 +397,12 @@ final case class DimensionDefaultRelationship(
   def defaultOfDimension: EName = targetConceptEName
 }
 
+final case class OtherDefinitionRelationship(
+  docUri: URI,
+  elr: String,
+  arcrole: String,
+  source: RelationshipNode.Concept,
+  target: RelationshipNode.Concept,
+  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship
+
 // TODO Generic relationships, and factories for relationships.
