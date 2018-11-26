@@ -156,7 +156,7 @@ final class BasicTaxonomy private (
 
     BasicTaxonomy.build(
       taxonomyBase.filteringDocumentUris(docUris),
-      netSubstitutionGroupMap,
+      extraSubstitutionGroupMap,
       filteredRelationships)
   }
 

@@ -35,7 +35,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * Each relationship is either a [[eu.cdevreeze.tqa.base.model.StandardRelationship]] or a [[eu.cdevreeze.tqa.base.model.NonStandardRelationship]].
  * There is no such thing as an UnknownRelationship in the model (such relationships would not be created, but just
- * ignored, unlike their counterparts in the relationship API).
+ * ignored, unlike their counterparts in the XML-backed relationship API).
  *
  * @author Chris de Vreeze
  */

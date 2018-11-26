@@ -22,6 +22,7 @@ import scala.collection.immutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames.IdEName
+import eu.cdevreeze.tqa.ENames.XmlBaseEName
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.ENameProvider
@@ -179,7 +180,7 @@ final class TaxonomyBase private (
 
     new TaxonomyBase(
       filteredTaxonomyDocs,
-      taxonomyDocUriMap.filterKeys(u => docUris.contains(removeFragment(u))),
+      taxonomyDocUriMap.filterKeys(docUris),
       elemUriMap.filterKeys(filteredElemUris),
       globalElementDeclarationMap.filterKeys(globalElementDeclarationENames),
       namedTypeDefinitionMap.filterKeys(namedTypeDefinitionENames),
@@ -351,8 +352,8 @@ object TaxonomyBase {
    */
   private def computeDerivedSubstitutionGroupMap(globalElementDeclarationMap: Map[EName, GlobalElementDeclaration]): SubstitutionGroupMap = {
     val rawMappings: Map[EName, EName] =
-      (globalElementDeclarationMap.toSeq collect {
-        case (en, decl) if decl.substitutionGroupOption.isDefined => (en -> decl.substitutionGroupOption.get)
+      (globalElementDeclarationMap.toSeq.flatMap {
+        case (en, decl) => decl.substitutionGroupOption.map(sg => en -> sg)
       }).toMap
 
     val substGroups: Set[EName] = rawMappings.values.toSet
@@ -366,10 +367,17 @@ object TaxonomyBase {
     val docUri = rootElem.docUri
     require(docUri.isAbsolute, s"Expected absolute URI but found '$docUri'")
 
+    // Trying to make baseUri computation extremely efficient in the usual case that xml:base is not used
+    val xmlBaseUsed = rootElem.findElemOrSelf(_.attributeOption(XmlBaseEName).nonEmpty).nonEmpty
+
     // The schema type of the ID attributes is not checked! That would be very expensive without any real advantage.
 
     val elemsWithId = rootElem.filterElemsOrSelf(_.attributeOption(IdEName).isDefined)
-    elemsWithId.map(e => (makeUriWithIdFragment(e.baseUri, e.attribute(IdEName)) -> e)).toMap
+
+    elemsWithId.map { e =>
+      val baseUri = if (xmlBaseUsed) e.baseUri else docUri
+      (makeUriWithIdFragment(baseUri, e.attribute(IdEName)) -> e)
+    }.toMap
   }
 
   private def makeUriWithIdFragment(baseUri: URI, idFragment: String): URI = {
