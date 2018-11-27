@@ -814,6 +814,17 @@ final class GlobalElementDeclaration private[dom] (
   }
 
   /**
+   * Returns all own or transitively inherited substitution groups. The given mappings are used as the necessary context.
+   *
+   * This method may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def findAllOwnOrTransitivelyInheritedSubstitutionGroups(substitutionGroupMap: SubstitutionGroupMap): Set[EName] = {
+    substitutionGroupOption.toSeq.flatMap { sg =>
+      substitutionGroupMap.transitivelyInheritedSubstitutionGroups(sg) + sg
+    }.toSet
+  }
+
+  /**
    * Returns the optional xbrli:periodType attribute, as `PeriodType`.
    *
    * This method may fail with an exception if the taxonomy is not schema-valid.

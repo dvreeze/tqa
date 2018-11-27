@@ -72,7 +72,7 @@ sealed abstract class ConceptDeclaration private[dom] (val globalElementDeclarat
 
   final override def equals(other: Any): Boolean = other match {
     case other: ConceptDeclaration => globalElementDeclaration == other.globalElementDeclaration
-    case _                         => false
+    case _ => false
   }
 
   final override def hashCode: Int = {
@@ -174,10 +174,13 @@ object ConceptDeclaration {
      * This creation cannot fail (assuming that the SubstitutionGroupMap cannot be corrupted).
      */
     def optConceptDeclaration(elemDecl: GlobalElementDeclaration): Option[ConceptDeclaration] = {
-      val isHypercube = elemDecl.hasSubstitutionGroup(XbrldtHypercubeItemEName, substitutionGroupMap)
-      val isDimension = elemDecl.hasSubstitutionGroup(XbrldtDimensionItemEName, substitutionGroupMap)
-      val isItem = elemDecl.hasSubstitutionGroup(XbrliItemEName, substitutionGroupMap)
-      val isTuple = elemDecl.hasSubstitutionGroup(XbrliTupleEName, substitutionGroupMap)
+      val allSubstGroups: Set[EName] =
+        elemDecl.findAllOwnOrTransitivelyInheritedSubstitutionGroups(substitutionGroupMap)
+
+      val isHypercube = allSubstGroups.contains(XbrldtHypercubeItemEName)
+      val isDimension = allSubstGroups.contains(XbrldtDimensionItemEName)
+      val isItem = allSubstGroups.contains(XbrliItemEName)
+      val isTuple = allSubstGroups.contains(XbrliTupleEName)
 
       require(!isItem || !isTuple, s"A concept (${elemDecl.targetEName}) cannot be both an item and tuple")
       require(!isHypercube || !isDimension, s"A concept (${elemDecl.targetEName}) cannot be both a hypercube and dimension")

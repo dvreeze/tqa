@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa
 
+import scala.annotation.tailrec
+
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -51,6 +53,27 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
    */
   def effectiveMappings: Map[EName, EName] = {
     mappings ++ Map(XbrldtHypercubeItemEName -> XbrliItemEName, XbrldtDimensionItemEName -> XbrliItemEName)
+  }
+
+  /**
+   * Finds all transitively inherited substitution groups from the given substitution group, as found in this mapping.
+   */
+  def transitivelyInheritedSubstitutionGroups(substGroup: EName): Set[EName] = {
+    val effMappings: Map[EName, EName] = effectiveMappings
+
+    @tailrec
+    def transitivelyInheritedSubstitutionGroupList(sg: EName, acc: List[EName]): List[EName] = {
+      val directlyInheritedSubstGroupOption = effMappings.get(sg)
+
+      directlyInheritedSubstGroupOption match {
+        case None => acc
+        case Some(isg) =>
+          // Recursive call
+          transitivelyInheritedSubstitutionGroupList(isg, isg :: acc)
+      }
+    }
+
+    transitivelyInheritedSubstitutionGroupList(substGroup, Nil).toSet
   }
 
   /**

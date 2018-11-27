@@ -252,19 +252,19 @@ object BasicTaxonomy {
     val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
 
     val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-      (taxonomyBase.globalElementDeclarationMap.toSeq collect {
-        case (ename, decl) if conceptDeclarationBuilder.optConceptDeclaration(decl).isDefined =>
-          (ename -> conceptDeclarationBuilder.optConceptDeclaration(decl).get)
-      }).toMap
+      taxonomyBase.globalElementDeclarationMap.toSeq.flatMap {
+        case (ename, decl) =>
+          conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => ename -> conceptDecl)
+      }.toMap
     }
 
-    val standardRelationships = relationships collect { case rel: StandardRelationship => rel }
+    val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
 
     val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
       standardRelationships groupBy (_.sourceConceptEName)
     }
 
-    val nonStandardRelationships = relationships collect { case rel: NonStandardRelationship => rel }
+    val nonStandardRelationships = relationships.collect { case rel: NonStandardRelationship => rel }
 
     val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
       nonStandardRelationships groupBy (_.sourceElem.key)
@@ -274,7 +274,7 @@ object BasicTaxonomy {
       nonStandardRelationships groupBy (_.targetElem.key)
     }
 
-    val interConceptRelationships = standardRelationships collect { case rel: InterConceptRelationship => rel }
+    val interConceptRelationships = standardRelationships.collect { case rel: InterConceptRelationship => rel }
 
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
       interConceptRelationships groupBy (_.sourceConceptEName)
