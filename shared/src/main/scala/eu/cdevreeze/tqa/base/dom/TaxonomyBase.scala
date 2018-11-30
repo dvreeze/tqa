@@ -95,6 +95,16 @@ final class TaxonomyBase private (
         case ShorthandPointer(_) :: Nil =>
           // Do a fast map lookup on the entire URI with fragment
           elemUriMap.get(elemUri)
+        case IdPointer(id) :: Nil =>
+          val u = new URI(elemUri.getScheme, elemUri.getSchemeSpecificPart, id)
+
+          // Do a fast map lookup on the URI with the id as fragment
+          elemUriMap.get(u)
+        case IdChildSequencePointer(id, childSeq) :: Nil =>
+          val u = new URI(elemUri.getScheme, elemUri.getSchemeSpecificPart, id)
+
+          // First do a fast map lookup on the URI with the id as fragment
+          elemUriMap.get(u).flatMap(e => ChildSequencePointer(1 :: childSeq).findElem(e))
         case _ =>
           val rootElemOption = taxonomyDocUriMap.get(removeFragment(elemUri)).map(_.documentElement)
           rootElemOption.flatMap(e => XPointer.findElem(e, xpointers))
