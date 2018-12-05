@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.base.model
 import java.net.URI
 
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.common.ContextElement
@@ -442,4 +443,272 @@ final case class OtherDefinitionRelationship(
   target: Node.Concept,
   nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship
 
-// TODO Generic relationships, and factories for relationships.
+// Generic relationships
+
+sealed trait ElementResourceRelationship extends NonStandardRelationship {
+
+  def target: Node.NonStandardDocumentationResource
+
+  def resource: Node.NonStandardDocumentationResource
+
+  // Assuming link name gen:link and arc name gen:arc
+
+  final def baseSetKey: BaseSetKey = {
+    BaseSetKey(ENames.GenArcEName, arcrole, ENames.GenLinkEName, elr)
+  }
+}
+
+// TODO Element-label and element-reference relationships with other resource element name
+
+final case class ElementLabelRelationship(
+  docUri: URI,
+  elr: String,
+  source: LocatorNode,
+  target: Node.ElementLabelResource,
+  nonXLinkArcAttributes: Map[EName, String]) extends ElementResourceRelationship {
+
+  def resource: Node.ElementLabelResource = target
+
+  def arcrole: String = baseSetKey.arcrole
+
+  def resourceRole: String = resource.roleOption.getOrElse("http://www.xbrl.org/2008/role/label")
+
+  def language: String = {
+    resource.langOption.getOrElse(sys.error(s"Missing xml:lang in $target in $docUri"))
+  }
+
+  def labelText: String = resource.text
+}
+
+final case class ElementReferenceRelationship(
+  docUri: URI,
+  elr: String,
+  source: LocatorNode,
+  target: Node.ElementReferenceResource,
+  nonXLinkArcAttributes: Map[EName, String]) extends ElementResourceRelationship {
+
+  def resource: Node.ElementReferenceResource = target
+
+  def arcrole: String = baseSetKey.arcrole
+
+  def resourceRole: String = resource.roleOption.getOrElse("http://www.xbrl.org/2008/role/reference")
+
+  def parts: Map[EName, String] = resource.parts
+}
+
+// TODO Element-message relationship
+
+final case class OtherNonStandardRelationship(
+  docUri: URI,
+  baseSetKey: BaseSetKey,
+  source: Node,
+  target: Node,
+  nonXLinkArcAttributes: Map[EName, String]) extends NonStandardRelationship {
+
+  def elr: String = baseSetKey.extLinkRole
+
+  def arcrole: String = baseSetKey.arcrole
+}
+
+// Companion objects
+
+object Relationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node,
+    target: Node,
+    nonXLinkArcAttributes: Map[EName, String]): Option[Relationship] = {
+
+    (baseSetKey.arcEName.namespaceUriOption, source) match {
+      case (Some(Namespaces.LinkNamespace), sourceConcept @ Node.Concept(_)) =>
+        StandardRelationship.opt(docUri, baseSetKey, sourceConcept, target, nonXLinkArcAttributes)
+      case (Some(ns), _) if ns != Namespaces.LinkNamespace =>
+        NonStandardRelationship.opt(docUri, baseSetKey, source, target, nonXLinkArcAttributes)
+      case _ =>
+        None
+    }
+  }
+}
+
+object StandardRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node.Concept,
+    target: Node,
+    nonXLinkArcAttributes: Map[EName, String]): Option[StandardRelationship] = {
+
+    (baseSetKey.arcEName.namespaceUriOption, target) match {
+      case (Some(Namespaces.LinkNamespace), targetConcept @ Node.Concept(_)) =>
+        InterConceptRelationship.opt(docUri, baseSetKey, source, targetConcept, nonXLinkArcAttributes)
+      case (Some(Namespaces.LinkNamespace), resource: Node.StandardDocumentationResource) =>
+        ConceptResourceRelationship.opt(docUri, baseSetKey, source, resource, nonXLinkArcAttributes)
+      case _ =>
+        None
+    }
+  }
+}
+
+object InterConceptRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node.Concept,
+    target: Node.Concept,
+    nonXLinkArcAttributes: Map[EName, String]): Option[InterConceptRelationship] = {
+
+    baseSetKey.arcEName match {
+      case ENames.LinkDefinitionArcEName =>
+        DefinitionRelationship.opt(docUri, baseSetKey, source, target, nonXLinkArcAttributes)
+      case ENames.LinkPresentationArcEName =>
+        PresentationRelationship.opt(docUri, baseSetKey, source, target, nonXLinkArcAttributes)
+      case ENames.LinkCalculationArcEName =>
+        CalculationRelationship.opt(docUri, baseSetKey, source, target, nonXLinkArcAttributes)
+      case _ =>
+        None
+    }
+  }
+}
+
+object ConceptResourceRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node.Concept,
+    target: Node.StandardDocumentationResource,
+    nonXLinkArcAttributes: Map[EName, String]): Option[ConceptResourceRelationship] = {
+
+    (baseSetKey.arcEName, target) match {
+      case (ENames.LinkLabelArcEName, resource: Node.ConceptLabelResource) =>
+        Some(ConceptLabelRelationship(docUri, baseSetKey.extLinkRole, source, resource, nonXLinkArcAttributes))
+      case (ENames.LinkReferenceArcEName, resource: Node.ConceptReferenceResource) =>
+        Some(ConceptReferenceRelationship(docUri, baseSetKey.extLinkRole, source, resource, nonXLinkArcAttributes))
+      case _ =>
+        None
+    }
+  }
+}
+
+object DefinitionRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node.Concept,
+    target: Node.Concept,
+    nonXLinkArcAttributes: Map[EName, String]): Option[DefinitionRelationship] = {
+
+    (baseSetKey.arcEName, baseSetKey.arcrole) match {
+      case (ENames.LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/general-special") =>
+        Some(GeneralSpecialRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/essence-alias") =>
+        Some(EssenceAliasRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/similar-tuples") =>
+        Some(SimilarTuplesRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/requires-element") =>
+        Some(RequiresElementRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, _) =>
+        DimensionalRelationship.opt(docUri, baseSetKey, source, target, nonXLinkArcAttributes)
+          .orElse(Some(OtherDefinitionRelationship(docUri, baseSetKey.extLinkRole, baseSetKey.arcrole, source, target, nonXLinkArcAttributes)))
+      case _ =>
+        None
+    }
+  }
+}
+
+object PresentationRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node.Concept,
+    target: Node.Concept,
+    nonXLinkArcAttributes: Map[EName, String]): Option[PresentationRelationship] = {
+
+    (baseSetKey.arcEName, baseSetKey.arcrole) match {
+      case (ENames.LinkPresentationArcEName, "http://www.xbrl.org/2003/arcrole/parent-child") =>
+        Some(ParentChildRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkPresentationArcEName, _) =>
+        Some(OtherPresentationRelationship(docUri, baseSetKey.extLinkRole, baseSetKey.arcrole, source, target, nonXLinkArcAttributes))
+      case _ =>
+        None
+    }
+  }
+}
+
+object CalculationRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node.Concept,
+    target: Node.Concept,
+    nonXLinkArcAttributes: Map[EName, String]): Option[CalculationRelationship] = {
+
+    (baseSetKey.arcEName, baseSetKey.arcrole) match {
+      case (ENames.LinkCalculationArcEName, "http://www.xbrl.org/2003/arcrole/summation-item") =>
+        Some(SummationItemRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkCalculationArcEName, _) =>
+        Some(OtherCalculationRelationship(docUri, baseSetKey.extLinkRole, baseSetKey.arcrole, source, target, nonXLinkArcAttributes))
+      case _ =>
+        None
+    }
+  }
+}
+
+object DimensionalRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node.Concept,
+    target: Node.Concept,
+    nonXLinkArcAttributes: Map[EName, String]): Option[DimensionalRelationship] = {
+
+    (baseSetKey.arcEName, baseSetKey.arcrole) match {
+      case (ENames.LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/hypercube-dimension") =>
+        Some(HypercubeDimensionRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/dimension-domain") =>
+        Some(DimensionDomainRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/domain-member") =>
+        Some(DomainMemberRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/dimension-default") =>
+        Some(DimensionDefaultRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/all") =>
+        Some(AllRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case (ENames.LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/notAll") =>
+        Some(NotAllRelationship(docUri, baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
+      case _ =>
+        None
+    }
+  }
+}
+
+object NonStandardRelationship {
+
+  def opt(
+    docUri: URI,
+    baseSetKey: BaseSetKey,
+    source: Node,
+    target: Node,
+    nonXLinkArcAttributes: Map[EName, String]): Option[NonStandardRelationship] = {
+
+    if (baseSetKey.arcEName.namespaceUriOption.contains(Namespaces.LinkNamespace)) {
+      None
+    } else {
+      (baseSetKey.arcrole, source, target) match {
+        case ("http://xbrl.org/arcrole/2008/element-label", sourceLoc: LocatorNode, res: Node.ElementLabelResource) =>
+          Some(ElementLabelRelationship(docUri, baseSetKey.extLinkRole, sourceLoc, res, nonXLinkArcAttributes))
+        case ("http://xbrl.org/arcrole/2008/element-reference", sourceLoc: LocatorNode, res: Node.ElementReferenceResource) =>
+          Some(ElementReferenceRelationship(docUri, baseSetKey.extLinkRole, sourceLoc, res, nonXLinkArcAttributes))
+        case _ =>
+          Some(OtherNonStandardRelationship(docUri, baseSetKey, source, target, nonXLinkArcAttributes))
+      }
+    }
+  }
+}
