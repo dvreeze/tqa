@@ -26,7 +26,6 @@ package eu.cdevreeze.tqa.base
  * <ul>
  * <li>Type [[eu.cdevreeze.tqa.base.dom.TaxonomyElem]] and its sub-types</li>
  * <li>Type [[eu.cdevreeze.tqa.base.dom.ConceptDeclaration]] and its sub-types; see below</li>
- * <li>Type [[eu.cdevreeze.tqa.base.dom.XPointer]] and its sub-types, modeling XPointer as used in XBRL</li>
  * </ul>
  *
  * This package has no knowledge about and dependency on XPath processing.
