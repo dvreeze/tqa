@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.dom
+package eu.cdevreeze.tqa
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.ENames.IdEName
 import eu.cdevreeze.yaidom.queryapi.ScopedElemApi
 
 /**
@@ -43,7 +42,7 @@ sealed trait XPointer {
 final case class ShorthandPointer(id: String) extends XPointer {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
-    rootElem.findElemOrSelf(_.attributeOption(IdEName).contains(id))
+    rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
   }
 
   override def toString: String = id
@@ -57,7 +56,7 @@ sealed trait ElementSchemePointer extends XPointer
 final case class IdPointer(id: String) extends ElementSchemePointer {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
-    rootElem.findElemOrSelf(_.attributeOption(IdEName).contains(id))
+    rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
   }
 
   override def toString: String = s"element(${id})"

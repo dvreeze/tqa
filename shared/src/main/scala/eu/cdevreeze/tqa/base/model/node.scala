@@ -19,21 +19,20 @@ package eu.cdevreeze.tqa.base.model
 import java.net.URI
 
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.XPointer
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Any relationship node that can be a relationship source or target in the model. There are 2 immediate
+ * Any node that can be a relationship source or target in the model. There are 2 immediate
  * sub-types: LocatorNode and ResourceNode (abstractions of XLink locators and XLink resources, respectively).
  *
  * A LocatorNode is a unique key to a taxonomy element, and not the taxonomy element itself. This decoupling
  * respects the fact that it is not known beforehand how relationships in taxonomies are traversed.
  * ResourceNodes, on the other hand, are the taxonomy elements themselves.
  *
- * Be careful not to confuse this notion of RelationshipNode with relationship nodes in XBRL Tables!
- *
  * @author Chris de Vreeze
  */
-sealed trait RelationshipNode
+sealed trait Node
 
 /**
  * Locator node. It holds a unique key to a taxonomy element. It is an abstraction of what in the XML
@@ -41,15 +40,15 @@ sealed trait RelationshipNode
  *
  * TODO Do we need locators to resources?
  */
-sealed trait LocatorNode extends RelationshipNode
+sealed trait LocatorNode extends Node
 
 /**
  * Resource node. It is an abstraction of what in the XML representation is a taxonomy element that is
  * an XLink resource.
  */
-sealed trait ResourceNode extends RelationshipNode
+sealed trait ResourceNode extends Node
 
-object RelationshipNode {
+object Node {
 
   /**
    * Key referring to a global element declaration
@@ -78,7 +77,7 @@ object RelationshipNode {
   /**
    * Key referring to an arcrole type definition
    */
-  final case class ArcroleType(roleUri: String) extends LocatorNode
+  final case class ArcroleType(arcroleUri: String) extends LocatorNode
 
   /**
    * Key referring to a named type definition.
@@ -87,12 +86,10 @@ object RelationshipNode {
 
   // TODO Key for enumeration value (XPointer-based?)
 
-  // TODO Complete label and reference resources, including reference content (which normally is XML)
-
   /**
    * A (standard or non-standard) label or reference resource
    */
-  sealed trait Resource extends ResourceNode {
+  sealed trait DocumentationResource extends ResourceNode {
 
     def docUri: URI
 
@@ -102,30 +99,38 @@ object RelationshipNode {
 
     def nonXLinkAttributes: Map[EName, String]
 
-    def text: String
-
     final def langOption: Option[String] = {
       nonXLinkAttributes.get(ENames.XmlLangEName)
     }
   }
 
-  sealed trait StandardResource extends Resource
+  sealed trait LabelResource extends DocumentationResource {
 
-  sealed trait NonStandardResource extends Resource
+    def text: String
+  }
+
+  sealed trait ReferenceResource extends DocumentationResource {
+
+    def parts: Map[EName, String]
+  }
+
+  sealed trait StandardDocumentationResource extends DocumentationResource
+
+  sealed trait NonStandardDocumentationResource extends DocumentationResource
 
   final case class ConceptLabelResource(
     docUri: URI,
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    text: String) extends StandardResource
+    text: String) extends StandardDocumentationResource with LabelResource
 
   final case class ConceptReferenceResource(
     docUri: URI,
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    text: String) extends StandardResource
+    parts: Map[EName, String]) extends StandardDocumentationResource with ReferenceResource
 
   /**
    * An element label, named label:label (and not any resource in that substitution group).
@@ -135,7 +140,7 @@ object RelationshipNode {
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    text: String) extends NonStandardResource
+    text: String) extends NonStandardDocumentationResource with LabelResource
 
   /**
    * An element reference, named reference:reference (and not any resource in that substitution group).
@@ -145,17 +150,20 @@ object RelationshipNode {
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    text: String) extends NonStandardResource
+    parts: Map[EName, String]) extends NonStandardDocumentationResource with ReferenceResource
 
-  // TODO OtherNonStandardResource
-
-  // TODO XPointer?
-
-  final case class OtherLocatorNode(docUri: URI, xpointer: String) extends LocatorNode
+  // TODO OtherNonStandardDocumentationResource
 
   /**
-   * Any other ResourceNode. For example, table content like table: ruleNode, or formula content like
-   * formula:valueAssertion, or a custom resource node, such as sbr:linkroleOrder in Dutch taxonomies.
+   * Any other LocatorNode. It contains an XPointer, and therefore carries no semantics in isolation.
    */
-  final case class OtherResourceNode(docUri: URI, xpointer: String) extends ResourceNode
+  final case class OtherLocatorNode(docUri: URI, xpointer: XPointer) extends LocatorNode
+
+  /**
+   * Any other ResourceNode. For example, table content like table, ruleNode, or formula content like
+   * formula:valueAssertion, or a custom resource node, such as sbr:linkroleOrder in Dutch taxonomies.
+   *
+   * It contains an XPointer, and therefore carries no semantics in isolation.
+   */
+  final case class OtherResourceNode(docUri: URI, xpointer: XPointer) extends ResourceNode
 }

@@ -21,9 +21,14 @@ import java.net.URI
 import scala.collection.immutable
 import scala.reflect.classTag
 
+import eu.cdevreeze.tqa.ChildSequencePointer
 import eu.cdevreeze.tqa.ENames.IdEName
 import eu.cdevreeze.tqa.ENames.XmlBaseEName
+import eu.cdevreeze.tqa.IdChildSequencePointer
+import eu.cdevreeze.tqa.IdPointer
+import eu.cdevreeze.tqa.ShorthandPointer
 import eu.cdevreeze.tqa.SubstitutionGroupMap
+import eu.cdevreeze.tqa.XPointer
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.ENameProvider
 import eu.cdevreeze.yaidom.core.Scope
