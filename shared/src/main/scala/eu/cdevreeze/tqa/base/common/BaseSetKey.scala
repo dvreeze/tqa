@@ -36,10 +36,10 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 final case class BaseSetKey(
-    val arcEName: EName,
-    val arcrole: String,
-    val extLinkEName: EName,
-    val extLinkRole: String) {
+  val arcEName: EName,
+  val arcrole: String,
+  val extLinkEName: EName,
+  val extLinkRole: String) {
 
   /**
    * Returns true if this key is for a standard arc in a standard extended link. This check looks at
@@ -58,49 +58,93 @@ object BaseSetKey {
 
   val StandardElr = "http://www.xbrl.org/2003/role/link"
 
-  def forSummationItemArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkCalculationArcEName, "http://www.xbrl.org/2003/arcrole/summation-item", LinkCalculationLinkEName, elr)
+  def forLabelArc(arcrole: String, elr: String): BaseSetKey = {
+    BaseSetKey(LinkLabelArcEName, arcrole, LinkLabelLinkEName, elr)
+  }
 
-  def forParentChildArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkPresentationArcEName, "http://www.xbrl.org/2003/arcrole/parent-child", LinkPresentationLinkEName, elr)
+  def forReferenceArc(arcrole: String, elr: String): BaseSetKey = {
+    BaseSetKey(LinkReferenceArcEName, arcrole, LinkReferenceLinkEName, elr)
+  }
 
-  def forGeneralSpecialArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/general-special", LinkDefinitionLinkEName, elr)
+  def forCalculationArc(arcrole: String, elr: String): BaseSetKey = {
+    BaseSetKey(LinkCalculationArcEName, arcrole, LinkCalculationLinkEName, elr)
+  }
 
-  def forEssenceAliasArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/essence-alias", LinkDefinitionLinkEName, elr)
+  def forPresentationArc(arcrole: String, elr: String): BaseSetKey = {
+    BaseSetKey(LinkPresentationArcEName, arcrole, LinkPresentationLinkEName, elr)
+  }
 
-  def forSimilarTuplesArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/similar-tuples", LinkDefinitionLinkEName, elr)
+  def forDefinitionArc(arcrole: String, elr: String): BaseSetKey = {
+    BaseSetKey(LinkDefinitionArcEName, arcrole, LinkDefinitionLinkEName, elr)
+  }
 
-  def forRequiresElementArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/requires-element", LinkDefinitionLinkEName, elr)
+  // BaseSetKey functions for specific label arcs
 
-  def forHypercubeDimensionArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/hypercube-dimension", LinkDefinitionLinkEName, elr)
-
-  def forDimensionDomainArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/dimension-domain", LinkDefinitionLinkEName, elr)
-
-  def forDomainMemberArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/domain-member", LinkDefinitionLinkEName, elr)
-
-  def forDimensionDefaultArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/dimension-default", LinkDefinitionLinkEName, elr)
-
-  def forAllArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/all", LinkDefinitionLinkEName, elr)
-
-  def forNotAllArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/notAll", LinkDefinitionLinkEName, elr)
-
-  def forConceptLabelArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkLabelArcEName, "http://www.xbrl.org/2003/arcrole/concept-label", LinkLabelLinkEName, elr)
-
-  def forConceptReferenceArc(elr: String): BaseSetKey =
-    BaseSetKey(LinkReferenceArcEName, "http://www.xbrl.org/2003/arcrole/concept-reference", LinkReferenceLinkEName, elr)
+  def forConceptLabelArc(elr: String): BaseSetKey = {
+    forLabelArc("http://www.xbrl.org/2003/arcrole/concept-label", elr)
+  }
 
   def forConceptLabelArcWithStandardElr: BaseSetKey = forConceptLabelArc(StandardElr)
 
+  // BaseSetKey functions for specific reference arcs
+
+  def forConceptReferenceArc(elr: String): BaseSetKey = {
+    forReferenceArc("http://www.xbrl.org/2003/arcrole/concept-reference", elr)
+  }
+
   def forConceptReferenceArcWithStandardElr: BaseSetKey = forConceptReferenceArc(StandardElr)
+
+  // BaseSetKey functions for specific calculation arcs
+
+  def forSummationItemArc(elr: String): BaseSetKey = {
+    forCalculationArc("http://www.xbrl.org/2003/arcrole/summation-item", elr)
+  }
+
+  // BaseSetKey functions for specific presentation arcs
+
+  def forParentChildArc(elr: String): BaseSetKey = {
+    forPresentationArc("http://www.xbrl.org/2003/arcrole/parent-child", elr)
+  }
+
+  // BaseSetKey functions for specific definition arcs
+
+  def forGeneralSpecialArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://www.xbrl.org/2003/arcrole/general-special", elr)
+  }
+
+  def forEssenceAliasArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://www.xbrl.org/2003/arcrole/essence-alias", elr)
+  }
+
+  def forSimilarTuplesArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://www.xbrl.org/2003/arcrole/similar-tuples", elr)
+  }
+
+  def forRequiresElementArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://www.xbrl.org/2003/arcrole/requires-element", elr)
+  }
+
+  def forHypercubeDimensionArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://xbrl.org/int/dim/arcrole/hypercube-dimension", elr)
+  }
+
+  def forDimensionDomainArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://xbrl.org/int/dim/arcrole/dimension-domain", elr)
+  }
+
+  def forDomainMemberArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://xbrl.org/int/dim/arcrole/domain-member", elr)
+  }
+
+  def forDimensionDefaultArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://xbrl.org/int/dim/arcrole/dimension-default", elr)
+  }
+
+  def forAllArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://xbrl.org/int/dim/arcrole/all", elr)
+  }
+
+  def forNotAllArc(elr: String): BaseSetKey = {
+    forDefinitionArc("http://xbrl.org/int/dim/arcrole/notAll", elr)
+  }
 }
