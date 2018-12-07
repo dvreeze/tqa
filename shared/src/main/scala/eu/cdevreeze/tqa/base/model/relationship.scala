@@ -97,7 +97,7 @@ sealed trait Relationship {
 
 sealed trait StandardRelationship extends Relationship {
 
-  def source: Node.Concept
+  def source: Node.GlobalElementDecl
 
   final def sourceConceptEName: EName = source.targetEName
 }
@@ -109,7 +109,7 @@ sealed trait NonStandardRelationship extends Relationship {
 
 sealed trait InterConceptRelationship extends StandardRelationship {
 
-  def target: Node.Concept
+  def target: Node.GlobalElementDecl
 
   final def targetConceptEName: EName = target.targetEName
 
@@ -162,7 +162,7 @@ sealed trait ConceptResourceRelationship extends StandardRelationship {
 final case class ConceptLabelRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
+  source: Node.GlobalElementDecl,
   target: Node.ConceptLabelResource,
   nonXLinkArcAttributes: Map[EName, String]) extends ConceptResourceRelationship {
 
@@ -186,7 +186,7 @@ final case class ConceptLabelRelationship(
 final case class ConceptReferenceRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
+  source: Node.GlobalElementDecl,
   target: Node.ConceptReferenceResource,
   nonXLinkArcAttributes: Map[EName, String]) extends ConceptResourceRelationship {
 
@@ -213,8 +213,8 @@ sealed trait PresentationRelationship extends InterConceptRelationship {
 final case class ParentChildRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends PresentationRelationship {
 
   def arcrole: String = baseSetKey.arcrole
@@ -228,8 +228,8 @@ final case class OtherPresentationRelationship(
   docUri: URI,
   elr: String,
   arcrole: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends PresentationRelationship {
 
   def baseSetKey: BaseSetKey = {
@@ -242,8 +242,8 @@ sealed trait CalculationRelationship extends InterConceptRelationship
 final case class SummationItemRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends CalculationRelationship {
 
   def arcrole: String = baseSetKey.arcrole
@@ -257,8 +257,8 @@ final case class OtherCalculationRelationship(
   docUri: URI,
   elr: String,
   arcrole: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends CalculationRelationship {
 
   def baseSetKey: BaseSetKey = {
@@ -271,8 +271,8 @@ sealed trait DefinitionRelationship extends InterConceptRelationship
 final case class GeneralSpecialRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
@@ -285,8 +285,8 @@ final case class GeneralSpecialRelationship(
 final case class EssenceAliasRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
@@ -299,8 +299,8 @@ final case class EssenceAliasRelationship(
 final case class SimilarTuplesRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
@@ -313,8 +313,8 @@ final case class SimilarTuplesRelationship(
 final case class RequiresElementRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
@@ -359,8 +359,8 @@ sealed trait HasHypercubeRelationship extends DimensionalRelationship {
 final case class AllRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends HasHypercubeRelationship {
 
   def isAllRelationship: Boolean = true
@@ -375,8 +375,8 @@ final case class AllRelationship(
 final case class NotAllRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends HasHypercubeRelationship {
 
   def isAllRelationship: Boolean = false
@@ -391,8 +391,8 @@ final case class NotAllRelationship(
 final case class HypercubeDimensionRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DimensionalRelationship {
 
   def hypercube: EName = sourceConceptEName
@@ -432,8 +432,8 @@ sealed trait DomainAwareRelationship extends DimensionalRelationship {
 final case class DimensionDomainRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DomainAwareRelationship {
 
   def dimension: EName = sourceConceptEName
@@ -450,8 +450,8 @@ final case class DimensionDomainRelationship(
 final case class DomainMemberRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DomainAwareRelationship {
 
   def domain: EName = sourceConceptEName
@@ -468,8 +468,8 @@ final case class DomainMemberRelationship(
 final case class DimensionDefaultRelationship(
   docUri: URI,
   elr: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DimensionalRelationship {
 
   def dimension: EName = sourceConceptEName
@@ -487,8 +487,8 @@ final case class OtherDefinitionRelationship(
   docUri: URI,
   elr: String,
   arcrole: String,
-  source: Node.Concept,
-  target: Node.Concept,
+  source: Node.GlobalElementDecl,
+  target: Node.GlobalElementDecl,
   nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
 
   def baseSetKey: BaseSetKey = {
@@ -571,7 +571,7 @@ final case class OtherNonStandardRelationship(
 
 // Companion objects
 
-object Relationship {
+object Relationship extends RelationshipBuilder[Relationship] {
 
   def opt(
     docUri: URI,
@@ -581,7 +581,7 @@ object Relationship {
     nonXLinkArcAttributes: Map[EName, String]): Option[Relationship] = {
 
     (baseSetKey.arcEName.namespaceUriOption, source) match {
-      case (Some(Namespaces.LinkNamespace), sourceConcept @ Node.Concept(_)) =>
+      case (Some(Namespaces.LinkNamespace), sourceConcept @ Node.GlobalElementDecl(_)) =>
         StandardRelationship.opt(docUri, baseSetKey, sourceConcept, target, nonXLinkArcAttributes)
       case (Some(ns), _) if ns != Namespaces.LinkNamespace =>
         NonStandardRelationship.opt(docUri, baseSetKey, source, target, nonXLinkArcAttributes)
@@ -591,17 +591,17 @@ object Relationship {
   }
 }
 
-object StandardRelationship {
+object StandardRelationship extends RelationshipBuilder[StandardRelationship] {
 
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node.Concept,
+    source: Node.GlobalElementDecl,
     target: Node,
     nonXLinkArcAttributes: Map[EName, String]): Option[StandardRelationship] = {
 
     (baseSetKey.arcEName.namespaceUriOption, target) match {
-      case (Some(Namespaces.LinkNamespace), targetConcept @ Node.Concept(_)) =>
+      case (Some(Namespaces.LinkNamespace), targetConcept @ Node.GlobalElementDecl(_)) =>
         InterConceptRelationship.opt(docUri, baseSetKey, source, targetConcept, nonXLinkArcAttributes)
       case (Some(Namespaces.LinkNamespace), resource: Node.StandardDocumentationResource) =>
         ConceptResourceRelationship.opt(docUri, baseSetKey, source, resource, nonXLinkArcAttributes)
@@ -611,13 +611,13 @@ object StandardRelationship {
   }
 }
 
-object InterConceptRelationship {
+object InterConceptRelationship extends RelationshipBuilder[InterConceptRelationship] {
 
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node.Concept,
-    target: Node.Concept,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
     nonXLinkArcAttributes: Map[EName, String]): Option[InterConceptRelationship] = {
 
     baseSetKey.arcEName match {
@@ -633,12 +633,12 @@ object InterConceptRelationship {
   }
 }
 
-object ConceptResourceRelationship {
+object ConceptResourceRelationship extends RelationshipBuilder[ConceptResourceRelationship] {
 
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node.Concept,
+    source: Node.GlobalElementDecl,
     target: Node.StandardDocumentationResource,
     nonXLinkArcAttributes: Map[EName, String]): Option[ConceptResourceRelationship] = {
 
@@ -653,13 +653,13 @@ object ConceptResourceRelationship {
   }
 }
 
-object DefinitionRelationship {
+object DefinitionRelationship extends RelationshipBuilder[DefinitionRelationship] {
 
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node.Concept,
-    target: Node.Concept,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
     nonXLinkArcAttributes: Map[EName, String]): Option[DefinitionRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
@@ -680,13 +680,13 @@ object DefinitionRelationship {
   }
 }
 
-object PresentationRelationship {
+object PresentationRelationship extends RelationshipBuilder[PresentationRelationship] {
 
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node.Concept,
-    target: Node.Concept,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
     nonXLinkArcAttributes: Map[EName, String]): Option[PresentationRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
@@ -700,13 +700,13 @@ object PresentationRelationship {
   }
 }
 
-object CalculationRelationship {
+object CalculationRelationship extends RelationshipBuilder[CalculationRelationship] {
 
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node.Concept,
-    target: Node.Concept,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
     nonXLinkArcAttributes: Map[EName, String]): Option[CalculationRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
@@ -720,13 +720,13 @@ object CalculationRelationship {
   }
 }
 
-object DimensionalRelationship {
+object DimensionalRelationship extends RelationshipBuilder[DimensionalRelationship] {
 
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node.Concept,
-    target: Node.Concept,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
     nonXLinkArcAttributes: Map[EName, String]): Option[DimensionalRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
@@ -748,7 +748,7 @@ object DimensionalRelationship {
   }
 }
 
-object NonStandardRelationship {
+object NonStandardRelationship extends RelationshipBuilder[NonStandardRelationship] {
 
   def opt(
     docUri: URI,

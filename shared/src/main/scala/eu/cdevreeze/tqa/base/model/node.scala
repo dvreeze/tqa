@@ -51,23 +51,11 @@ sealed trait ResourceNode extends Node
 object Node {
 
   /**
-   * Key referring to a global element declaration
+   * Key referring to a global element declaration. Typically the global element declaration is for a concept
+   * (that is, item or tuple), but this is only known if we have enough context to determine the substitution
+   * group inheritance hierarchy. It could also be a global element declaration for a typed dimension member.
    */
-  sealed trait Element extends LocatorNode {
-
-    def targetEName: EName
-  }
-
-  /**
-   * Key referring to a global element declaration for a concept (that is, item or tuple)
-   */
-  final case class Concept(targetEName: EName) extends Element
-
-  /**
-   * Key referring to a global element declaration for something that is not a concept. For example,
-   * this key could refer to a typed dimension member declaration.
-   */
-  final case class OtherElement(targetEName: EName) extends Element
+  final case class GlobalElementDecl(targetEName: EName) extends LocatorNode
 
   /**
    * Key referring to a role type definition
@@ -82,7 +70,7 @@ object Node {
   /**
    * Key referring to a named type definition.
    */
-  final case class SchemaType(targetEName: EName) extends LocatorNode
+  final case class NamedTypeDef(targetEName: EName) extends LocatorNode
 
   // TODO Key for enumeration value (XPointer-based?)
 
@@ -156,6 +144,9 @@ object Node {
 
   /**
    * Any other LocatorNode. It contains an XPointer, and therefore carries no semantics in isolation.
+   *
+   * Note that only XPointers containing just an ID are stable in that they do not depend on the order of
+   * elements in the document pointed to.
    */
   final case class OtherLocatorNode(docUri: URI, xpointer: XPointer) extends LocatorNode
 
@@ -164,6 +155,9 @@ object Node {
    * formula:valueAssertion, or a custom resource node, such as sbr:linkroleOrder in Dutch taxonomies.
    *
    * It contains an XPointer, and therefore carries no semantics in isolation.
+   *
+   * Note that only XPointers containing just an ID are stable in that they do not depend on the order of
+   * elements in the document pointed to.
    */
   final case class OtherResourceNode(docUri: URI, xpointer: XPointer) extends ResourceNode
 }
