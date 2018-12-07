@@ -571,7 +571,11 @@ final case class OtherNonStandardRelationship(
 
 // Companion objects
 
-object Relationship extends RelationshipBuilder[Relationship] {
+object Relationship extends RelationshipBuilder {
+
+  type RelationshipType = Relationship
+  type SourceNodeType = Node
+  type TargetNodeType = Node
 
   def opt(
     docUri: URI,
@@ -591,7 +595,11 @@ object Relationship extends RelationshipBuilder[Relationship] {
   }
 }
 
-object StandardRelationship extends RelationshipBuilder[StandardRelationship] {
+object StandardRelationship extends RelationshipBuilder {
+
+  type RelationshipType = StandardRelationship
+  type SourceNodeType = Node.GlobalElementDecl
+  type TargetNodeType = Node
 
   def opt(
     docUri: URI,
@@ -611,7 +619,11 @@ object StandardRelationship extends RelationshipBuilder[StandardRelationship] {
   }
 }
 
-object InterConceptRelationship extends RelationshipBuilder[InterConceptRelationship] {
+object InterConceptRelationship extends RelationshipBuilder {
+
+  type RelationshipType = InterConceptRelationship
+  type SourceNodeType = Node.GlobalElementDecl
+  type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
     docUri: URI,
@@ -633,7 +645,11 @@ object InterConceptRelationship extends RelationshipBuilder[InterConceptRelation
   }
 }
 
-object ConceptResourceRelationship extends RelationshipBuilder[ConceptResourceRelationship] {
+object ConceptResourceRelationship extends RelationshipBuilder {
+
+  type RelationshipType = ConceptResourceRelationship
+  type SourceNodeType = Node.GlobalElementDecl
+  type TargetNodeType = Node.StandardDocumentationResource
 
   def opt(
     docUri: URI,
@@ -653,7 +669,11 @@ object ConceptResourceRelationship extends RelationshipBuilder[ConceptResourceRe
   }
 }
 
-object DefinitionRelationship extends RelationshipBuilder[DefinitionRelationship] {
+object DefinitionRelationship extends RelationshipBuilder {
+
+  type RelationshipType = DefinitionRelationship
+  type SourceNodeType = Node.GlobalElementDecl
+  type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
     docUri: URI,
@@ -680,7 +700,11 @@ object DefinitionRelationship extends RelationshipBuilder[DefinitionRelationship
   }
 }
 
-object PresentationRelationship extends RelationshipBuilder[PresentationRelationship] {
+object PresentationRelationship extends RelationshipBuilder {
+
+  type RelationshipType = PresentationRelationship
+  type SourceNodeType = Node.GlobalElementDecl
+  type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
     docUri: URI,
@@ -700,7 +724,11 @@ object PresentationRelationship extends RelationshipBuilder[PresentationRelation
   }
 }
 
-object CalculationRelationship extends RelationshipBuilder[CalculationRelationship] {
+object CalculationRelationship extends RelationshipBuilder {
+
+  type RelationshipType = CalculationRelationship
+  type SourceNodeType = Node.GlobalElementDecl
+  type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
     docUri: URI,
@@ -720,7 +748,11 @@ object CalculationRelationship extends RelationshipBuilder[CalculationRelationsh
   }
 }
 
-object DimensionalRelationship extends RelationshipBuilder[DimensionalRelationship] {
+object DimensionalRelationship extends RelationshipBuilder {
+
+  type RelationshipType = DimensionalRelationship
+  type SourceNodeType = Node.GlobalElementDecl
+  type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
     docUri: URI,
@@ -748,7 +780,11 @@ object DimensionalRelationship extends RelationshipBuilder[DimensionalRelationsh
   }
 }
 
-object NonStandardRelationship extends RelationshipBuilder[NonStandardRelationship] {
+object NonStandardRelationship extends RelationshipBuilder {
+
+  type RelationshipType = NonStandardRelationship
+  type SourceNodeType = Node
+  type TargetNodeType = Node
 
   def opt(
     docUri: URI,

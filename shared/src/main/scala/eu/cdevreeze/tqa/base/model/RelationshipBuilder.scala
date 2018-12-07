@@ -26,7 +26,13 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-trait RelationshipBuilder[A <: Relationship] {
+trait RelationshipBuilder {
+
+  type RelationshipType <: Relationship
+
+  type SourceNodeType <: Node
+
+  type TargetNodeType <: Node
 
   /**
    * Creates a relationship of the given type from the passed parameters, if applicable,
@@ -35,7 +41,16 @@ trait RelationshipBuilder[A <: Relationship] {
   def opt(
     docUri: URI,
     baseSetKey: BaseSetKey,
-    source: Node,
-    target: Node,
-    nonXLinkArcAttributes: Map[EName, String]): Option[A]
+    source: SourceNodeType,
+    target: TargetNodeType,
+    nonXLinkArcAttributes: Map[EName, String]): Option[RelationshipType]
+}
+
+object RelationshipBuilder {
+
+  type Aux[R, S, T] = RelationshipBuilder {
+    type RelationshipType = R
+    type SourceNodeType = S
+    type TargetNodeType = T
+  }
 }
