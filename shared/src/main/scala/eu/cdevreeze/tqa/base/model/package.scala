@@ -21,11 +21,13 @@ package eu.cdevreeze.tqa.base
  * other than keeping XPath expressions as strings. It is not XLink-aware, but replaces XML-backed relationships
  * by a case class hierarchy for relationships.
  *
+ * The model consists of schema content elements, and "linkbase content". The latter consists of nodes (which are
+ * abstractions of XLink locators and resource) and of relationships (which are abstractions of XLink arcs).
+ *
  * The model is meant to be used for (somewhat high-level) querying, as an attractive alternative to the XML
- * representation. It is not meant to be used for taxonomy editing and creation, because the model elements
- * may represent context that in the XML representation could even consist of multiple documents. Think for
- * example knowledge about substitution groups and their ancestry. As a less extreme example, think the ELR
- * of the parent extended link of a relationship.
+ * representation. It can also be used for taxonomy editing and creation, but keep in mind that the model elements
+ * may need context that in the XML representation could even consist of multiple documents. Think for
+ * example of knowledge about substitution groups and their ancestry.
  *
  * The model is not hierarchical.
  *
