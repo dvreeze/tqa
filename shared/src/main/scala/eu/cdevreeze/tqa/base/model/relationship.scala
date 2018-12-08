@@ -571,7 +571,7 @@ final case class OtherNonStandardRelationship(
 
 // Companion objects
 
-object Relationship extends RelationshipBuilder {
+object Relationship extends Relationships.Factory {
 
   type RelationshipType = Relationship
   type SourceNodeType = Node
@@ -595,7 +595,7 @@ object Relationship extends RelationshipBuilder {
   }
 }
 
-object StandardRelationship extends RelationshipBuilder {
+object StandardRelationship extends Relationships.Factory {
 
   type RelationshipType = StandardRelationship
   type SourceNodeType = Node.GlobalElementDecl
@@ -619,7 +619,7 @@ object StandardRelationship extends RelationshipBuilder {
   }
 }
 
-object InterConceptRelationship extends RelationshipBuilder {
+object InterConceptRelationship extends Relationships.Factory {
 
   type RelationshipType = InterConceptRelationship
   type SourceNodeType = Node.GlobalElementDecl
@@ -645,7 +645,7 @@ object InterConceptRelationship extends RelationshipBuilder {
   }
 }
 
-object ConceptResourceRelationship extends RelationshipBuilder {
+object ConceptResourceRelationship extends Relationships.Factory {
 
   type RelationshipType = ConceptResourceRelationship
   type SourceNodeType = Node.GlobalElementDecl
@@ -669,7 +669,7 @@ object ConceptResourceRelationship extends RelationshipBuilder {
   }
 }
 
-object DefinitionRelationship extends RelationshipBuilder {
+object DefinitionRelationship extends Relationships.Factory {
 
   type RelationshipType = DefinitionRelationship
   type SourceNodeType = Node.GlobalElementDecl
@@ -700,7 +700,7 @@ object DefinitionRelationship extends RelationshipBuilder {
   }
 }
 
-object PresentationRelationship extends RelationshipBuilder {
+object PresentationRelationship extends Relationships.Factory {
 
   type RelationshipType = PresentationRelationship
   type SourceNodeType = Node.GlobalElementDecl
@@ -724,7 +724,7 @@ object PresentationRelationship extends RelationshipBuilder {
   }
 }
 
-object CalculationRelationship extends RelationshipBuilder {
+object CalculationRelationship extends Relationships.Factory {
 
   type RelationshipType = CalculationRelationship
   type SourceNodeType = Node.GlobalElementDecl
@@ -748,7 +748,7 @@ object CalculationRelationship extends RelationshipBuilder {
   }
 }
 
-object DimensionalRelationship extends RelationshipBuilder {
+object DimensionalRelationship extends Relationships.Factory {
 
   type RelationshipType = DimensionalRelationship
   type SourceNodeType = Node.GlobalElementDecl
@@ -780,7 +780,7 @@ object DimensionalRelationship extends RelationshipBuilder {
   }
 }
 
-object NonStandardRelationship extends RelationshipBuilder {
+object NonStandardRelationship extends Relationships.Factory {
 
   type RelationshipType = NonStandardRelationship
   type SourceNodeType = Node
