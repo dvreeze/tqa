@@ -55,6 +55,11 @@ sealed trait SchemaContentElement {
   def docUri: URI
 
   /**
+   * The resolved name of the corresponding XML element.
+   */
+  def resolvedName: EName
+
+  /**
    * The attributes in the corresponding XML element, but with QName values replaced by ENames in James Clark notation.
    */
   def attributes: Map[EName, String]
@@ -64,24 +69,32 @@ sealed trait SchemaContentElement {
    */
   def children: immutable.IndexedSeq[SchemaContentElement]
 
-  /**
-   * The resolved name of the corresponding XML element.
-   */
-  def resolvedName: EName
-
   // Querying for children, descendants, etc.
 
-  final def findChildElem(p: SchemaContentElement => Boolean): Option[SchemaContentElement] = {
+  final def findChild(p: SchemaContentElement => Boolean): Option[SchemaContentElement] = {
     children.find(p)
   }
 
-  final def findChildElemOfType[A <: SchemaContentElement](
+  final def findChildOfType[A <: SchemaContentElement](
     classTag: ClassTag[A])(
     p: SchemaContentElement => Boolean): Option[A] = {
 
     implicit val clsTag = classTag
 
     children.collectFirst { case ch: A if p(ch) => ch }
+  }
+
+  final def filterDescendants(p: SchemaContentElement => Boolean): immutable.IndexedSeq[SchemaContentElement] = {
+    children.flatMap(_.filterDescendantsOrSelf(p))
+  }
+
+  final def filterDescendantsOrSelf(p: SchemaContentElement => Boolean): immutable.IndexedSeq[SchemaContentElement] = {
+    val thisElemFiltered = immutable.IndexedSeq(this).filter(p)
+
+    // Recursive calls
+    val descendantsFiltered = children.flatMap(_.filterDescendantsOrSelf(p))
+
+    thisElemFiltered ++ descendantsFiltered
   }
 }
 
@@ -412,11 +425,11 @@ sealed trait SimpleTypeDefinition extends TypeDefinition {
    * Returns the variety. This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def variety: Variety = {
-    if (findChildElem(_.resolvedName == ENames.XsListEName).isDefined) {
+    if (findChild(_.resolvedName == ENames.XsListEName).isDefined) {
       Variety.List
-    } else if (findChildElem(_.resolvedName == ENames.XsUnionEName).isDefined) {
+    } else if (findChild(_.resolvedName == ENames.XsUnionEName).isDefined) {
       Variety.Union
-    } else if (findChildElem(_.resolvedName == ENames.XsRestrictionEName).isDefined) {
+    } else if (findChild(_.resolvedName == ENames.XsRestrictionEName).isDefined) {
       Variety.Atomic
     } else {
       // TODO Better error message!
@@ -429,7 +442,7 @@ sealed trait SimpleTypeDefinition extends TypeDefinition {
    */
   final def baseTypeOption: Option[EName] = variety match {
     case Variety.Atomic =>
-      findChildElemOfType(classTag[Restriction])(_ => true).headOption.flatMap(_.baseTypeOption)
+      findChildOfType(classTag[Restriction])(_ => true).headOption.flatMap(_.baseTypeOption)
     case _ => None
   }
 }
@@ -442,8 +455,8 @@ sealed trait ComplexTypeDefinition extends TypeDefinition {
   final def resolvedName: EName = ENames.XsComplexTypeEName
 
   final def contentElemOption: Option[Content] = {
-    val complexContentOption = findChildElemOfType(classTag[ComplexContent])(_ => true)
-    val simpleContentOption = findChildElemOfType(classTag[SimpleContent])(_ => true)
+    val complexContentOption = findChildOfType(classTag[ComplexContent])(_ => true)
+    val simpleContentOption = findChildOfType(classTag[SimpleContent])(_ => true)
 
     complexContentOption.orElse(simpleContentOption)
   }
@@ -639,8 +652,8 @@ sealed trait Content extends StandardSchemaContentElement {
   final def derivation: RestrictionOrExtension = {
     // TODO Better error message!
 
-    findChildElemOfType(classTag[Restriction])(_ => true)
-      .orElse(findChildElemOfType(classTag[Extension])(_ => true))
+    findChildOfType(classTag[Restriction])(_ => true)
+      .orElse(findChildOfType(classTag[Extension])(_ => true))
       .getOrElse(sys.error(s"Expected xs:restriction or xs:extension child element"))
   }
 
