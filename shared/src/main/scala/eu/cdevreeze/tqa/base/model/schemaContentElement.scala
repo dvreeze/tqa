@@ -20,7 +20,6 @@ import java.net.URI
 
 import scala.collection.immutable
 import scala.reflect.classTag
-import scala.reflect.ClassTag
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
@@ -28,11 +27,17 @@ import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.base.common.Variety
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemApi
+import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
+import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
  * Any '''taxonomy schema content element''' in the model. It is either standard schema content, which is a representation
  * of an element in the XML Schema namespace, or it is appinfo content. The schema root element, and imports and
  * linkbaseRefs are not represented in this model. Neither are the annotation and appinfo elements.
+ *
+ * This schema content model offers the yaidom SubtypeAwareElemApi API. Note, however, that most schema content
+ * elements have no child elements, but type definitions typically do have descendant elements.
  *
  * Due to the fact that this schema model hardly contains any URI references, it plays no role in DTS discovery.
  * Also note that this schema model has no knowledge about XLink.
@@ -50,7 +55,9 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-sealed trait SchemaContentElement {
+sealed trait SchemaContentElement extends SubtypeAwareElemApi with SubtypeAwareElemLike {
+
+  type ThisElem = SchemaContentElement
 
   def docUri: URI
 
@@ -67,34 +74,14 @@ sealed trait SchemaContentElement {
   /**
    * The (immediate) child elements of this schema content element.
    */
-  def children: immutable.IndexedSeq[SchemaContentElement]
+  def childElems: immutable.IndexedSeq[SchemaContentElement]
 
-  // Querying for children, descendants, etc.
+  // Methods needed for completing the SubtypeAwareElemApi API
 
-  final def findChild(p: SchemaContentElement => Boolean): Option[SchemaContentElement] = {
-    children.find(p)
-  }
+  final def thisElem: SchemaContentElement = this
 
-  final def findChildOfType[A <: SchemaContentElement](
-    classTag: ClassTag[A])(
-    p: SchemaContentElement => Boolean): Option[A] = {
-
-    implicit val clsTag = classTag
-
-    children.collectFirst { case ch: A if p(ch) => ch }
-  }
-
-  final def filterDescendants(p: SchemaContentElement => Boolean): immutable.IndexedSeq[SchemaContentElement] = {
-    children.flatMap(_.filterDescendantsOrSelf(p))
-  }
-
-  final def filterDescendantsOrSelf(p: SchemaContentElement => Boolean): immutable.IndexedSeq[SchemaContentElement] = {
-    val thisElemFiltered = immutable.IndexedSeq(this).filter(p)
-
-    // Recursive calls
-    val descendantsFiltered = children.flatMap(_.filterDescendantsOrSelf(p))
-
-    thisElemFiltered ++ descendantsFiltered
+  final def findAllChildElems: immutable.IndexedSeq[SchemaContentElement] = {
+    childElems
   }
 }
 
@@ -228,7 +215,7 @@ final case class GlobalElementDeclaration(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with CanBeAbstract {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with CanBeAbstract {
 
   /**
    * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
@@ -299,7 +286,7 @@ final case class LocalElementDeclaration(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with Particle
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with Particle
 
 /**
  * Element reference, referring to a global element declaration. Like local element declarations it is not a child element of
@@ -309,7 +296,7 @@ final case class ElementReference(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclarationOrReference with Reference
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclarationOrReference with Reference
 
 // Attribute declarations or references.
 
@@ -341,7 +328,7 @@ final case class GlobalAttributeDeclaration(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclaration {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclaration {
 
   /**
    * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
@@ -361,7 +348,7 @@ final case class LocalAttributeDeclaration(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclaration
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclaration
 
 /**
  * Attribute reference. It is an xs:attribute element referring to a global attribute declaration. It is not a direct child element of
@@ -371,7 +358,7 @@ final case class AttributeReference(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclarationOrReference with Reference
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclarationOrReference with Reference
 
 // Type definitions.
 
@@ -425,11 +412,11 @@ sealed trait SimpleTypeDefinition extends TypeDefinition {
    * Returns the variety. This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def variety: Variety = {
-    if (findChild(_.resolvedName == ENames.XsListEName).isDefined) {
+    if (findChildElem(_.resolvedName == ENames.XsListEName).isDefined) {
       Variety.List
-    } else if (findChild(_.resolvedName == ENames.XsUnionEName).isDefined) {
+    } else if (findChildElem(_.resolvedName == ENames.XsUnionEName).isDefined) {
       Variety.Union
-    } else if (findChild(_.resolvedName == ENames.XsRestrictionEName).isDefined) {
+    } else if (findChildElem(_.resolvedName == ENames.XsRestrictionEName).isDefined) {
       Variety.Atomic
     } else {
       // TODO Better error message!
@@ -442,7 +429,7 @@ sealed trait SimpleTypeDefinition extends TypeDefinition {
    */
   final def baseTypeOption: Option[EName] = variety match {
     case Variety.Atomic =>
-      findChildOfType(classTag[Restriction])(_ => true).headOption.flatMap(_.baseTypeOption)
+      findChildElemOfType(classTag[Restriction])(anyElem).headOption.flatMap(_.baseTypeOption)
     case _ => None
   }
 }
@@ -455,8 +442,8 @@ sealed trait ComplexTypeDefinition extends TypeDefinition {
   final def resolvedName: EName = ENames.XsComplexTypeEName
 
   final def contentElemOption: Option[Content] = {
-    val complexContentOption = findChildOfType(classTag[ComplexContent])(_ => true)
-    val simpleContentOption = findChildOfType(classTag[SimpleContent])(_ => true)
+    val complexContentOption = findChildElemOfType(classTag[ComplexContent])(anyElem)
+    val simpleContentOption = findChildElemOfType(classTag[SimpleContent])(anyElem)
 
     complexContentOption.orElse(simpleContentOption)
   }
@@ -476,7 +463,7 @@ final case class NamedSimpleTypeDefinition(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends NamedTypeDefinition with SimpleTypeDefinition
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends NamedTypeDefinition with SimpleTypeDefinition
 
 /**
  * Anonymous simple type definition. It is a non-top-level xs:simpleType element without any name attribute.
@@ -485,7 +472,7 @@ final case class AnonymousSimpleTypeDefinition(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends AnonymousTypeDefinition with SimpleTypeDefinition
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AnonymousTypeDefinition with SimpleTypeDefinition
 
 /**
  * Named complex type definition. It is a top-level xs:complexType element with a name attribute.
@@ -494,7 +481,7 @@ final case class NamedComplexTypeDefinition(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends NamedTypeDefinition with ComplexTypeDefinition
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends NamedTypeDefinition with ComplexTypeDefinition
 
 /**
  * Anonymous complex type definition. It is a non-top-level xs:complexType element without any name attribute.
@@ -503,7 +490,7 @@ final case class AnonymousComplexTypeDefinition(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends AnonymousTypeDefinition with ComplexTypeDefinition
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AnonymousTypeDefinition with ComplexTypeDefinition
 
 // Attribute group definitions and references.
 
@@ -522,7 +509,7 @@ final case class AttributeGroupDefinition(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends AttributeGroupDefinitionOrReference with NamedDeclOrDef
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeGroupDefinitionOrReference with NamedDeclOrDef
 
 /**
  * Attribute group reference, so a non-top-level xs:attributeGroup element with a ref attribute, referring to an attribute group definition.
@@ -531,7 +518,7 @@ final case class AttributeGroupReference(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends AttributeGroupDefinitionOrReference with Reference
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeGroupDefinitionOrReference with Reference
 
 // Model group definitions and references.
 
@@ -550,7 +537,7 @@ final case class ModelGroupDefinition(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroupDefinitionOrReference
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroupDefinitionOrReference
 
 /**
  * Model group reference, so a non-top-level xs:group element with a ref attribute, referring to a model group definition.
@@ -559,7 +546,7 @@ final case class ModelGroupReference(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroupDefinitionOrReference with Reference
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroupDefinitionOrReference with Reference
 
 // Ignoring identity constraints, notations, wildcards.
 
@@ -575,7 +562,7 @@ final case class SequenceModelGroup(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
 
   def resolvedName: EName = ENames.XsSequenceEName
 }
@@ -587,7 +574,7 @@ final case class ChoiceModelGroup(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
 
   def resolvedName: EName = ENames.XsChoiceEName
 }
@@ -599,7 +586,7 @@ final case class AllModelGroup(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
 
   def resolvedName: EName = ENames.XsAllEName
 }
@@ -624,7 +611,7 @@ final case class Restriction(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension {
 
   def resolvedName: EName = ENames.XsRestrictionEName
 }
@@ -636,7 +623,7 @@ final case class Extension(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension {
 
   def resolvedName: EName = ENames.XsExtensionEName
 }
@@ -652,8 +639,8 @@ sealed trait Content extends StandardSchemaContentElement {
   final def derivation: RestrictionOrExtension = {
     // TODO Better error message!
 
-    findChildOfType(classTag[Restriction])(_ => true)
-      .orElse(findChildOfType(classTag[Extension])(_ => true))
+    findChildElemOfType(classTag[Restriction])(anyElem)
+      .orElse(findChildElemOfType(classTag[Extension])(anyElem))
       .getOrElse(sys.error(s"Expected xs:restriction or xs:extension child element"))
   }
 
@@ -671,7 +658,7 @@ final case class SimpleContent(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends Content {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends Content {
 
   def resolvedName: EName = ENames.XsSimpleContentEName
 }
@@ -683,7 +670,7 @@ final case class ComplexContent(
   docUri: URI,
   targetNamespaceOption: Option[String],
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends Content {
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends Content {
 
   def resolvedName: EName = ENames.XsComplexContentEName
 }
@@ -700,4 +687,4 @@ final case class OtherSchemaContentElement(
   targetNamespaceOption: Option[String],
   resolvedName: EName,
   attributes: Map[EName, String],
-  children: immutable.IndexedSeq[SchemaContentElement]) extends SchemaContentElement
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends SchemaContentElement
