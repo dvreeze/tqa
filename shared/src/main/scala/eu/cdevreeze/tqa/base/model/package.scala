@@ -43,4 +43,13 @@ package eu.cdevreeze.tqa.base
  *
  * @author Chris de Vreeze
  */
-package object model
+package object model {
+
+  type ParentChildRelationshipPath = ConsecutiveRelationshipPath[ParentChildRelationship]
+
+  type DomainMemberRelationshipPath = ConsecutiveRelationshipPath[DomainMemberRelationship]
+
+  type DomainAwareRelationshipPath = ConsecutiveRelationshipPath[DomainAwareRelationship]
+
+  type DimensionalRelationshipPath = ConsecutiveRelationshipPath[DimensionalRelationship]
+}

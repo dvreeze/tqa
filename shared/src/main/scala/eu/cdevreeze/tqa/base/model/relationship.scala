@@ -510,7 +510,7 @@ sealed trait ElementResourceRelationship extends NonStandardRelationship {
 final case class ElementLabelRelationship(
   docUri: URI,
   elr: String,
-  source: LocatorNode,
+  source: Node,
   target: Node.ElementLabelResource,
   nonXLinkArcAttributes: Map[EName, String]) extends ElementResourceRelationship {
 
@@ -536,7 +536,7 @@ final case class ElementLabelRelationship(
 final case class ElementReferenceRelationship(
   docUri: URI,
   elr: String,
-  source: LocatorNode,
+  source: Node,
   target: Node.ElementReferenceResource,
   nonXLinkArcAttributes: Map[EName, String]) extends ElementResourceRelationship {
 
@@ -796,11 +796,11 @@ object NonStandardRelationship extends Relationships.Factory {
     if (baseSetKey.arcEName.namespaceUriOption.contains(Namespaces.LinkNamespace)) {
       None
     } else {
-      (baseSetKey.arcrole, source, target) match {
-        case ("http://xbrl.org/arcrole/2008/element-label", sourceLoc: LocatorNode, res: Node.ElementLabelResource) =>
-          Some(ElementLabelRelationship(docUri, baseSetKey.extLinkRole, sourceLoc, res, nonXLinkArcAttributes))
-        case ("http://xbrl.org/arcrole/2008/element-reference", sourceLoc: LocatorNode, res: Node.ElementReferenceResource) =>
-          Some(ElementReferenceRelationship(docUri, baseSetKey.extLinkRole, sourceLoc, res, nonXLinkArcAttributes))
+      (baseSetKey.arcrole, target) match {
+        case ("http://xbrl.org/arcrole/2008/element-label", res: Node.ElementLabelResource) =>
+          Some(ElementLabelRelationship(docUri, baseSetKey.extLinkRole, source, res, nonXLinkArcAttributes))
+        case ("http://xbrl.org/arcrole/2008/element-reference", res: Node.ElementReferenceResource) =>
+          Some(ElementReferenceRelationship(docUri, baseSetKey.extLinkRole, source, res, nonXLinkArcAttributes))
         case _ =>
           Some(OtherNonStandardRelationship(docUri, baseSetKey, source, target, nonXLinkArcAttributes))
       }

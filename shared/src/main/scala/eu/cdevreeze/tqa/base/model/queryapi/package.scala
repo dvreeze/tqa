@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base
-
-import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
-import eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
-import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
+package eu.cdevreeze.tqa.base.model
 
 /**
  * Traits offering parts of a '''taxonomy query API'''. They can be assembled into "taxonomy classes".
@@ -27,8 +22,8 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  *
  * Examples of such traits are traits for querying schema content, for querying inter-concept relationships,
  * for querying dimensional relationships in particular, etc. These traits combined form the
- * [[eu.cdevreeze.tqa.base.queryapi.TaxonomyApi]] query API. The partial implementations combined form the
- * [[eu.cdevreeze.tqa.base.queryapi.TaxonomyLike]] trait, which implements most of the `TaxonomyApi` query API.
+ * [[eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi]] query API. The partial implementations combined form the
+ * [[eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike]] trait, which implements most of the `TaxonomyApi` query API.
  *
  * Most query API methods are quite forgiving when the taxonomy is incomplete or incorrect. They just
  * return the queried data to the extent that it is found. Only the getXXX methods that expect precisely
@@ -41,14 +36,12 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * TQA (except the "xpathaware" namespace) has no knowledge about XPath, so any XPath in the taxonomy is
  * just text, as far as TQA is concerned.
  *
- * This package unidirectionally depends on the [[eu.cdevreeze.tqa.base.relationship]] and [[eu.cdevreeze.tqa.base.dom]] packages.
+ * This package unidirectionally depends on the [[eu.cdevreeze.tqa.base.model]] package.
  *
  * ==Usage===
  *
- * In the following examples, assume that we have a `taxonomy` of type [[eu.cdevreeze.tqa.base.queryapi.TaxonomyApi]],
- * for example a [[eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy]]. It may or may not be closed under "DTS discovery rules".
- * The examples show how the taxonomy query API, along with the types in packages [[eu.cdevreeze.tqa.base.relationship]] and
- * [[eu.cdevreeze.tqa.base.dom]] can be used to query XBRL taxonomies.
+ * In the following examples, assume that we have a `taxonomy` of type [[eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi]].
+ * The examples show how the taxonomy query API can be used to query XBRL taxonomies.
  *
  * Suppose we want to query the taxonomy for all English verbose concept labels, grouped by the concept target `EName`.
  * Note that the "target EName" of a concept declaration is the name attribute along with the target namespace of the
@@ -57,12 +50,12 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * {{{
  * import scala.reflect.classTag
  * import eu.cdevreeze.yaidom.core.EName
- * import eu.cdevreeze.tqa.base.relationship.ConceptLabelRelationship
+ * import eu.cdevreeze.tqa.base.model.ConceptLabelRelationship
  *
  * val concepts: Set[EName] =
  *   taxonomy.findAllConceptDeclarations.map(_.targetEName).toSet
  *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq.map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingConceptLabelRelationships(conceptEName) { rel =>
  *
@@ -73,7 +66,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * }).toMap
  *
  * val verboseEnConceptLabels: Map[EName, Set[String]] =
- *   conceptLabelRelationshipsByConceptEName mapValues { rels =>
+ *   conceptLabelRelationshipsByConceptEName.mapValues { rels =>
  *     rels.map(_.labelText).toSet
  *   }
  * }}}
@@ -90,7 +83,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * val concepts: Set[EName] =
  *   taxonomy.filterPrimaryItemDeclarations(_.isConcrete).map(_.targetEName).toSet
  *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq.map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingConceptLabelRelationships(conceptEName) { rel =>
  *
@@ -101,7 +94,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * }).toMap
  *
  * val terseEnConceptLabels: Map[EName, Set[String]] =
- *   conceptLabelRelationshipsByConceptEName mapValues { rels =>
+ *   conceptLabelRelationshipsByConceptEName.mapValues { rels =>
  *     rels.map(_.labelText).toSet
  *   }
  * }}}
@@ -109,42 +102,16 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * To simulate how TQA retrieves concrete primary item declarations, we could write more verbosely:
  *
  * {{{
- * import eu.cdevreeze.tqa.base.dom.ConceptDeclaration
- * import eu.cdevreeze.tqa.base.dom.PrimaryItemDeclaration
+ * import eu.cdevreeze.tqa.base.model.ConceptDeclaration
+ * import eu.cdevreeze.tqa.base.model.PrimaryItemDeclaration
  *
  * val substitutionGroupMap = taxonomy.substitutionGroupMap
  * val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
  *
  * val concepts: Set[EName] =
- *   taxonomy.filterGlobalElementDeclarations(_.isConcrete).
- *     flatMap(decl => conceptDeclarationBuilder.optConceptDeclaration(decl)).
- *     collect({ case decl: PrimaryItemDeclaration => decl }).map(_.targetEName).toSet
- * }}}
- *
- * To simulate how TQA filters the concept label relationships we are interested in, we could write more verbosely:
- *
- * {{{
- * import eu.cdevreeze.tqa.ENames
- *
- * // Falling back to more general method filterOutgoingStandardRelationshipsOfType
- *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
- *   val conceptLabelRels =
- *     taxonomy.filterOutgoingStandardRelationshipsOfType(
- *       conceptEName,
- *       classTag[ConceptLabelRelationship]) { rel =>
- *
- *       rel.resolvedTo.resolvedElem.attribute(ENames.XmlLangEName) == "en" &&
- *         rel.resolvedTo.resolvedElem.attributeOption(ENames.XLinkRoleEName).contains("http://www.xbrl.org/2003/role/terseLabel")
- *     }
- *
- *   (conceptEName -> conceptLabelRels)
- * }).toMap
- *
- * val terseEnConceptLabels: Map[EName, Set[String]] =
- *   conceptLabelRelationshipsByConceptEName mapValues { rels =>
- *     rels.map(_.resolvedTo.resolvedElem.text).toSet
- *   }
+ *   taxonomy.filterGlobalElementDeclarations(_.isConcrete)
+ *     .flatMap(decl => conceptDeclarationBuilder.optConceptDeclaration(decl))
+ *     .collect { case decl: PrimaryItemDeclaration => decl }.map(_.targetEName).toSet
  * }}}
  *
  * Suppose we want to query the taxonomy for the parent-child presentation hierarchies in some custom ELR (extended link role).
@@ -153,7 +120,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  *
  * {{{
  * import scala.collection.immutable
- * import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
+ * import eu.cdevreeze.tqa.base.model.ParentChildRelationship
  *
  * val parentChildRelationships =
  *   taxonomy.filterParentChildRelationships(_.elr == customElr)
@@ -163,7 +130,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  *     parentChildRelationships.map(_.targetConceptEName).toSet)
  *
  * val topLevelParentChildren: Map[EName, immutable.IndexedSeq[EName]] =
- *   (topLevelConcepts.toIndexedSeq map { conceptEName =>
+ *   (topLevelConcepts.toIndexedSeq.map { conceptEName =>
  *     val parentChildren =
  *       taxonomy.filterOutgoingParentChildRelationships(conceptEName)(_.elr == customElr)
  *
@@ -174,12 +141,12 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * }}}
  *
  * These examples only scratch the surface of what is possible. Dimensional relationship queries are typically more
- * interesting than the examples above, for example. See [[eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi]]
- * for the dimensional query API that is part of [[eu.cdevreeze.tqa.base.queryapi.TaxonomyApi]].
+ * interesting than the examples above, for example. See [[eu.cdevreeze.tqa.base.model.queryapi.DimensionalRelationshipContainerApi]]
+ * for the dimensional query API that is part of [[eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi]].
  *
  * ==Notes on performance==
  *
- * The performance characteristics of the [[eu.cdevreeze.tqa.base.queryapi.TaxonomyApi]] trait and its implementations
+ * The performance characteristics of the [[eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi]] trait and its implementations
  * partially depend on the concrete "taxonomy" class used. Still we can say in general that:
  *
  * <ul>
@@ -196,11 +163,4 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  *
  * @author Chris de Vreeze
  */
-package object queryapi {
-
-  type ParentChildRelationshipPath = InterConceptRelationshipPath[ParentChildRelationship]
-
-  type DomainMemberRelationshipPath = InterConceptRelationshipPath[DomainMemberRelationship]
-
-  type DomainAwareRelationshipPath = InterConceptRelationshipPath[DomainAwareRelationship]
-}
+package object queryapi
