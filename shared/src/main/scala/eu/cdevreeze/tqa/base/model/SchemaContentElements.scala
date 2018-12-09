@@ -16,12 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model
 
-import java.net.URI
-
-import scala.collection.immutable
-
-import eu.cdevreeze.yaidom.core.EName
-
 /**
  * API for factories of schema content elements. This object does not depend on the schema content types and companion objects.
  *
@@ -41,26 +35,13 @@ object SchemaContentElements {
      * Creates a relationship of the given type from the passed parameters, if applicable,
      * and otherwise returns None.
      */
-    def opt(elem: Elem): Option[SchemaContentElementType]
+    def opt(elem: ElemInSchema): Option[SchemaContentElementType]
   }
 
-  object SchemaContentElements {
+  object Factory {
 
     type Aux[E] = Factory {
       type SchemaContentElementType = E
     }
   }
-
-  /**
-   * XML element in a schema, aware of the target namespace, if any, and the document URI.
-   *
-   * The attributes that in the original XML are QName-valued are here resolved ones and therefore EName-valued.
-   * Make sure that this is indeed the case, because these elements contain no in-scope namespaces!
-   */
-  final case class Elem(
-    docUri: URI,
-    targetNamespaceOption: Option[String],
-    resolvedName: EName,
-    attributes: Map[EName, String],
-    childElems: immutable.IndexedSeq[Elem])
 }
