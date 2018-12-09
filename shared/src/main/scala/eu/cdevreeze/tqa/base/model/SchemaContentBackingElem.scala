@@ -20,15 +20,20 @@ import java.net.URI
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.QName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.ClarkElemApi
 import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
 
 /**
- * XML element in a schema, aware of the target namespace, if any, and the document URI.
+ * XML element in a schema, aware of the target namespace, if any, and of the document URI.
  *
  * The attributes that in the original XML are QName-valued are here resolved ones and therefore EName-valued.
  * Make sure that this is indeed the case, because these elements contain no in-scope namespaces!
+ * The same is true for element text!
  *
  * @author Chris de Vreeze
  */
@@ -49,4 +54,63 @@ final case class SchemaContentBackingElem(
   def findAllChildElems: immutable.IndexedSeq[SchemaContentBackingElem] = childElems
 
   def resolvedAttributes: Map[EName, String] = attributes
+}
+
+object SchemaContentBackingElem {
+
+  def fromSchemaRootElem(elem: BackingNodes.Elem): SchemaContentBackingElem = {
+    require(elem.resolvedName == ENames.XsSchemaEName, s"Expected ${ENames.XsSchemaEName} but got ${elem.resolvedName}")
+
+    val tnsOption: Option[String] = elem.attributeOption(ENames.TargetNamespaceEName)
+
+    from(elem.docUri, tnsOption, elem)
+  }
+
+  private def from(docUri: URI, tnsOption: Option[String], elem: BackingNodes.Elem): SchemaContentBackingElem = {
+    // Recursive calls
+
+    val childElems = elem.findAllChildElems.map(e => from(docUri, tnsOption, e))
+
+    SchemaContentBackingElem(
+      docUri,
+      tnsOption,
+      elem.resolvedName,
+      transformAttributes(elem.resolvedName, elem.resolvedAttributes.toMap, elem.scope),
+      transformText(elem.resolvedName, elem.text, elem.scope),
+      childElems)
+  }
+
+  private def transformAttributes(elemName: EName, attrs: Map[EName, String], scope: Scope): Map[EName, String] = {
+    val editedAttributes = attrs.filterKeys(qnameValuedAttributes.getOrElse(elemName, Set.empty))
+      .mapValues(v => scope.resolveQName(QName(v)).toString)
+
+    attrs ++ editedAttributes
+  }
+
+  private def transformText(elemName: EName, txt: String, scope: Scope): String = {
+    if (qnameValuedElems.contains(elemName)) {
+      scope.resolveQName(QName(txt)).toString
+    } else {
+      txt
+    }
+  }
+
+  private val qnameValuedAttributes: Map[EName, Set[EName]] = {
+    import ENames._
+
+    Map(
+      XsElementEName -> Set(RefEName, SubstitutionGroupEName, TypeEName),
+      XsAttributeEName -> Set(RefEName, TypeEName),
+      XsGroupEName -> Set(RefEName),
+      XsAttributeGroupEName -> Set(RefEName),
+      XsRestrictionEName -> Set(BaseEName),
+      XsExtensionEName -> Set(BaseEName),
+      XsKeyrefEName -> Set(ReferEName))
+  }
+
+  private val qnameValuedElems: Set[EName] = {
+    import ENames._
+
+    Set(LinkUsedOnEName)
+  }
 }
