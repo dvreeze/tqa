@@ -32,21 +32,21 @@ import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
  *
  * @author Chris de Vreeze
  */
-final case class ElemInSchema(
+final case class SchemaContentBackingElem(
   docUri: URI,
   targetNamespaceOption: Option[String],
   resolvedName: EName,
   attributes: Map[EName, String],
   text: String,
-  childElems: immutable.IndexedSeq[ElemInSchema]) extends ClarkElemApi with ClarkElemLike {
+  childElems: immutable.IndexedSeq[SchemaContentBackingElem]) extends ClarkElemApi with ClarkElemLike {
 
-  type ThisElem = ElemInSchema
+  type ThisElem = SchemaContentBackingElem
 
   // Methods needed for completing the ClarkElemApi API
 
-  def thisElem: ElemInSchema = this
+  def thisElem: SchemaContentBackingElem = this
 
-  def findAllChildElems: immutable.IndexedSeq[ElemInSchema] = childElems
+  def findAllChildElems: immutable.IndexedSeq[SchemaContentBackingElem] = childElems
 
   def resolvedAttributes: Map[EName, String] = attributes
 }

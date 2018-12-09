@@ -35,7 +35,7 @@ object SchemaContentElements {
      * Creates a relationship of the given type from the passed parameters, if applicable,
      * and otherwise returns None.
      */
-    def opt(elem: ElemInSchema): Option[SchemaContentElementType]
+    def opt(elem: SchemaContentBackingElem): Option[SchemaContentElementType]
   }
 
   object Factory {
