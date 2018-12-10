@@ -39,6 +39,8 @@ import eu.cdevreeze.yaidom.core.EName
  * [[eu.cdevreeze.tqa.base.model.NonStandardRelationship]]. There is no such thing as an UnknownRelationship in the model
  * (such relationships would not be created, but just ignored, unlike their counterparts in the XML-backed relationship API).
  *
+ * Note that Relationship instances are easy to create on the fly, which is by design.
+ *
  * @author Chris de Vreeze
  */
 sealed trait Relationship {

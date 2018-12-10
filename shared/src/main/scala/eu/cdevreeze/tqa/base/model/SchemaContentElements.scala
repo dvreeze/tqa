@@ -16,6 +16,10 @@
 
 package eu.cdevreeze.tqa.base.model
 
+import scala.collection.immutable
+
+import eu.cdevreeze.yaidom.core.EName
+
 /**
  * API for factories of schema content elements. This object does not depend on the schema content types and companion objects.
  *
@@ -26,16 +30,23 @@ object SchemaContentElements {
   trait Factory {
 
     /**
-     * Schema content element type, which is a sub-type of SchemaContentElement (but this is not specified here, in order to
-     * prevent circular dependencies).
+     * The common super-type of schema content element types. Should be SchemaContentElement in practice.
      */
-    type SchemaContentElementType
+    type SchemaContentElementSuperType
 
     /**
-     * Creates a relationship of the given type from the passed parameters, if applicable,
+     * Specific schema content element type, which is a sub-type of SchemaContentElementSuperType.
+     */
+    type SchemaContentElementType <: SchemaContentElementSuperType
+
+    /**
+     * Creates a schema content element of the given type from the passed parameters, if applicable,
      * and otherwise returns None.
      */
-    def opt(elem: SchemaContentBackingElem): Option[SchemaContentElementType]
+    def opt(
+      elem: SchemaContentBackingElem,
+      ancestorENames: immutable.IndexedSeq[EName],
+      childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType]
   }
 
   object Factory {

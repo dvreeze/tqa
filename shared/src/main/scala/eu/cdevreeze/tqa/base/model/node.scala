@@ -30,6 +30,8 @@ import eu.cdevreeze.yaidom.core.EName
  * respects the fact that it is not known beforehand how relationships in taxonomies are traversed.
  * ResourceNodes, on the other hand, are the taxonomy elements themselves.
  *
+ * Note that Nodes are easy to create on the fly, which is by design.
+ *
  * @author Chris de Vreeze
  */
 sealed trait Node

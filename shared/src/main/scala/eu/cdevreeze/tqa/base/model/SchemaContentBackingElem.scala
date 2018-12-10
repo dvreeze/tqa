@@ -29,11 +29,19 @@ import eu.cdevreeze.yaidom.queryapi.ClarkElemApi
 import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
 
 /**
- * XML element in a schema, aware of the target namespace, if any, and of the document URI.
+ * XML element in a schema, aware of the target namespace, if any, and of the document URI. It is a custom
+ * yaidom element implementation for schema content offering the ClarkElemApi query API. It is not a
+ * "yaidom dialect", but it is a backing element for such a dialect, namely SchemaContentElement.
+ *
+ * Note that these elements are easy to create on the fly, which is by design. The downside is that they
+ * do not know much of their ancestry, not even whether they are top-level root children or not.
  *
  * The attributes that in the original XML are QName-valued are here resolved ones and therefore EName-valued.
  * Make sure that this is indeed the case, because these elements contain no in-scope namespaces!
  * The same is true for element text!
+ *
+ * Mixed element content is not supported. Either the element contains text content, or it contains child
+ * elements, but not both.
  *
  * @author Chris de Vreeze
  */
@@ -66,7 +74,11 @@ object SchemaContentBackingElem {
     from(elem.docUri, tnsOption, elem)
   }
 
-  private def from(docUri: URI, tnsOption: Option[String], elem: BackingNodes.Elem): SchemaContentBackingElem = {
+  private def from(
+    docUri: URI,
+    tnsOption: Option[String],
+    elem: BackingNodes.Elem): SchemaContentBackingElem = {
+
     // Recursive calls
 
     val childElems = elem.findAllChildElems.map(e => from(docUri, tnsOption, e))
