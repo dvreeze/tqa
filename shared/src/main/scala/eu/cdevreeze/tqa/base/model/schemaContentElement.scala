@@ -50,7 +50,7 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * Several kinds of schema content elements in this model are easy to refer to from relationships, as source or
  * target. Note that these "links" are semantically meaningful, and need no URIs to point to them.
  *
- * Schema content elements are easy to create on the fly, and could be part of the basis for easy programmatic taxonomy
+ * Schema content elements are relatively easy to create on the fly, and could be part of the basis for easy programmatic taxonomy
  * creation. Note, however, that the taxonomy creation algorithm must at some point worry about closure with
  * respect to DTS discovery, and about containing the needed substitution group ancestry.
  *

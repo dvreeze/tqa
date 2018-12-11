@@ -216,7 +216,12 @@ sealed abstract class TaxonomyElem private[dom] (
 /**
  * Taxonomy root element, like an xs:schema element or a link:linkbase element.
  */
-sealed trait TaxonomyRootElem extends TaxonomyElem
+sealed trait TaxonomyRootElem extends TaxonomyElem {
+
+  def isXsdSchema: Boolean
+
+  def isLinkbase: Boolean
+}
 
 // XLink elements in taxonomies.
 
@@ -624,6 +629,10 @@ final class XsdSchema private[dom] (
   backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInXsdNamespace with TaxonomyRootElem {
 
+  def isXsdSchema: Boolean = true
+
+  def isLinkbase: Boolean = false
+
   /**
    * Returns the optional target namespace of this schema root element itself, ignoring the possibility that this is an included chameleon schema.
    */
@@ -690,6 +699,10 @@ final class XsdSchema private[dom] (
 final class Linkbase private[dom] (
   backingElem: BackingNodes.Elem,
   childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with TaxonomyRootElem {
+
+  def isXsdSchema: Boolean = false
+
+  def isLinkbase: Boolean = true
 
   /**
    * Returns all extended link child elements. Only "taxonomy DOM" extended links are returned.
