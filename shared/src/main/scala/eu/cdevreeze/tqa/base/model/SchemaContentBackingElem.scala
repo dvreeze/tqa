@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model
 
-import java.net.URI
-
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ENames
@@ -29,9 +27,9 @@ import eu.cdevreeze.yaidom.queryapi.ClarkElemApi
 import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
 
 /**
- * XML element in a schema, aware of the target namespace, if any, and of the document URI. It is a custom
- * yaidom element implementation for schema content offering the ClarkElemApi query API. It is not a
- * "yaidom dialect", but it is a backing element for such a dialect, namely SchemaContentElement.
+ * XML element in a schema, aware of the target namespace, if any. It is a custom yaidom element
+ * implementation for schema content offering the ClarkElemApi query API. It is not a "yaidom dialect", but
+ * it is a backing element for such a dialect, namely SchemaContentElement.
  *
  * Note that these elements are easy to create on the fly, which is by design. The downside is that they
  * do not know much of their ancestry, not even whether they are top-level root children or not.
@@ -46,7 +44,6 @@ import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
  * @author Chris de Vreeze
  */
 final case class SchemaContentBackingElem(
-  docUri: URI,
   targetNamespaceOption: Option[String],
   resolvedName: EName,
   attributes: Map[EName, String],
@@ -66,25 +63,25 @@ final case class SchemaContentBackingElem(
 
 object SchemaContentBackingElem {
 
+  // TODO We should also transform typedDomainRefs to ENames, but cannot do that without any context!
+
   def fromSchemaRootElem(elem: BackingNodes.Elem): SchemaContentBackingElem = {
     require(elem.resolvedName == ENames.XsSchemaEName, s"Expected ${ENames.XsSchemaEName} but got ${elem.resolvedName}")
 
     val tnsOption: Option[String] = elem.attributeOption(ENames.TargetNamespaceEName)
 
-    from(elem.docUri, tnsOption, elem)
+    from(tnsOption, elem)
   }
 
   private def from(
-    docUri: URI,
     tnsOption: Option[String],
     elem: BackingNodes.Elem): SchemaContentBackingElem = {
 
     // Recursive calls
 
-    val childElems = elem.findAllChildElems.map(e => from(docUri, tnsOption, e))
+    val childElems = elem.findAllChildElems.map(e => from(tnsOption, e))
 
     SchemaContentBackingElem(
-      docUri,
       tnsOption,
       elem.resolvedName,
       transformAttributes(elem.resolvedName, elem.resolvedAttributes.toMap, elem.scope),

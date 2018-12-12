@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import java.net.URI
-
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.SubstitutionGroupMap
@@ -70,9 +68,15 @@ trait SchemaApi {
 
   def getGlobalElementDeclaration(ename: EName): GlobalElementDeclaration
 
-  def findGlobalElementDeclarationByUri(uri: URI): Option[GlobalElementDeclaration]
+  /**
+   * Finds the optional global element declaration having the given ID, assuming that at most one result matches.
+   */
+  def findGlobalElementDeclarationById(id: String): Option[GlobalElementDeclaration]
 
-  def getGlobalElementDeclarationByUri(uri: URI): GlobalElementDeclaration
+  /**
+   * Gets the global element declaration having the given ID, assuming that at precisely one result matches.
+   */
+  def getGlobalElementDeclarationById(id: String): GlobalElementDeclaration
 
   // Global attribute declarations, across documents
 

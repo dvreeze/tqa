@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model
 
-import java.net.URI
-
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.yaidom.core.EName
 
@@ -45,7 +43,6 @@ object Relationships {
      * and otherwise returns None.
      */
     def opt(
-      docUri: URI,
       baseSetKey: BaseSetKey,
       source: SourceNodeType,
       target: TargetNodeType,

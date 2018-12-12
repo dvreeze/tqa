@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model.taxonomy
 
-import java.net.URI
-
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
@@ -54,13 +52,13 @@ final class BasicTaxonomy private (
   val extraSubstitutionGroupMap: SubstitutionGroupMap,
   val netSubstitutionGroupMap: SubstitutionGroupMap,
   val schemaContentElements: immutable.IndexedSeq[SchemaContentElement],
-  val schemaContentElementsByDocUri: Map[URI, immutable.IndexedSeq[SchemaContentElement]],
+  val schemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]],
   val relationships: immutable.IndexedSeq[Relationship],
   val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration],
   val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration],
   val namedTypeDefinitionsByEName: Map[EName, NamedTypeDefinition],
   val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
-  val globalElementDeclarationsByElemUri: Map[URI, GlobalElementDeclaration],
+  val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]],
   val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
   val nonStandardRelationshipsBySource: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
   val nonStandardRelationshipsByTarget: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
@@ -77,8 +75,8 @@ final class BasicTaxonomy private (
     globalElementDeclarationsByEName.get(ename)
   }
 
-  def findGlobalElementDeclarationByUri(uri: URI): Option[GlobalElementDeclaration] = {
-    globalElementDeclarationsByElemUri.get(uri)
+  def findGlobalElementDeclarationById(id: String): Option[GlobalElementDeclaration] = {
+    globalElementDeclarationsById.getOrElse(id, immutable.IndexedSeq()).headOption
   }
 
   def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
@@ -149,8 +147,9 @@ object BasicTaxonomy {
     extraSubstitutionGroupMap: SubstitutionGroupMap,
     relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
-    val schemaContentElementsByDocUri: Map[URI, immutable.IndexedSeq[SchemaContentElement]] =
-      schemaContentElements.groupBy(_.docUri)
+    val schemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]] =
+      schemaContentElements.groupBy(_.resolvedName)
+        .mapValues(_.filter(_.attributes.get(ENames.IdEName).nonEmpty).groupBy(_.attributes(ENames.IdEName)))
 
     val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration] =
       schemaContentElements.collect { case e: GlobalElementDeclaration => e }
@@ -204,23 +203,21 @@ object BasicTaxonomy {
       interConceptRelationships groupBy (_.targetConceptEName)
     }
 
-    val globalElementDeclarationsByElemUri: Map[URI, GlobalElementDeclaration] =
-      schemaContentElements.collect { case e: GlobalElementDeclaration => e }
-        .filter(_.attributes.contains(ENames.IdEName))
-        .groupBy(e => new URI(e.docUri.getScheme, e.docUri.getSchemeSpecificPart, e.attributes(ENames.IdEName)))
-        .mapValues(_.head)
+    val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]] =
+      schemaContentElementsByENameAndId.getOrElse(ENames.XsElementEName, Map())
+        .mapValues(_.collect { case e: GlobalElementDeclaration => e })
 
     new BasicTaxonomy(
       extraSubstitutionGroupMap,
       netSubstitutionGroupMap,
       schemaContentElements,
-      schemaContentElementsByDocUri,
+      schemaContentElementsByENameAndId,
       relationships,
       globalElementDeclarationsByEName,
       globalAttributeDeclarationsByEName,
       namedTypeDefinitionsByEName,
       conceptDeclarationsByEName,
-      globalElementDeclarationsByElemUri,
+      globalElementDeclarationsById,
       standardRelationshipsBySource,
       nonStandardRelationshipsBySource,
       nonStandardRelationshipsByTarget,

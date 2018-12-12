@@ -40,8 +40,9 @@ package eu.cdevreeze.tqa.base
  * the purpose of the model, which is not taxonomy editing). It is also complete enough for grouping
  * relationships into base sets.
  *
- * This model is not dependent on the DOM, relationship and query API packages. The reverse
- * is also true. In other words, this model package can be used in isolation.
+ * This model is not dependent on the DOM, relationship and query API packages directly under the base namespace (or in this
+ * namespace). The reverse is also true for those packages directly under the base namespace. In other words, this
+ * model package can be used in isolation.
  *
  * @author Chris de Vreeze
  */

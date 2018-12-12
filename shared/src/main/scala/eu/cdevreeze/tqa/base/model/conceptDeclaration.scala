@@ -44,8 +44,6 @@ import eu.cdevreeze.yaidom.core.EName
  */
 sealed abstract class ConceptDeclaration private[model] (val globalElementDeclaration: GlobalElementDeclaration) {
 
-  // TODO Key?
-
   final def targetEName: EName = {
     globalElementDeclaration.targetEName
   }
@@ -75,7 +73,8 @@ sealed abstract class ConceptDeclaration private[model] (val globalElementDeclar
 /**
  * Item declaration. It must be in the xbrli:item substitution group, directly or indirectly.
  */
-sealed abstract class ItemDeclaration private[model] (globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration) {
+sealed abstract class ItemDeclaration private[model] (
+  globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration) {
 
   final def periodType: PeriodType = {
     globalElementDeclaration.periodTypeOption.getOrElse(sys.error(s"Missing xbrli:periodType attribute"))
@@ -85,7 +84,8 @@ sealed abstract class ItemDeclaration private[model] (globalElementDeclaration: 
 /**
  * Tuple declaration. It must be in the xbrli:tuple substitution group, directly or indirectly.
  */
-final class TupleDeclaration private[model] (globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration)
+final class TupleDeclaration private[model] (
+  globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration)
 
 /**
  * Primary item declaration. It must be in the xbrli:item substitution group but neither in the xbrldt:hypercubeItem nor in the xbrldt:dimensionItem substitution groups.
@@ -96,12 +96,14 @@ final class TupleDeclaration private[model] (globalElementDeclaration: GlobalEle
  * definition! Although in a taxonomy the dimensional relationships make clear whether an item plays the role of primary item
  * or of domain-member, here we call each such item declaration a primary item declaration.
  */
-final class PrimaryItemDeclaration private[model] (globalElementDeclaration: GlobalElementDeclaration) extends ItemDeclaration(globalElementDeclaration)
+final class PrimaryItemDeclaration private[model] (
+  globalElementDeclaration: GlobalElementDeclaration) extends ItemDeclaration(globalElementDeclaration)
 
 /**
  * Hypercube declaration. It must be an abstract item declaration in the xbrldt:hypercubeItem substitution group.
  */
-final class HypercubeDeclaration private[model] (globalElementDeclaration: GlobalElementDeclaration) extends ItemDeclaration(globalElementDeclaration) {
+final class HypercubeDeclaration private[model] (
+  globalElementDeclaration: GlobalElementDeclaration) extends ItemDeclaration(globalElementDeclaration) {
 
   def hypercubeEName: EName = {
     targetEName
@@ -111,7 +113,8 @@ final class HypercubeDeclaration private[model] (globalElementDeclaration: Globa
 /**
  * Dimension declaration. It must be an abstract item declaration in the xbrldt:dimensionItem substitution group.
  */
-sealed abstract class DimensionDeclaration private[model] (globalElementDeclaration: GlobalElementDeclaration) extends ItemDeclaration(globalElementDeclaration) {
+sealed abstract class DimensionDeclaration private[model] (
+  globalElementDeclaration: GlobalElementDeclaration) extends ItemDeclaration(globalElementDeclaration) {
 
   final def isTyped: Boolean = {
     globalElementDeclaration.attributes.contains(XbrldtTypedDomainRefEName)
@@ -125,36 +128,40 @@ sealed abstract class DimensionDeclaration private[model] (globalElementDeclarat
 /**
  * Explicit dimension declaration. It must be a dimension declaration without attribute xbrldt:typedDomainRef, among other requirements.
  */
-final class ExplicitDimensionDeclaration private[model] (globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
+final class ExplicitDimensionDeclaration private[model] (
+  globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
   require(!isTyped, s"${globalElementDeclaration.targetEName} is typed and therefore not an explicit dimension")
 }
 
 /**
  * Typed dimension declaration. It must be a dimension declaration with an attribute xbrldt:typedDomainRef, among other requirements.
  */
-final class TypedDimensionDeclaration private[model] (globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
+final class TypedDimensionDeclaration private[model] (
+  globalElementDeclaration: GlobalElementDeclaration) extends DimensionDeclaration(globalElementDeclaration) {
   require(isTyped, s"${globalElementDeclaration.targetEName} is not typed and therefore not a typed dimension")
 
   /**
-   * Returns the value of the xbrldt:typedDomainRef attribute, as absolute (!) URI.
+   * Returns the value of the xbrldt:typedDomainRef attribute, as an ID.
    *
-   * Note that XML Base is not used. Instead the document URI is used to make relative URIs absolute.
+   * The assumption is that these typed domain declaration IDs are unique for global element declarations across documents.
    */
-  def typedDomainRef: URI = {
+  def typedDomainRef: String = {
     val rawUri = URI.create(globalElementDeclaration.attributes(XbrldtTypedDomainRefEName))
-    globalElementDeclaration.docUri.resolve(rawUri)
+    val fragment = rawUri.getFragment
+    fragment
   }
 
   /**
-   * Returns the optional value of the xbrldt:typedDomainRef attribute, as optional absolute (!) URI.
+   * Returns the optional value of the xbrldt:typedDomainRef attribute, as optional ID.
    * Consider calling this method if the "typed dimension declaration" is not known to be schema-valid.
    *
-   * Note that XML Base is not used. Instead the document URI is used to make relative URIs absolute.
+   * The assumption is that these typed domain declaration IDs are unique for global element declarations across documents.
    */
-  def typedDomainRefOption: Option[URI] = {
+  def typedDomainRefOption: Option[String] = {
     val rawUriOption =
       globalElementDeclaration.attributes.get(XbrldtTypedDomainRefEName).map(URI.create)
-    rawUriOption.map(globalElementDeclaration.docUri.resolve)
+    val fragmentOption = rawUriOption.map(_.getFragment)
+    fragmentOption
   }
 }
 

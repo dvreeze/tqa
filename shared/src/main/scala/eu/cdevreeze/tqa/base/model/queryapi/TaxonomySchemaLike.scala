@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import java.net.URI
-
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.model.ConceptDeclaration
@@ -226,9 +224,9 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   final def findMemberDeclarationOfTypedDimension(typedDimension: EName): Option[GlobalElementDeclaration] = {
     val typedDimensionDeclOption = findTypedDimensionDeclaration(typedDimension)
 
-    val typedDomainRefOption: Option[URI] = typedDimensionDeclOption.map(e => e.typedDomainRef)
+    val typedDomainRefOption: Option[String] = typedDimensionDeclOption.map(e => e.typedDomainRef)
 
-    typedDomainRefOption.flatMap(uri => findGlobalElementDeclarationByUri(uri))
+    typedDomainRefOption.flatMap(findGlobalElementDeclarationById _)
   }
 
   final def getMemberDeclarationOfTypedDimension(typedDimension: EName): GlobalElementDeclaration = {

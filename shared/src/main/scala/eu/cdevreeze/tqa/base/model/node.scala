@@ -16,10 +16,7 @@
 
 package eu.cdevreeze.tqa.base.model
 
-import java.net.URI
-
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.XPointer
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -39,16 +36,25 @@ sealed trait Node
 /**
  * Locator node. It holds a unique key to a taxonomy element. It is an abstraction of what in the XML
  * representation is an XLink locator, but then resolved as a key to a taxonomy element.
- *
- * TODO Do we need locators to resources?
  */
 sealed trait LocatorNode extends Node
 
 /**
  * Resource node. It is an abstraction of what in the XML representation is a taxonomy element that is
- * an XLink resource.
+ * an XLink resource. Note that each resource node is expected to have an ID.
  */
-sealed trait ResourceNode extends Node
+sealed trait ResourceNode extends Node {
+
+  def elementKey: ResourceKey
+
+  def nonXLinkAttributes: Map[EName, String]
+
+  final def id: String = elementKey.id
+
+  final def elr: String = elementKey.elr
+
+  final def roleOption: Option[String] = elementKey.roleOption
+}
 
 object Node {
 
@@ -74,20 +80,21 @@ object Node {
    */
   final case class NamedTypeDef(targetEName: EName) extends LocatorNode
 
-  // TODO Key for enumeration value (XPointer-based?)
+  /**
+   * Any other LocatorNode. It contains an ElementKey, and therefore carries no semantics in isolation.
+   * It is assumed that the element key is unique in the entire document collection.
+   *
+   * An example is a locator to an enumeration value, assuming the enumeration value has an ID and the element
+   * key is unique across the taxonomy document collection.
+   *
+   * Another example is a locator to a ResourceNode, using a ResourceKey as element key.
+   */
+  final case class OtherLocatorNode(elementKey: ElementKey) extends LocatorNode
 
   /**
    * A (standard or non-standard) label or reference resource
    */
   sealed trait DocumentationResource extends ResourceNode {
-
-    def docUri: URI
-
-    def elr: String
-
-    def roleOption: Option[String]
-
-    def nonXLinkAttributes: Map[EName, String]
 
     final def langOption: Option[String] = {
       nonXLinkAttributes.get(ENames.XmlLangEName)
@@ -109,16 +116,12 @@ object Node {
   sealed trait NonStandardDocumentationResource extends DocumentationResource
 
   final case class ConceptLabelResource(
-    docUri: URI,
-    elr: String,
-    roleOption: Option[String],
+    elementKey: ResourceKey,
     nonXLinkAttributes: Map[EName, String],
     text: String) extends StandardDocumentationResource with LabelResource
 
   final case class ConceptReferenceResource(
-    docUri: URI,
-    elr: String,
-    roleOption: Option[String],
+    elementKey: ResourceKey,
     nonXLinkAttributes: Map[EName, String],
     parts: Map[EName, String]) extends StandardDocumentationResource with ReferenceResource
 
@@ -126,9 +129,7 @@ object Node {
    * An element label, named label:label (and not any resource in that substitution group).
    */
   final case class ElementLabelResource(
-    docUri: URI,
-    elr: String,
-    roleOption: Option[String],
+    elementKey: ResourceKey,
     nonXLinkAttributes: Map[EName, String],
     text: String) extends NonStandardDocumentationResource with LabelResource
 
@@ -136,30 +137,22 @@ object Node {
    * An element reference, named reference:reference (and not any resource in that substitution group).
    */
   final case class ElementReferenceResource(
-    docUri: URI,
-    elr: String,
-    roleOption: Option[String],
+    elementKey: ResourceKey,
     nonXLinkAttributes: Map[EName, String],
     parts: Map[EName, String]) extends NonStandardDocumentationResource with ReferenceResource
 
   // TODO OtherNonStandardDocumentationResource
 
   /**
-   * Any other LocatorNode. It contains an XPointer, and therefore carries no semantics in isolation.
-   *
-   * Note that only XPointers containing just an ID are stable in that they do not depend on the order of
-   * elements in the document pointed to.
-   */
-  final case class OtherLocatorNode(docUri: URI, xpointer: XPointer) extends LocatorNode
-
-  /**
    * Any other ResourceNode. For example, table content like table, ruleNode, or formula content like
    * formula:valueAssertion, or a custom resource node, such as sbr:linkroleOrder in Dutch taxonomies.
    *
-   * It contains an XPointer, and therefore carries no semantics in isolation.
+   * It contains an element key, and therefore carries no semantics in isolation.
+   * It is assumed that the element key is unique in the entire document collection.
    *
-   * Note that only XPointers containing just an ID are stable in that they do not depend on the order of
-   * elements in the document pointed to.
+   * TODO Model the content of an OtherResourceNode.
    */
-  final case class OtherResourceNode(docUri: URI, xpointer: XPointer) extends ResourceNode
+  final case class OtherResourceNode(
+    elementKey: ResourceKey,
+    nonXLinkAttributes: Map[EName, String]) extends ResourceNode
 }

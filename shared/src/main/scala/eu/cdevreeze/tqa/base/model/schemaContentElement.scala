@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model
 
-import java.net.URI
-
 import scala.collection.immutable
 import scala.reflect.classTag
 
@@ -64,8 +62,6 @@ sealed trait SchemaContentElement extends SubtypeAwareElemApi with SubtypeAwareE
    * Returns the underlying SchemaContentBackingElem
    */
   def elem: SchemaContentBackingElem
-
-  final def docUri: URI = elem.docUri
 
   /**
    * The resolved name of the corresponding XML element.

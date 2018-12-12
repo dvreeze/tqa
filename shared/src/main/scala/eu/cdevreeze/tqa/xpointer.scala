@@ -37,9 +37,18 @@ sealed trait XPointer {
 }
 
 /**
+ * XPointer containing an ID. The significance of such an XPointer is that if we know that IDs are unique across
+ * documents, we need no document URI context other than the XPointer to find an XML element in a set of documents.
+ */
+sealed trait XPointerContainingId extends XPointer {
+
+  def id: String
+}
+
+/**
  * Shorthand pointer, which is by far the most commonly used kind of XPointer in XBRL (and in general).
  */
-final case class ShorthandPointer(id: String) extends XPointer {
+final case class ShorthandPointer(id: String) extends XPointerContainingId {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
     rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
@@ -53,7 +62,7 @@ sealed trait ElementSchemePointer extends XPointer
 /**
  * Element-scheme XPointer containing only an ID. It is therefore semantically equivalent to a shorthand pointer.
  */
-final case class IdPointer(id: String) extends ElementSchemePointer {
+final case class IdPointer(id: String) extends ElementSchemePointer with XPointerContainingId {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
     rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
@@ -66,7 +75,9 @@ final case class IdPointer(id: String) extends ElementSchemePointer {
  * Element-scheme XPointer starting with an ID and followed by a child sequence. The indexes in the child
  * sequence are 1-based.
  */
-final case class IdChildSequencePointer(id: String, childSequence: List[Int]) extends ElementSchemePointer {
+final case class IdChildSequencePointer(
+  id: String,
+  childSequence: List[Int]) extends ElementSchemePointer with XPointerContainingId {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
     IdPointer(id).findElem(rootElem).flatMap(e => ChildSequencePointer(1 :: childSequence).findElem(e))

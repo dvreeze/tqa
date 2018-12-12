@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import java.net.URI
-
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.SubstitutionGroupMap
@@ -43,7 +41,7 @@ trait SchemaLike extends SchemaApi {
 
   def findGlobalElementDeclaration(ename: EName): Option[GlobalElementDeclaration]
 
-  def findGlobalElementDeclarationByUri(uri: URI): Option[GlobalElementDeclaration]
+  def findGlobalElementDeclarationById(id: String): Option[GlobalElementDeclaration]
 
   def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration]
 
@@ -79,8 +77,8 @@ trait SchemaLike extends SchemaApi {
     findGlobalElementDeclaration(ename).getOrElse(sys.error(s"Missing global element declaration for expanded name $ename"))
   }
 
-  final def getGlobalElementDeclarationByUri(uri: URI): GlobalElementDeclaration = {
-    findGlobalElementDeclarationByUri(uri).getOrElse(sys.error(s"Missing global element declaration with URI $uri"))
+  final def getGlobalElementDeclarationById(id: String): GlobalElementDeclaration = {
+    findGlobalElementDeclarationById(id).getOrElse(sys.error(s"Missing global element declaration with ID $id"))
   }
 
   // Global attribute declarations, across documents

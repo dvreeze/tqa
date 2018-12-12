@@ -16,12 +16,9 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import java.net.URI
-
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.model.Relationship
-import eu.cdevreeze.tqa.base.model.SchemaContentElement
 
 /**
  * Purely abstract trait offering a '''taxonomy query API'''. It combines several other purely abstract query
@@ -46,9 +43,4 @@ trait TaxonomyApi
    * Returns all relationships in the taxonomy
    */
   def relationships: immutable.IndexedSeq[Relationship]
-
-  /**
-   * Returns a mapping from document URIs to schema content elements. Should be a field for very fast lookups.
-   */
-  def schemaContentElementsByDocUri: Map[URI, immutable.IndexedSeq[SchemaContentElement]]
 }
