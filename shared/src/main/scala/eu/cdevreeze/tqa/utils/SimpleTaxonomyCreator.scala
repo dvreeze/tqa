@@ -21,12 +21,12 @@ import java.net.URI
 import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.base.dom.ConceptDeclaration
 import eu.cdevreeze.tqa.base.dom.ExtendedLink
 import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
+import eu.cdevreeze.tqa.base.model
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
@@ -45,12 +45,12 @@ import eu.cdevreeze.yaidom.simple
 final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
   /**
-   * Adds the given parent-child arcs, expecting an empty presentation link to start with.
+   * Adds the given parent-child relationships, expecting an empty presentation link to start with.
    */
-  def addParentChildArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.ParentChildArc]): SimpleTaxonomyCreator = {
+  def addParentChildArcs(docUri: URI, elr: String, relationships: immutable.IndexedSeq[model.ParentChildRelationship]): SimpleTaxonomyCreator = {
     // Do some validations
 
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkPresentationLinkEName)
+    validateExtendedLinkAndInterConceptArcs(docUri, elr, relationships, ENames.LinkPresentationLinkEName)
 
     val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
     val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
@@ -62,18 +62,18 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     // Edit
 
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeParentChildArc _)
+    val endTaxo = addInterConceptArcs(startLinkbase, extLink, relationships, makeParentChildArc _)
 
     new SimpleTaxonomyCreator(endTaxo)
   }
 
   /**
-   * Adds the given dimensional arcs, expecting an empty definition link to start with.
+   * Adds the given dimensional relationships, expecting an empty definition link to start with.
    */
-  def addDimensionalArcs(docUri: URI, elr: String, arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.DimensionalArc]): SimpleTaxonomyCreator = {
+  def addDimensionalArcs(docUri: URI, elr: String, relationships: immutable.IndexedSeq[model.DimensionalRelationship]): SimpleTaxonomyCreator = {
     // Do some validations
 
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, arcs, ENames.LinkDefinitionLinkEName)
+    validateExtendedLinkAndInterConceptArcs(docUri, elr, relationships, ENames.LinkDefinitionLinkEName)
 
     val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
     val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
@@ -85,17 +85,17 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     // Edit
 
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, arcs, makeDimensionalArc _)
+    val endTaxo = addInterConceptArcs(startLinkbase, extLink, relationships, makeDimensionalArc _)
 
     new SimpleTaxonomyCreator(endTaxo)
   }
 
-  // Private methods for adding (and pre-validating) any inter-concept arcs
+  // Private methods for adding (and pre-validating) any inter-concept relationships
 
   private def validateExtendedLinkAndInterConceptArcs(
     docUri: URI,
     elr: String,
-    arcs: immutable.IndexedSeq[SimpleTaxonomyCreator.InterConceptArc],
+    relationships: immutable.IndexedSeq[model.InterConceptRelationship],
     extLinkEName: EName): Unit = {
 
     val doc: TaxonomyDocument =
@@ -111,10 +111,16 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     require(extLink.findAllChildElems.isEmpty, s"Expected an empty presentation link for ELR $elr")
 
-    val concepts: Set[EName] = arcs.flatMap(arc => List(arc.source, arc.target)).toSet
+    val concepts: Set[EName] =
+      relationships.flatMap { relationship =>
+        List(
+          relationship.source.asInstanceOf[model.Node.GlobalElementDecl].targetEName,
+          relationship.target.asInstanceOf[model.Node.GlobalElementDecl].targetEName)
+      }.toSet
+
     require(
       concepts.forall(concept => startTaxonomy.findConceptDeclaration(concept).nonEmpty),
-      s"Not all arc sources/targets found as concepts in the taxonomy")
+      s"Not all relationship sources/targets found as concepts in the taxonomy")
 
     val conceptXLinkLabelMap: Map[EName, String] =
       concepts.toSeq.map(c => c -> makeXLinkLabelForLocatorToConcept(c, startTaxonomy)).toMap
@@ -125,15 +131,15 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     val declaredNamespaces: Set[String] = startLinkbase.scope.withoutDefaultNamespace.namespaces
     require(
-      arcs.flatMap(_.nonXLinkAttributes.keySet).distinct.filter(_.namespaceUriOption.nonEmpty)
+      relationships.flatMap(_.nonXLinkArcAttributes.keySet).distinct.filter(_.namespaceUriOption.nonEmpty)
         .forall(ename => declaredNamespaces.contains(ename.namespaceUriOption.get)),
       s"Not all needed (attribute) namespaces declared")
   }
 
-  private def addInterConceptArcs[A <: SimpleTaxonomyCreator.InterConceptArc](
+  private def addInterConceptArcs[A <: model.InterConceptRelationship](
     linkbase: Linkbase,
     extendedLink: ExtendedLink,
-    arcs: immutable.IndexedSeq[A],
+    relationships: immutable.IndexedSeq[A],
     makeArcElem: (A, String, String) => resolved.Elem): BasicTaxonomy = {
 
     assert(linkbase.docUri == extendedLink.docUri)
@@ -145,14 +151,20 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
     val extLinkPath = extendedLink.backingElem.path
 
     val endLinkbaseAsResolvedElem = startLinkbaseAsResolvedElem.updateElemOrSelf(extLinkPath) { oldExtLinkElem =>
-      val arcElems = arcs.map { arc =>
-        val sourceXLinkLabel = makeXLinkLabelForLocatorToConcept(arc.source, startTaxonomy)
-        val targetXLinkLabel = makeXLinkLabelForLocatorToConcept(arc.target, startTaxonomy)
+      val arcElems = relationships.map { relationship =>
+        val sourceXLinkLabel =
+          makeXLinkLabelForLocatorToConcept(relationship.source.asInstanceOf[model.Node.GlobalElementDecl].targetEName, startTaxonomy)
+        val targetXLinkLabel =
+          makeXLinkLabelForLocatorToConcept(relationship.target.asInstanceOf[model.Node.GlobalElementDecl].targetEName, startTaxonomy)
 
-        makeArcElem(arc, sourceXLinkLabel, targetXLinkLabel)
+        makeArcElem(relationship, sourceXLinkLabel, targetXLinkLabel)
       }
 
-      val locatorElems = arcs.flatMap(arc => List(arc.source, arc.target)).distinct.map { concept =>
+      val locatorElems = relationships.flatMap { relationship =>
+        List(
+          relationship.source.asInstanceOf[model.Node.GlobalElementDecl].targetEName,
+          relationship.target.asInstanceOf[model.Node.GlobalElementDecl].targetEName)
+      }.distinct.map { concept =>
         makeLocatorToConcept(concept, startTaxonomy, linkbase.docUri)
       }
 
@@ -177,16 +189,16 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
     endTaxo
   }
 
-  // Private methods for creating (specific) inter-concept arcs
+  // Private methods for creating (specific) inter-concept relationships
 
   private def makeInterConceptArc(
-    arc: SimpleTaxonomyCreator.InterConceptArc,
+    relationship: model.InterConceptRelationship,
     sourceXLinkLabel: String,
     targetXLinkLabel: String,
     extLinkEName: EName,
     arcrole: String): resolved.Elem = {
 
-    resolved.Node.emptyElem(extLinkEName, arc.nonXLinkAttributes)
+    resolved.Node.emptyElem(extLinkEName, relationship.nonXLinkArcAttributes)
       .plusAttribute(ENames.XLinkFromEName, sourceXLinkLabel)
       .plusAttribute(ENames.XLinkToEName, targetXLinkLabel)
       .plusAttribute(ENames.XLinkArcroleEName, arcrole)
@@ -194,66 +206,82 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
   }
 
   private def makePresentationArc(
-    arc: SimpleTaxonomyCreator.PresentationArc,
+    relationship: model.PresentationRelationship,
     sourceXLinkLabel: String,
     targetXLinkLabel: String,
     arcrole: String): resolved.Elem = {
 
-    makeInterConceptArc(arc, sourceXLinkLabel, targetXLinkLabel, ENames.LinkPresentationArcEName, arcrole)
+    makeInterConceptArc(relationship, sourceXLinkLabel, targetXLinkLabel, ENames.LinkPresentationArcEName, arcrole)
   }
 
   private def makeDefinitionArc(
-    arc: SimpleTaxonomyCreator.DefinitionArc,
+    relationship: model.DefinitionRelationship,
     sourceXLinkLabel: String,
     targetXLinkLabel: String,
     arcrole: String): resolved.Elem = {
 
-    makeInterConceptArc(arc, sourceXLinkLabel, targetXLinkLabel, ENames.LinkDefinitionArcEName, arcrole)
+    makeInterConceptArc(relationship, sourceXLinkLabel, targetXLinkLabel, ENames.LinkDefinitionArcEName, arcrole)
   }
 
-  private def makeParentChildArc(arc: SimpleTaxonomyCreator.ParentChildArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    makePresentationArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://www.xbrl.org/2003/arcrole/parent-child")
+  private def makeParentChildArc(relationship: model.ParentChildRelationship, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
+    makePresentationArc(relationship, sourceXLinkLabel, targetXLinkLabel, "http://www.xbrl.org/2003/arcrole/parent-child")
   }
 
-  private def makeDimensionalArc(arc: SimpleTaxonomyCreator.DimensionalArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    arc match {
-      case arc: SimpleTaxonomyCreator.AllArc =>
-        makeAllArc(arc, sourceXLinkLabel, targetXLinkLabel)
-      case arc: SimpleTaxonomyCreator.NotAllArc =>
-        makeNotAllArc(arc, sourceXLinkLabel, targetXLinkLabel)
-      case arc: SimpleTaxonomyCreator.HypercubeDimensionArc =>
-        makeHypercubeDimensionArc(arc, sourceXLinkLabel, targetXLinkLabel)
-      case arc: SimpleTaxonomyCreator.DimensionDomainArc =>
-        makeDimensionDomainArc(arc, sourceXLinkLabel, targetXLinkLabel)
-      case arc: SimpleTaxonomyCreator.DomainMemberArc =>
-        makeDomainMemberArc(arc, sourceXLinkLabel, targetXLinkLabel)
-      case arc: SimpleTaxonomyCreator.DimensionDefaultArc =>
-        makeDimensionDefaultArc(arc, sourceXLinkLabel, targetXLinkLabel)
+  private def makeDimensionalArc(relationship: model.DimensionalRelationship, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
+    relationship match {
+      case relationship: model.AllRelationship =>
+        makeAllArc(relationship, sourceXLinkLabel, targetXLinkLabel)
+      case relationship: model.NotAllRelationship =>
+        makeNotAllArc(relationship, sourceXLinkLabel, targetXLinkLabel)
+      case relationship: model.HypercubeDimensionRelationship =>
+        makeHypercubeDimensionArc(relationship, sourceXLinkLabel, targetXLinkLabel)
+      case relationship: model.DimensionDomainRelationship =>
+        makeDimensionDomainArc(relationship, sourceXLinkLabel, targetXLinkLabel)
+      case relationship: model.DomainMemberRelationship =>
+        makeDomainMemberArc(relationship, sourceXLinkLabel, targetXLinkLabel)
+      case relationship: model.DimensionDefaultRelationship =>
+        makeDimensionDefaultArc(relationship, sourceXLinkLabel, targetXLinkLabel)
     }
   }
 
-  private def makeAllArc(arc: SimpleTaxonomyCreator.AllArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    makeDefinitionArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/all")
+  private def makeAllArc(relationship: model.AllRelationship, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
+    makeDefinitionArc(relationship, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/all")
   }
 
-  private def makeNotAllArc(arc: SimpleTaxonomyCreator.NotAllArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    makeDefinitionArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/notAll")
+  private def makeNotAllArc(relationship: model.NotAllRelationship, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
+    makeDefinitionArc(relationship, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/notAll")
   }
 
-  private def makeHypercubeDimensionArc(arc: SimpleTaxonomyCreator.HypercubeDimensionArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    makeDefinitionArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/hypercube-dimension")
+  private def makeHypercubeDimensionArc(
+    relationship: model.HypercubeDimensionRelationship,
+    sourceXLinkLabel: String,
+    targetXLinkLabel: String): resolved.Elem = {
+
+    makeDefinitionArc(relationship, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/hypercube-dimension")
   }
 
-  private def makeDimensionDomainArc(arc: SimpleTaxonomyCreator.DimensionDomainArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    makeDefinitionArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/dimension-domain")
+  private def makeDimensionDomainArc(
+    relationship: model.DimensionDomainRelationship,
+    sourceXLinkLabel: String,
+    targetXLinkLabel: String): resolved.Elem = {
+
+    makeDefinitionArc(relationship, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/dimension-domain")
   }
 
-  private def makeDomainMemberArc(arc: SimpleTaxonomyCreator.DomainMemberArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    makeDefinitionArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/domain-member")
+  private def makeDomainMemberArc(
+    relationship: model.DomainMemberRelationship,
+    sourceXLinkLabel: String,
+    targetXLinkLabel: String): resolved.Elem = {
+
+    makeDefinitionArc(relationship, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/domain-member")
   }
 
-  private def makeDimensionDefaultArc(arc: SimpleTaxonomyCreator.DimensionDefaultArc, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
-    makeDefinitionArc(arc, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/dimension-default")
+  private def makeDimensionDefaultArc(
+    relationship: model.DimensionDefaultRelationship,
+    sourceXLinkLabel: String,
+    targetXLinkLabel: String): resolved.Elem = {
+
+    makeDefinitionArc(relationship, sourceXLinkLabel, targetXLinkLabel, "http://xbrl.org/int/dim/arcrole/dimension-default")
   }
 
   // Private helper methods for creating locators, Link labels etc.
@@ -312,120 +340,5 @@ object SimpleTaxonomyCreator {
 
   def apply(startTaxonomy: BasicTaxonomy): SimpleTaxonomyCreator = {
     new SimpleTaxonomyCreator(startTaxonomy)
-  }
-
-  sealed trait StandardArc {
-
-    def source: EName
-
-    def nonXLinkAttributes: Map[EName, String]
-
-    protected final def validate(): Unit = {
-      require(
-        nonXLinkAttributes.keySet.forall(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
-        s"Expected non-XLink attributes, but got attributes ${nonXLinkAttributes.keySet}")
-    }
-  }
-
-  sealed trait InterConceptArc extends StandardArc {
-
-    def target: EName
-  }
-
-  sealed trait PresentationArc extends InterConceptArc
-
-  sealed trait DefinitionArc extends InterConceptArc
-
-  sealed trait DimensionalArc extends DefinitionArc {
-
-    final def xbrldtAttributes: Map[EName, String] = {
-      nonXLinkAttributes.filterKeys(_.namespaceUriOption.contains(Namespaces.XbrldtNamespace))
-    }
-
-    def withTargetRole(targetRole: String): DimensionalArc
-  }
-
-  sealed trait HasHypercubeArc extends DimensionalArc {
-
-    def withContextElement(contextElement: String): HasHypercubeArc
-
-    def withClosed(closed: Boolean): HasHypercubeArc
-  }
-
-  final case class ParentChildArc(source: EName, target: EName, nonXLinkAttributes: Map[EName, String]) extends PresentationArc {
-    validate()
-  }
-
-  final case class AllArc(source: EName, target: EName, nonXLinkAttributes: Map[EName, String]) extends HasHypercubeArc {
-    validate()
-
-    def withTargetRole(targetRole: String): AllArc = {
-      AllArc(source, target, nonXLinkAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
-    }
-
-    def withContextElement(contextElement: String): AllArc = {
-      AllArc(source, target, nonXLinkAttributes + (ENames.XbrldtContextElementEName -> contextElement))
-    }
-
-    def withClosed(closed: Boolean): AllArc = {
-      AllArc(source, target, nonXLinkAttributes + (ENames.XbrldtClosedEName -> closed.toString))
-    }
-  }
-
-  final case class NotAllArc(source: EName, target: EName, nonXLinkAttributes: Map[EName, String]) extends HasHypercubeArc {
-    validate()
-
-    def withTargetRole(targetRole: String): NotAllArc = {
-      NotAllArc(source, target, nonXLinkAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
-    }
-
-    def withContextElement(contextElement: String): NotAllArc = {
-      NotAllArc(source, target, nonXLinkAttributes + (ENames.XbrldtContextElementEName -> contextElement))
-    }
-
-    def withClosed(closed: Boolean): NotAllArc = {
-      NotAllArc(source, target, nonXLinkAttributes + (ENames.XbrldtClosedEName -> closed.toString))
-    }
-  }
-
-  final case class HypercubeDimensionArc(source: EName, target: EName, nonXLinkAttributes: Map[EName, String]) extends DimensionalArc {
-    validate()
-
-    def withTargetRole(targetRole: String): HypercubeDimensionArc = {
-      HypercubeDimensionArc(source, target, nonXLinkAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
-    }
-  }
-
-  final case class DimensionDomainArc(source: EName, target: EName, nonXLinkAttributes: Map[EName, String]) extends DimensionalArc {
-    validate()
-
-    def withTargetRole(targetRole: String): DimensionDomainArc = {
-      DimensionDomainArc(source, target, nonXLinkAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
-    }
-
-    def withUsable(usable: Boolean): DimensionDomainArc = {
-      DimensionDomainArc(source, target, nonXLinkAttributes + (ENames.XbrldtUsableEName -> usable.toString))
-    }
-  }
-
-  final case class DomainMemberArc(source: EName, target: EName, nonXLinkAttributes: Map[EName, String]) extends DimensionalArc {
-    validate()
-
-    def withTargetRole(targetRole: String): DomainMemberArc = {
-      DomainMemberArc(source, target, nonXLinkAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
-    }
-
-    def withUsable(usable: Boolean): DomainMemberArc = {
-      DomainMemberArc(source, target, nonXLinkAttributes + (ENames.XbrldtUsableEName -> usable.toString))
-    }
-  }
-
-  final case class DimensionDefaultArc(source: EName, target: EName, nonXLinkAttributes: Map[EName, String]) extends DimensionalArc {
-    validate()
-
-    def withTargetRole(targetRole: String): DimensionDefaultArc = {
-      // A no-op
-      this
-    }
   }
 }

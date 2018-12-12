@@ -20,19 +20,23 @@ import java.io.File
 import java.net.URI
 
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.base.model.AllRelationship
+import eu.cdevreeze.tqa.base.model.HypercubeDimensionRelationship
+import eu.cdevreeze.tqa.base.model.Node
+import eu.cdevreeze.tqa.base.model.ParentChildRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
+import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.jvm._
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 
 /**
  * SimpleTaxonomyCreator test case.
@@ -42,7 +46,9 @@ import eu.cdevreeze.yaidom.core.EName
 @RunWith(classOf[JUnitRunner])
 class SimpleTaxonomyCreatorTest extends FunSuite {
 
-  import SimpleTaxonomyCreator._
+  private def mkConceptNode(tns: String, localName: String): Node.GlobalElementDecl = {
+    Node.GlobalElementDecl(EName(tns, localName))
+  }
 
   test("testAddArcs") {
     val taxoBuilder = getTaxoBuilder()
@@ -62,11 +68,11 @@ class SimpleTaxonomyCreatorTest extends FunSuite {
       .ensuring(u => taxo.taxonomyBase.taxonomyDocUriMap.contains(u))
 
     val pArcs = Vector(
-      ParentChildArc(EName(tns, "c1"), EName(tns, "c2"), Map(ENames.OrderEName -> "1")),
-      ParentChildArc(EName(tns, "c2"), EName(tns, "c3"), Map(ENames.OrderEName -> "2")),
-      ParentChildArc(EName(tns, "c2"), EName(tns, "c4"), Map(ENames.OrderEName -> "3")),
-      ParentChildArc(EName(tns, "c4"), EName(tns, "c5"), Map(ENames.OrderEName -> "4")),
-      ParentChildArc(EName(tns, "c4"), EName(tns, "c6"), Map(ENames.OrderEName -> "5")))
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c1"), mkConceptNode(tns, "c2"), Map(ENames.OrderEName -> "1")),
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c2"), mkConceptNode(tns, "c3"), Map(ENames.OrderEName -> "2")),
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c2"), mkConceptNode(tns, "c4"), Map(ENames.OrderEName -> "3")),
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c4"), mkConceptNode(tns, "c5"), Map(ENames.OrderEName -> "4")),
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c4"), mkConceptNode(tns, "c6"), Map(ENames.OrderEName -> "5")))
 
     val hypercubeElr = "urn:test:linkrole:my-hypercubes"
 
@@ -76,14 +82,26 @@ class SimpleTaxonomyCreatorTest extends FunSuite {
       .ensuring(u => taxo.taxonomyBase.taxonomyDocUriMap.contains(u))
 
     val allArcs = Vector(
-      AllArc(EName(tns, "c1"), EName(hypercubeTns, "Hypercube1"), Map(ENames.OrderEName -> "1")),
-      AllArc(EName(tns, "c2"), EName(hypercubeTns, "Hypercube1"), Map(ENames.OrderEName -> "2")),
-      AllArc(EName(tns, "c3"), EName(hypercubeTns, "Hypercube2"), Map(ENames.OrderEName -> "3")))
+      AllRelationship(hypercubeElr, mkConceptNode(tns, "c1"), mkConceptNode(hypercubeTns, "Hypercube1"), Map(ENames.OrderEName -> "1")),
+      AllRelationship(hypercubeElr, mkConceptNode(tns, "c2"), mkConceptNode(hypercubeTns, "Hypercube1"), Map(ENames.OrderEName -> "2")),
+      AllRelationship(hypercubeElr, mkConceptNode(tns, "c3"), mkConceptNode(hypercubeTns, "Hypercube2"), Map(ENames.OrderEName -> "3")))
 
     val hdArcs = Vector(
-      HypercubeDimensionArc(EName(hypercubeTns, "Hypercube1"), EName(hypercubeTns, "RegionAxis"), Map(ENames.OrderEName -> "1")),
-      HypercubeDimensionArc(EName(hypercubeTns, "Hypercube1"), EName(hypercubeTns, "ProductAxis"), Map(ENames.OrderEName -> "2")),
-      HypercubeDimensionArc(EName(hypercubeTns, "Hypercube2"), EName(hypercubeTns, "RegionAxis"), Map(ENames.OrderEName -> "3")))
+      HypercubeDimensionRelationship(
+        hypercubeElr,
+        mkConceptNode(hypercubeTns, "Hypercube1"),
+        mkConceptNode(hypercubeTns, "RegionAxis"),
+        Map(ENames.OrderEName -> "1")),
+      HypercubeDimensionRelationship(
+        hypercubeElr,
+        mkConceptNode(hypercubeTns, "Hypercube1"),
+        mkConceptNode(hypercubeTns, "ProductAxis"),
+        Map(ENames.OrderEName -> "2")),
+      HypercubeDimensionRelationship(
+        hypercubeElr,
+        mkConceptNode(hypercubeTns, "Hypercube2"),
+        mkConceptNode(hypercubeTns, "RegionAxis"),
+        Map(ENames.OrderEName -> "3")))
 
     val taxoCreator: SimpleTaxonomyCreator =
       SimpleTaxonomyCreator(taxo)

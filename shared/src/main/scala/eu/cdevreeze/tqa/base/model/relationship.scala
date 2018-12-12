@@ -88,6 +88,14 @@ sealed trait Relationship {
   final def order: BigDecimal = {
     BigDecimal(nonXLinkArcAttributes.get(ENames.OrderEName).getOrElse("1"))
   }
+
+  final def validated: this.type = {
+    require(
+      nonXLinkArcAttributes.keySet.forall(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
+      s"Expected non-XLink arcattributes, but got attributes ${nonXLinkArcAttributes.keySet}")
+
+    this
+  }
 }
 
 sealed trait StandardRelationship extends Relationship {
@@ -309,7 +317,14 @@ final case class RequiresElementRelationship(
   }
 }
 
-sealed trait DimensionalRelationship extends DefinitionRelationship
+sealed trait DimensionalRelationship extends DefinitionRelationship {
+
+  final def xbrldtAttributes: Map[EName, String] = {
+    nonXLinkArcAttributes.filterKeys(_.namespaceUriOption.contains(Namespaces.XbrldtNamespace))
+  }
+
+  def withTargetRole(targetRole: String): DimensionalRelationship
+}
 
 sealed trait HasHypercubeRelationship extends DimensionalRelationship {
 
@@ -339,6 +354,10 @@ sealed trait HasHypercubeRelationship extends DimensionalRelationship {
   final override def effectiveTargetBaseSetKey: BaseSetKey = {
     BaseSetKey.forHypercubeDimensionArc(effectiveTargetRole).ensuring(_.extLinkRole == effectiveTargetRole)
   }
+
+  def withContextElement(contextElement: String): HasHypercubeRelationship
+
+  def withClosed(closed: Boolean): HasHypercubeRelationship
 }
 
 final case class AllRelationship(
@@ -354,6 +373,18 @@ final case class AllRelationship(
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forAllArc(elr)
   }
+
+  def withTargetRole(targetRole: String): AllRelationship = {
+    AllRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
+  }
+
+  def withContextElement(contextElement: String): AllRelationship = {
+    AllRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtContextElementEName -> contextElement))
+  }
+
+  def withClosed(closed: Boolean): AllRelationship = {
+    AllRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtClosedEName -> closed.toString))
+  }
 }
 
 final case class NotAllRelationship(
@@ -368,6 +399,18 @@ final case class NotAllRelationship(
 
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forNotAllArc(elr)
+  }
+
+  def withTargetRole(targetRole: String): NotAllRelationship = {
+    NotAllRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
+  }
+
+  def withContextElement(contextElement: String): NotAllRelationship = {
+    NotAllRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtContextElementEName -> contextElement))
+  }
+
+  def withClosed(closed: Boolean): NotAllRelationship = {
+    NotAllRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtClosedEName -> closed.toString))
   }
 }
 
@@ -393,6 +436,10 @@ final case class HypercubeDimensionRelationship(
 
   override def effectiveTargetBaseSetKey: BaseSetKey = {
     BaseSetKey.forDimensionDomainArc(effectiveTargetRole).ensuring(_.extLinkRole == effectiveTargetRole)
+  }
+
+  def withTargetRole(targetRole: String): HypercubeDimensionRelationship = {
+    HypercubeDimensionRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
   }
 }
 
@@ -426,6 +473,14 @@ final case class DimensionDomainRelationship(
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forDimensionDomainArc(elr)
   }
+
+  def withTargetRole(targetRole: String): DimensionDomainRelationship = {
+    DimensionDomainRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
+  }
+
+  def withUsable(targetRole: String): DimensionDomainRelationship = {
+    DimensionDomainRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtUsableEName -> targetRole))
+  }
 }
 
 final case class DomainMemberRelationship(
@@ -443,6 +498,14 @@ final case class DomainMemberRelationship(
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forDomainMemberArc(elr)
   }
+
+  def withTargetRole(targetRole: String): DomainMemberRelationship = {
+    DomainMemberRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
+  }
+
+  def withUsable(targetRole: String): DomainMemberRelationship = {
+    DomainMemberRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtUsableEName -> targetRole))
+  }
 }
 
 final case class DimensionDefaultRelationship(
@@ -459,6 +522,11 @@ final case class DimensionDefaultRelationship(
 
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forDimensionDefaultArc(elr)
+  }
+
+  def withTargetRole(targetRole: String): DimensionDefaultRelationship = {
+    // A no-op
+    this
   }
 }
 
