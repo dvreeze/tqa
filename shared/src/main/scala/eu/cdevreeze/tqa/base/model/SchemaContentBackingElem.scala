@@ -26,6 +26,21 @@ import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.ClarkElemApi
 import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
 
+// TODO Add node super-type and text node type as well, and have the element type offer the BackingNodes.Elem API
+// TODO Then there is a children field for all text and element nodes that are child nodes
+// TODO Use minimalScope instead of attribute and element text transformations
+// TODO Must SchemaContentElement store the SchemaContentElement children?
+// TODO Analogous to SchemaContentBackingElem, create ResourceContentBackingElem and the corresponding node and text types
+// TODO Analogous to SchemaContentElement, create ResourceContentElement (backed by ResourceContentBackingElem) for resource descendants
+// TODO Can we then generalize over SchemaContentBackingElem and ResourceContentBackingElem into, say, MiniDialectElem?
+// TODO ResourceContentElement keeps as "ancestry state" the ELR (?) and link element (?) (so anything outside a resource is not modeled)
+// TODO Then ResourceNode contains ResourceContentElement child elements; other than that, relationships and nodes are independent of the rest
+// TODO Alternatively, no XML for resource content, but make (extensible) model for that (?)
+// TODO Should ElementKey become just one case class containing an optional (!) document URI plus required ID?
+// TODO Or should SchemaContentElementKey contain optional TNS plus required ID, and LinkContentKey contain ELR, link name and ID?
+// TODO What does this mean in terms of (uniqueness) assumptions about the taxonomy?
+// TODO Can we define a friendly "case class-like" ("low ancestry context") XML format that ties all this together?
+
 /**
  * XML element in a schema, aware of the target namespace, if any. It is a custom yaidom element
  * implementation for schema content offering the ClarkElemApi query API. It is not a "yaidom dialect", but

@@ -20,6 +20,8 @@ package eu.cdevreeze.tqa.base
  * Model of (mainly standard) linkbase and schema content, as free from (nested) XML as possible. The model is not XPath-aware,
  * other than keeping XPath expressions as strings. It is not XLink-aware, but replaces XML-backed relationships
  * by a case class hierarchy for relationships. It is also not aware of XML Base, nor does it have to be.
+ * It does not even know about documents and document URIs! (Hence the model supports no "DTS discovery", but instead
+ * DTSes are explicitly "collected" from outside the model.)
  *
  * THIS PACKAGE AND ITS SUB-PACKAGES ARE EXPERIMENTAL!
  *
