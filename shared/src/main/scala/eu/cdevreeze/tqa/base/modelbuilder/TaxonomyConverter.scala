@@ -71,31 +71,41 @@ object TaxonomyConverter {
     elem match {
       case e: base.dom.ConceptLabelResource =>
         base.model.Node.ConceptLabelResource(
-          base.model.ResourceKey(elr, e.roleOption, e.attribute(ENames.IdEName)),
+          e.attributeOption(ENames.IdEName),
+          elr,
+          e.roleOption,
           e.resolvedAttributes.toMap
             .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.text)
       case e: base.dom.ConceptReferenceResource =>
         base.model.Node.ConceptReferenceResource(
-          base.model.ResourceKey(elr, e.roleOption, e.attribute(ENames.IdEName)),
+          e.attributeOption(ENames.IdEName),
+          elr,
+          e.roleOption,
           e.resolvedAttributes.toMap
             .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.findAllChildElems.map(e => (e.resolvedName, e.text)).toMap)
       case e: base.dom.XLinkResource if e.resolvedName == ENames.LabelLabelEName =>
         base.model.Node.ElementLabelResource(
-          base.model.ResourceKey(elr, e.roleOption, e.attribute(ENames.IdEName)),
+          e.attributeOption(ENames.IdEName),
+          elr,
+          e.roleOption,
           e.resolvedAttributes.toMap
             .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.text)
       case e: base.dom.XLinkResource if e.resolvedName == ENames.ReferenceReferenceEName =>
         base.model.Node.ElementReferenceResource(
-          base.model.ResourceKey(elr, e.roleOption, e.attribute(ENames.IdEName)),
+          e.attributeOption(ENames.IdEName),
+          elr,
+          e.roleOption,
           e.resolvedAttributes.toMap
             .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.findAllChildElems.map(e => (e.resolvedName, e.text)).toMap)
       case e =>
         base.model.Node.OtherResourceNode(
-          base.model.ResourceKey(elr, e.roleOption, e.attribute(ENames.IdEName)),
+          e.attributeOption(ENames.IdEName),
+          elr,
+          e.roleOption,
           e.resolvedAttributes.toMap
             .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)))
     }

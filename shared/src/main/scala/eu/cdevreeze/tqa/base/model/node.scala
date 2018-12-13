@@ -41,19 +41,23 @@ sealed trait LocatorNode extends Node
 
 /**
  * Resource node. It is an abstraction of what in the XML representation is a taxonomy element that is
- * an XLink resource. Note that each resource node is expected to have an ID.
+ * an XLink resource. Note that each resource node that locators can point to is expected to have an ID.
  */
 sealed trait ResourceNode extends Node {
 
-  def elementKey: ResourceKey
+  def idOption: Option[String]
+
+  def elr: String
+
+  def roleOption: Option[String]
 
   def nonXLinkAttributes: Map[EName, String]
 
-  final def id: String = elementKey.id
-
-  final def elr: String = elementKey.elr
-
-  final def roleOption: Option[String] = elementKey.roleOption
+  final def elementKeyOption: Option[ResourceKey] = {
+    idOption.map { id =>
+      ResourceKey(elr, roleOption, id)
+    }
+  }
 }
 
 object Node {
@@ -116,12 +120,16 @@ object Node {
   sealed trait NonStandardDocumentationResource extends DocumentationResource
 
   final case class ConceptLabelResource(
-    elementKey: ResourceKey,
+    idOption: Option[String],
+    elr: String,
+    roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
     text: String) extends StandardDocumentationResource with LabelResource
 
   final case class ConceptReferenceResource(
-    elementKey: ResourceKey,
+    idOption: Option[String],
+    elr: String,
+    roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
     parts: Map[EName, String]) extends StandardDocumentationResource with ReferenceResource
 
@@ -129,7 +137,9 @@ object Node {
    * An element label, named label:label (and not any resource in that substitution group).
    */
   final case class ElementLabelResource(
-    elementKey: ResourceKey,
+    idOption: Option[String],
+    elr: String,
+    roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
     text: String) extends NonStandardDocumentationResource with LabelResource
 
@@ -137,7 +147,9 @@ object Node {
    * An element reference, named reference:reference (and not any resource in that substitution group).
    */
   final case class ElementReferenceResource(
-    elementKey: ResourceKey,
+    idOption: Option[String],
+    elr: String,
+    roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
     parts: Map[EName, String]) extends NonStandardDocumentationResource with ReferenceResource
 
@@ -147,12 +159,14 @@ object Node {
    * Any other ResourceNode. For example, table content like table, ruleNode, or formula content like
    * formula:valueAssertion, or a custom resource node, such as sbr:linkroleOrder in Dutch taxonomies.
    *
-   * It contains an element key, and therefore carries no semantics in isolation.
-   * It is assumed that the element key is unique in the entire document collection.
+   * It contains an optional element key, and therefore carries no semantics in isolation.
+   * It is assumed that the element key, if present, is unique in the entire document collection.
    *
    * TODO Model the content of an OtherResourceNode.
    */
   final case class OtherResourceNode(
-    elementKey: ResourceKey,
+    idOption: Option[String],
+    elr: String,
+    roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String]) extends ResourceNode
 }
