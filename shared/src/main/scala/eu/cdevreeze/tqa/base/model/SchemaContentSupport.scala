@@ -20,11 +20,10 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
-import eu.cdevreeze.yaidom.queryapi.ClarkElemApi
 import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
+import eu.cdevreeze.yaidom.queryapi.ClarkNodes
 
 // TODO Add node super-type and text node type as well, and have the element type offer the BackingNodes.Elem API
 // TODO Then there is a children field for all text and element nodes that are child nodes
@@ -58,29 +57,53 @@ import eu.cdevreeze.yaidom.queryapi.ClarkElemLike
  *
  * @author Chris de Vreeze
  */
-final case class SchemaContentBackingElem(
-  targetNamespaceOption: Option[String],
-  resolvedName: EName,
-  attributes: Map[EName, String],
-  text: String,
-  childElems: immutable.IndexedSeq[SchemaContentBackingElem]) extends ClarkElemApi with ClarkElemLike {
+object SchemaContentSupport {
 
-  type ThisElem = SchemaContentBackingElem
+  sealed trait Node extends ClarkNodes.Node
 
-  // Methods needed for completing the ClarkElemApi API
+  final case class Elem(
+    targetNamespaceOption: Option[String],
+    minimalScope: Scope,
+    resolvedName: EName,
+    attributes: Map[EName, String],
+    children: immutable.IndexedSeq[Node]) extends Node with ClarkNodes.Elem with ClarkElemLike {
 
-  def thisElem: SchemaContentBackingElem = this
+    type ThisNode = Node
 
-  def findAllChildElems: immutable.IndexedSeq[SchemaContentBackingElem] = childElems
+    type ThisElem = Elem
 
-  def resolvedAttributes: Map[EName, String] = attributes
-}
+    // Methods needed for completing the ClarkNodes.Elem API
 
-object SchemaContentBackingElem {
+    def thisElem: Elem = this
+
+    def findAllChildElems: immutable.IndexedSeq[Elem] = {
+      children.collect { case e: Elem => e }
+    }
+
+    def resolvedAttributes: Map[EName, String] = attributes
+
+    /**
+     * Returns the concatenation of the texts of text children, including whitespace. Non-text children are ignored.
+     * If there are no text children, the empty string is returned.
+     */
+    def text: String = {
+      val textStrings = children.collect { case t: Text => t }.map(_.text)
+      textStrings.mkString
+    }
+  }
+
+  final case class Text(text: String) extends Node with ClarkNodes.Text {
+
+    /** Returns `text.trim`. */
+    final def trimmedText: String = text.trim
+
+    /** Returns `XmlStringUtils.normalizeString(text)` .*/
+    final def normalizedText: String = normalizeString(text)
+  }
 
   // TODO We should also transform typedDomainRefs to ENames, but cannot do that without any context!
 
-  def fromSchemaRootElem(elem: BackingNodes.Elem): SchemaContentBackingElem = {
+  def fromSchemaRootElem(elem: BackingNodes.Elem): Elem = {
     require(elem.resolvedName == ENames.XsSchemaEName, s"Expected ${ENames.XsSchemaEName} but got ${elem.resolvedName}")
 
     val tnsOption: Option[String] = elem.attributeOption(ENames.TargetNamespaceEName)
@@ -90,51 +113,37 @@ object SchemaContentBackingElem {
 
   private def from(
     tnsOption: Option[String],
-    elem: BackingNodes.Elem): SchemaContentBackingElem = {
+    elem: BackingNodes.Elem): Elem = {
 
     // Recursive calls
 
-    val childElems = elem.findAllChildElems.map(e => from(tnsOption, e))
-
-    SchemaContentBackingElem(
-      tnsOption,
-      elem.resolvedName,
-      transformAttributes(elem.resolvedName, elem.resolvedAttributes.toMap, elem.scope),
-      transformText(elem.resolvedName, elem.text, elem.scope),
-      childElems)
-  }
-
-  private def transformAttributes(elemName: EName, attrs: Map[EName, String], scope: Scope): Map[EName, String] = {
-    val editedAttributes = attrs.filterKeys(qnameValuedAttributes.getOrElse(elemName, Set.empty))
-      .mapValues(v => scope.resolveQName(QName(v)).toString)
-
-    attrs ++ editedAttributes
-  }
-
-  private def transformText(elemName: EName, txt: String, scope: Scope): String = {
-    if (qnameValuedElems.contains(elemName)) {
-      scope.resolveQName(QName(txt)).toString
-    } else {
-      txt
+    val children: immutable.IndexedSeq[Node] = elem.children.flatMap {
+      case e: BackingNodes.Elem => Some(from(tnsOption, e))
+      case t: BackingNodes.Text => Some(Text(t.text))
+      case _ => None
     }
+
+    val minimalScope: Scope = ???
+
+    Elem(
+      tnsOption,
+      minimalScope,
+      elem.resolvedName,
+      elem.resolvedAttributes.toMap,
+      children)
   }
 
-  private val qnameValuedAttributes: Map[EName, Set[EName]] = {
-    import ENames._
+  /**
+   * Normalizes the string, removing surrounding whitespace and normalizing internal whitespace to a single space.
+   * Whitespace includes #x20 (space), #x9 (tab), #xD (carriage return), #xA (line feed). If there is only whitespace,
+   * the empty string is returned. Inspired by the JDOM library.
+   */
+  private def normalizeString(s: String): String = {
+    require(s ne null) // scalastyle:off null
 
-    Map(
-      XsElementEName -> Set(RefEName, SubstitutionGroupEName, TypeEName),
-      XsAttributeEName -> Set(RefEName, TypeEName),
-      XsGroupEName -> Set(RefEName),
-      XsAttributeGroupEName -> Set(RefEName),
-      XsRestrictionEName -> Set(BaseEName),
-      XsExtensionEName -> Set(BaseEName),
-      XsKeyrefEName -> Set(ReferEName))
-  }
+    val separators = Array(' ', '\t', '\r', '\n')
+    val words: Seq[String] = s.split(separators).toSeq.filterNot(_.isEmpty)
 
-  private val qnameValuedElems: Set[EName] = {
-    import ENames._
-
-    Set(LinkUsedOnEName)
+    words.mkString(" ") // Returns empty string if words.isEmpty
   }
 }

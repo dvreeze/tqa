@@ -22,7 +22,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import eu.cdevreeze.tqa.ENames.TypeEName
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.indexed
@@ -43,8 +42,7 @@ class SchemaContentTest extends FunSuite {
 
     val doc = indexed.Document(docParser.parse(docUri).withUriOption(Some(docUri)))
 
-    val backingElem = SchemaContentBackingElem.fromSchemaRootElem(doc.documentElement)
-    val schemaContentElems = SchemaContentElement.collectSchemaContent(backingElem)
+    val schemaContentElems = SchemaContentElement.collectSchemaContent(doc.documentElement)
 
     val globalElemDecls = schemaContentElems.collect { case e: GlobalElementDeclaration => e }
 
@@ -70,7 +68,7 @@ class SchemaContentTest extends FunSuite {
       schemaContentElems.flatMap(_.findElemOfType(classTag[AttributeDeclaration])(_.nameAttributeValue == "orderid")).head
 
     assertResult(Some(EName(XsNamespace, "string"))) {
-      attrDecl.attributes.get(TypeEName).map(v => EName(v))
+      attrDecl.typeOption
     }
 
     val topmostComplexTypeDefs =

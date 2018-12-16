@@ -149,7 +149,7 @@ object BasicTaxonomy {
 
     val schemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]] =
       schemaContentElements.groupBy(_.resolvedName)
-        .mapValues(_.filter(_.attributes.get(ENames.IdEName).nonEmpty).groupBy(_.attributes(ENames.IdEName)))
+        .mapValues(_.filter(_.attributes.idOption.nonEmpty).groupBy(_.attributes.idOption.get))
 
     val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration] =
       schemaContentElements.collect { case e: GlobalElementDeclaration => e }

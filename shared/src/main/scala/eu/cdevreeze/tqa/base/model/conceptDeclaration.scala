@@ -117,7 +117,7 @@ sealed abstract class DimensionDeclaration private[model] (
   globalElementDeclaration: GlobalElementDeclaration) extends ItemDeclaration(globalElementDeclaration) {
 
   final def isTyped: Boolean = {
-    globalElementDeclaration.attributes.contains(XbrldtTypedDomainRefEName)
+    globalElementDeclaration.attributes.otherAttributes.contains(XbrldtTypedDomainRefEName)
   }
 
   final def dimensionEName: EName = {
@@ -146,7 +146,7 @@ final class TypedDimensionDeclaration private[model] (
    * The assumption is that these typed domain declaration IDs are unique for global element declarations across documents.
    */
   def typedDomainRef: String = {
-    val rawUri = URI.create(globalElementDeclaration.attributes(XbrldtTypedDomainRefEName))
+    val rawUri = URI.create(globalElementDeclaration.attributes.otherAttributes(XbrldtTypedDomainRefEName))
     val fragment = rawUri.getFragment
     fragment
   }
@@ -159,7 +159,7 @@ final class TypedDimensionDeclaration private[model] (
    */
   def typedDomainRefOption: Option[String] = {
     val rawUriOption =
-      globalElementDeclaration.attributes.get(XbrldtTypedDomainRefEName).map(URI.create)
+      globalElementDeclaration.attributes.otherAttributes.get(XbrldtTypedDomainRefEName).map(URI.create)
     val fragmentOption = rawUriOption.map(_.getFragment)
     fragmentOption
   }
@@ -196,7 +196,7 @@ object ConceptDeclaration {
         if (isHypercube) {
           Some(new HypercubeDeclaration(elemDecl))
         } else if (isDimension) {
-          if (elemDecl.attributes.contains(XbrldtTypedDomainRefEName)) {
+          if (elemDecl.attributes.otherAttributes.contains(XbrldtTypedDomainRefEName)) {
             Some(new TypedDimensionDeclaration(elemDecl))
           } else {
             Some(new ExplicitDimensionDeclaration(elemDecl))

@@ -18,14 +18,17 @@ package eu.cdevreeze.tqa.base.model
 
 import scala.collection.immutable
 import scala.reflect.classTag
+import scala.util.Try
 
+import eu.cdevreeze.tqa.AttributeSupport
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.SubstitutionGroupMap
-import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.base.common.Variety
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.core.Scope
+import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemApi
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
@@ -33,7 +36,7 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 /**
  * Any '''taxonomy schema content element''' in the model. It is either standard schema content, which is a representation
  * of an element in the XML Schema namespace, or it is appinfo content. The schema root element, and imports and
- * linkbaseRefs are not represented in this model. Neither are the annotation and appinfo elements.
+ * linkbaseRefs are not represented in this model. Neither are the topmost annotation and their child appinfo elements.
  *
  * This schema content model offers the yaidom SubtypeAwareElemApi API. Note, however, that most schema content
  * elements have no child elements, but type definitions typically do have descendant elements.
@@ -48,9 +51,11 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * Several kinds of schema content elements in this model are easy to refer to from relationships, as source or
  * target. Note that these "links" are semantically meaningful, and need no URIs to point to them.
  *
- * Schema content elements are relatively easy to create on the fly, and could be part of the basis for easy programmatic taxonomy
- * creation. Note, however, that the taxonomy creation algorithm must at some point worry about closure with
+ * Schema content elements are relatively easy to create on the fly, and could be part of the basis for easy programmatic
+ * taxonomy creation. Note, however, that the taxonomy creation algorithm must at some point worry about closure with
  * respect to DTS discovery, and about containing the needed substitution group ancestry.
+ *
+ * See http://www.datypic.com/sc/xsd for the XML Schema model (unaware of XBRL).
  *
  * @author Chris de Vreeze
  */
@@ -59,19 +64,19 @@ sealed trait SchemaContentElement extends SubtypeAwareElemApi with SubtypeAwareE
   type ThisElem = SchemaContentElement
 
   /**
-   * Returns the underlying SchemaContentBackingElem
+   * The optional target namespace that "is in scope".
    */
-  def elem: SchemaContentBackingElem
+  def targetNamespaceOption: Option[String]
 
   /**
    * The resolved name of the corresponding XML element.
    */
-  final def resolvedName: EName = elem.resolvedName
+  def resolvedName: EName
 
   /**
-   * The attributes in the corresponding XML element, but with QName values replaced by ENames in James Clark notation.
+   * The (partially type-safe) attributes of the corresponding XML element.
    */
-  final def attributes: Map[EName, String] = elem.attributes
+  def attributes: SchemaContentElement.Attributes
 
   /**
    * The (immediate) child elements of this schema content element.
@@ -90,17 +95,21 @@ sealed trait SchemaContentElement extends SubtypeAwareElemApi with SubtypeAwareE
 /**
  * Representation of an element in the XML Schema namespace, but excluding the schema root element.
  * More precisely, any child element of the schema root element that is not an xs:annotation and that is
- * in the XML Schema namespace, or any of its desdendants.
+ * in the XML Schema namespace, or any of its desdendants in the XML Schema namespace (even xs:annotation).
  */
-sealed trait StandardSchemaContentElement extends SchemaContentElement {
-
-  final def targetNamespaceOption: Option[String] = elem.targetNamespaceOption
-}
+sealed trait StandardSchemaContentElement extends SchemaContentElement
 
 /**
- * Representation of an element in an xs:appinfo element (as descendant).
+ * Representation of an element in an xs:appinfo element (as descendant). The ancestor xs:appinfo element
+ * may or may not be a child of a top-level xs:annotation element.
  */
 sealed trait AppinfoContentElement extends SchemaContentElement
+
+/**
+ * Representation of an element in an xs:documentation element (as descendant). The ancestor xs:documentation element
+ * may or may not be a child of a top-level xs:annotation element.
+ */
+sealed trait DocumentationContentElement extends SchemaContentElement
 
 // The "capabilities" of schema content elements.
 
@@ -109,16 +118,11 @@ sealed trait AppinfoContentElement extends SchemaContentElement
  */
 sealed trait CanBeAbstract extends StandardSchemaContentElement {
 
-  /**
-   * Returns the boolean "abstract" attribute (defaulting to false). This may fail with an exception if the taxonomy is not schema-valid.
-   */
-  final def isAbstract: Boolean = {
-    attributes.get(ENames.AbstractEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
-  }
+  def attributes: CanBeAbstract.Attributes
 
-  final def isConcrete: Boolean = {
-    !isAbstract
-  }
+  final def isAbstract: Boolean = attributes.isAbstract
+
+  final def isConcrete: Boolean = !isAbstract
 }
 
 /**
@@ -126,12 +130,9 @@ sealed trait CanBeAbstract extends StandardSchemaContentElement {
  */
 sealed trait NamedDeclOrDef extends StandardSchemaContentElement {
 
-  /**
-   * Returns the "name" attribute. This may fail with an exception if the taxonomy is not schema-valid.
-   */
-  final def nameAttributeValue: String = {
-    attributes(ENames.NameEName)
-  }
+  def attributes: NamedDeclOrDef.Attributes
+
+  final def nameAttributeValue: String = attributes.name
 }
 
 /**
@@ -139,12 +140,9 @@ sealed trait NamedDeclOrDef extends StandardSchemaContentElement {
  */
 sealed trait Reference extends StandardSchemaContentElement {
 
-  /**
-   * Returns the "ref" attribute as EName. This may fail with an exception if the taxonomy is not schema-valid.
-   */
-  final def ref: EName = {
-    EName.parse(attributes(ENames.RefEName))
-  }
+  def attributes: Reference.Attributes
+
+  final def ref: EName = attributes.ref
 }
 
 // The inheritance hierarchy
@@ -154,24 +152,21 @@ sealed trait Reference extends StandardSchemaContentElement {
  */
 sealed trait Particle extends StandardSchemaContentElement {
 
+  def attributes: Particle.Attributes
+
   /**
    * The minOccurs attribute as integer, defaulting to 1.
-   * This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def minOccurs: Int = {
-    attributes.get(ENames.MinOccursEName).getOrElse("1").toInt
+    attributes.minOccurs
   }
 
   /**
    * The maxOccurs attribute as optional integer, defaulting to 1, but returning
-   * None if unbounded. This may fail with an exception if the taxonomy is not schema-valid.
+   * None if unbounded.
    */
   final def maxOccursOption: Option[Int] = {
-    attributes.get(ENames.MaxOccursEName) match {
-      case Some("unbounded") => None
-      case Some(i) => Some(i.toInt)
-      case None => Some(1)
-    }
+    attributes.maxOccursOption
   }
 }
 
@@ -180,19 +175,19 @@ sealed trait Particle extends StandardSchemaContentElement {
 /**
  * Either an element declaration or an element reference.
  */
-sealed trait ElementDeclarationOrReference extends StandardSchemaContentElement
+sealed trait ElementDeclarationOrReference extends StandardSchemaContentElement {
+
+  final def resolvedName: EName = ENames.XsElementEName
+}
 
 /**
  * Either a global element declaration or a local element declaration.
  */
 sealed trait ElementDeclaration extends ElementDeclarationOrReference with NamedDeclOrDef {
 
-  /**
-   * Returns the optional type attribute (as EName). This may fail with an exception if the taxonomy is not schema-valid.
-   */
-  final def typeOption: Option[EName] = {
-    attributes.get(ENames.TypeEName).map(EName.parse)
-  }
+  def attributes: ElementDeclaration.Attributes
+
+  final def typeOption: Option[EName] = attributes.typeOption
 }
 
 /**
@@ -214,10 +209,19 @@ sealed trait ElementDeclaration extends ElementDeclarationOrReference with Named
  *
  * Once we have a `SubstitutionGroupMap` as context, we can turn the global element declaration into a `ConceptDeclaration`,
  * if the global element declaration is indeed an item or tuple declaration according to the `SubstitutionGroupMap`.
+ *
+ * The "other child elements" passed below, if any, are xs:unique, xs:key and xs:keyref elements.
  */
-final case class GlobalElementDeclaration private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with CanBeAbstract {
+final case class GlobalElementDeclaration(
+  targetNamespaceOption: Option[String],
+  attributes: GlobalElementDeclaration.Attributes,
+  annotationOption: Option[Annotation],
+  anonymousTypeDefinitionOption: Option[AnonymousTypeDefinition],
+  otherChildElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with CanBeAbstract {
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ anonymousTypeDefinitionOption.toIndexedSeq ++ otherChildElems
+  }
 
   /**
    * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
@@ -229,12 +233,7 @@ final case class GlobalElementDeclaration private[model] (
     EName(tnsOption, nameAttributeValue)
   }
 
-  /**
-   * Returns the optional substitution group (as EName). This may fail with an exception if the taxonomy is not schema-valid.
-   */
-  def substitutionGroupOption: Option[EName] = {
-    attributes.get(ENames.SubstitutionGroupEName).map(EName.parse)
-  }
+  def substitutionGroupOption: Option[EName] = attributes.substitutionGroupOption
 
   /**
    * Returns true if this global element declaration has the given substitution group, either
@@ -264,13 +263,8 @@ final case class GlobalElementDeclaration private[model] (
     }.toSet
   }
 
-  /**
-   * Returns the optional xbrli:periodType attribute, as `PeriodType`.
-   *
-   * This method may fail with an exception if the taxonomy is not schema-valid.
-   */
   def periodTypeOption: Option[PeriodType] = {
-    attributes.get(ENames.XbrliPeriodTypeEName).map(PeriodType.fromString)
+    attributes.otherAttributes.get(ENames.XbrliPeriodTypeEName).map(PeriodType.fromString)
   }
 }
 
@@ -284,16 +278,25 @@ final case class GlobalElementDeclaration private[model] (
  * are global element declarations declaring item or tuple concepts, and tuple concept content models refer to other
  * (item or tuple) concept declarations.
  */
-final case class LocalElementDeclaration private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with Particle
+final case class LocalElementDeclaration(
+  targetNamespaceOption: Option[String],
+  attributes: LocalElementDeclaration.Attributes,
+  annotationOption: Option[Annotation],
+  anonymousTypeDefinitionOption: Option[AnonymousTypeDefinition],
+  otherChildElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclaration with Particle {
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ anonymousTypeDefinitionOption.toIndexedSeq ++ otherChildElems
+  }
+}
 
 /**
  * Element reference, referring to a global element declaration. Like local element declarations it is not a child element of
  * the xs:schema root element, but unlike global and local element declarations it has a ref attribute instead of a name attribute.
  */
-final case class ElementReference private[model] (
-  elem: SchemaContentBackingElem,
+final case class ElementReference(
+  targetNamespaceOption: Option[String],
+  attributes: ElementReference.Attributes,
   childElems: immutable.IndexedSeq[SchemaContentElement]) extends ElementDeclarationOrReference with Reference
 
 // Attribute declarations or references.
@@ -301,27 +304,36 @@ final case class ElementReference private[model] (
 /**
  * Either an attribute declaration or an attribute reference.
  */
-sealed trait AttributeDeclarationOrReference extends StandardSchemaContentElement
+sealed trait AttributeDeclarationOrReference extends StandardSchemaContentElement {
+
+  final def resolvedName: EName = ENames.XsAttributeEName
+}
 
 /**
  * Either a global attribute declaration or a local attribute declaration.
  */
 sealed trait AttributeDeclaration extends AttributeDeclarationOrReference with NamedDeclOrDef {
 
+  def attributes: AttributeDeclaration.Attributes
+
   /**
    * Returns the optional type attribute (as EName). This may fail with an exception if the taxonomy is not schema-valid.
    */
-  def typeOption: Option[EName] = {
-    attributes.get(ENames.TypeEName).map(EName.parse)
-  }
+  def typeOption: Option[EName] = attributes.typeOption
 }
 
 /**
  * Global attribute declaration. It is an xs:attribute element, and a child element of the xs:schema root element.
  */
-final case class GlobalAttributeDeclaration private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclaration {
+final case class GlobalAttributeDeclaration(
+  targetNamespaceOption: Option[String],
+  attributes: GlobalAttributeDeclaration.Attributes,
+  annotationOption: Option[Annotation],
+  anonymousSimpleTypeDefinitionOption: Option[AnonymousSimpleTypeDefinition]) extends AttributeDeclaration {
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ anonymousSimpleTypeDefinitionOption.toIndexedSeq
+  }
 
   /**
    * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
@@ -337,17 +349,31 @@ final case class GlobalAttributeDeclaration private[model] (
 /**
  * Local attribute declaration. It is an xs:attribute element, but not a direct child element of the xs:schema root element.
  */
-final case class LocalAttributeDeclaration private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclaration
+final case class LocalAttributeDeclaration(
+  targetNamespaceOption: Option[String],
+  attributes: LocalAttributeDeclaration.Attributes,
+  annotationOption: Option[Annotation],
+  anonymousSimpleTypeDefinitionOption: Option[AnonymousSimpleTypeDefinition]) extends AttributeDeclaration {
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ anonymousSimpleTypeDefinitionOption.toIndexedSeq
+  }
+}
 
 /**
  * Attribute reference. It is an xs:attribute element referring to a global attribute declaration. It is not a direct child element of
  * the xs:schema root element.
  */
-final case class AttributeReference private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeDeclarationOrReference with Reference
+final case class AttributeReference(
+  targetNamespaceOption: Option[String],
+  attributes: AttributeReference.Attributes,
+  annotationOption: Option[Annotation],
+  anonymousSimpleTypeDefinitionOption: Option[AnonymousSimpleTypeDefinition]) extends AttributeDeclarationOrReference with Reference {
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ anonymousSimpleTypeDefinitionOption.toIndexedSeq
+  }
+}
 
 // Type definitions.
 
@@ -355,6 +381,8 @@ final case class AttributeReference private[model] (
  * Type definition. It is either a complex or simple type definition, and it is also either a named or anonymous type definition.
  */
 sealed trait TypeDefinition extends StandardSchemaContentElement {
+
+  def attributes: TypeDefinition.Attributes
 
   /**
    * Returns the base type of this type, as EName, if any, wrapped in an Option.
@@ -373,6 +401,8 @@ sealed trait TypeDefinition extends StandardSchemaContentElement {
  * Named type definition, so either a named complex type definition or a named simple type definition.
  */
 sealed trait NamedTypeDefinition extends TypeDefinition with NamedDeclOrDef {
+
+  def attributes: NamedTypeDefinition.Attributes
 
   /**
    * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
@@ -394,6 +424,8 @@ sealed trait AnonymousTypeDefinition extends TypeDefinition
  * Simple type definition, so either a named simple type definition or an anonymous simple type definition.
  */
 sealed trait SimpleTypeDefinition extends TypeDefinition {
+
+  final def resolvedName: EName = ENames.XsSimpleTypeEName
 
   /**
    * Returns the variety. This may fail with an exception if the taxonomy is not schema-valid.
@@ -426,6 +458,8 @@ sealed trait SimpleTypeDefinition extends TypeDefinition {
  */
 sealed trait ComplexTypeDefinition extends TypeDefinition {
 
+  final def resolvedName: EName = ENames.XsComplexTypeEName
+
   final def contentElemOption: Option[Content] = {
     val complexContentOption = findChildElemOfType(classTag[ComplexContent])(anyElem)
     val simpleContentOption = findChildElemOfType(classTag[SimpleContent])(anyElem)
@@ -444,29 +478,45 @@ sealed trait ComplexTypeDefinition extends TypeDefinition {
 /**
  * Named simple type definition. It is a top-level xs:simpleType element with a name attribute.
  */
-final case class NamedSimpleTypeDefinition private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends NamedTypeDefinition with SimpleTypeDefinition
+final case class NamedSimpleTypeDefinition(
+  targetNamespaceOption: Option[String],
+  attributes: NamedSimpleTypeDefinition.Attributes,
+  annotationOption: Option[Annotation],
+  contentElement: SchemaContentElement) extends NamedTypeDefinition with SimpleTypeDefinition {
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ immutable.IndexedSeq(contentElement)
+  }
+}
 
 /**
  * Anonymous simple type definition. It is a non-top-level xs:simpleType element without any name attribute.
  */
-final case class AnonymousSimpleTypeDefinition private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AnonymousTypeDefinition with SimpleTypeDefinition
+final case class AnonymousSimpleTypeDefinition(
+  targetNamespaceOption: Option[String],
+  attributes: AnonymousSimpleTypeDefinition.Attributes,
+  annotationOption: Option[Annotation],
+  contentElement: SchemaContentElement) extends AnonymousTypeDefinition with SimpleTypeDefinition {
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ immutable.IndexedSeq(contentElement)
+  }
+}
 
 /**
  * Named complex type definition. It is a top-level xs:complexType element with a name attribute.
  */
-final case class NamedComplexTypeDefinition private[model] (
-  elem: SchemaContentBackingElem,
+final case class NamedComplexTypeDefinition(
+  targetNamespaceOption: Option[String],
+  attributes: NamedComplexTypeDefinition.Attributes,
   childElems: immutable.IndexedSeq[SchemaContentElement]) extends NamedTypeDefinition with ComplexTypeDefinition
 
 /**
  * Anonymous complex type definition. It is a non-top-level xs:complexType element without any name attribute.
  */
-final case class AnonymousComplexTypeDefinition private[model] (
-  elem: SchemaContentBackingElem,
+final case class AnonymousComplexTypeDefinition(
+  targetNamespaceOption: Option[String],
+  attributes: AnonymousComplexTypeDefinition.Attributes,
   childElems: immutable.IndexedSeq[SchemaContentElement]) extends AnonymousTypeDefinition with ComplexTypeDefinition
 
 // Attribute group definitions and references.
@@ -474,20 +524,25 @@ final case class AnonymousComplexTypeDefinition private[model] (
 /**
  * Attribute group definition or attribute group reference.
  */
-sealed trait AttributeGroupDefinitionOrReference extends StandardSchemaContentElement
+sealed trait AttributeGroupDefinitionOrReference extends StandardSchemaContentElement {
+
+  final def resolvedName: EName = ENames.XsAttributeGroupEName
+}
 
 /**
  * Attribute group definition, so a top-level xs:attributeGroup element with a name attribute.
  */
-final case class AttributeGroupDefinition private[model] (
-  elem: SchemaContentBackingElem,
+final case class AttributeGroupDefinition(
+  targetNamespaceOption: Option[String],
+  attributes: AttributeGroupDefinition.Attributes,
   childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeGroupDefinitionOrReference with NamedDeclOrDef
 
 /**
  * Attribute group reference, so a non-top-level xs:attributeGroup element with a ref attribute, referring to an attribute group definition.
  */
-final case class AttributeGroupReference private[model] (
-  elem: SchemaContentBackingElem,
+final case class AttributeGroupReference(
+  targetNamespaceOption: Option[String],
+  attributes: AttributeGroupReference.Attributes,
   childElems: immutable.IndexedSeq[SchemaContentElement]) extends AttributeGroupDefinitionOrReference with Reference
 
 // Model group definitions and references.
@@ -495,20 +550,25 @@ final case class AttributeGroupReference private[model] (
 /**
  * Model group definition or model group reference.
  */
-sealed trait ModelGroupDefinitionOrReference extends StandardSchemaContentElement
+sealed trait ModelGroupDefinitionOrReference extends StandardSchemaContentElement {
+
+  final def resolvedName: EName = ENames.XsGroupEName
+}
 
 /**
  * Model group definition, so a top-level xs:group element with a name attribute.
  */
-final case class ModelGroupDefinition private[model] (
-  elem: SchemaContentBackingElem,
+final case class ModelGroupDefinition(
+  targetNamespaceOption: Option[String],
+  attributes: ModelGroupDefinition.Attributes,
   childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroupDefinitionOrReference
 
 /**
  * Model group reference, so a non-top-level xs:group element with a ref attribute, referring to a model group definition.
  */
-final case class ModelGroupReference private[model] (
-  elem: SchemaContentBackingElem,
+final case class ModelGroupReference(
+  targetNamespaceOption: Option[String],
+  attributes: ModelGroupReference.Attributes,
   childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroupDefinitionOrReference with Reference
 
 // Ignoring identity constraints, notations, wildcards.
@@ -521,50 +581,69 @@ sealed trait ModelGroup extends StandardSchemaContentElement
 /**
  * Sequence model group, so an xs:sequence element.
  */
-final case class SequenceModelGroup private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup
+final case class SequenceModelGroup(
+  targetNamespaceOption: Option[String],
+  attributes: SequenceModelGroup.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
+
+  def resolvedName: EName = ENames.XsSequenceEName
+}
 
 /**
  * Choice model group, so an xs:choice element.
  */
-final case class ChoiceModelGroup private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup
+final case class ChoiceModelGroup(
+  targetNamespaceOption: Option[String],
+  attributes: ChoiceModelGroup.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
+
+  def resolvedName: EName = ENames.XsChoiceEName
+}
 
 /**
  * All model group, so an xs:all element.
  */
-final case class AllModelGroup private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup
+final case class AllModelGroup(
+  targetNamespaceOption: Option[String],
+  attributes: AllModelGroup.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends ModelGroup {
+
+  def resolvedName: EName = ENames.XsAllEName
+}
 
 /**
  * Either a restriction or an extension.
  */
 sealed trait RestrictionOrExtension extends StandardSchemaContentElement {
 
-  /**
-   * Returns the optional base type. This may fail with an exception if the taxonomy is not schema-valid.
-   */
+  def attributes: RestrictionOrExtension.Attributes
+
   def baseTypeOption: Option[EName] = {
-    attributes.get(ENames.BaseEName).map(EName.parse)
+    attributes.baseTypeOption
   }
 }
 
 /**
  * An xs:restriction element.
  */
-final case class Restriction private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension
+final case class Restriction(
+  targetNamespaceOption: Option[String],
+  attributes: Restriction.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension {
+
+  def resolvedName: EName = ENames.XsRestrictionEName
+}
 
 /**
  * An xs:extension element.
  */
-final case class Extension private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension
+final case class Extension(
+  targetNamespaceOption: Option[String],
+  attributes: Extension.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends RestrictionOrExtension {
+
+  def resolvedName: EName = ENames.XsExtensionEName
+}
 
 /**
  * Either simple content or complex content.
@@ -592,16 +671,58 @@ sealed trait Content extends StandardSchemaContentElement {
 /**
  * An xs:simpleContent element.
  */
-final case class SimpleContent private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends Content
+final case class SimpleContent(
+  targetNamespaceOption: Option[String],
+  attributes: SchemaContentElement.Attributes,
+  annotationOption: Option[Annotation],
+  restrictionOrExtension: RestrictionOrExtension) extends Content {
+
+  def resolvedName: EName = ENames.XsSimpleContentEName
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ immutable.IndexedSeq(restrictionOrExtension)
+  }
+}
 
 /**
  * An xs:complexContent element.
  */
-final case class ComplexContent private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends Content
+final case class ComplexContent(
+  targetNamespaceOption: Option[String],
+  attributes: SchemaContentElement.Attributes,
+  annotationOption: Option[Annotation],
+  restrictionOrExtension: RestrictionOrExtension) extends Content {
+
+  def resolvedName: EName = ENames.XsComplexContentEName
+
+  def childElems: immutable.IndexedSeq[SchemaContentElement] = {
+    annotationOption.toIndexedSeq ++ immutable.IndexedSeq(restrictionOrExtension)
+  }
+}
+
+final case class Annotation(
+  targetNamespaceOption: Option[String],
+  attributes: SchemaContentElement.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends SchemaContentElement {
+
+  def resolvedName: EName = ENames.XsAnnotationEName
+}
+
+final case class Appinfo(
+  targetNamespaceOption: Option[String],
+  attributes: SchemaContentElement.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends SchemaContentElement {
+
+  def resolvedName: EName = ENames.XsAppinfoEName
+}
+
+final case class Documentation(
+  targetNamespaceOption: Option[String],
+  attributes: SchemaContentElement.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement]) extends SchemaContentElement {
+
+  def resolvedName: EName = ENames.XsDocumentationEName
+}
 
 // TODO Sub-types of AppinfoContentElement, like role types and arcrole types.
 
@@ -610,18 +731,36 @@ final case class ComplexContent private[model] (
  * This means that either this is valid schema content not modeled in the `StandardSchemaContentElement` sub-type hierarchy, or it is
  * syntactically incorrect. As an example of the latter, an xs:element XML element with both a name and a ref attribute is clearly invalid.
  */
-final case class OtherStandardSchemaContentElement private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends StandardSchemaContentElement
+final case class OtherStandardSchemaContentElement(
+  targetNamespaceOption: Option[String],
+  resolvedName: EName,
+  attributes: SchemaContentElement.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement],
+  text: String) extends StandardSchemaContentElement
 
 /**
  * Any `AppinfoContentElement` not recognized as an instance of one of the other concrete `AppinfoContentElement` sub-types.
  * This means that either this is valid schema content not modeled in the `AppinfoContentElement` sub-type hierarchy, or it is
  * syntactically incorrect.
  */
-final case class OtherAppinfoContentElement private[model] (
-  elem: SchemaContentBackingElem,
-  childElems: immutable.IndexedSeq[SchemaContentElement]) extends AppinfoContentElement
+final case class OtherAppinfoContentElement(
+  targetNamespaceOption: Option[String],
+  resolvedName: EName,
+  attributes: SchemaContentElement.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement],
+  text: String) extends AppinfoContentElement
+
+/**
+ * Any `DocumentationContentElement` not recognized as an instance of one of the other concrete `DocumentationContentElement` sub-types.
+ * This means that either this is valid schema content not modeled in the `DocumentationContentElement` sub-type hierarchy, or it is
+ * syntactically incorrect.
+ */
+final case class OtherDocumentationContentElement(
+  targetNamespaceOption: Option[String],
+  resolvedName: EName,
+  attributes: SchemaContentElement.Attributes,
+  childElems: immutable.IndexedSeq[SchemaContentElement],
+  text: String) extends DocumentationContentElement
 
 // Companion objects
 
@@ -630,15 +769,49 @@ object SchemaContentElement extends SchemaContentElements.Factory {
   type SchemaContentElementSuperType = SchemaContentElement
   type SchemaContentElementType = SchemaContentElement
 
-  def collectSchemaContent(rootElem: SchemaContentBackingElem): immutable.IndexedSeq[SchemaContentElement] = {
+  trait Attributes {
+    def idOption: Option[String]
+    def otherAttributes: Map[EName, String]
+  }
+
+  def attributes(rawAttributes: Map[EName, String]): SchemaContentElement.Attributes = {
+    new SchemaContentElement.Attributes {
+      def idOption: Option[String] = rawAttributes.get(ENames.IdEName)
+      def otherAttributes: Map[EName, String] = rawAttributes.filterKeys(_ != ENames.IdEName)
+    }
+  }
+
+  def collectSchemaContent(rootElem: ScopedNodes.Elem): immutable.IndexedSeq[SchemaContentElement] = {
     require(rootElem.resolvedName == ENames.XsSchemaEName, s"Expected ${ENames.XsSchemaEName} but got ${rootElem.resolvedName}")
 
+    val tnsOption = rootElem.attributeOption(ENames.TargetNamespaceEName)
+
+    // Appinfo (top-level)
+
     val appinfoChildren =
-      rootElem.findTopmostElems(_.resolvedName == ENames.XsAppinfoEName).flatMap(_.findAllChildElems)
+      rootElem
+        .filterChildElems(_.resolvedName == ENames.XsAnnotationEName)
+        .flatMap(_.filterChildElems(_.resolvedName == ENames.XsAppinfoEName))
+        .flatMap(_.findAllChildElems)
 
-    val appinfoAncestorENames = immutable.IndexedSeq(ENames.XsSchemaEName, ENames.XsAnnotationEName, ENames.XsAppinfoEName)
+    val appinfoAncestorENames = immutable.IndexedSeq(ENames.XsAnnotationEName, ENames.XsAppinfoEName, ENames.XsSchemaEName)
 
-    val appinfoContent = appinfoChildren.flatMap(e => AppinfoContentElement.optionallyBuild(e, appinfoAncestorENames))
+    val appinfoContent = appinfoChildren.map(e => AppinfoContentElement.build(e, appinfoAncestorENames, tnsOption))
+
+    // Documentation (top-level)
+
+    val documentationChildren =
+      rootElem
+        .filterChildElems(_.resolvedName == ENames.XsAnnotationEName)
+        .flatMap(_.filterChildElems(_.resolvedName == ENames.XsDocumentationEName))
+        .flatMap(_.findAllChildElems)
+
+    val documentationAncestorENames = immutable.IndexedSeq(ENames.XsAnnotationEName, ENames.XsDocumentationEName, ENames.XsSchemaEName)
+
+    val documentationContent =
+      documentationChildren.map(e => DocumentationContentElement.build(e, documentationAncestorENames, tnsOption))
+
+    // Standard schema content (and descendant appinfo and documentation content)
 
     val topLevelChildren =
       rootElem.filterChildElems { e =>
@@ -648,20 +821,48 @@ object SchemaContentElement extends SchemaContentElements.Factory {
 
     val topLevelAncestorENames = immutable.IndexedSeq(ENames.XsSchemaEName)
 
-    val topLevelContent = topLevelChildren.flatMap(e => StandardSchemaContentElement.optionallyBuild(e, topLevelAncestorENames))
+    val topLevelContent =
+      topLevelChildren.map(e => StandardSchemaContentElement.build(e, topLevelAncestorENames, tnsOption))
 
-    appinfoContent ++ topLevelContent
+    appinfoContent ++ documentationContent ++ topLevelContent
+  }
+
+  def build(
+    elem: ScopedNodes.Elem,
+    ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String]): SchemaContentElementType = {
+
+    // Recursive calls
+
+    val childElems: immutable.IndexedSeq[SchemaContentElementSuperType] = elem.findAllChildElems.map { che =>
+      build(che, elem.resolvedName +: ancestorENames, targetNamespaceOption)
+    }
+
+    opt(elem, ancestorENames, targetNamespaceOption, childElems).getOrElse {
+      val attrs: SchemaContentElement.Attributes = SchemaContentElement.attributes(elem.resolvedAttributes.toMap)
+
+      if (ancestorENames.contains(ENames.XsAppinfoEName)) {
+        OtherAppinfoContentElement(targetNamespaceOption, elem.resolvedName, attrs, childElems, elem.text)
+      } else if (ancestorENames.contains(ENames.XsDocumentationEName)) {
+        OtherDocumentationContentElement(targetNamespaceOption, elem.resolvedName, attrs, childElems, elem.text)
+      } else {
+        OtherStandardSchemaContentElement(targetNamespaceOption, elem.resolvedName, attrs, childElems, elem.text)
+      }
+    }
   }
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (ancestorENames.contains(ENames.XsAppinfoEName)) {
-      AppinfoContentElement.opt(elem, ancestorENames, childElems)
+      AppinfoContentElement.opt(elem, ancestorENames, targetNamespaceOption, childElems)
+    } else if (ancestorENames.contains(ENames.XsDocumentationEName)) {
+      DocumentationContentElement.opt(elem, ancestorENames, targetNamespaceOption, childElems)
     } else {
-      StandardSchemaContentElement.opt(elem, ancestorENames, childElems)
+      StandardSchemaContentElement.opt(elem, ancestorENames, targetNamespaceOption, childElems)
     }
   }
 }
@@ -671,22 +872,22 @@ object StandardSchemaContentElement extends SchemaContentElements.Factory {
   type SchemaContentElementSuperType = SchemaContentElement
   type SchemaContentElementType = StandardSchemaContentElement
 
-  def optionallyBuild(
-    elem: SchemaContentBackingElem,
-    ancestorENames: immutable.IndexedSeq[EName]): Option[SchemaContentElementType] = {
+  def build(
+    elem: ScopedNodes.Elem,
+    ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String]): SchemaContentElementType = {
 
-    // Recursive calls
-    val childElems = elem.findAllChildElems.flatMap(che => optionallyBuild(che, elem.resolvedName +: ancestorENames))
-
-    opt(elem, ancestorENames, childElems)
+    SchemaContentElement.build(elem, ancestorENames, targetNamespaceOption)
+      .asInstanceOf[StandardSchemaContentElement]
   }
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
-    if (ancestorENames.contains(ENames.XsAppinfoEName)) {
+    if (ancestorENames.contains(ENames.XsAppinfoEName) || ancestorENames.contains(ENames.XsDocumentationEName)) {
       None
     } else {
       elem.resolvedName match {
@@ -696,31 +897,61 @@ object StandardSchemaContentElement extends SchemaContentElements.Factory {
         case EName(nsOption, _) if !nsOption.contains(Namespaces.XsNamespace) =>
           None
         case ENames.XsElementEName =>
-          ElementDeclarationOrReference.opt(elem, ancestorENames, childElems)
-            .orElse(Some(new OtherStandardSchemaContentElement(elem, childElems)))
+          ElementDeclarationOrReference.opt(elem, ancestorENames, targetNamespaceOption, childElems)
+            .orElse(Some(OtherStandardSchemaContentElement.apply(elem, targetNamespaceOption, childElems)))
         case ENames.XsAttributeEName =>
-          AttributeDeclarationOrReference.opt(elem, ancestorENames, childElems)
-            .orElse(Some(new OtherStandardSchemaContentElement(elem, childElems)))
+          AttributeDeclarationOrReference.opt(elem, ancestorENames, targetNamespaceOption, childElems)
+            .orElse(Some(OtherStandardSchemaContentElement.apply(elem, targetNamespaceOption, childElems)))
         case ENames.XsSimpleTypeEName =>
-          SimpleTypeDefinition.opt(elem, ancestorENames, childElems)
-            .orElse(Some(new OtherStandardSchemaContentElement(elem, childElems)))
+          SimpleTypeDefinition.opt(elem, ancestorENames, targetNamespaceOption, childElems)
+            .orElse(Some(OtherStandardSchemaContentElement.apply(elem, targetNamespaceOption, childElems)))
         case ENames.XsComplexTypeEName =>
-          ComplexTypeDefinition.opt(elem, ancestorENames, childElems)
-            .orElse(Some(new OtherStandardSchemaContentElement(elem, childElems)))
+          ComplexTypeDefinition.opt(elem, ancestorENames, targetNamespaceOption, childElems)
+            .orElse(Some(OtherStandardSchemaContentElement.apply(elem, targetNamespaceOption, childElems)))
         case ENames.XsGroupEName =>
-          ModelGroupDefinitionOrReference.opt(elem, ancestorENames, childElems)
-            .orElse(Some(new OtherStandardSchemaContentElement(elem, childElems)))
+          ModelGroupDefinitionOrReference.opt(elem, ancestorENames, targetNamespaceOption, childElems)
+            .orElse(Some(OtherStandardSchemaContentElement.apply(elem, targetNamespaceOption, childElems)))
         case ENames.XsAttributeGroupEName =>
-          AttributeGroupDefinitionOrReference.opt(elem, ancestorENames, childElems)
-            .orElse(Some(new OtherStandardSchemaContentElement(elem, childElems)))
-        case ENames.XsSequenceEName => Some(new SequenceModelGroup(elem, childElems))
-        case ENames.XsChoiceEName => Some(new ChoiceModelGroup(elem, childElems))
-        case ENames.XsAllEName => Some(new AllModelGroup(elem, childElems))
-        case ENames.XsRestrictionEName => Some(new Restriction(elem, childElems))
-        case ENames.XsExtensionEName => Some(new Extension(elem, childElems))
-        case ENames.XsSimpleContentEName => Some(new SimpleContent(elem, childElems))
-        case ENames.XsComplexContentEName => Some(new ComplexContent(elem, childElems))
-        case _ => Some(new OtherStandardSchemaContentElement(elem, childElems))
+          AttributeGroupDefinitionOrReference.opt(elem, ancestorENames, targetNamespaceOption, childElems)
+            .orElse(Some(OtherStandardSchemaContentElement.apply(elem, targetNamespaceOption, childElems)))
+        case ENames.XsSequenceEName =>
+          SequenceModelGroup.optAttributes(elem.resolvedAttributes.toMap).map { attrs =>
+            new SequenceModelGroup(targetNamespaceOption, attrs, childElems)
+          }
+        case ENames.XsChoiceEName =>
+          ChoiceModelGroup.optAttributes(elem.resolvedAttributes.toMap).map { attrs =>
+            new ChoiceModelGroup(targetNamespaceOption, attrs, childElems)
+          }
+        case ENames.XsAllEName =>
+          AllModelGroup.optAttributes(elem.resolvedAttributes.toMap).map { attrs =>
+            new AllModelGroup(targetNamespaceOption, attrs, childElems)
+          }
+        case ENames.XsRestrictionEName =>
+          Restriction.optAttributes(elem.resolvedAttributes.toMap, elem.scope).map { attrs =>
+            new Restriction(targetNamespaceOption, attrs, childElems)
+          }
+        case ENames.XsExtensionEName =>
+          Extension.optAttributes(elem.resolvedAttributes.toMap, elem.scope).map { attrs =>
+            new Extension(targetNamespaceOption, attrs, childElems)
+          }
+        case ENames.XsSimpleContentEName =>
+          val attrs: SchemaContentElement.Attributes = SchemaContentElement.attributes(elem.resolvedAttributes.toMap)
+
+          Try(new SimpleContent(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.collectFirst { case e: RestrictionOrExtension => e }.get)).toOption
+        case ENames.XsComplexContentEName =>
+          val attrs: SchemaContentElement.Attributes = SchemaContentElement.attributes(elem.resolvedAttributes.toMap)
+
+          Try(new ComplexContent(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.collectFirst { case e: RestrictionOrExtension => e }.get)).toOption
+        case _ =>
+          Some(OtherStandardSchemaContentElement.apply(elem, targetNamespaceOption, childElems))
       }
     }
   }
@@ -731,27 +962,105 @@ object AppinfoContentElement extends SchemaContentElements.Factory {
   type SchemaContentElementSuperType = SchemaContentElement
   type SchemaContentElementType = AppinfoContentElement
 
-  def optionallyBuild(
-    elem: SchemaContentBackingElem,
-    ancestorENames: immutable.IndexedSeq[EName]): Option[SchemaContentElementType] = {
+  def build(
+    elem: ScopedNodes.Elem,
+    ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String]): SchemaContentElementType = {
 
-    // Recursive calls
-    val childElems = elem.findAllChildElems.flatMap(che => optionallyBuild(che, elem.resolvedName +: ancestorENames))
-
-    opt(elem, ancestorENames, childElems)
+    SchemaContentElement.build(elem, ancestorENames, targetNamespaceOption)
+      .asInstanceOf[AppinfoContentElement]
   }
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (!ancestorENames.contains(ENames.XsAppinfoEName)) {
       None
     } else {
       // TODO
-      Some(new OtherAppinfoContentElement(elem, childElems))
+
+      Some(new OtherAppinfoContentElement(
+        targetNamespaceOption,
+        elem.resolvedName,
+        SchemaContentElement.attributes(elem.resolvedAttributes.toMap),
+        childElems,
+        elem.text))
     }
+  }
+}
+
+object DocumentationContentElement extends SchemaContentElements.Factory {
+
+  type SchemaContentElementSuperType = SchemaContentElement
+  type SchemaContentElementType = DocumentationContentElement
+
+  def build(
+    elem: ScopedNodes.Elem,
+    ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String]): SchemaContentElementType = {
+
+    SchemaContentElement.build(elem, ancestorENames, targetNamespaceOption)
+      .asInstanceOf[DocumentationContentElement]
+  }
+
+  def opt(
+    elem: ScopedNodes.Elem,
+    ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
+    childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
+
+    if (!ancestorENames.contains(ENames.XsDocumentationEName)) {
+      None
+    } else {
+      // TODO
+
+      Some(new OtherDocumentationContentElement(
+        targetNamespaceOption,
+        elem.resolvedName,
+        SchemaContentElement.attributes(elem.resolvedAttributes.toMap),
+        childElems,
+        elem.text))
+    }
+  }
+}
+
+object CanBeAbstract {
+
+  trait Attributes extends SchemaContentElement.Attributes {
+    def isAbstract: Boolean
+  }
+}
+
+object NamedDeclOrDef {
+
+  trait Attributes extends SchemaContentElement.Attributes {
+    def name: String
+  }
+}
+
+object Reference {
+
+  trait Attributes extends SchemaContentElement.Attributes {
+    def ref: EName
+  }
+}
+
+object Particle {
+
+  trait Attributes extends SchemaContentElement.Attributes {
+
+    /**
+     * The minOccurs attribute value, defaulting to 1
+     */
+    def minOccurs: Int
+
+    /**
+     * The maxOccurs attribute as optional integer, defaulting to 1, but returning None for "unbounded"
+     */
+    def maxOccursOption: Option[Int]
   }
 }
 
@@ -761,27 +1070,137 @@ object ElementDeclarationOrReference extends SchemaContentElements.Factory {
   type SchemaContentElementType = ElementDeclarationOrReference
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (elem.resolvedName == ENames.XsElementEName) {
       val parentIsSchema = ancestorENames.headOption.contains(ENames.XsSchemaEName)
-      val hasName = elem.attributes.get(ENames.NameEName).isDefined
-      val hasRef = elem.attributes.get(ENames.RefEName).isDefined
+      val hasName = elem.attributeOption(ENames.NameEName).isDefined
+      val hasRef = elem.attributeOption(ENames.RefEName).isDefined
 
       if (parentIsSchema && hasName && !hasRef) {
-        Some(new GlobalElementDeclaration(elem, childElems))
+        GlobalElementDeclaration.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new GlobalElementDeclaration(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.collectFirst { case t: AnonymousTypeDefinition => t },
+            childElems.filter(e =>
+              e.resolvedName != ENames.XsAnnotationEName &&
+                e.resolvedName != ENames.XsSimpleTypeEName &&
+                e.resolvedName != ENames.XsComplexTypeEName))).toOption
+        }
       } else if (!parentIsSchema && hasName && !hasRef) {
-        Some(new LocalElementDeclaration(elem, childElems))
+        LocalElementDeclaration.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new LocalElementDeclaration(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.collectFirst { case t: AnonymousTypeDefinition => t },
+            childElems.filter(e =>
+              e.resolvedName != ENames.XsAnnotationEName &&
+                e.resolvedName != ENames.XsSimpleTypeEName &&
+                e.resolvedName != ENames.XsComplexTypeEName))).toOption
+        }
       } else if (!parentIsSchema && !hasName && hasRef) {
-        Some(new ElementReference(elem, childElems))
+        ElementReference.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new ElementReference(
+            targetNamespaceOption,
+            attrs,
+            childElems)).toOption
+        }
       } else {
         None
       }
     } else {
       None
     }
+  }
+}
+
+object ElementDeclaration {
+
+  trait Attributes extends NamedDeclOrDef.Attributes {
+    def typeOption: Option[EName]
+  }
+}
+
+object GlobalElementDeclaration {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    typeOption: Option[EName],
+    substitutionGroupOption: Option[EName],
+    isNillable: Boolean,
+    isAbstract: Boolean,
+    otherAttributes: Map[EName, String]) extends ElementDeclaration.Attributes with CanBeAbstract.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      AttributeSupport.optType(rawAttributes, scope),
+      AttributeSupport.optSubstitutionGroup(rawAttributes, scope),
+      AttributeSupport.optNillable(rawAttributes).getOrElse(false),
+      AttributeSupport.optAbstract(rawAttributes).getOrElse(false),
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName,
+        ENames.TypeEName,
+        ENames.SubstitutionGroupEName,
+        ENames.NillableEName,
+        ENames.AbstractEName))))).toOption
+  }
+}
+
+object LocalElementDeclaration {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    typeOption: Option[EName],
+    minOccurs: Int,
+    maxOccursOption: Option[Int],
+    isNillable: Boolean,
+    otherAttributes: Map[EName, String]) extends ElementDeclaration.Attributes with Particle.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    val maxOccursOption: Option[String] = AttributeSupport.optMaxOccurs(rawAttributes)
+
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      AttributeSupport.optType(rawAttributes, scope),
+      AttributeSupport.optMinOccurs(rawAttributes).getOrElse(1),
+      if (maxOccursOption.isEmpty) Some(1) else if (maxOccursOption.contains("unbounded")) None else maxOccursOption.map(_.toInt),
+      AttributeSupport.optNillable(rawAttributes).getOrElse(false),
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName,
+        ENames.TypeEName,
+        ENames.MinOccursEName,
+        ENames.MaxOccursEName,
+        ENames.NillableEName))))).toOption
+  }
+}
+
+object ElementReference {
+
+  final case class Attributes(
+    idOption: Option[String],
+    ref: EName,
+    otherAttributes: Map[EName, String]) extends Reference.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optRef(rawAttributes, scope).get,
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.RefEName))))).toOption
   }
 }
 
@@ -791,21 +1210,40 @@ object AttributeDeclarationOrReference extends SchemaContentElements.Factory {
   type SchemaContentElementType = AttributeDeclarationOrReference
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (elem.resolvedName == ENames.XsAttributeEName) {
       val parentIsSchema = ancestorENames.headOption.contains(ENames.XsSchemaEName)
-      val hasName = elem.attributes.get(ENames.NameEName).isDefined
-      val hasRef = elem.attributes.get(ENames.RefEName).isDefined
+      val hasName = elem.attributeOption(ENames.NameEName).isDefined
+      val hasRef = elem.attributeOption(ENames.RefEName).isDefined
 
       if (parentIsSchema && hasName && !hasRef) {
-        Some(new GlobalAttributeDeclaration(elem, childElems))
+        GlobalAttributeDeclaration.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new GlobalAttributeDeclaration(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.collectFirst { case t: AnonymousSimpleTypeDefinition => t })).toOption
+        }
       } else if (!parentIsSchema && hasName && !hasRef) {
-        Some(new LocalAttributeDeclaration(elem, childElems))
+        LocalAttributeDeclaration.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new LocalAttributeDeclaration(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.collectFirst { case t: AnonymousSimpleTypeDefinition => t })).toOption
+        }
       } else if (!parentIsSchema && !hasName && hasRef) {
-        Some(new AttributeReference(elem, childElems))
+        AttributeReference.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new AttributeReference(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.collectFirst { case t: AnonymousSimpleTypeDefinition => t })).toOption
+        }
       } else {
         None
       }
@@ -815,30 +1253,153 @@ object AttributeDeclarationOrReference extends SchemaContentElements.Factory {
   }
 }
 
+object AttributeDeclaration {
+
+  trait Attributes extends NamedDeclOrDef.Attributes {
+    def typeOption: Option[EName]
+  }
+}
+
+object GlobalAttributeDeclaration {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    typeOption: Option[EName],
+    otherAttributes: Map[EName, String]) extends AttributeDeclaration.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      AttributeSupport.optType(rawAttributes, scope),
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName,
+        ENames.TypeEName))))).toOption
+  }
+}
+
+object LocalAttributeDeclaration {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    typeOption: Option[EName],
+    otherAttributes: Map[EName, String]) extends AttributeDeclaration.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      AttributeSupport.optType(rawAttributes, scope),
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName,
+        ENames.TypeEName))))).toOption
+  }
+}
+
+object AttributeReference {
+
+  final case class Attributes(
+    idOption: Option[String],
+    ref: EName,
+    otherAttributes: Map[EName, String]) extends Reference.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optRef(rawAttributes, scope).get,
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.RefEName))))).toOption
+  }
+}
+
+object TypeDefinition {
+
+  trait Attributes extends SchemaContentElement.Attributes
+}
+
+object NamedTypeDefinition {
+
+  trait Attributes extends TypeDefinition.Attributes with NamedDeclOrDef.Attributes
+}
+
+object AnonymousTypeDefinition {
+
+  trait Attributes extends TypeDefinition.Attributes
+}
+
 object SimpleTypeDefinition extends SchemaContentElements.Factory {
 
   type SchemaContentElementSuperType = SchemaContentElement
   type SchemaContentElementType = SimpleTypeDefinition
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (elem.resolvedName == ENames.XsSimpleTypeEName) {
       val parentIsSchema = ancestorENames.headOption.contains(ENames.XsSchemaEName)
-      val hasName = elem.attributes.get(ENames.NameEName).isDefined
+      val hasName = elem.attributeOption(ENames.NameEName).isDefined
 
       if (parentIsSchema && hasName) {
-        Some(new NamedSimpleTypeDefinition(elem, childElems))
+        NamedSimpleTypeDefinition.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new NamedSimpleTypeDefinition(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.find(_.resolvedName != ENames.XsAnnotationEName).get)).toOption
+        }
       } else if (!parentIsSchema && !hasName) {
-        Some(new AnonymousSimpleTypeDefinition(elem, childElems))
+        AnonymousSimpleTypeDefinition.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new AnonymousSimpleTypeDefinition(
+            targetNamespaceOption,
+            attrs,
+            childElems.collectFirst { case ann: Annotation => ann },
+            childElems.find(_.resolvedName != ENames.XsAnnotationEName).get)).toOption
+        }
       } else {
         None
       }
     } else {
       None
     }
+  }
+}
+
+object NamedSimpleTypeDefinition {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    otherAttributes: Map[EName, String]) extends NamedTypeDefinition.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName))))).toOption
+  }
+}
+
+object AnonymousSimpleTypeDefinition {
+
+  final case class Attributes(
+    idOption: Option[String],
+    otherAttributes: Map[EName, String]) extends AnonymousTypeDefinition.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName))))).toOption
   }
 }
 
@@ -848,24 +1409,69 @@ object ComplexTypeDefinition extends SchemaContentElements.Factory {
   type SchemaContentElementType = ComplexTypeDefinition
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (elem.resolvedName == ENames.XsComplexTypeEName) {
       val parentIsSchema = ancestorENames.headOption.contains(ENames.XsSchemaEName)
-      val hasName = elem.attributes.get(ENames.NameEName).isDefined
+      val hasName = elem.attributeOption(ENames.NameEName).isDefined
 
       if (parentIsSchema && hasName) {
-        Some(new NamedComplexTypeDefinition(elem, childElems))
+        NamedComplexTypeDefinition.optAttributes(elem.resolvedAttributes.toMap).flatMap { attrs =>
+          Try(new NamedComplexTypeDefinition(
+            targetNamespaceOption,
+            attrs,
+            childElems)).toOption
+        }
       } else if (!parentIsSchema && !hasName) {
-        Some(new AnonymousComplexTypeDefinition(elem, childElems))
+        AnonymousComplexTypeDefinition.optAttributes(elem.resolvedAttributes.toMap).flatMap { attrs =>
+          Try(new AnonymousComplexTypeDefinition(
+            targetNamespaceOption,
+            attrs,
+            childElems)).toOption
+        }
       } else {
         None
       }
     } else {
       None
     }
+  }
+}
+
+object NamedComplexTypeDefinition {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    isAbstract: Boolean,
+    otherAttributes: Map[EName, String]) extends NamedTypeDefinition.Attributes with CanBeAbstract.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String]): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      AttributeSupport.optAbstract(rawAttributes).get,
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName,
+        ENames.AbstractEName))))).toOption
+  }
+}
+
+object AnonymousComplexTypeDefinition {
+
+  final case class Attributes(
+    idOption: Option[String],
+    otherAttributes: Map[EName, String]) extends AnonymousTypeDefinition.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String]): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName))))).toOption
   }
 }
 
@@ -875,19 +1481,30 @@ object ModelGroupDefinitionOrReference extends SchemaContentElements.Factory {
   type SchemaContentElementType = ModelGroupDefinitionOrReference
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (elem.resolvedName == ENames.XsGroupEName) {
       val parentIsSchema = ancestorENames.headOption.contains(ENames.XsSchemaEName)
-      val hasName = elem.attributes.get(ENames.NameEName).isDefined
-      val hasRef = elem.attributes.get(ENames.RefEName).isDefined
+      val hasName = elem.attributeOption(ENames.NameEName).isDefined
+      val hasRef = elem.attributeOption(ENames.RefEName).isDefined
 
       if (parentIsSchema && hasName && !hasRef) {
-        Some(new ModelGroupDefinition(elem, childElems))
+        ModelGroupDefinition.optAttributes(elem.resolvedAttributes.toMap).flatMap { attrs =>
+          Try(new ModelGroupDefinition(
+            targetNamespaceOption,
+            attrs,
+            childElems)).toOption
+        }
       } else if (!parentIsSchema && !hasName && hasRef) {
-        Some(new ModelGroupReference(elem, childElems))
+        ModelGroupReference.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new ModelGroupReference(
+            targetNamespaceOption,
+            attrs,
+            childElems)).toOption
+        }
       } else {
         None
       }
@@ -897,30 +1514,224 @@ object ModelGroupDefinitionOrReference extends SchemaContentElements.Factory {
   }
 }
 
+object ModelGroupDefinition {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    otherAttributes: Map[EName, String]) extends NamedDeclOrDef.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String]): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName))))).toOption
+  }
+}
+
+object ModelGroupReference {
+
+  final case class Attributes(
+    idOption: Option[String],
+    ref: EName,
+    minOccurs: Int,
+    maxOccursOption: Option[Int],
+    otherAttributes: Map[EName, String]) extends Reference.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    val maxOccursOption: Option[String] = AttributeSupport.optMaxOccurs(rawAttributes)
+
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optRef(rawAttributes, scope).get,
+      AttributeSupport.optMinOccurs(rawAttributes).getOrElse(1),
+      if (maxOccursOption.isEmpty) Some(1) else if (maxOccursOption.contains("unbounded")) None else maxOccursOption.map(_.toInt),
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.RefEName,
+        ENames.MinOccursEName,
+        ENames.MaxOccursEName))))).toOption
+  }
+}
+
 object AttributeGroupDefinitionOrReference extends SchemaContentElements.Factory {
 
   type SchemaContentElementSuperType = SchemaContentElement
   type SchemaContentElementType = AttributeGroupDefinitionOrReference
 
   def opt(
-    elem: SchemaContentBackingElem,
+    elem: ScopedNodes.Elem,
     ancestorENames: immutable.IndexedSeq[EName],
+    targetNamespaceOption: Option[String],
     childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType] = {
 
     if (elem.resolvedName == ENames.XsAttributeGroupEName) {
       val parentIsSchema = ancestorENames.headOption.contains(ENames.XsSchemaEName)
-      val hasName = elem.attributes.get(ENames.NameEName).isDefined
-      val hasRef = elem.attributes.get(ENames.RefEName).isDefined
+      val hasName = elem.attributeOption(ENames.NameEName).isDefined
+      val hasRef = elem.attributeOption(ENames.RefEName).isDefined
 
       if (parentIsSchema && hasName && !hasRef) {
-        Some(new AttributeGroupDefinition(elem, childElems))
+        AttributeGroupDefinition.optAttributes(elem.resolvedAttributes.toMap).flatMap { attrs =>
+          Try(new AttributeGroupDefinition(
+            targetNamespaceOption,
+            attrs,
+            childElems)).toOption
+        }
       } else if (!parentIsSchema && !hasName && hasRef) {
-        Some(new AttributeGroupReference(elem, childElems))
+        AttributeGroupReference.optAttributes(elem.resolvedAttributes.toMap, elem.scope).flatMap { attrs =>
+          Try(new AttributeGroupReference(
+            targetNamespaceOption,
+            attrs,
+            childElems)).toOption
+        }
       } else {
         None
       }
     } else {
       None
     }
+  }
+}
+
+object AttributeGroupDefinition {
+
+  final case class Attributes(
+    idOption: Option[String],
+    name: String,
+    otherAttributes: Map[EName, String]) extends NamedDeclOrDef.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String]): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optName(rawAttributes).get,
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.NameEName))))).toOption
+  }
+}
+
+object AttributeGroupReference {
+
+  final case class Attributes(
+    idOption: Option[String],
+    ref: EName,
+    otherAttributes: Map[EName, String]) extends Reference.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optRef(rawAttributes, scope).get,
+      rawAttributes.filterKeys(rawAttributes.keySet.diff(Set(
+        ENames.IdEName,
+        ENames.RefEName))))).toOption
+  }
+}
+
+object SequenceModelGroup {
+
+  final case class Attributes(
+    idOption: Option[String],
+    minOccurs: Int,
+    maxOccursOption: Option[Int],
+    otherAttributes: Map[EName, String]) extends SchemaContentElement.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String]): Option[Attributes] = {
+    val maxOccursOption: Option[String] = AttributeSupport.optMaxOccurs(rawAttributes)
+
+    Some(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optMinOccurs(rawAttributes).getOrElse(1),
+      if (maxOccursOption.isEmpty) Some(1) else if (maxOccursOption.contains("unbounded")) None else maxOccursOption.map(_.toInt),
+      rawAttributes.filterKeys(name => name != ENames.IdEName && name != ENames.MinOccursEName && name != ENames.MaxOccursEName)))
+  }
+}
+
+object ChoiceModelGroup {
+
+  final case class Attributes(
+    idOption: Option[String],
+    minOccurs: Int,
+    maxOccursOption: Option[Int],
+    otherAttributes: Map[EName, String]) extends SchemaContentElement.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String]): Option[Attributes] = {
+    val maxOccursOption: Option[String] = AttributeSupport.optMaxOccurs(rawAttributes)
+
+    Some(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optMinOccurs(rawAttributes).getOrElse(1),
+      if (maxOccursOption.isEmpty) Some(1) else if (maxOccursOption.contains("unbounded")) None else maxOccursOption.map(_.toInt),
+      rawAttributes.filterKeys(name => name != ENames.IdEName && name != ENames.MinOccursEName && name != ENames.MaxOccursEName)))
+  }
+}
+
+object AllModelGroup {
+
+  final case class Attributes(
+    idOption: Option[String],
+    minOccurs: Int,
+    maxOccursOption: Option[Int],
+    otherAttributes: Map[EName, String]) extends SchemaContentElement.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String]): Option[Attributes] = {
+    val maxOccursOption: Option[String] = AttributeSupport.optMaxOccurs(rawAttributes)
+
+    Some(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optMinOccurs(rawAttributes).getOrElse(1),
+      if (maxOccursOption.isEmpty) Some(1) else if (maxOccursOption.contains("unbounded")) None else maxOccursOption.map(_.toInt),
+      rawAttributes.filterKeys(name => name != ENames.IdEName && name != ENames.MinOccursEName && name != ENames.MaxOccursEName)))
+  }
+}
+
+object RestrictionOrExtension {
+
+  trait Attributes extends SchemaContentElement.Attributes {
+    def baseTypeOption: Option[EName]
+  }
+}
+
+object Restriction {
+
+  final case class Attributes(
+    idOption: Option[String],
+    baseTypeOption: Option[EName],
+    otherAttributes: Map[EName, String]) extends RestrictionOrExtension.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optBaseType(rawAttributes, scope),
+      rawAttributes.filterKeys(name => name != ENames.IdEName && name != ENames.BaseEName))).toOption
+  }
+}
+
+object Extension {
+
+  final case class Attributes(
+    idOption: Option[String],
+    baseTypeOption: Option[EName],
+    otherAttributes: Map[EName, String]) extends RestrictionOrExtension.Attributes
+
+  def optAttributes(rawAttributes: Map[EName, String], scope: Scope): Option[Attributes] = {
+    Try(Attributes(
+      AttributeSupport.optId(rawAttributes),
+      AttributeSupport.optBaseType(rawAttributes, scope),
+      rawAttributes.filterKeys(name => name != ENames.IdEName && name != ENames.BaseEName))).toOption
+  }
+}
+
+object OtherStandardSchemaContentElement {
+
+  private[model] def apply(
+    elem: ScopedNodes.Elem,
+    targetNamespaceOption: Option[String],
+    children: immutable.IndexedSeq[SchemaContentElement]): OtherStandardSchemaContentElement = {
+
+    val attrs: SchemaContentElement.Attributes = SchemaContentElement.attributes(elem.resolvedAttributes.toMap)
+
+    OtherStandardSchemaContentElement(targetNamespaceOption, elem.resolvedName, attrs, children, elem.text)
   }
 }

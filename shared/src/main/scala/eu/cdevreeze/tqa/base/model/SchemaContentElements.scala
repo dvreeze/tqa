@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.base.model
 import scala.collection.immutable
 
 import eu.cdevreeze.yaidom.core.EName
+import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 
 /**
  * API for factories of schema content elements. This object does not depend on the schema content types and companion objects.
@@ -41,11 +42,12 @@ object SchemaContentElements {
 
     /**
      * Creates a schema content element of the given type from the passed parameters, if applicable,
-     * and otherwise returns None.
+     * and returns None otherwise.
      */
     def opt(
-      elem: SchemaContentBackingElem,
+      elem: ScopedNodes.Elem,
       ancestorENames: immutable.IndexedSeq[EName],
+      targetNamespaceOption: Option[String],
       childElems: immutable.IndexedSeq[SchemaContentElementSuperType]): Option[SchemaContentElementType]
   }
 

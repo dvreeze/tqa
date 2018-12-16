@@ -29,7 +29,7 @@ object TaxonomyConverter {
   def convertTaxonomy(taxo: base.taxonomy.BasicTaxonomy): base.model.taxonomy.BasicTaxonomy = {
     val schemaContentElems =
       taxo.rootElems.filter(_.asInstanceOf[base.dom.TaxonomyRootElem].isXsdSchema)
-        .map(e => base.model.SchemaContentBackingElem.fromSchemaRootElem(e.backingElem))
+        .map(_.backingElem)
         .flatMap(base.model.SchemaContentElement.collectSchemaContent _)
 
     val relationships = taxo.relationships.flatMap(optionallyConvertRelationship _)
