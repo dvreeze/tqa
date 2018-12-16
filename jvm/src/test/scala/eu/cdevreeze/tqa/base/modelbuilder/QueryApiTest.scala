@@ -25,6 +25,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
 import eu.cdevreeze.tqa.ENames.XbrldtHypercubeItemEName
 import eu.cdevreeze.tqa.ENames.XbrliItemEName
@@ -422,6 +423,49 @@ class QueryApiTest extends FunSuite {
 
     assertResult(true) {
       dimensions.forall(dim => richTaxo.findGlobalElementDeclaration(dim).map(_.targetEName).contains(dim))
+    }
+  }
+
+  test("testElementCount") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUris = Vector(
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/fr/sg-se/sg-se_2013-09-13_def.xml").toURI,
+      classOf[QueryApiTest].getResource("/taxonomies/acra/2013/elts/sg-as-cor_2013-09-13.xsd").toURI)
+
+    val docs = docUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))
+
+    val taxoDocs = docs.map(d => base.dom.TaxonomyDocument.build(indexed.Document(d)))
+
+    val underlyingTaxo = base.dom.TaxonomyBase.build(taxoDocs)
+    val originalRichTaxo = base.taxonomy.BasicTaxonomy.build(
+      underlyingTaxo,
+      SubstitutionGroupMap.Empty,
+      base.relationship.DefaultRelationshipFactory.LenientInstance)
+
+    val richTaxo: base.model.taxonomy.BasicTaxonomy = TaxonomyConverter.convertTaxonomy(originalRichTaxo)
+
+    val originalSchemas = originalRichTaxo.taxonomyDocs.filter(_.isSchemaDocument).map(_.documentElement)
+
+    val originalSchemaDescendantOrSelfCount = originalSchemas.flatMap(_.findAllElemsOrSelf).size
+
+    val originalSchemaCount = originalSchemas.size
+    val topLevelAnnotationCount =
+      originalSchemas.flatMap(_.filterChildElems(_.resolvedName == ENames.XsAnnotationEName)).size
+    val topLevelAnnotationChildCount =
+      originalSchemas.flatMap(_.filterChildElems(_.resolvedName == ENames.XsAnnotationEName))
+        .flatMap(_.findAllChildElems).size
+    val importCount =
+      originalSchemas.flatMap(_.filterChildElems(_.resolvedName == ENames.XsImportEName)).size
+    val includeCount =
+      originalSchemas.flatMap(_.filterChildElems(_.resolvedName == ENames.XsIncludeEName)).size
+
+    val expectedElemCount =
+      originalSchemaDescendantOrSelfCount - originalSchemaCount - topLevelAnnotationCount -
+        topLevelAnnotationChildCount - importCount - includeCount
+
+    assertResult(expectedElemCount) {
+      richTaxo.schemaContentElements.flatMap(_.findAllElemsOrSelf).size
     }
   }
 
