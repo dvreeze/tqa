@@ -53,6 +53,8 @@ sealed trait ResourceNode extends Node {
 
   def nonXLinkAttributes: Map[EName, String]
 
+  // TODO Content
+
   final def elementKeyOption: Option[ResourceKey] = {
     idOption.map { id =>
       ResourceKey(elr, id)

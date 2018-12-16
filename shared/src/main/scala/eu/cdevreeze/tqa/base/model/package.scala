@@ -39,7 +39,7 @@ package eu.cdevreeze.tqa.base
  *
  * The model may contain slightly less information than the XML-backed DOM and relationship classes, although it
  * should be complete enough to generate the XML representation again (but mind the remark made earlier about
- * the purpose of the model, which is not taxonomy editing). It is also complete enough for grouping
+ * the purpose of the model, which is not entirely lossless taxonomy editing). It is also complete enough for grouping
  * relationships into base sets.
  *
  * This model is not dependent on the DOM, relationship and query API packages directly under the base namespace (or in this
