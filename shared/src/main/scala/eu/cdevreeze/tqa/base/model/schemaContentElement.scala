@@ -36,7 +36,7 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 /**
  * Any '''taxonomy schema content element''' in the model. It is either standard schema content, which is a representation
  * of an element in the XML Schema namespace, or it is appinfo content. The schema root element, and imports and
- * linkbaseRefs are not represented in this model. Neither are the topmost annotation and their child appinfo elements.
+ * linkbaseRefs are not represented in this model. Neither are the topmost annotation and their child appinfo or documentation elements.
  *
  * This schema content model offers the yaidom SubtypeAwareElemApi API. Note, however, that most schema content
  * elements have no child elements, but type definitions typically do have descendant elements.
@@ -59,6 +59,8 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * the optional target namespace. This is not checked!
  *
  * See http://www.datypic.com/sc/xsd for the XML Schema model (unaware of XBRL).
+ *
+ * TODO Remove linkbaseRefs from model.
  *
  * @author Chris de Vreeze
  */

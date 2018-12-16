@@ -26,7 +26,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * It is assumed that only the 2 sub-types SchemaContentElementKey and ResourceKey are needed, that is, that
  * each element (to refer to in a LocatorNode) for which there is no specific LocatorNode sub-type is either
- * schema content or a ResourceNode.
+ * schema content or a ResourceNode (or its content).
  *
  * @author Chris de Vreeze
  */
@@ -36,7 +36,8 @@ sealed trait ElementKey {
 }
 
 /**
- * Element key of a SchemaContentElement.
+ * Element key of a SchemaContentElement. It contains the ID, along with the optional target namespace and the
+ * element name. It is assumed that this combination is unique across schema content elements.
  */
 final case class SchemaContentElementKey(
   targetNamespaceUriOption: Option[String],
@@ -44,9 +45,11 @@ final case class SchemaContentElementKey(
   id: String) extends ElementKey
 
 /**
- * Element key of a ResourceNode.
+ * Element key of a ResourceNode, or its content! It contains the ID, along with the ELR. It is assumed that this
+ * combination is unique across resource content. Given that most label linkbase content uses the default ELR,
+ * this means that labels for the same concept/element but differing in language and resource role must all have
+ * unique IDs in the taxonomy.
  */
 final case class ResourceKey(
   elr: String,
-  roleOption: Option[String],
   id: String) extends ElementKey

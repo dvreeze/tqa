@@ -55,7 +55,7 @@ sealed trait ResourceNode extends Node {
 
   final def elementKeyOption: Option[ResourceKey] = {
     idOption.map { id =>
-      ResourceKey(elr, roleOption, id)
+      ResourceKey(elr, id)
     }
   }
 }

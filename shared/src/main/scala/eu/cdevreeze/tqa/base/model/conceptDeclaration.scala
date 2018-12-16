@@ -88,7 +88,8 @@ final class TupleDeclaration private[model] (
   globalElementDeclaration: GlobalElementDeclaration) extends ConceptDeclaration(globalElementDeclaration)
 
 /**
- * Primary item declaration. It must be in the xbrli:item substitution group but neither in the xbrldt:hypercubeItem nor in the xbrldt:dimensionItem substitution groups.
+ * Primary item declaration. It must be in the xbrli:item substitution group but neither in the xbrldt:hypercubeItem nor
+ * in the xbrldt:dimensionItem substitution groups.
  *
  * A primary item may be used as explicit dimension member.
  *
