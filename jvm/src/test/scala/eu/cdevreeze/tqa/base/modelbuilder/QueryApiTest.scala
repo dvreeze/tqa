@@ -465,7 +465,7 @@ class QueryApiTest extends FunSuite {
         topLevelAnnotationChildCount - importCount - includeCount
 
     assertResult(expectedElemCount) {
-      richTaxo.schemaContentElements.flatMap(_.findAllElemsOrSelf).size
+      richTaxo.topmostSchemaContentElements.flatMap(_.findAllElemsOrSelf).size
     }
   }
 
