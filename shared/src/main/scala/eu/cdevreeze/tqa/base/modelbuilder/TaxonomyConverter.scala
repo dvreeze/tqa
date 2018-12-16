@@ -30,7 +30,7 @@ object TaxonomyConverter {
     val topmostSchemaContentElems =
       taxo.rootElems.filter(_.asInstanceOf[base.dom.TaxonomyRootElem].isXsdSchema)
         .map(_.backingElem)
-        .flatMap(base.model.SchemaContentElement.collectSchemaContent _)
+        .flatMap(base.model.SchemaContentElement.collectTopmostSchemaContent _)
 
     val relationships = taxo.relationships.flatMap(optionallyConvertRelationship _)
 

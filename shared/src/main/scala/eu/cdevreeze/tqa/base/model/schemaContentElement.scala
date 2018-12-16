@@ -789,7 +789,7 @@ object SchemaContentElement extends SchemaContentElements.Factory {
     }
   }
 
-  def collectSchemaContent(rootElem: ScopedNodes.Elem): immutable.IndexedSeq[SchemaContentElement] = {
+  def collectTopmostSchemaContent(rootElem: ScopedNodes.Elem): immutable.IndexedSeq[SchemaContentElement] = {
     require(rootElem.resolvedName == ENames.XsSchemaEName, s"Expected ${ENames.XsSchemaEName} but got ${rootElem.resolvedName}")
 
     val tnsOption = rootElem.attributeOption(ENames.TargetNamespaceEName)

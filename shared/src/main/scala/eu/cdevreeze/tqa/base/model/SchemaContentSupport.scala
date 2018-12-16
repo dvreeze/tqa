@@ -41,6 +41,8 @@ import eu.cdevreeze.yaidom.queryapi.ClarkNodes
 // TODO Can we define a friendly "case class-like" ("low ancestry context") XML format that ties all this together?
 
 /**
+ * TODO REMOVE!
+ *
  * XML element in a schema, aware of the target namespace, if any. It is a custom yaidom element
  * implementation for schema content offering the ClarkElemApi query API. It is not a "yaidom dialect", but
  * it is a backing element for such a dialect, namely SchemaContentElement.

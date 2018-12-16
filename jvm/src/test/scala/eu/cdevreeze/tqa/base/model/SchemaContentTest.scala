@@ -42,7 +42,7 @@ class SchemaContentTest extends FunSuite {
 
     val doc = indexed.Document(docParser.parse(docUri).withUriOption(Some(docUri)))
 
-    val schemaContentElems = SchemaContentElement.collectSchemaContent(doc.documentElement)
+    val schemaContentElems = SchemaContentElement.collectTopmostSchemaContent(doc.documentElement)
 
     val globalElemDecls = schemaContentElems.collect { case e: GlobalElementDeclaration => e }
 
