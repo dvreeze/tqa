@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.base.model
 
+import scala.collection.immutable
+
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.yaidom.core.EName
 
@@ -51,13 +53,15 @@ sealed trait ResourceNode extends Node {
 
   def roleOption: Option[String]
 
+  def resolvedName: EName
+
   def nonXLinkAttributes: Map[EName, String]
 
-  // TODO Content
+  def content: immutable.IndexedSeq[ResourceContentElement]
 
   final def elementKeyOption: Option[ResourceKey] = {
     idOption.map { id =>
-      ResourceKey(elr, id)
+      ResourceKey(elr, resolvedName, id)
     }
   }
 }
@@ -114,7 +118,9 @@ object Node {
 
   sealed trait ReferenceResource extends DocumentationResource {
 
-    def parts: Map[EName, String]
+    final def parts: Map[EName, String] = {
+      content.map(e => (e.underlyingElem.resolvedName, e.underlyingElem.text)).toMap
+    }
   }
 
   sealed trait StandardDocumentationResource extends DocumentationResource
@@ -126,14 +132,22 @@ object Node {
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    text: String) extends StandardDocumentationResource with LabelResource
+    text: String) extends StandardDocumentationResource with LabelResource {
+
+    def resolvedName: EName = ENames.LinkLabelEName
+
+    def content: immutable.IndexedSeq[ResourceContentElement] = immutable.IndexedSeq() // TODO Is this always correct?
+  }
 
   final case class ConceptReferenceResource(
     idOption: Option[String],
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    parts: Map[EName, String]) extends StandardDocumentationResource with ReferenceResource
+    content: immutable.IndexedSeq[ResourceContentElement]) extends StandardDocumentationResource with ReferenceResource {
+
+    def resolvedName: EName = ENames.LinkReferenceEName
+  }
 
   /**
    * An element label, named label:label (and not any resource in that substitution group).
@@ -143,7 +157,12 @@ object Node {
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    text: String) extends NonStandardDocumentationResource with LabelResource
+    text: String) extends NonStandardDocumentationResource with LabelResource {
+
+    def resolvedName: EName = ENames.LabelLabelEName // TODO Is this always correct?
+
+    def content: immutable.IndexedSeq[ResourceContentElement] = immutable.IndexedSeq() // TODO Is this always correct?
+  }
 
   /**
    * An element reference, named reference:reference (and not any resource in that substitution group).
@@ -153,9 +172,21 @@ object Node {
     elr: String,
     roleOption: Option[String],
     nonXLinkAttributes: Map[EName, String],
-    parts: Map[EName, String]) extends NonStandardDocumentationResource with ReferenceResource
+    content: immutable.IndexedSeq[ResourceContentElement]) extends NonStandardDocumentationResource with ReferenceResource {
 
-  // TODO OtherNonStandardDocumentationResource
+    def resolvedName: EName = ENames.ReferenceReferenceEName // TODO Is this always correct?
+  }
+
+  /**
+   * Any other NonStandardDocumentationResource. Should hardly, if ever, be encountered.
+   */
+  final case class OtherNonStandardDocumentationResource(
+    idOption: Option[String],
+    elr: String,
+    roleOption: Option[String],
+    resolvedName: EName,
+    nonXLinkAttributes: Map[EName, String],
+    content: immutable.IndexedSeq[ResourceContentElement]) extends NonStandardDocumentationResource
 
   /**
    * Any other ResourceNode. For example, table content like table, ruleNode, or formula content like
@@ -163,12 +194,12 @@ object Node {
    *
    * It contains an optional element key, and therefore carries no semantics in isolation.
    * It is assumed that the element key, if present, is unique in the entire document collection.
-   *
-   * TODO Model the content of an OtherResourceNode.
    */
   final case class OtherResourceNode(
     idOption: Option[String],
     elr: String,
     roleOption: Option[String],
-    nonXLinkAttributes: Map[EName, String]) extends ResourceNode
+    resolvedName: EName,
+    nonXLinkAttributes: Map[EName, String],
+    content: immutable.IndexedSeq[ResourceContentElement]) extends ResourceNode
 }

@@ -84,7 +84,7 @@ object TaxonomyConverter {
           e.roleOption,
           e.resolvedAttributes.toMap
             .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
-          e.findAllChildElems.map(e => (e.resolvedName, e.text)).toMap)
+          e.findAllChildElems.map(e => base.model.ResourceContentElement(elr, e.backingElem)))
       case e: base.dom.XLinkResource if e.resolvedName == ENames.LabelLabelEName =>
         base.model.Node.ElementLabelResource(
           e.attributeOption(ENames.IdEName),
@@ -100,14 +100,16 @@ object TaxonomyConverter {
           e.roleOption,
           e.resolvedAttributes.toMap
             .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
-          e.findAllChildElems.map(e => (e.resolvedName, e.text)).toMap)
+          e.findAllChildElems.map(e => base.model.ResourceContentElement(elr, e.backingElem)))
       case e =>
         base.model.Node.OtherResourceNode(
           e.attributeOption(ENames.IdEName),
           elr,
           e.roleOption,
+          e.resolvedName,
           e.resolvedAttributes.toMap
-            .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)))
+            .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
+          e.findAllChildElems.map(e => base.model.ResourceContentElement(elr, e.backingElem)))
     }
   }
 }

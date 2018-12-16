@@ -33,6 +33,8 @@ import eu.cdevreeze.yaidom.core.EName
 sealed trait ElementKey {
 
   def id: String
+
+  def elementName: EName
 }
 
 /**
@@ -45,11 +47,12 @@ final case class SchemaContentElementKey(
   id: String) extends ElementKey
 
 /**
- * Element key of a ResourceNode, or its content! It contains the ID, along with the ELR. It is assumed that this
+ * Element key of a ResourceNode, or its content! It contains the ID, along with the ELR and element name. It is assumed that this
  * combination is unique across resource content. Given that most label linkbase content uses the default ELR,
  * this means that labels for the same concept/element but differing in language and resource role must all have
  * unique IDs in the taxonomy.
  */
 final case class ResourceKey(
   elr: String,
+  elementName: EName,
   id: String) extends ElementKey
