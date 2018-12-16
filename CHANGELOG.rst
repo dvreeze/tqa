@@ -3,6 +3,80 @@ CHANGELOG
 =========
 
 
+0.8.9
+=====
+
+This release mainly adds an experimental "model" that shares pretty much the same query API. Some changes are:
+
+* Moved ``BaseSetKey`` to common package, and moved ``XPointer`` to top-level (breaking changes)
+* Made ``TaxonomyBase`` creation faster (avoiding XML Base computation where not needed)
+* Created experimental model for core/dimensional taxonomy content, offering pretty much the same taxonomy query API
+* Added experimental (far from complete) taxonomy editing support, using the model mentioned above
+
+Breaking changes compared to version 0.8.8 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* object eu.cdevreeze.tqa.base.dom.IdPointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.IdPointer$")
+* interface eu.cdevreeze.tqa.base.dom.XPointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.XPointer")
+* object eu.cdevreeze.tqa.base.dom.ShorthandPointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.ShorthandPointer$")
+* object eu.cdevreeze.tqa.base.dom.BaseSetKey does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.BaseSetKey$")
+* method baseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in interface eu.cdevreeze.tqa.base.dom.XLinkArc has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.dom.XLinkArc.baseSetKey")
+* object eu.cdevreeze.tqa.base.dom.ChildSequencePointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.ChildSequencePointer$")
+* class eu.cdevreeze.tqa.base.dom.ShorthandPointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.ShorthandPointer")
+* class eu.cdevreeze.tqa.base.dom.IdPointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.IdPointer")
+* method baseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.dom.StandardArc has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.dom.StandardArc.baseSetKey")
+* interface eu.cdevreeze.tqa.base.dom.ElementSchemePointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.ElementSchemePointer")
+* class eu.cdevreeze.tqa.base.dom.ChildSequencePointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.ChildSequencePointer")
+* object eu.cdevreeze.tqa.base.dom.IdChildSequencePointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.IdChildSequencePointer$")
+* class eu.cdevreeze.tqa.base.dom.IdChildSequencePointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.IdChildSequencePointer")
+* abstract method isXsdSchema()Boolean in interface eu.cdevreeze.tqa.base.dom.TaxonomyRootElem is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyRootElem.isXsdSchema")
+* abstract method isLinkbase()Boolean in interface eu.cdevreeze.tqa.base.dom.TaxonomyRootElem is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyRootElem.isLinkbase")
+* object eu.cdevreeze.tqa.base.dom.XPointer does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.XPointer$")
+* method baseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.dom.NonStandardArc has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.dom.NonStandardArc.baseSetKey")
+* class eu.cdevreeze.tqa.base.dom.BaseSetKey does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.BaseSetKey")
+* method effectiveTargetBaseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship.effectiveTargetBaseSetKey")
+* method effectiveTargetBaseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationship has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationship.effectiveTargetBaseSetKey")
+* method effectiveTargetBaseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship.effectiveTargetBaseSetKey")
+* method copy(eu.cdevreeze.tqa.base.dom.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)eu.cdevreeze.tqa.base.relationship.RelationshipKey in class eu.cdevreeze.tqa.base.relationship.RelationshipKey's type is different in current version, where it is (eu.cdevreeze.tqa.base.common.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)eu.cdevreeze.tqa.base.relationship.RelationshipKey instead of (eu.cdevreeze.tqa.base.dom.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)eu.cdevreeze.tqa.base.relationship.RelationshipKey
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.RelationshipKey.copy")
+* method baseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.relationship.RelationshipKey has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.RelationshipKey.baseSetKey")
+* synthetic method copy$default$1()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.relationship.RelationshipKey has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.RelationshipKey.copy$default$1")
+* method this(eu.cdevreeze.tqa.base.dom.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)Unit in class eu.cdevreeze.tqa.base.relationship.RelationshipKey's type is different in current version, where it is (eu.cdevreeze.tqa.base.common.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)Unit instead of (eu.cdevreeze.tqa.base.dom.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)Unit
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.RelationshipKey.this")
+* method baseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.relationship.Relationship has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.Relationship.baseSetKey")
+* method effectiveTargetBaseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship.effectiveTargetBaseSetKey")
+* method apply(eu.cdevreeze.tqa.base.dom.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)eu.cdevreeze.tqa.base.relationship.RelationshipKey in object eu.cdevreeze.tqa.base.relationship.RelationshipKey in current version does not have a correspondent with same parameter signature among (eu.cdevreeze.tqa.base.common.BaseSetKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.XmlFragmentKey,eu.cdevreeze.tqa.base.relationship.NonExemptAttributeMap)eu.cdevreeze.tqa.base.relationship.RelationshipKey, (java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)java.lang.Object
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.RelationshipKey.apply")
+* method baseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship.baseSetKey")
+* method baseSetKey()eu.cdevreeze.tqa.base.dom.BaseSetKey in class eu.cdevreeze.tqa.extension.table.relationship.TableRelationship has a different result type in current version, where it is eu.cdevreeze.tqa.base.common.BaseSetKey rather than eu.cdevreeze.tqa.base.dom.BaseSetKey
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.extension.table.relationship.TableRelationship.baseSetKey")
+
+
 0.8.8
 =====
 

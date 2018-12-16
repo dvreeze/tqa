@@ -81,7 +81,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     libraryDependencies += "junit" % "junit" % "4.12" % "test",
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.7")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.8")
   )
   .jsSettings(
     // Do we need this jsEnv?
@@ -103,7 +103,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     parallelExecution in Test := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.7")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.8")
   )
 
 lazy val tqaJVM = tqa.jvm
