@@ -27,7 +27,7 @@ import eu.cdevreeze.tqa.base
 object TaxonomyConverter {
 
   def convertTaxonomy(taxo: base.taxonomy.BasicTaxonomy): base.model.taxonomy.BasicTaxonomy = {
-    val schemaContentElems =
+    val topmostSchemaContentElems =
       taxo.rootElems.filter(_.asInstanceOf[base.dom.TaxonomyRootElem].isXsdSchema)
         .map(_.backingElem)
         .flatMap(base.model.SchemaContentElement.collectSchemaContent _)
@@ -35,7 +35,7 @@ object TaxonomyConverter {
     val relationships = taxo.relationships.flatMap(optionallyConvertRelationship _)
 
     base.model.taxonomy.BasicTaxonomy.build(
-      schemaContentElems,
+      topmostSchemaContentElems,
       taxo.extraSubstitutionGroupMap,
       relationships)
   }

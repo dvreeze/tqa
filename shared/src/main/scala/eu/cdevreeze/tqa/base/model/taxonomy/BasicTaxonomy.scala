@@ -51,8 +51,8 @@ import eu.cdevreeze.yaidom.core.EName
 final class BasicTaxonomy private (
   val extraSubstitutionGroupMap: SubstitutionGroupMap,
   val netSubstitutionGroupMap: SubstitutionGroupMap,
-  val schemaContentElements: immutable.IndexedSeq[SchemaContentElement],
-  val schemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]],
+  val topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
+  val topmostSchemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]],
   val relationships: immutable.IndexedSeq[Relationship],
   val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration],
   val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration],
@@ -68,7 +68,7 @@ final class BasicTaxonomy private (
   def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
 
   def findAllGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
-    schemaContentElements.collect { case e: GlobalElementDeclaration => e }
+    topmostSchemaContentElements.collect { case e: GlobalElementDeclaration => e }
   }
 
   def findGlobalElementDeclaration(ename: EName): Option[GlobalElementDeclaration] = {
@@ -80,7 +80,7 @@ final class BasicTaxonomy private (
   }
 
   def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
-    schemaContentElements.collect { case e: GlobalAttributeDeclaration => e }
+    topmostSchemaContentElements.collect { case e: GlobalAttributeDeclaration => e }
   }
 
   def findGlobalAttributeDeclaration(ename: EName): Option[GlobalAttributeDeclaration] = {
@@ -88,7 +88,7 @@ final class BasicTaxonomy private (
   }
 
   def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition] = {
-    schemaContentElements.collect { case e: NamedTypeDefinition => e }
+    topmostSchemaContentElements.collect { case e: NamedTypeDefinition => e }
   }
 
   def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition] = {
@@ -143,24 +143,24 @@ object BasicTaxonomy {
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    */
   def build(
-    schemaContentElements: immutable.IndexedSeq[SchemaContentElement],
+    topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
     extraSubstitutionGroupMap: SubstitutionGroupMap,
     relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
-    val schemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]] =
-      schemaContentElements.groupBy(_.resolvedName)
+    val topmostSchemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]] =
+      topmostSchemaContentElements.groupBy(_.resolvedName)
         .mapValues(_.filter(_.attributes.idOption.nonEmpty).groupBy(_.attributes.idOption.get))
 
     val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration] =
-      schemaContentElements.collect { case e: GlobalElementDeclaration => e }
+      topmostSchemaContentElements.collect { case e: GlobalElementDeclaration => e }
         .groupBy(_.targetEName).mapValues(_.head)
 
     val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration] =
-      schemaContentElements.collect { case e: GlobalAttributeDeclaration => e }
+      topmostSchemaContentElements.collect { case e: GlobalAttributeDeclaration => e }
         .groupBy(_.targetEName).mapValues(_.head)
 
     val namedTypeDefinitionsByEName: Map[EName, NamedTypeDefinition] =
-      schemaContentElements.collect { case e: NamedTypeDefinition => e }
+      topmostSchemaContentElements.collect { case e: NamedTypeDefinition => e }
         .groupBy(_.targetEName).mapValues(_.head)
 
     val derivedSubstitutionGroupMap: SubstitutionGroupMap =
@@ -204,14 +204,14 @@ object BasicTaxonomy {
     }
 
     val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]] =
-      schemaContentElementsByENameAndId.getOrElse(ENames.XsElementEName, Map())
+      topmostSchemaContentElementsByENameAndId.getOrElse(ENames.XsElementEName, Map())
         .mapValues(_.collect { case e: GlobalElementDeclaration => e })
 
     new BasicTaxonomy(
       extraSubstitutionGroupMap,
       netSubstitutionGroupMap,
-      schemaContentElements,
-      schemaContentElementsByENameAndId,
+      topmostSchemaContentElements,
+      topmostSchemaContentElementsByENameAndId,
       relationships,
       globalElementDeclarationsByEName,
       globalAttributeDeclarationsByEName,
