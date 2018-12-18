@@ -24,7 +24,9 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.base.model.AllRelationship
+import eu.cdevreeze.tqa.base.model.GlobalElementDeclaration
 import eu.cdevreeze.tqa.base.model.HypercubeDimensionRelationship
 import eu.cdevreeze.tqa.base.model.Node
 import eu.cdevreeze.tqa.base.model.ParentChildRelationship
@@ -116,6 +118,80 @@ class SimpleTaxonomyCreatorTest extends FunSuite {
     }
     assertResult(3) {
       taxoCreator.startTaxonomy.findAllHypercubeDimensionRelationships.size
+    }
+  }
+
+  test("testAddConceptsAndArcs") {
+    val taxoBuilder = getTaxoBuilder()
+    val taxo: BasicTaxonomy =
+      taxoBuilder.build(Set(URI.create("http://www.test.com/test/entrypoint.xsd")))
+        .ensuring(_.relationships.isEmpty)
+        .ensuring(_.findAllPrimaryItemDeclarations.size >= 5)
+        .ensuring(_.findAllHypercubeDeclarations.size >= 2)
+        .ensuring(_.findAllExplicitDimensionDeclarations.size >= 2)
+        .ensuring(_.findAllTypedDimensionDeclarations.isEmpty)
+
+    val pElr = "urn:test:linkrole:my-report"
+
+    val tns = "http://www.test.com/test/data"
+
+    val conceptDecls = Vector(
+      GlobalElementDeclaration(
+        Some(tns),
+        GlobalElementDeclaration.Attributes(
+          Some("c31"),
+          "c31",
+          Some(EName(Namespaces.XbrliNamespace, "stringItemType")),
+          Some(EName(Namespaces.XbrliNamespace, "item")),
+          false,
+          false,
+          Map(EName(Namespaces.XbrliNamespace, "periodType") -> "instant")),
+        None,
+        None,
+        Vector()),
+      GlobalElementDeclaration(
+        Some(tns),
+        GlobalElementDeclaration.Attributes(
+          Some("c32"),
+          "c32",
+          Some(EName(Namespaces.XbrliNamespace, "stringItemType")),
+          Some(EName(Namespaces.XbrliNamespace, "item")),
+          false,
+          false,
+          Map(EName(Namespaces.XbrliNamespace, "periodType") -> "duration")),
+        None,
+        None,
+        Vector()))
+
+    val schemaDocUri = URI.create("http://www.test.com/test/data.xsd")
+      .ensuring(u => taxo.taxonomyBase.taxonomyDocUriMap.contains(u))
+
+    val presDocUri = URI.create("http://www.test.com/test/presentation.xml")
+      .ensuring(u => taxo.taxonomyBase.taxonomyDocUriMap.contains(u))
+
+    val pArcs = Vector(
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c1"), mkConceptNode(tns, "c2"), Map(ENames.OrderEName -> "1")),
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c2"), mkConceptNode(tns, "c31"), Map(ENames.OrderEName -> "2")),
+      ParentChildRelationship(pElr, mkConceptNode(tns, "c2"), mkConceptNode(tns, "c32"), Map(ENames.OrderEName -> "3")))
+
+    val taxoCreator: SimpleTaxonomyCreator =
+      SimpleTaxonomyCreator(taxo)
+        .addGlobalElementDeclarations(schemaDocUri, tns, conceptDecls)
+        .addParentChildArcs(presDocUri, pElr, pArcs)
+
+    assertResult(taxo.findAllPrimaryItemDeclarations.size + 2) {
+      taxoCreator.startTaxonomy.findAllPrimaryItemDeclarations.size
+    }
+    assertResult(3) {
+      taxoCreator.startTaxonomy.findAllParentChildRelationships.size
+    }
+    assertResult(true) {
+      taxoCreator.startTaxonomy.findAllParentChildRelationships.map(_.sourceConceptEName)
+        .forall(c => taxoCreator.startTaxonomy.findItemDeclaration(c).nonEmpty)
+    }
+    assertResult(true) {
+      taxoCreator.startTaxonomy.findAllParentChildRelationships.map(_.targetConceptEName)
+        .forall(c => taxoCreator.startTaxonomy.findItemDeclaration(c).nonEmpty)
     }
   }
 
