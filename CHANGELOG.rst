@@ -3,6 +3,178 @@ CHANGELOG
 =========
 
 
+0.8.10
+======
+
+This release tries to speed up Path and XmlFragmentKey computations for relationships sources and targets,
+by storing the Path with each taxonomy element. This speedup is needed to speed up taxonomy creation.
+
+Breaking changes compared to version 0.8.9 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Appinfo does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Appinfo.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.StandardLoc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.StandardLoc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ReferenceLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ReferenceLink.this")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.AttributeDeclarationOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AttributeDeclarationOrReference.opt")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.AttributeGroupReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AttributeGroupReference.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.LocalElementDeclaration does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.LocalElementDeclaration.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.DefinitionArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.DefinitionArc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.LocalAttributeDeclaration does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.LocalAttributeDeclaration.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.LinkbaseRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.LinkbaseRef.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.AnonymousComplexTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AnonymousComplexTypeDefinition.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Extension does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Extension.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.AnonymousSimpleTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AnonymousSimpleTypeDefinition.this")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.ComplexTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ComplexTypeDefinition.opt")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ModelGroupReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ModelGroupReference.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherNonXLinkElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherNonXLinkElem.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.SequenceModelGroup does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.SequenceModelGroup.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInLabelNamespace in object eu.cdevreeze.tqa.base.dom.ElemInLabelNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInLabelNamespace.apply")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ConceptLabelResource does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ConceptLabelResource.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Annotation does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Annotation.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.AttributeGroupDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AttributeGroupDefinition.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Definition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Definition.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.LabelArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.LabelArc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.SchemaRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.SchemaRef.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.LabelInLabelNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.LabelInLabelNamespace.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherNonStandardLocator does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherNonStandardLocator.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.RoleType does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.RoleType.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInLinkNamespace in object eu.cdevreeze.tqa.base.dom.ElemInLinkNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInLinkNamespace.apply")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.TaxonomyElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyElem.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherNonStandardResource does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherNonStandardResource.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.CalculationArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.CalculationArc.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInXsdNamespace in object eu.cdevreeze.tqa.base.dom.ElemInXsdNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInXsdNamespace.apply")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.GlobalElementDeclaration does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.GlobalElementDeclaration.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.NamedSimpleTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.NamedSimpleTypeDefinition.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInReferenceNamespace in object eu.cdevreeze.tqa.base.dom.ElemInReferenceNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInReferenceNamespace.apply")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Linkbase does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Linkbase.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Restriction does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Restriction.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.StandardExtendedLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.StandardExtendedLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.CalculationLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.CalculationLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.LabelLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.LabelLink.this")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.ElementDeclarationOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElementDeclarationOrReference.opt")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.NonStandardLocator does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.NonStandardLocator.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.NonStandardSimpleLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.NonStandardSimpleLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.AllModelGroup does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AllModelGroup.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.StandardResource does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.StandardResource.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ChoiceModelGroup does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ChoiceModelGroup.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Import does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Import.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherNonStandardSimpleLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherNonStandardSimpleLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.StandardArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.StandardArc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherElemInXsdNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherElemInXsdNamespace.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ArcroleType does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ArcroleType.this")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.TaxonomyElem in object eu.cdevreeze.tqa.base.dom.TaxonomyElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyElem.apply")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.AttributeReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AttributeReference.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.NonStandardExtendedLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.NonStandardExtendedLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherElemInLinkNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherElemInLinkNamespace.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.PresentationArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.PresentationArc.this")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.ModelGroupDefinitionOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ModelGroupDefinitionOrReference.opt")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ConceptReferenceResource does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ConceptReferenceResource.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ModelGroupDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ModelGroupDefinition.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ArcroleRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ArcroleRef.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherElemInLabelNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherElemInLabelNamespace.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherNonStandardExtendedLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherNonStandardExtendedLink.this")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.SimpleTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.SimpleTypeDefinition.opt")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.DefinitionLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.DefinitionLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.NonStandardResource does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.NonStandardResource.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.XsdSchema does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.XsdSchema.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ComplexContent does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ComplexContent.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherNonStandardArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherNonStandardArc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.NonStandardArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.NonStandardArc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.NamedComplexTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.NamedComplexTypeDefinition.this")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.AttributeGroupDefinitionOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AttributeGroupDefinitionOrReference.opt")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.PresentationLink does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.PresentationLink.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Include does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Include.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.GlobalAttributeDeclaration does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.GlobalAttributeDeclaration.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.OtherElemInReferenceNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.OtherElemInReferenceNamespace.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ReferenceArc does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ReferenceArc.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ReferenceInReferenceNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ReferenceInReferenceNamespace.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.RoleRef does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.RoleRef.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.ElementReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElementReference.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.SimpleContent does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.SimpleContent.this")
+* method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.UsedOn does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.UsedOn.this")
+* abstract method underlyingResource()eu.cdevreeze.tqa.base.dom.NonStandardResource in interface eu.cdevreeze.tqa.extension.formula.dom.FormulaOrTableResource is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.extension.formula.dom.FormulaOrTableResource.underlyingResource")
+
+
 0.8.9
 =====
 
