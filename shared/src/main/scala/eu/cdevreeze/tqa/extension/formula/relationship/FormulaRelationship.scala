@@ -60,9 +60,9 @@ import eu.cdevreeze.yaidom.core.Path
  * @author Chris de Vreeze
  */
 sealed abstract class FormulaRelationship(
-    val arc: FormulaArc,
-    val resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaResource],
-    val resolvedTo: ResolvedLocatorOrResource[_ <: FormulaResource]) {
+  val arc: FormulaArc,
+  val resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaResource],
+  val resolvedTo: ResolvedLocatorOrResource[_ <: FormulaResource]) {
 
   require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
   require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
@@ -85,11 +85,11 @@ sealed abstract class FormulaRelationship(
 
   final def arcrole: String = arc.arcrole
 
-  final def arcPath: Path = arc.underlyingArc.backingElem.path
+  final def arcPath: Path = arc.underlyingArc.path
 
-  final def fromPath: Path = resolvedFrom.xlinkLocatorOrResource.backingElem.path
+  final def fromPath: Path = sourceElem.underlyingResource.path
 
-  final def toPath: Path = resolvedTo.xlinkLocatorOrResource.backingElem.path
+  final def toPath: Path = targetElem.underlyingResource.path
 
   final def baseSetKey: BaseSetKey = arc.underlyingArc.baseSetKey
 
@@ -122,9 +122,9 @@ sealed abstract class FormulaRelationship(
  * A variable-set relationship.
  */
 final class VariableSetRelationship(
-    arc: VariableArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: VariableSet],
-    resolvedTo: ResolvedLocatorOrResource[_ <: VariableOrParameter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: VariableArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: VariableSet],
+  resolvedTo: ResolvedLocatorOrResource[_ <: VariableOrParameter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/variable-set")
 
@@ -142,9 +142,9 @@ final class VariableSetRelationship(
  * A variable-filter relationship.
  */
 final class VariableFilterRelationship(
-    arc: VariableFilterArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: FactVariable],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: VariableFilterArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: FactVariable],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/variable-filter")
 
@@ -167,9 +167,9 @@ final class VariableFilterRelationship(
  * A variable-set-filter relationship.
  */
 final class VariableSetFilterRelationship(
-    arc: VariableSetFilterArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: VariableSet],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: VariableSetFilterArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: VariableSet],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/variable-set-filter")
 
@@ -187,9 +187,9 @@ final class VariableSetFilterRelationship(
  * A variable-filter relationship.
  */
 final class BooleanFilterRelationship(
-    arc: VariableFilterArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: BooleanFilter],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: VariableFilterArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: BooleanFilter],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/boolean-filter")
 
@@ -212,9 +212,9 @@ final class BooleanFilterRelationship(
  * A consistency-assertion-parameter relationship. Note that it is backed by a VariableArc.
  */
 final class ConsistencyAssertionParameterRelationship(
-    arc: VariableArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: ConsistencyAssertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Parameter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: VariableArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: ConsistencyAssertion],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Parameter]) extends FormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/consistency-assertion-parameter")
 
@@ -240,9 +240,9 @@ sealed abstract class OtherFormulaRelationship(
  * A variable-set-precondition relationship.
  */
 final class VariableSetPreconditionRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: VariableSet],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Precondition]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: VariableSet],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Precondition]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/variable-set-precondition")
 
@@ -255,9 +255,9 @@ final class VariableSetPreconditionRelationship(
  * A consistency-assertion-formula relationship.
  */
 final class ConsistencyAssertionFormulaRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: ConsistencyAssertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Formula]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: ConsistencyAssertion],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Formula]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/consistency-assertion-formula")
 
@@ -270,9 +270,9 @@ final class ConsistencyAssertionFormulaRelationship(
  * An assertion-set relationship.
  */
 final class AssertionSetRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: AssertionSet],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Assertion]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: AssertionSet],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Assertion]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2008/assertion-set")
 
@@ -285,9 +285,9 @@ final class AssertionSetRelationship(
  * An element-message relationship, as used in a formula-related context.
  */
 sealed abstract class ElementMessageRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaResource],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaResource],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   final def referredElement: FormulaResource = resolvedFrom.resolvedElem
 
@@ -298,9 +298,9 @@ sealed abstract class ElementMessageRelationship(
  * An AssertionSatisfiedMessageRelationship or AssertionUnsatisfiedMessageRelationship.
  */
 sealed abstract class AssertionMessageRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends ElementMessageRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends ElementMessageRelationship(arc, resolvedFrom, resolvedTo) {
 
   final def assertion: Assertion = resolvedFrom.resolvedElem
 }
@@ -309,9 +309,9 @@ sealed abstract class AssertionMessageRelationship(
  * An assertion-satisfied-message relationship.
  */
 final class AssertionSatisfiedMessageRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends AssertionMessageRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends AssertionMessageRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/assertion-satisfied-message")
 }
@@ -320,9 +320,9 @@ final class AssertionSatisfiedMessageRelationship(
  * An assertion-unsatisfied-message relationship.
  */
 final class AssertionUnsatisfiedMessageRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends AssertionMessageRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Message]) extends AssertionMessageRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/assertion-unsatisfied-message")
 }
@@ -331,9 +331,9 @@ final class AssertionUnsatisfiedMessageRelationship(
  * An instance-variable relationship.
  */
 final class InstanceVariableRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Instance],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Variable]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Instance],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Variable]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/instance-variable")
 
@@ -346,9 +346,9 @@ final class InstanceVariableRelationship(
  * A formula-instance relationship.
  */
 final class FormulaInstanceRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Formula],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Instance]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Formula],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Instance]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2010/formula-instance")
 
@@ -361,9 +361,9 @@ final class FormulaInstanceRelationship(
  * An assertion-unsatisfied-severity relationship.
  */
 final class AssertionUnsatisfiedSeverityRelationship(
-    arc: OtherFormulaArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Severity]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: OtherFormulaArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Assertion],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Severity]) extends OtherFormulaRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2016/assertion-unsatisfied-severity")
 
@@ -431,14 +431,14 @@ object FormulaRelationship {
   private def toOptionalFormulaArc(arc: XLinkArc): Option[FormulaArc] = {
     arc match {
       case arc: NonStandardArc => FormulaArc.opt(arc)
-      case _                   => None
+      case _ => None
     }
   }
 
   private def toOptionalFormulaResource(taxoElem: AnyTaxonomyElem): Option[FormulaResource] = {
     taxoElem match {
       case res: NonStandardResource => FormulaResource.opt(res)
-      case _                        => None
+      case _ => None
     }
   }
 }

@@ -56,9 +56,9 @@ import eu.cdevreeze.yaidom.core.Path
  * @author Chris de Vreeze
  */
 sealed abstract class TableRelationship(
-    val arc: TableArc,
-    val resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaOrTableResource],
-    val resolvedTo: ResolvedLocatorOrResource[_ <: FormulaOrTableResource]) {
+  val arc: TableArc,
+  val resolvedFrom: ResolvedLocatorOrResource[_ <: FormulaOrTableResource],
+  val resolvedTo: ResolvedLocatorOrResource[_ <: FormulaOrTableResource]) {
 
   require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
   require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
@@ -81,11 +81,11 @@ sealed abstract class TableRelationship(
 
   final def arcrole: String = arc.arcrole
 
-  final def arcPath: Path = arc.underlyingArc.backingElem.path
+  final def arcPath: Path = arc.underlyingArc.path
 
-  final def fromPath: Path = resolvedFrom.xlinkLocatorOrResource.backingElem.path
+  final def fromPath: Path = sourceElem.underlyingResource.path
 
-  final def toPath: Path = resolvedTo.xlinkLocatorOrResource.backingElem.path
+  final def toPath: Path = targetElem.underlyingResource.path
 
   final def baseSetKey: BaseSetKey = arc.underlyingArc.baseSetKey
 
@@ -118,9 +118,9 @@ sealed abstract class TableRelationship(
  * A table-breakdown relationship.
  */
 final class TableBreakdownRelationship(
-    arc: TableBreakdownArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
-    resolvedTo: ResolvedLocatorOrResource[_ <: TableBreakdown]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: TableBreakdownArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
+  resolvedTo: ResolvedLocatorOrResource[_ <: TableBreakdown]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-breakdown")
 
@@ -138,9 +138,9 @@ final class TableBreakdownRelationship(
  * A breakdown-tree relationship.
  */
 final class BreakdownTreeRelationship(
-    arc: BreakdownTreeArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: TableBreakdown],
-    resolvedTo: ResolvedLocatorOrResource[_ <: DefinitionNode]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: BreakdownTreeArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: TableBreakdown],
+  resolvedTo: ResolvedLocatorOrResource[_ <: DefinitionNode]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/breakdown-tree")
 
@@ -153,9 +153,9 @@ final class BreakdownTreeRelationship(
  * A definition-node-subtree relationship.
  */
 final class DefinitionNodeSubtreeRelationship(
-    arc: DefinitionNodeSubtreeArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: DefinitionNode],
-    resolvedTo: ResolvedLocatorOrResource[_ <: DefinitionNode]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: DefinitionNodeSubtreeArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: DefinitionNode],
+  resolvedTo: ResolvedLocatorOrResource[_ <: DefinitionNode]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/definition-node-subtree")
 
@@ -168,9 +168,9 @@ final class DefinitionNodeSubtreeRelationship(
  * A table-filter relationship.
  */
 final class TableFilterRelationship(
-    arc: TableFilterArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: TableFilterArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-filter")
 
@@ -188,9 +188,9 @@ final class TableFilterRelationship(
  * A table-parameter relationship.
  */
 final class TableParameterRelationship(
-    arc: TableParameterArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Parameter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: TableParameterArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: Table],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Parameter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/table-parameter")
 
@@ -208,9 +208,9 @@ final class TableParameterRelationship(
  * An aspect-node-filter relationship.
  */
 final class AspectNodeFilterRelationship(
-    arc: AspectNodeFilterArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: AspectNode],
-    resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
+  arc: AspectNodeFilterArc,
+  resolvedFrom: ResolvedLocatorOrResource[_ <: AspectNode],
+  resolvedTo: ResolvedLocatorOrResource[_ <: Filter]) extends TableRelationship(arc, resolvedFrom, resolvedTo) {
 
   requireArcrole("http://xbrl.org/arcrole/2014/aspect-node-filter")
 
@@ -286,21 +286,21 @@ object TableRelationship {
   private def toOptionalTableArc(arc: XLinkArc): Option[TableArc] = {
     arc match {
       case arc: NonStandardArc => TableArc.opt(arc)
-      case _                   => None
+      case _ => None
     }
   }
 
   private def toOptionalTableResource(taxoElem: AnyTaxonomyElem): Option[TableResource] = {
     taxoElem match {
       case res: NonStandardResource => TableResource.opt(res)
-      case _                        => None
+      case _ => None
     }
   }
 
   private def toOptionalFormulaResource(taxoElem: AnyTaxonomyElem): Option[FormulaResource] = {
     taxoElem match {
       case res: NonStandardResource => FormulaResource.opt(res)
-      case _                        => None
+      case _ => None
     }
   }
 }

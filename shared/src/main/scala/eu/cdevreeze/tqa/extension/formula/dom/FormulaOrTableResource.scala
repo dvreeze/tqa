@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.extension.formula.dom
 
 import eu.cdevreeze.tqa.base.dom.AnyTaxonomyElem
+import eu.cdevreeze.tqa.base.dom.NonStandardResource
 import eu.cdevreeze.tqa.xlink.XLinkResource
 
 /**
@@ -25,4 +26,7 @@ import eu.cdevreeze.tqa.xlink.XLinkResource
  *
  * @author Chris de Vreeze
  */
-trait FormulaOrTableResource extends AnyTaxonomyElem with XLinkResource
+trait FormulaOrTableResource extends AnyTaxonomyElem with XLinkResource {
+
+  def underlyingResource: NonStandardResource
+}

@@ -107,15 +107,15 @@ sealed abstract class Relationship(
 
   final def arcrole: String = arc.arcrole
 
-  final def arcPath: Path = arc.backingElem.path
+  final def arcPath: Path = arc.path
 
   /**
-   * Returns the source element path. This method is very fast.
+   * Returns the resolved source element path. This method is very fast.
    */
   final def fromPath: Path = sourceElem.path
 
   /**
-   * Returns the target element path. This method is very fast.
+   * Returns the resolved target element path. This method is very fast.
    */
   final def toPath: Path = targetElem.path
 
@@ -258,7 +258,7 @@ final class ConceptLabelRelationship(
   def resourceRole: String = resource.roleOption.getOrElse(StandardLabelRoles.StandardLabel)
 
   def language: String = {
-    resource.attributeOption(XmlLangEName).getOrElse(sys.error(s"Missing xml:lang in $toPath in $docUri"))
+    resource.attributeOption(XmlLangEName).getOrElse(sys.error(s"Missing xml:lang in $toPath in ${targetElem.docUri}"))
   }
 
   def labelText: String = resource.text
@@ -582,7 +582,7 @@ object Relationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     (arc, resolvedFrom.resolvedElem) match {
       case (arc: StandardArc, elemDecl: GlobalElementDeclaration) =>
@@ -612,7 +612,7 @@ object StandardRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     resolvedTo.resolvedElem match {
       case elemDecl: GlobalElementDeclaration =>
@@ -640,7 +640,7 @@ object NonStandardRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     (arc.arcrole, arc, resolvedTo.resolvedElem) match {
       case ("http://xbrl.org/arcrole/2008/element-label", arc: NonStandardArc, res: XLinkResource) =>
@@ -669,7 +669,7 @@ object InterConceptRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     (arc.resolvedName, arc) match {
       case (LinkDefinitionArcEName, arc: DefinitionArc) => Some(DefinitionRelationship(arc, resolvedFrom, resolvedTo))
@@ -696,7 +696,7 @@ object ConceptResourceRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     (arc.resolvedName, arc, resolvedTo.resolvedElem) match {
       case (LinkLabelArcEName, arc: LabelArc, lbl: ConceptLabelResource) =>
@@ -721,7 +721,7 @@ object DefinitionRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     arc.arcrole match {
       case "http://www.xbrl.org/2003/arcrole/general-special" => new GeneralSpecialRelationship(arc, resolvedFrom, resolvedTo)
@@ -747,7 +747,7 @@ object DimensionalRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     arc.arcrole match {
       case "http://xbrl.org/int/dim/arcrole/hypercube-dimension" => Some(new HypercubeDimensionRelationship(arc, resolvedFrom, resolvedTo))
@@ -774,7 +774,7 @@ object PresentationRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     arc.arcrole match {
       case "http://www.xbrl.org/2003/arcrole/parent-child" => new ParentChildRelationship(arc, resolvedFrom, resolvedTo)
@@ -796,7 +796,7 @@ object CalculationRelationship {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.backingElem.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
 
     arc.arcrole match {
       case "http://www.xbrl.org/2003/arcrole/summation-item" => new SummationItemRelationship(arc, resolvedFrom, resolvedTo)

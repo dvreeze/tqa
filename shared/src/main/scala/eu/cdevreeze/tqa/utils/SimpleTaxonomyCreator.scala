@@ -247,7 +247,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     val startLinkbaseAsResolvedElem = resolved.Elem.from(linkbase)
 
-    val extLinkPath = extendedLink.backingElem.path
+    val extLinkPath = extendedLink.path
 
     val endLinkbaseAsResolvedElem = startLinkbaseAsResolvedElem.updateElemOrSelf(extLinkPath) { oldExtLinkElem =>
       val arcElems = relationships.map { relationship =>

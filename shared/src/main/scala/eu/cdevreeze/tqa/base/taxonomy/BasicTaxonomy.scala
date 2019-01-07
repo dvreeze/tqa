@@ -266,6 +266,8 @@ object BasicTaxonomy {
 
     val nonStandardRelationships = relationships.collect { case rel: NonStandardRelationship => rel }
 
+    // The speed of the following 2 statements depends on the speed of "key" computation, which is fortunately a very fast operation.
+
     val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
       nonStandardRelationships groupBy (_.sourceElem.key)
     }
