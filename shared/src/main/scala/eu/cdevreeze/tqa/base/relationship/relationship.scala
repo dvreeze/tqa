@@ -110,12 +110,12 @@ sealed abstract class Relationship(
   final def arcPath: Path = arc.path
 
   /**
-   * Returns the resolved source element path. This method is very fast.
+   * Returns the resolved source element path.
    */
   final def fromPath: Path = sourceElem.path
 
   /**
-   * Returns the resolved target element path. This method is very fast.
+   * Returns the resolved target element path.
    */
   final def toPath: Path = targetElem.path
 
