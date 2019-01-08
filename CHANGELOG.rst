@@ -9,6 +9,9 @@ CHANGELOG
 This release tries to speed up Path and XmlFragmentKey computations for relationships sources and targets,
 by storing the Path with each taxonomy element. This speedup is needed to speed up taxonomy creation.
 
+DO NOT USE THIS RELEASE, AND USE THE PRECEDING RELEASE INSTEAD OF THIS ONE! Overall version 0.8.10 has worse
+performance than version 0.8.9.
+
 Breaking changes compared to version 0.8.9 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
 
 * method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Appinfo does not have a correspondent in current version
