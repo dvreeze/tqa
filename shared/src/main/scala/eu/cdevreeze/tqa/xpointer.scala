@@ -41,7 +41,7 @@ sealed trait XPointer {
    * has no ID attribute). If this XPointer has an ID, the result will always be an IdChildSequencePointer.
    * Otherwise the result will remain a ChildSequencePointer.
    */
-  def addOneBasedChildIndex(oneBasedIndex: Int): XPointer
+  def addOneBasedChildElemIndex(oneBasedIndex: Int): XPointer
 }
 
 /**
@@ -52,7 +52,7 @@ sealed trait XPointerContainingId extends XPointer {
 
   def id: String
 
-  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer
+  def addOneBasedChildElemIndex(oneBasedIndex: Int): IdChildSequencePointer
 }
 
 /**
@@ -64,7 +64,7 @@ final case class ShorthandPointer(id: String) extends XPointerContainingId {
     rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
   }
 
-  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer = {
+  def addOneBasedChildElemIndex(oneBasedIndex: Int): IdChildSequencePointer = {
     require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
     IdChildSequencePointer(id, List(oneBasedIndex))
   }
@@ -83,7 +83,7 @@ final case class IdPointer(id: String) extends ElementSchemePointer with XPointe
     rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
   }
 
-  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer = {
+  def addOneBasedChildElemIndex(oneBasedIndex: Int): IdChildSequencePointer = {
     require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
     IdChildSequencePointer(id, List(oneBasedIndex))
   }
@@ -103,7 +103,7 @@ final case class IdChildSequencePointer(
     IdPointer(id).findElem(rootElem).flatMap(e => ChildSequencePointer(1 :: childSequence).findElem(e))
   }
 
-  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer = {
+  def addOneBasedChildElemIndex(oneBasedIndex: Int): IdChildSequencePointer = {
     require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
     IdChildSequencePointer(id, childSequence ::: List(oneBasedIndex))
   }
@@ -124,7 +124,7 @@ final case class ChildSequencePointer(childSequence: List[Int]) extends ElementS
     if (childSequence.headOption.contains(1)) findElem(rootElem, childSequence.tail) else None
   }
 
-  def addOneBasedChildIndex(oneBasedIndex: Int): ChildSequencePointer = {
+  def addOneBasedChildElemIndex(oneBasedIndex: Int): ChildSequencePointer = {
     require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
     ChildSequencePointer(childSequence ::: List(oneBasedIndex))
   }
@@ -213,7 +213,7 @@ object XPointer {
 
       parentElemOption.map { parent =>
         // Recursive call
-        toXPointer(parent).addOneBasedChildIndex(zeroBasedElemIndex(elem, parent) + 1)
+        toXPointer(parent).addOneBasedChildElemIndex(zeroBasedElemIndex(elem, parent) + 1)
       }.getOrElse {
         ChildSequencePointer(List(1))
       }
