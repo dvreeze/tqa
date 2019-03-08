@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa
 
 import scala.collection.immutable
 
+import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import eu.cdevreeze.yaidom.queryapi.ScopedElemApi
 
 /**
@@ -34,6 +35,13 @@ sealed trait XPointer {
    * Finds the optional element with this XPointer, relative to the passed root element.
    */
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E]
+
+  /**
+   * Returns the XPointer for the n-th child element (n >= 1) of this XPointer (assuming that the child element
+   * has no ID attribute). If this XPointer has an ID, the result will always be an IdChildSequencePointer.
+   * Otherwise the result will remain a ChildSequencePointer.
+   */
+  def addOneBasedChildIndex(oneBasedIndex: Int): XPointer
 }
 
 /**
@@ -43,6 +51,8 @@ sealed trait XPointer {
 sealed trait XPointerContainingId extends XPointer {
 
   def id: String
+
+  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer
 }
 
 /**
@@ -52,6 +62,11 @@ final case class ShorthandPointer(id: String) extends XPointerContainingId {
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
     rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
+  }
+
+  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer = {
+    require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
+    IdChildSequencePointer(id, List(oneBasedIndex))
   }
 
   override def toString: String = id
@@ -66,6 +81,11 @@ final case class IdPointer(id: String) extends ElementSchemePointer with XPointe
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
     rootElem.findElemOrSelf(_.attributeOption(ENames.IdEName).contains(id))
+  }
+
+  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer = {
+    require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
+    IdChildSequencePointer(id, List(oneBasedIndex))
   }
 
   override def toString: String = s"element(${id})"
@@ -83,6 +103,11 @@ final case class IdChildSequencePointer(
     IdPointer(id).findElem(rootElem).flatMap(e => ChildSequencePointer(1 :: childSequence).findElem(e))
   }
 
+  def addOneBasedChildIndex(oneBasedIndex: Int): IdChildSequencePointer = {
+    require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
+    IdChildSequencePointer(id, childSequence ::: List(oneBasedIndex))
+  }
+
   override def toString: String = {
     val dataString = s"${id}/" + childSequence.mkString("/")
     s"element(${dataString})"
@@ -97,6 +122,11 @@ final case class ChildSequencePointer(childSequence: List[Int]) extends ElementS
 
   def findElem[E <: ScopedElemApi.Aux[E]](rootElem: E): Option[E] = {
     if (childSequence.headOption.contains(1)) findElem(rootElem, childSequence.tail) else None
+  }
+
+  def addOneBasedChildIndex(oneBasedIndex: Int): ChildSequencePointer = {
+    require(oneBasedIndex >= 1, s"Expected one-based index but got $oneBasedIndex instead")
+    ChildSequencePointer(childSequence ::: List(oneBasedIndex))
   }
 
   private def findElem[E <: ScopedElemApi.Aux[E]](root: E, childSeq: List[Int]): Option[E] = childSeq match {
@@ -169,6 +199,27 @@ object XPointer {
     }
   }
 
+  /**
+   * Turns the given element into the XPointer that is has relative to the root element. Whenever possible,
+   * shorthand pointers are returned. The root element, if it has no ID attribute, has XPointer "element(/1)".
+   *
+   * This method assumes that the element type has a well-defined (and inexpensive) equality defined on it.
+   */
+  def toXPointer[E <: BackingElemApi.Aux[E]](elem: E): XPointer = {
+    val idOption = elem.attributeOption(ENames.IdEName)
+
+    idOption.map(id => ShorthandPointer(id)).getOrElse {
+      val parentElemOption = elem.parentOption
+
+      parentElemOption.map { parent =>
+        // Recursive call
+        toXPointer(parent).addOneBasedChildIndex(zeroBasedElemIndex(elem, parent) + 1)
+      }.getOrElse {
+        ChildSequencePointer(List(1))
+      }
+    }
+  }
+
   private def parseElementSchemeData(s: String): String = {
     require(s.startsWith("element("), s"Expected element scheme pointer, but got '${s}'")
     require(s.endsWith(")"), s"Expected element scheme pointer, but got '${s}'")
@@ -176,5 +227,9 @@ object XPointer {
     val withoutPrefix = s.substring("element(".length)
     val result = withoutPrefix.substring(0, withoutPrefix.length - 1)
     result
+  }
+
+  private def zeroBasedElemIndex[E <: BackingElemApi.Aux[E]](elem: E, parent: E): Int = {
+    parent.findAllChildElems.zipWithIndex.find { case (che, idx) => che == elem }.get._2
   }
 }
