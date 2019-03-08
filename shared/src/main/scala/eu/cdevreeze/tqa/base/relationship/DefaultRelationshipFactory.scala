@@ -73,7 +73,7 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     taxonomyBase: TaxonomyBase,
     arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
-    taxonomyBase.rootElems flatMap { rootElem =>
+    taxonomyBase.rootElems.flatMap { rootElem =>
       extractRelationshipsFromDocument(rootElem.docUri, taxonomyBase, arcFilter)
     }
   }
@@ -224,8 +224,9 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
   private def resolveProhibitionAndOverridingForEquivalentRelationships(
     equivalentRelationships: immutable.IndexedSeq[Relationship]): Option[Relationship] = {
 
-    if (equivalentRelationships.isEmpty) None
-    else {
+    if (equivalentRelationships.isEmpty) {
+      None
+    } else {
       val highestPriority = equivalentRelationships.map(_.arc.priority).max
 
       val relationshipsWithHighestPriority =

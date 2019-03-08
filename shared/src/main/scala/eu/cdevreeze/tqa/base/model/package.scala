@@ -26,7 +26,7 @@ package eu.cdevreeze.tqa.base
  * THIS PACKAGE AND ITS SUB-PACKAGES ARE EXPERIMENTAL!
  *
  * The model consists of schema content elements, and "linkbase content". The latter consists of nodes (which are
- * abstractions of XLink locators and resource) and of relationships (which are abstractions of XLink arcs).
+ * abstractions of XLink locators and resources) and of relationships (which are abstractions of XLink arcs).
  *
  * The model is meant to be used for (somewhat high-level) querying, as an attractive alternative to the XML
  * representation. It can also be used for taxonomy editing and creation, but keep in mind that the model elements
