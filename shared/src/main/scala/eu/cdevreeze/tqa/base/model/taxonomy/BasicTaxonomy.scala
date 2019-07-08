@@ -154,7 +154,7 @@ object BasicTaxonomy {
 
     val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration] =
       topmostSchemaContentElements.collect { case e: GlobalElementDeclaration => e }
-        .view.groupBy(_.targetEName).view.mapValues(_.head).toMap
+        .groupBy(_.targetEName).view.mapValues(_.head).toMap
 
     val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration] =
       topmostSchemaContentElements.collect { case e: GlobalAttributeDeclaration => e }

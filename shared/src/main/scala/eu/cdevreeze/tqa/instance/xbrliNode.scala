@@ -1385,7 +1385,7 @@ object XbrlInstance {
     }
 
     val allContextsById: Map[String, XbrliContext] =
-      nonFacts.collect { case e: XbrliContext => e }.view.groupBy(_.id).view.mapValues(_.head).toMap
+      nonFacts.collect { case e: XbrliContext => e }.groupBy(_.id).view.mapValues(_.head).toMap
 
     val allUnitsById: Map[String, XbrliUnit] =
       nonFacts.collect { case e: XbrliUnit => e }.groupBy(_.id).view.mapValues(_.head).toMap

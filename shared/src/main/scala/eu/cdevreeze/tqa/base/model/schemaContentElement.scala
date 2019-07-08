@@ -827,7 +827,7 @@ object SchemaContentElement extends SchemaContentElements.Factory {
   def attributes(rawAttributes: Map[EName, String]): SchemaContentElement.Attributes = {
     new SchemaContentElement.Attributes {
       def idOption: Option[String] = rawAttributes.get(ENames.IdEName)
-      def otherAttributes: Map[EName, String] = rawAttributes.view.filter(_._1 != ENames.IdEName).toMap
+      def otherAttributes: Map[EName, String] = rawAttributes.filter(_._1 != ENames.IdEName)
     }
   }
 

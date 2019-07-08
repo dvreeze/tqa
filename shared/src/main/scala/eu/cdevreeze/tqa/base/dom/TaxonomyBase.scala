@@ -196,11 +196,11 @@ final class TaxonomyBase private (
 
     new TaxonomyBase(
       filteredTaxonomyDocs,
-      taxonomyDocUriMap.view.filter(kv => docUris.contains(kv._1)).toMap,
-      elemUriMap.view.filter(kv => filteredElemUris.contains(kv._1)).toMap,
-      globalElementDeclarationMap.view.filter(kv => globalElementDeclarationENames.contains(kv._1)).toMap,
-      namedTypeDefinitionMap.view.filter(kv => namedTypeDefinitionENames.contains(kv._1)).toMap,
-      globalAttributeDeclarationMap.view.filter(kv => globalAttributeDeclarationENames.contains(kv._1)).toMap,
+      taxonomyDocUriMap.filter(kv => docUris.contains(kv._1)),
+      elemUriMap.filter(kv => filteredElemUris.contains(kv._1)),
+      globalElementDeclarationMap.filter(kv => globalElementDeclarationENames.contains(kv._1)),
+      namedTypeDefinitionMap.filter(kv => namedTypeDefinitionENames.contains(kv._1)),
+      globalAttributeDeclarationMap.filter(kv => globalAttributeDeclarationENames.contains(kv._1)),
       filteredDerivedSubstitutionGroup)
   }
 
@@ -260,9 +260,9 @@ final class TaxonomyBase private (
   }
 
   private def filterSubstitutionGroupMap(substitutionGroupMap: SubstitutionGroupMap, docUris: Set[URI]): SubstitutionGroupMap = {
-    val filteredMappings: Map[EName, EName] = substitutionGroupMap.mappings.view.filter { case (ename, _) =>
+    val filteredMappings: Map[EName, EName] = substitutionGroupMap.mappings.filter { case (ename, _) =>
       globalElementDeclarationMap.get(ename).exists(e => docUris.contains(e.docUri))
-    }.toMap
+    }
 
     SubstitutionGroupMap(filteredMappings)
   }
@@ -374,7 +374,7 @@ object TaxonomyBase {
 
     val substGroups: Set[EName] = rawMappings.values.toSet
 
-    val mappings: Map[EName, EName] = rawMappings.view.filter(kv => substGroups.contains(kv._1)).toMap
+    val mappings: Map[EName, EName] = rawMappings.filter(kv => substGroups.contains(kv._1))
 
     SubstitutionGroupMap.from(mappings)
   }
