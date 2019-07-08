@@ -148,7 +148,7 @@ object ShowDimensions {
       val elrPrimariesPairs = hasHypercubes.groupBy(_.elr).view.mapValues(_.map(_.primary)).toSeq.sortBy(_._1)
 
       require(
-        elrPrimariesPairs.toMap.view.mapValues(_.toSet) == hasHypercubeInheritanceOrSelf.getOrElse(item, Map.empty),
+        elrPrimariesPairs.toMap.view.mapValues(_.toSet).toMap == hasHypercubeInheritanceOrSelf.getOrElse(item, Map.empty),
         s"Finding own or inherited has-hypercubes must be consistent with the bulk methods for has-hypercube inheritance-or-self")
 
       elrPrimariesPairs foreach {
