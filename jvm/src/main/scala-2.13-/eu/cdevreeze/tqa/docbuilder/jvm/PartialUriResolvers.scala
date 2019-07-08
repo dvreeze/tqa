@@ -23,11 +23,10 @@ import java.net.URI
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
-
-import org.xml.sax.InputSource
+import scala.collection.JavaConverters._
 
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import org.xml.sax.InputSource
 
 /**
  * Partial URI resolvers, converting an URI to a SAX InputSource.

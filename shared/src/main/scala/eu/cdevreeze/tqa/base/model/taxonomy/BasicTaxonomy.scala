@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.base.model.taxonomy
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.ClassTag
 
 import eu.cdevreeze.tqa.ENames
@@ -149,19 +150,19 @@ object BasicTaxonomy {
 
     val topmostSchemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]] =
       topmostSchemaContentElements.groupBy(_.resolvedName)
-        .mapValues(_.filter(_.attributes.idOption.nonEmpty).groupBy(_.attributes.idOption.get))
+        .view.mapValues(_.filter(_.attributes.idOption.nonEmpty).groupBy(_.attributes.idOption.get)).toMap
 
     val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration] =
       topmostSchemaContentElements.collect { case e: GlobalElementDeclaration => e }
-        .groupBy(_.targetEName).mapValues(_.head)
+        .view.groupBy(_.targetEName).view.mapValues(_.head).toMap
 
     val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration] =
       topmostSchemaContentElements.collect { case e: GlobalAttributeDeclaration => e }
-        .groupBy(_.targetEName).mapValues(_.head)
+        .groupBy(_.targetEName).view.mapValues(_.head).toMap
 
     val namedTypeDefinitionsByEName: Map[EName, NamedTypeDefinition] =
       topmostSchemaContentElements.collect { case e: NamedTypeDefinition => e }
-        .groupBy(_.targetEName).mapValues(_.head)
+        .groupBy(_.targetEName).view.mapValues(_.head).toMap
 
     val derivedSubstitutionGroupMap: SubstitutionGroupMap =
       computeDerivedSubstitutionGroupMap(globalElementDeclarationsByEName)
@@ -205,7 +206,7 @@ object BasicTaxonomy {
 
     val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]] =
       topmostSchemaContentElementsByENameAndId.getOrElse(ENames.XsElementEName, Map())
-        .mapValues(_.collect { case e: GlobalElementDeclaration => e })
+        .view.mapValues(_.collect { case e: GlobalElementDeclaration => e }).toMap
 
     new BasicTaxonomy(
       extraSubstitutionGroupMap,
@@ -237,7 +238,7 @@ object BasicTaxonomy {
 
     val substGroups: Set[EName] = rawMappings.values.toSet
 
-    val mappings: Map[EName, EName] = rawMappings.filterKeys(substGroups)
+    val mappings: Map[EName, EName] = rawMappings.filter(kv => substGroups.contains(kv._1))
 
     SubstitutionGroupMap.from(mappings)
   }

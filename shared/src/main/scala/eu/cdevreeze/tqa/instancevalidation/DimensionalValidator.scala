@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.instancevalidation
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.util.Success
 import scala.util.Try
 
@@ -139,7 +140,7 @@ final class DimensionalValidator private (
     ownOrInheritedPrimaries: Set[EName]): Try[Boolean] = {
 
     val hasHypercubes =
-      hasHypercubesByElrAndPrimary.getOrElse(hasHypercubeElr, Map()).filterKeys(ownOrInheritedPrimaries).
+      hasHypercubesByElrAndPrimary.getOrElse(hasHypercubeElr, Map()).filter(kv => ownOrInheritedPrimaries.contains(kv._1)).
         values.flatten.toIndexedSeq
 
     if (hasHypercubes.isEmpty) {
@@ -295,13 +296,13 @@ final class DimensionalValidator private (
   private def filterHasHypercubes(
     elrToPrimaryMaps: Map[String, Set[EName]]): Map[String, Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]] = {
 
-    val ownOrInheritedHasHypercubesByElrAndPrimary =
-      (hasHypercubesByElrAndPrimary.filterKeys(elrToPrimaryMaps.keySet).toIndexedSeq map {
+    val ownOrInheritedHasHypercubesByElrAndPrimary: Map[String, Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]] =
+      (hasHypercubesByElrAndPrimary.filter(kv => elrToPrimaryMaps.keySet.contains(kv._1)).toIndexedSeq.map {
         case (elr, primaryToHasHypercubeMap) =>
           val primaries = elrToPrimaryMaps.getOrElse(elr, Set())
 
           val filteredPrimaryToHasHypercubeMap =
-            primaryToHasHypercubeMap.filterKeys(primaries).filter(_._2.nonEmpty)
+            primaryToHasHypercubeMap.filter(kv => primaries.contains(kv._1)).filter(_._2.nonEmpty).toMap
 
           elr -> filteredPrimaryToHasHypercubeMap
       } filter {
@@ -332,9 +333,9 @@ object DimensionalValidator {
 
     new DimensionalValidator(
       taxonomy,
-      hasHypercubes.groupBy(_.elr).mapValues(_.groupBy(_.primary)),
-      hypercubeDimensions.groupBy(_.elr).mapValues(_.groupBy(_.hypercube)),
-      dimensionDomains.groupBy(_.dimensionDomainElr).mapValues(_.groupBy(_.dimension)),
+      hasHypercubes.groupBy(_.elr).view.mapValues(_.groupBy(_.primary)).toMap,
+      hypercubeDimensions.groupBy(_.elr).view.mapValues(_.groupBy(_.hypercube)).toMap,
+      dimensionDomains.groupBy(_.dimensionDomainElr).view.mapValues(_.groupBy(_.dimension)).toMap,
       dimensionDefaults,
       hasHypercubeInheritanceOrSelf)
   }
@@ -350,7 +351,7 @@ object DimensionalValidator {
       case ((dimension, dimensionDomainElr), paths) =>
         val domainMembers: Map[EName, DimensionDomain.Member] =
           paths.flatMap(_.relationships).map(rel => DimensionDomain.Member(rel.targetConceptEName, rel.usable)).groupBy(_.ename).
-            mapValues(mems => mems.find(m => !m.usable).getOrElse(mems.head))
+            view.mapValues(mems => mems.find(m => !m.usable).getOrElse(mems.head)).toMap
 
         new DimensionDomain(dimension, dimensionDomainElr, domainMembers)
     }

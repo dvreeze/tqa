@@ -46,7 +46,7 @@ object TaxonomyConverter {
       convertTaxonomyElemToNode(relationship.sourceElem, relationship.elr),
       convertTaxonomyElemToNode(relationship.targetElem, relationship.elr),
       relationship.arc.resolvedAttributes.toMap
-        .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)))
+        .filter(!_._1.namespaceUriOption.contains(Namespaces.XLinkNamespace)))
   }
 
   private def convertTaxonomyElemToNode(elem: base.dom.TaxonomyElem, elr: String): base.model.Node = {
@@ -75,7 +75,7 @@ object TaxonomyConverter {
           elr,
           e.roleOption,
           e.resolvedAttributes.toMap
-            .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
+            .filter(!_._1.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.text)
       case e: base.dom.ConceptReferenceResource =>
         base.model.Node.ConceptReferenceResource(
@@ -83,7 +83,7 @@ object TaxonomyConverter {
           elr,
           e.roleOption,
           e.resolvedAttributes.toMap
-            .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
+            .filter(!_._1.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.findAllChildElems.map(e => base.model.ResourceContentElement(elr, e.backingElem)))
       case e: base.dom.XLinkResource if e.resolvedName == ENames.LabelLabelEName =>
         base.model.Node.ElementLabelResource(
@@ -91,7 +91,7 @@ object TaxonomyConverter {
           elr,
           e.roleOption,
           e.resolvedAttributes.toMap
-            .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
+            .filter(!_._1.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.text)
       case e: base.dom.XLinkResource if e.resolvedName == ENames.ReferenceReferenceEName =>
         base.model.Node.ElementReferenceResource(
@@ -99,7 +99,7 @@ object TaxonomyConverter {
           elr,
           e.roleOption,
           e.resolvedAttributes.toMap
-            .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
+            .filter(!_._1.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.findAllChildElems.map(e => base.model.ResourceContentElement(elr, e.backingElem)))
       case e =>
         base.model.Node.OtherResourceNode(
@@ -108,7 +108,7 @@ object TaxonomyConverter {
           e.roleOption,
           e.resolvedName,
           e.resolvedAttributes.toMap
-            .filterKeys(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
+            .filter(!_._1.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
           e.findAllChildElems.map(e => base.model.ResourceContentElement(elr, e.backingElem)))
     }
   }

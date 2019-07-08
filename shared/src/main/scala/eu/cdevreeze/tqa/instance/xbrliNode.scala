@@ -23,6 +23,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.Temporal
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.classTag
 import scala.util.Try
 
@@ -38,7 +39,7 @@ import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
-import eu.cdevreeze.yaidom.queryapi.HasENameApi.withEName
+import eu.cdevreeze.yaidom.queryapi.ClarkElemApi.withEName
 import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
@@ -97,8 +98,6 @@ final case class XbrliCommentNode(text: String) extends CanBeXbrliDocumentChild 
  * XBRL instances embedded in other XML elements, or only for parts of XBRL instances. As an example of the latter, table layout
  * models may contain pieces of XBRL context data, such as periods. Their parent elements can be parsed into an `XbrliElem`,
  * thus offering the XBRL instance query API on such XBRL context data.
- *
- * @author Chris de Vreeze
  */
 sealed abstract class XbrliElem private[instance] (
   val backingElem: BackingNodes.Elem,
@@ -317,7 +316,7 @@ sealed trait XLinkElem extends XbrliElem with xlink.XLinkElem {
   final def key: XmlFragmentKey = backingElem.key
 
   final def xlinkAttributes: Map[EName, String] = {
-    resolvedAttributes.toMap.filterKeys(_.namespaceUriOption.contains(Namespaces.XLinkNamespace))
+    resolvedAttributes.toMap.filter(_._1.namespaceUriOption.contains(Namespaces.XLinkNamespace))
   }
 }
 
@@ -1386,10 +1385,10 @@ object XbrlInstance {
     }
 
     val allContextsById: Map[String, XbrliContext] =
-      nonFacts.collect { case e: XbrliContext => e }.groupBy(_.id).mapValues(_.head)
+      nonFacts.collect { case e: XbrliContext => e }.view.groupBy(_.id).view.mapValues(_.head).toMap
 
     val allUnitsById: Map[String, XbrliUnit] =
-      nonFacts.collect { case e: XbrliUnit => e }.groupBy(_.id).mapValues(_.head)
+      nonFacts.collect { case e: XbrliUnit => e }.groupBy(_.id).view.mapValues(_.head).toMap
 
     val allFactsByEName: Map[EName, immutable.IndexedSeq[Fact]] =
       facts.flatMap(_.findAllElemsOrSelfOfType(classTag[Fact])).groupBy(_.resolvedName)

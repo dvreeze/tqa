@@ -245,7 +245,7 @@ sealed trait XLinkElem extends TaxonomyElem with xlink.XLinkElem {
   def xlinkType: String
 
   final def xlinkAttributes: Map[EName, String] = {
-    resolvedAttributes.toMap.filterKeys(_.namespaceUriOption.contains(XLinkNamespace))
+    resolvedAttributes.toMap.filter(_._1.namespaceUriOption.contains(XLinkNamespace))
   }
 }
 

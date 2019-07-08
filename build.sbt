@@ -10,11 +10,9 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 // Note that 2.12.5 does not work for Scalatest in sbt (https://github.com/scalatest/scalatest/issues/1342).
 
-val scalaVer = "2.12.7"
+val scalaVer = "2.13.0"
 
-// I wanted to cross-build for Scala 2.13.0-M4 as well, but then miss library scalajs-jsjoda-as-java-time
-
-val crossScalaVer = Seq(scalaVer, "2.11.12")
+val crossScalaVer = Seq(scalaVer, "2.12.8")
 
 lazy val commonSettings = Seq(
   name         := "tqa",
@@ -27,7 +25,7 @@ lazy val commonSettings = Seq(
 
   scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint", "-target:jvm-1.8"),
 
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   publishMavenStyle := true,
 
   publishTo := {
@@ -41,13 +39,15 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.9.0",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.10.0",
 
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.1.1",
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.2.0",
 
-  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.5",
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.1",
 
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % "test"
+  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.8",
+
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.8" % "test"
 )
 
 lazy val root = project.in(file("."))
@@ -69,17 +69,41 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.8.0-14",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-3",
 
-    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.6.2",
+    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.7.0",
 
     libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2",
 
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-java8-compat" % "0.9.0",
+    libraryDependencies ++= {
+      scalaBinaryVersion.value match {
+        case "2.13" => Seq()
+        case _      => Seq("org.scala-lang.modules" %%% "scala-java8-compat" % "0.9.0")
+      }
+    },
 
-    libraryDependencies += "org.scalameta" %%% "scalameta" % "4.0.0" % "test",
+    libraryDependencies ++= {
+      scalaBinaryVersion.value match {
+        case "2.13" => Seq()
+        case _      => Seq("org.scalameta" %%% "scalameta" % "4.1.11" % "test")
+      }
+    },
 
-    libraryDependencies += "junit" % "junit" % "4.12" % "test",
+    Compile / unmanagedSourceDirectories += {
+      val sourceDir = (Compile / sourceDirectory).value
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+        case _                       => sourceDir / "scala-2.13-"
+      }
+    },
+
+    Test / unmanagedSourceDirectories += {
+      val sourceDir = (Test / sourceDirectory).value
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+        case _                       => sourceDir / "scala-2.13-"
+      }
+    },
 
     mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.9")
   )
@@ -87,21 +111,21 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
     // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.6",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.7",
 
-    // It turns out that scalajs-jsjoda is far more complete than scalajs-java-time!
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
 
-    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda" % "1.1.1",
+    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.7.0" % "optional",
 
-    libraryDependencies += "com.zoepepper" %%% "scalajs-jsjoda-as-java-time" % "1.1.1",
+    Compile / unmanagedSourceDirectories += {
+      val sourceDir = (Compile / sourceDirectory).value
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+        case _                       => sourceDir / "scala-2.13-"
+      }
+    },
 
-    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.6.7" % "optional",
-
-    jsDependencies += "org.webjars.npm" % "js-joda" % "1.3.0" / "dist/js-joda.js" minified "dist/js-joda.min.js",
-
-    jsDependencies += "org.webjars.npm" % "js-joda-timezone" % "1.0.0" / "dist/js-joda-timezone.js" minified "dist/js-joda-timezone.min.js",
-
-    parallelExecution in Test := false,
+    Test / parallelExecution := false,
 
     mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.9")
   )

@@ -20,8 +20,6 @@ import java.net.URI
 
 import scala.reflect.classTag
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
 import eu.cdevreeze.tqa.Namespaces.XbrliNamespace
@@ -40,7 +38,6 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class LayoutModelTest extends FunSuite {
 
   private val docParser = DocumentParserUsingStax.newInstance()

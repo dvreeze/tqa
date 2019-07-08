@@ -20,9 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.RefEName
@@ -48,7 +46,6 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class ExtractUnknownRelationshipsTest extends FunSuite {
 
   test("testExtractUnknownRelationships") {

@@ -20,9 +20,9 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.junit.runner.RunWith
+import scala.collection.compat._
+
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.NameEName
@@ -44,7 +44,6 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class RelationshipEquivalenceTest extends FunSuite {
 
   test("testProhibition") {
@@ -102,7 +101,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
@@ -162,7 +161,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val nonProhibitedRelationships = relationships.filter(_.arc.use == Use.Optional)
 
@@ -231,7 +230,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     assertResult(Map(BaseSetKey.forSummationItemArc(BaseSetKey.StandardElr) -> Vector())) {
       networkMap
@@ -296,7 +295,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val floatingAssetsRels =
       calcRelationships.filter(_.targetConceptEName.localPart == "floatingAssets")
@@ -368,7 +367,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val floatingAssetsRels =
       calcRelationships.filter(_.targetConceptEName.localPart == "floatingAssets")
@@ -413,7 +412,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships)) {
       networkMap
@@ -451,7 +450,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val filteredRelationships = relationships.filter(_.arc.priority == 2)
 
@@ -505,7 +504,7 @@ class RelationshipEquivalenceTest extends FunSuite {
 
     // Useless network computation, because one arc is not allowed
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     assertResult(Map(BaseSetKey.forConceptLabelArc(BaseSetKey.StandardElr) -> relationships.filter(_.arc.priority == 2))) {
       networkMap
@@ -543,7 +542,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     assertResult(Map(BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> relationships)) {
       networkMap
@@ -581,7 +580,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val filteredRelationships =
       relationships.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
@@ -626,7 +625,7 @@ class RelationshipEquivalenceTest extends FunSuite {
       relationshipKeys.distinct.size
     }
 
-    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).mapValues(_.retainedRelationships)
+    val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val filteredRequiresElementRelationships =
       relationships collect {
@@ -641,8 +640,8 @@ class RelationshipEquivalenceTest extends FunSuite {
         BaseSetKey.forRequiresElementArc(BaseSetKey.StandardElr) -> filteredRequiresElementRelationships,
         BaseSetKey.forGeneralSpecialArc(BaseSetKey.StandardElr) -> filteredGeneralSpecialRelationships)) {
 
-        networkMap
-      }
+      networkMap
+    }
   }
 
   test("testWrongConceptLabelRelationship") {

@@ -23,9 +23,7 @@ import java.util.zip.ZipFile
 import scala.collection.immutable
 import scala.reflect.classTag
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
@@ -46,7 +44,6 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class DimensionalRelationshipTargetTest extends FunSuite {
 
   test("testTargetHypercubeDimensionIsItemInvalid") {

@@ -18,12 +18,12 @@ package eu.cdevreeze.tqa.meta
 
 import java.io.File
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import scala.collection.immutable
 import scala.meta._
+
+import org.scalatest.FunSuite
 
 /**
  * Test case checking that the "shared" code base can be used targeting Scala.js, by inspecting import statements.
@@ -33,7 +33,6 @@ import scala.meta._
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class JvmIndependencyTest extends FunSuite {
 
   import JvmIndependencyTest.ImportedName

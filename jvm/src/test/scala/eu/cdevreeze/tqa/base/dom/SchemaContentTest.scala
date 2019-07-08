@@ -18,9 +18,7 @@ package eu.cdevreeze.tqa.base.dom
 
 import scala.reflect.classTag
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.TypeEName
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
@@ -33,7 +31,6 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class SchemaContentTest extends FunSuite {
 
   test("testSchemaContent") {

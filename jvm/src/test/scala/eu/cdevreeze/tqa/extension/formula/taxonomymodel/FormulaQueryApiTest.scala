@@ -16,10 +16,7 @@
 
 package eu.cdevreeze.tqa.extension.formula.taxonomymodel
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.aspect.AspectModel
@@ -47,7 +44,6 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class FormulaQueryApiTest extends FunSuite {
 
   test("testQueryExistenceAssertions") {
@@ -94,7 +90,17 @@ class FormulaQueryApiTest extends FunSuite {
     val varSetVarOrPar @ VariableSetVariableOrParameter(
       CommonRelationshipAttributes(elr, order, priority, use),
       ename,
-      factVariable @ FactVariable(_, _, _, _, _, variableFilters)) = varSetVariablesOrParameters.head
+      varOrPar) = varSetVariablesOrParameters.head
+
+    val variableFilters = varOrPar match {
+      case fv: FactVariable => fv.variableFilters
+      case _ => Seq.empty
+    }
+
+    assertResult(true) {
+      varOrPar.isInstanceOf[FactVariable]
+    }
+    val factVariable = varOrPar.asInstanceOf[FactVariable]
 
     assertResult(Elr) {
       elr
@@ -225,7 +231,17 @@ class FormulaQueryApiTest extends FunSuite {
     val varSetVarOrPar @ VariableSetVariableOrParameter(
       CommonRelationshipAttributes(elr, order, priority, use),
       ename,
-      factVariable @ FactVariable(_, _, _, _, _, variableFilters)) = valueAssertion.variableSetVariablesOrParameters.head
+      varOrPar) = valueAssertion.variableSetVariablesOrParameters.head
+
+    val variableFilters = varOrPar match {
+      case fv: FactVariable => fv.variableFilters
+      case _ => Seq.empty
+    }
+
+    assertResult(true) {
+      varOrPar.isInstanceOf[FactVariable]
+    }
+    val factVariable = varOrPar.asInstanceOf[FactVariable]
 
     assertResult(Elr) {
       elr
@@ -270,12 +286,18 @@ class FormulaQueryApiTest extends FunSuite {
       variableFilters.map(_.commonAttributes.order).toSet
     }
 
-    val explicitDimensionFilter @ ExplicitDimensionFilter(_, dim, mems) =
-      variableFilters.filter(_.commonAttributes.order == BigDecimal(2)).head.filter
+    val filter = variableFilters.filter(_.commonAttributes.order == BigDecimal(2)).head.filter
 
     val guessedScope = taxo.guessedScope
 
     import guessedScope._
+
+    assertResult(true) {
+      filter.isInstanceOf[ExplicitDimensionFilter]
+    }
+
+    val dim = filter.asInstanceOf[ExplicitDimensionFilter].dimensionNameOrExpr
+    val mems = filter.asInstanceOf[ExplicitDimensionFilter].members
 
     assertResult(ENameValue(QName("venj-bw2-dim:FinancialStatementsTypeAxis").res)) {
       dim

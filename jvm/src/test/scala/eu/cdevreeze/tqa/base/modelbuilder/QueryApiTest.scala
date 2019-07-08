@@ -21,9 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 import scala.reflect.classTag
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
@@ -44,7 +42,6 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class QueryApiTest extends FunSuite {
 
   test("testQueryPLink") {
@@ -488,7 +485,7 @@ class QueryApiTest extends FunSuite {
     testDimensionalBulkQueries(docUris)
   }
 
-  private def testDimensionalBulkQueries(taxoDocUris: immutable.IndexedSeq[URI]) {
+  private def testDimensionalBulkQueries(taxoDocUris: immutable.IndexedSeq[URI]): Unit = {
     val docParser = DocumentParserUsingStax.newInstance()
 
     val docs = taxoDocUris.map(uri => docParser.parse(uri).withUriOption(Some(uri)))

@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.extension.table.model
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.ClassTag
 
 import eu.cdevreeze.tqa.BigDecimalValueOrExpr
@@ -115,7 +116,7 @@ final case class RuleNode(
       untaggedAspects.map(aspect => (aspect, None)) ++
         ruleSets.flatMap(ruleSet => ruleSet.aspects.map(aspect => (aspect, Some(ruleSet.tag))))
 
-    taggedAspects.groupBy({ case (aspect, tagOption) => tagOption }).mapValues(taggedAspects => taggedAspects.map(_._1))
+    taggedAspects.groupBy({ case (aspect, tagOption) => tagOption }).view.mapValues(taggedAspects => taggedAspects.map(_._1)).toMap
   }
 }
 

@@ -320,7 +320,7 @@ final case class RequiresElementRelationship(
 sealed trait DimensionalRelationship extends DefinitionRelationship {
 
   final def xbrldtAttributes: Map[EName, String] = {
-    nonXLinkArcAttributes.filterKeys(_.namespaceUriOption.contains(Namespaces.XbrldtNamespace))
+    nonXLinkArcAttributes.filter(_._1.namespaceUriOption.contains(Namespaces.XbrldtNamespace))
   }
 
   def withTargetRole(targetRole: String): DimensionalRelationship

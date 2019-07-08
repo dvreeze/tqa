@@ -19,8 +19,6 @@ package eu.cdevreeze.tqa.docbuilder
 import java.io.StringReader
 import java.net.URI
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.xml.sax.InputSource
 
@@ -33,7 +31,6 @@ import eu.cdevreeze.yaidom.resolved
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class SimpleCatalogTest extends FunSuite {
 
   test("testParseRelativeUriCatalog") {

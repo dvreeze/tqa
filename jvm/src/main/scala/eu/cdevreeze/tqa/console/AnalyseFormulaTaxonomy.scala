@@ -22,6 +22,7 @@ import java.util.logging.Logger
 import java.util.zip.ZipFile
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
@@ -73,7 +74,7 @@ object AnalyseFormulaTaxonomy {
 
     // scalastyle:off magic.number
     logger.info(
-      s"Formula relationship group sizes (topmost 15): ${formulaRelationshipGroups.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(15).mkString(", ")}")
+      s"Formula relationship group sizes (topmost 15): ${formulaRelationshipGroups.view.mapValues(_.size).toSeq.sortBy(_._2).reverse.take(15).mkString(", ")}")
 
     val sortedFormulaRelationshipGroups = formulaRelationshipGroups.toIndexedSeq.sortBy(_._2.size).reverse
 

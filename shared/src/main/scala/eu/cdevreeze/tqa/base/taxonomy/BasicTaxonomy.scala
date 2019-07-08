@@ -152,7 +152,7 @@ final class BasicTaxonomy private (
    */
   def filteringDocumentUris(docUris: Set[URI]): BasicTaxonomy = {
     val filteredRelationships: immutable.IndexedSeq[Relationship] =
-      relationships.groupBy(_.docUri).filterKeys(docUris).values.toIndexedSeq.flatten
+      relationships.groupBy(_.docUri).filter(kv => docUris.contains(kv._1)).values.toIndexedSeq.flatten
 
     BasicTaxonomy.build(
       taxonomyBase.filteringDocumentUris(docUris),

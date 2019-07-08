@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.base.model.tree
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 import eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
 import eu.cdevreeze.tqa.base.model.InterConceptRelationship
@@ -49,7 +50,7 @@ object ConceptRelationshipTree {
       s"Not all paths start with the same concept $sourceConcept")
 
     val pathsIndexedByConcept: Map[EName, immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]] =
-      paths.flatMap(p => p.concepts.distinct.map(_ -> p)).groupBy(_._1).mapValues(_.map(_._2))
+      paths.flatMap(p => p.concepts.distinct.map(_ -> p)).groupBy(_._1).view.mapValues(_.map(_._2)).toMap
 
     new ConceptRelationshipTree(sourceConcept, paths, pathsIndexedByConcept)
   }

@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.base.relationship
 import java.net.URI
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.classTag
 import scala.util.Failure
 import scala.util.Success
@@ -209,9 +210,9 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     val equivalentRelationshipsByKey =
       filteredRelationships.groupBy(rel => getRelationshipKey(rel, taxonomyBase))
     val optResolvedRelationshipsByKey =
-      equivalentRelationshipsByKey.mapValues(rels => resolveProhibitionAndOverridingForEquivalentRelationships(rels))
+      equivalentRelationshipsByKey.view.mapValues(rels => resolveProhibitionAndOverridingForEquivalentRelationships(rels)).toMap
     val resolvedRelationshipsByKey =
-      optResolvedRelationshipsByKey.filter(_._2.nonEmpty).mapValues(_.head)
+      optResolvedRelationshipsByKey.filter(_._2.nonEmpty).view.mapValues(_.head).toMap
 
     val result = filteredRelationships.partition(resolvedRelationshipsByKey.values.toSet)
     RelationshipFactory.NetworkComputationResult(result._1, result._2)
@@ -245,7 +246,7 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     // TODO This does not include default and fixed attributes!
 
     val nonExemptAttrs: Map[EName, String] =
-      relationship.arc.resolvedAttributes.toMap filterKeys { attrName =>
+      relationship.arc.resolvedAttributes.toMap.filter { case (attrName, _) =>
         attrName.namespaceUriOption != Some(XLinkNamespace) &&
           attrName != UseEName &&
           attrName != PriorityEName

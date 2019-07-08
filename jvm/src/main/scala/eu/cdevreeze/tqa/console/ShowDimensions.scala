@@ -22,6 +22,7 @@ import java.util.logging.Logger
 import java.util.zip.ZipFile
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
@@ -144,10 +145,10 @@ object ShowDimensions {
 
     concretePrimaryItemDecls.map(_.targetEName).distinct.sortBy(_.toString) foreach { item =>
       val hasHypercubes = basicTaxo.findAllOwnOrInheritedHasHypercubes(item)
-      val elrPrimariesPairs = hasHypercubes.groupBy(_.elr).mapValues(_.map(_.primary)).toSeq.sortBy(_._1)
+      val elrPrimariesPairs = hasHypercubes.groupBy(_.elr).view.mapValues(_.map(_.primary)).toSeq.sortBy(_._1)
 
       require(
-        elrPrimariesPairs.toMap.mapValues(_.toSet) == hasHypercubeInheritanceOrSelf.getOrElse(item, Map.empty),
+        elrPrimariesPairs.toMap.view.mapValues(_.toSet) == hasHypercubeInheritanceOrSelf.getOrElse(item, Map.empty),
         s"Finding own or inherited has-hypercubes must be consistent with the bulk methods for has-hypercube inheritance-or-self")
 
       elrPrimariesPairs foreach {

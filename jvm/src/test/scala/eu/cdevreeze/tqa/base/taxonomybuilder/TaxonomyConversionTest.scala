@@ -21,11 +21,10 @@ import java.net.URI
 import java.util.zip.ZipFile
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.classTag
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
@@ -74,7 +73,6 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class TaxonomyConversionTest extends FunSuite {
 
   test("testTaxonomyConversion") {
@@ -492,7 +490,7 @@ class TaxonomyConversionTest extends FunSuite {
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
-    val taxoDocMap: Map[URI, TaxonomyDocument] = taxoDocs.groupBy(_.uri).mapValues(_.head)
+    val taxoDocMap: Map[URI, TaxonomyDocument] = taxoDocs.groupBy(_.uri).view.mapValues(_.head).toMap
 
     val docBuilder = new DocumentBuilder {
       type BackingDoc = BackingDocumentApi

@@ -20,9 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
@@ -37,7 +35,6 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class TaxonomyEquivalenceTest extends FunSuite {
 
   test("testTaxonomyWithoutLabels") {
@@ -79,8 +76,8 @@ class TaxonomyEquivalenceTest extends FunSuite {
       dts.computeHasHypercubeInheritanceOrSelf.nonEmpty
     }
 
-    assertResult(referenceTaxonomy.computeHasHypercubeInheritanceOrSelf.mapValues(_.map(_.elr).toSet)) {
-      dts.computeHasHypercubeInheritanceOrSelf.mapValues(_.map(_.elr).toSet)
+    assertResult(referenceTaxonomy.computeHasHypercubeInheritanceOrSelf.view.mapValues(_.map(_.elr).toSet).toMap) {
+      dts.computeHasHypercubeInheritanceOrSelf.view.mapValues(_.map(_.elr).toSet).toMap
     }
 
     assertResult(true) {

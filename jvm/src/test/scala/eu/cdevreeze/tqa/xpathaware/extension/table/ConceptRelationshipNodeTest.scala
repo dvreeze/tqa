@@ -20,9 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
@@ -47,7 +45,6 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class ConceptRelationshipNodeTest extends FunSuite {
 
   import ConceptRelationshipNodeData._

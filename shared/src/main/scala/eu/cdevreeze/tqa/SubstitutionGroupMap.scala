@@ -45,7 +45,7 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
    * In other words, the reverse of `effectiveMappings`.
    */
   val substitutionGroupDerivations: Map[EName, Set[EName]] = {
-    effectiveMappings.toSeq.groupBy(_._2).mapValues(grp => grp.map(_._1).toSet)
+    effectiveMappings.toSeq.groupBy(_._2).map { case (sg, grp) => sg -> grp.map(_._1).toSet }.toMap
   }
 
   /**
@@ -97,6 +97,6 @@ object SubstitutionGroupMap {
    * Safe construction method, filtering away standard substitution groups from the mapping keys provided.
    */
   def from(mappings: Map[EName, EName]): SubstitutionGroupMap = {
-    SubstitutionGroupMap(mappings.filterKeys(k => !SubstitutionGroupMap.StandardConceptSubstitutionGroups.contains(k)))
+    SubstitutionGroupMap(mappings.filter(kv => !SubstitutionGroupMap.StandardConceptSubstitutionGroups.contains(kv._1)))
   }
 }

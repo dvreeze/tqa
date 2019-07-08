@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.base.dom
 import java.net.URI
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ChildSequencePointer
@@ -77,7 +78,7 @@ final class TaxonomyBase private (
 
   def rootElems: immutable.IndexedSeq[TaxonomyElem] = taxonomyDocs.map(_.documentElement)
 
-  def rootElemUriMap: Map[URI, TaxonomyElem] = taxonomyDocUriMap.mapValues(_.documentElement)
+  def rootElemUriMap: Map[URI, TaxonomyElem] = taxonomyDocUriMap.view.mapValues(_.documentElement).toMap
 
   /**
    * Finds the (first) optional element with the given URI. The fragment, if any, must be an XPointer or sequence thereof.
@@ -174,7 +175,7 @@ final class TaxonomyBase private (
     val filteredTaxonomyDocs = taxonomyDocs.filter(d => docUris.contains(d.uri))
 
     val filteredElemUris: Set[URI] =
-      elemUriMap.keySet.toSeq.groupBy(removeFragment _).filterKeys(docUris).values.flatten.toSet
+      elemUriMap.keySet.toSeq.groupBy(removeFragment _).filter(kv => docUris.contains(kv._1)).values.flatten.toSet
 
     val globalElementDeclarationENames: Set[EName] =
       filteredTaxonomyDocs.flatMap { d =>
@@ -195,11 +196,11 @@ final class TaxonomyBase private (
 
     new TaxonomyBase(
       filteredTaxonomyDocs,
-      taxonomyDocUriMap.filterKeys(docUris),
-      elemUriMap.filterKeys(filteredElemUris),
-      globalElementDeclarationMap.filterKeys(globalElementDeclarationENames),
-      namedTypeDefinitionMap.filterKeys(namedTypeDefinitionENames),
-      globalAttributeDeclarationMap.filterKeys(globalAttributeDeclarationENames),
+      taxonomyDocUriMap.view.filter(kv => docUris.contains(kv._1)).toMap,
+      elemUriMap.view.filter(kv => filteredElemUris.contains(kv._1)).toMap,
+      globalElementDeclarationMap.view.filter(kv => globalElementDeclarationENames.contains(kv._1)).toMap,
+      namedTypeDefinitionMap.view.filter(kv => namedTypeDefinitionENames.contains(kv._1)).toMap,
+      globalAttributeDeclarationMap.view.filter(kv => globalAttributeDeclarationENames.contains(kv._1)).toMap,
       filteredDerivedSubstitutionGroup)
   }
 
@@ -259,9 +260,9 @@ final class TaxonomyBase private (
   }
 
   private def filterSubstitutionGroupMap(substitutionGroupMap: SubstitutionGroupMap, docUris: Set[URI]): SubstitutionGroupMap = {
-    val filteredMappings: Map[EName, EName] = substitutionGroupMap.mappings.filterKeys { ename =>
+    val filteredMappings: Map[EName, EName] = substitutionGroupMap.mappings.view.filter { case (ename, _) =>
       globalElementDeclarationMap.get(ename).exists(e => docUris.contains(e.docUri))
-    }
+    }.toMap
 
     SubstitutionGroupMap(filteredMappings)
   }
@@ -285,7 +286,7 @@ object TaxonomyBase {
    */
   def build(taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument]): TaxonomyBase = {
     val taxonomyDocUriMap: Map[URI, TaxonomyDocument] = {
-      taxonomyDocs.groupBy(_.uri).mapValues(_.head)
+      taxonomyDocs.groupBy(_.uri).view.mapValues(_.head).toMap
     }
 
     val rootElems = taxonomyDocs.map(_.documentElement)
@@ -330,7 +331,7 @@ object TaxonomyBase {
     val globalElementDeclarations =
       xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem))
 
-    globalElementDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).mapValues(_.head)
+    globalElementDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
   }
 
   def getNamedTypeDefinitionMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, NamedTypeDefinition] = {
@@ -344,7 +345,7 @@ object TaxonomyBase {
     val namedTypeDefinitions =
       xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(anyElem))
 
-    namedTypeDefinitions.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).mapValues(_.head)
+    namedTypeDefinitions.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
   }
 
   def getGlobalAttributeDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalAttributeDeclaration] = {
@@ -358,7 +359,7 @@ object TaxonomyBase {
     val globalAttributeDeclarations =
       xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(anyElem))
 
-    globalAttributeDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).mapValues(_.head)
+    globalAttributeDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
   }
 
   /**
@@ -373,7 +374,7 @@ object TaxonomyBase {
 
     val substGroups: Set[EName] = rawMappings.values.toSet
 
-    val mappings: Map[EName, EName] = rawMappings.filterKeys(substGroups)
+    val mappings: Map[EName, EName] = rawMappings.view.filter(kv => substGroups.contains(kv._1)).toMap
 
     SubstitutionGroupMap.from(mappings)
   }

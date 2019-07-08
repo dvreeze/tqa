@@ -22,9 +22,7 @@ import java.util.zip.ZipFile
 
 import scala.reflect.classTag
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 import eu.cdevreeze.tqa.ENames.XbrliItemEName
 import eu.cdevreeze.tqa.Namespaces.XbrliNamespace
@@ -44,7 +42,6 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-@RunWith(classOf[JUnitRunner])
 class TaxonomyElemTest extends FunSuite {
 
   test("testParseSchemaWithEmbeddedLinkbase") {
