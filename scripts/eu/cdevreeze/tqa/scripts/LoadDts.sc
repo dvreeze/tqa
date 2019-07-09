@@ -2,9 +2,9 @@
 // Run amm in scripts folder
 // In amm session, use command "import $exec.eu.cdevreeze.tqa.scripts.LoadDts"
 
-// Taking TQA version 0.8.9
+// Taking TQA version 0.8.11-M1
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.8.9`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.8.11-M1`
 
 // Imports that (must) remain available after this initialization script
 
@@ -58,7 +58,7 @@ import ENameUtil._
 
 // Yaidom: Easy creation of element predicates, even implicitly from ENames
 
-import yaidom.queryapi.HasENameApi._
+import yaidom.queryapi.ClarkElemApi._
 
 // Utilities
 
