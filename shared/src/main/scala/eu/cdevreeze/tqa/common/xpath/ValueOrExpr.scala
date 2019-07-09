@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.common.xpath
 
 /**
- * String value or XPath expression.
+ * Value of some type or XPath expression that must evaluate to the same type.
  *
  * @author Chris de Vreeze
  */
-sealed trait StringValueOrExpr extends ValueOrExpr[String]
+trait ValueOrExpr[A]
 
-final case class StringValue(value: String) extends StringValueOrExpr with Value[String]
+trait Value[A] extends ValueOrExpr[A] {
 
-final case class StringExpr(expr: ScopedXPathString) extends StringValueOrExpr with Expr[String]
+  def value: A
+}
+
+trait Expr[A] extends ValueOrExpr[A] {
+
+  def expr: ScopedXPathString
+}

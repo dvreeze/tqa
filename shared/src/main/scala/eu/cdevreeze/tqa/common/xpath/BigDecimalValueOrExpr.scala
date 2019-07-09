@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.common.xpath
 
 /**
- * Parsing of xsd:boolean into Boolean. This is functionality offered by the JAXB DatatypeConverter,
- * but in Scala.js we cannot use that.
+ * BigDecimal value or XPath expression.
  *
  * @author Chris de Vreeze
  */
-object XsdBooleans {
+sealed trait BigDecimalValueOrExpr extends ValueOrExpr[BigDecimal]
 
-  def parseBoolean(s: String): Boolean = s.trim match {
-    case "true" | "1"  => true
-    case "false" | "0" => false
-    case _             => sys.error(s"Not an xs:boolean value: '$s'")
-  }
-}
+final case class BigDecimalValue(value: BigDecimal) extends BigDecimalValueOrExpr with Value[BigDecimal]
+
+final case class BigDecimalExpr(expr: ScopedXPathString) extends BigDecimalValueOrExpr with Expr[BigDecimal]

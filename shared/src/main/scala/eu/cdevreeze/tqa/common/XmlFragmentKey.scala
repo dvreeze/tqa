@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.common
+
+import java.net.URI
+
+import eu.cdevreeze.yaidom.core.Path
+import eu.cdevreeze.yaidom.queryapi.BackingNodes
 
 /**
- * BigDecimal value or XPath expression.
+ * A unique identifier of an XML fragment in a Taxonomy. It is made up by
+ * the document URI and the Path within that document.
  *
  * @author Chris de Vreeze
  */
-sealed trait BigDecimalValueOrExpr extends ValueOrExpr[BigDecimal]
+final case class XmlFragmentKey(val docUri: URI, val path: Path)
 
-final case class BigDecimalValue(value: BigDecimal) extends BigDecimalValueOrExpr with Value[BigDecimal]
+object XmlFragmentKey {
 
-final case class BigDecimalExpr(expr: ScopedXPathString) extends BigDecimalValueOrExpr with Expr[BigDecimal]
+  implicit class XmlFragmentKeyAware(val backingElem: BackingNodes.Elem) {
+
+    def key: XmlFragmentKey =
+      XmlFragmentKey(backingElem.docUri, backingElem.path)
+  }
+}

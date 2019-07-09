@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.common.schematypes
 
 /**
- * Value of some type or XPath expression that must evaluate to the same type.
+ * Parsing of xsd:boolean into Boolean. This is functionality offered by the JAXB DatatypeConverter,
+ * but in Scala.js we cannot use that.
  *
  * @author Chris de Vreeze
  */
-trait ValueOrExpr[A]
+object XsdBooleans {
 
-trait Value[A] extends ValueOrExpr[A] {
-
-  def value: A
-}
-
-trait Expr[A] extends ValueOrExpr[A] {
-
-  def expr: ScopedXPathString
+  def parseBoolean(s: String): Boolean = s.trim match {
+    case "true" | "1"  => true
+    case "false" | "0" => false
+    case _             => sys.error(s"Not an xs:boolean value: '$s'")
+  }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.common.xpath
 
 import eu.cdevreeze.yaidom.core.EName
 

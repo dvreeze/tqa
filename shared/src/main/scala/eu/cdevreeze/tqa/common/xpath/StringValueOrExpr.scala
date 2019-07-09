@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
-
-import java.net.URI
-
-import eu.cdevreeze.yaidom.core.Path
-import eu.cdevreeze.yaidom.queryapi.BackingNodes
+package eu.cdevreeze.tqa.common.xpath
 
 /**
- * A unique identifier of an XML fragment in a Taxonomy. It is made up by
- * the document URI and the Path within that document.
+ * String value or XPath expression.
  *
  * @author Chris de Vreeze
  */
-final case class XmlFragmentKey(val docUri: URI, val path: Path)
+sealed trait StringValueOrExpr extends ValueOrExpr[String]
 
-object XmlFragmentKey {
+final case class StringValue(value: String) extends StringValueOrExpr with Value[String]
 
-  implicit class XmlFragmentKeyAware(val backingElem: BackingNodes.Elem) {
-
-    def key: XmlFragmentKey =
-      XmlFragmentKey(backingElem.docUri, backingElem.path)
-  }
-}
+final case class StringExpr(expr: ScopedXPathString) extends StringValueOrExpr with Expr[String]

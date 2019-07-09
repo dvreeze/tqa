@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.common.schema
 
 import scala.annotation.tailrec
 
+import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.yaidom.core.EName
 
 /**

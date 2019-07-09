@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa
+package eu.cdevreeze.tqa.common.xpointer
 
 import scala.collection.immutable
 
+import eu.cdevreeze.tqa.common.names.ENames
 import eu.cdevreeze.yaidom.queryapi.BackingElemApi
 import eu.cdevreeze.yaidom.queryapi.ScopedElemApi
 

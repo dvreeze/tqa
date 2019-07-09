@@ -89,4 +89,105 @@ package eu.cdevreeze
  *
  * @author Chris de Vreeze
  */
-package object tqa
+package object tqa {
+
+  // Names
+
+  val Namespaces = common.names.Namespaces
+
+  val ENames = common.names.ENames
+
+  // Schema types
+
+  val XsdBooleans = common.schematypes.XsdBooleans
+
+  // XPath
+
+  type ScopedXPathString = common.xpath.ScopedXPathString
+
+  val ScopedXPathString = common.xpath.ScopedXPathString
+
+  type ValueOrExpr[A] = common.xpath.ValueOrExpr[A]
+
+  type Value[A] = common.xpath.Value[A]
+
+  type Expr[A] = common.xpath.Expr[A]
+
+  type StringValueOrExpr = common.xpath.StringValueOrExpr
+
+  type StringValue = common.xpath.StringValue
+
+  val StringValue = common.xpath.StringValue
+
+  type StringExpr = common.xpath.StringExpr
+
+  val StringExpr = common.xpath.StringExpr
+
+  type BigDecimalValueOrExpr = common.xpath.BigDecimalValueOrExpr
+
+  type BigDecimalValue = common.xpath.BigDecimalValue
+
+  val BigDecimalValue = common.xpath.BigDecimalValue
+
+  type BigDecimalExpr = common.xpath.BigDecimalExpr
+
+  val BigDecimalExpr = common.xpath.BigDecimalExpr
+
+  type ENameValueOrExpr = common.xpath.ENameValueOrExpr
+
+  type ENameValue = common.xpath.ENameValue
+
+  val ENameValue = common.xpath.ENameValue
+
+  type ENameExpr = common.xpath.ENameExpr
+
+  val ENameExpr = common.xpath.ENameExpr
+
+  // XPointer
+
+  type XPointer = common.xpointer.XPointer
+
+  val XPointer = common.xpointer.XPointer
+
+  type XPointerContainingId = common.xpointer.XPointerContainingId
+
+  type ShorthandPointer = common.xpointer.ShorthandPointer
+
+  val ShorthandPointer = common.xpointer.ShorthandPointer
+
+  type ElementSchemePointer = common.xpointer.ElementSchemePointer
+
+  type IdPointer = common.xpointer.IdPointer
+
+  val IdPointer = common.xpointer.IdPointer
+
+  type IdChildSequencePointer = common.xpointer.IdChildSequencePointer
+
+  val IdChildSequencePointer = common.xpointer.IdChildSequencePointer
+
+  type ChildSequencePointer = common.xpointer.ChildSequencePointer
+
+  val ChildSequencePointer = common.xpointer.ChildSequencePointer
+
+  type ElemPointer = common.xpointer.ElemPointer
+
+  val ElemPointer = common.xpointer.ElemPointer
+
+  // Schema
+
+  type SubstitutionGroupMap = common.schema.SubstitutionGroupMap
+
+  val SubstitutionGroupMap = common.schema.SubstitutionGroupMap
+
+  // Miscellaneous
+
+  type XmlFragmentKey = common.XmlFragmentKey
+
+  val XmlFragmentKey = common.XmlFragmentKey
+
+  type XsiSchemaLocation = common.XsiSchemaLocation
+
+  val XsiSchemaLocation = common.XsiSchemaLocation
+
+  val AttributeSupport = common.AttributeSupport
+}
