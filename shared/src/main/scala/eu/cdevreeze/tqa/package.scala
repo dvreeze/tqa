@@ -101,6 +101,12 @@ package object tqa {
 
   val XsdBooleans = common.schematypes.XsdBooleans
 
+  val XsdFloats = common.schematypes.XsdFloats
+
+  val XsdDoubles = common.schematypes.XsdDoubles
+
+  val XsdDecimals = common.schematypes.XsdDecimals
+
   // XPath
 
   type ScopedXPathString = common.xpath.ScopedXPathString

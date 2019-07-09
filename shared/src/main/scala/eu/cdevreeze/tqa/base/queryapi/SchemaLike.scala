@@ -96,6 +96,17 @@ trait SchemaLike extends SchemaApi {
     findGlobalElementDeclarationByUri(uri).getOrElse(sys.error(s"Missing global element declaration with URI $uri"))
   }
 
+  final def findNamedTypeOfGlobalElementDeclaration(ename: EName): Option[EName] = {
+    val elemDeclOption: Option[GlobalElementDeclaration] = findGlobalElementDeclaration(ename)
+
+    elemDeclOption.flatMap(_.typeOption).orElse {
+      elemDeclOption.flatMap(_.substitutionGroupOption).flatMap { sg =>
+        // Recursive call
+        findNamedTypeOfGlobalElementDeclaration(sg)
+      }
+    }
+  }
+
   // Global attribute declarations, across documents
 
   final def filterGlobalAttributeDeclarations(p: GlobalAttributeDeclaration => Boolean): immutable.IndexedSeq[GlobalAttributeDeclaration] = {

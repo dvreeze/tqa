@@ -112,6 +112,12 @@ trait SchemaApi {
 
   def getGlobalElementDeclarationByUri(uri: URI): GlobalElementDeclaration
 
+  /**
+   * Finds the named type of the global element declaration with the given target EName, recursively trying to obtain the
+   * type via the substitution group ancestry chain, if needed.
+   */
+  def findNamedTypeOfGlobalElementDeclaration(ename: EName): Option[EName]
+
   // Global attribute declarations, across documents
 
   def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration]

@@ -33,13 +33,15 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
  *
  * @author Chris de Vreeze
  */
-abstract class AbstractDtsCollector extends DocumentCollector {
+abstract class AbstractDtsCollector(val acceptsEmptyUriSet: Boolean) extends DocumentCollector {
 
   final def collectTaxonomyDocuments(
-    entryPointUris:  Set[URI],
-    documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyDocument] = {
+      entryPointUris: Set[URI],
+      documentBuilder: DocumentBuilder): immutable.IndexedSeq[TaxonomyDocument] = {
 
-    require(entryPointUris.nonEmpty, s"At least one entryPoint URI must be provided")
+    if (!acceptsEmptyUriSet) {
+      require(entryPointUris.nonEmpty, s"At least one entryPoint URI must be provided")
+    }
 
     val dts = findDts(entryPointUris, Map(), documentBuilder)
 
@@ -55,9 +57,9 @@ abstract class AbstractDtsCollector extends DocumentCollector {
 
   @tailrec
   private def findDts(
-    docUris:         Set[URI],
-    processedDocs:   Map[URI, TaxonomyDocument],
-    documentBuilder: DocumentBuilder): Map[URI, TaxonomyDocument] = {
+      docUris: Set[URI],
+      processedDocs: Map[URI, TaxonomyDocument],
+      documentBuilder: DocumentBuilder): Map[URI, TaxonomyDocument] = {
 
     val processedDocUris = processedDocs.keySet
 

@@ -44,7 +44,7 @@ import eu.cdevreeze.tqa.base.dom.XsdSchema
  *
  * @author Chris de Vreeze
  */
-final class DefaultDtsCollector extends AbstractDtsCollector {
+final class DefaultDtsCollector(acceptsEmptyUriSet: Boolean) extends AbstractDtsCollector(acceptsEmptyUriSet) {
 
   def findAllUsedDocUris(taxonomyDoc: TaxonomyDocument): Set[URI] = {
     val taxoRootElems =
@@ -119,6 +119,10 @@ final class DefaultDtsCollector extends AbstractDtsCollector {
 object DefaultDtsCollector {
 
   def apply(): DefaultDtsCollector = {
-    new DefaultDtsCollector()
+    acceptingEmptyUriSet(false)
+  }
+
+  def acceptingEmptyUriSet(acceptsEmptyUriSet: Boolean): DefaultDtsCollector = {
+    new DefaultDtsCollector(acceptsEmptyUriSet)
   }
 }
