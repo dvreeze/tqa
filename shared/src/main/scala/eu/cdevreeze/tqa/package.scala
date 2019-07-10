@@ -107,6 +107,8 @@ package object tqa {
 
   val XsdDecimals = common.schematypes.XsdDecimals
 
+  val AttributeSupport = common.schematypes.AttributeSupport
+
   // XPath
 
   type ScopedXPathString = common.xpath.ScopedXPathString
@@ -194,6 +196,4 @@ package object tqa {
   type XsiSchemaLocation = common.XsiSchemaLocation
 
   val XsiSchemaLocation = common.XsiSchemaLocation
-
-  val AttributeSupport = common.AttributeSupport
 }

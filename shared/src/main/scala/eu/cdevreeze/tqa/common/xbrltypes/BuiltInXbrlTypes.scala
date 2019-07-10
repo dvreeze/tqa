@@ -17,7 +17,6 @@
 package eu.cdevreeze.tqa.common.xbrltypes
 
 import eu.cdevreeze.tqa.common.names.ENames
-import eu.cdevreeze.tqa.common.names.Namespaces
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -28,72 +27,71 @@ import eu.cdevreeze.yaidom.core.EName
 object BuiltInXbrlTypes {
 
   import ENames._
-  import Namespaces._
 
   val xbrlNonFractionItemBaseTypes: Map[EName, EName] = Map(
-    EName(XbrliNamespace, "decimalItemType") -> XsDecimalEName,
-    EName(XbrliNamespace, "floatItemType") -> XsFloatEName,
-    EName(XbrliNamespace, "doubleItemType") -> XsDoubleEName,
-    EName(XbrliNamespace, "integerItemType") -> XsIntegerEName,
-    EName(XbrliNamespace, "nonPositiveIntegerItemType") -> XsNonPositiveIntegerEName,
-    EName(XbrliNamespace, "negativeIntegerItemType") -> XsNegativeIntegerEName,
-    EName(XbrliNamespace, "longItemType") -> XsLongEName,
-    EName(XbrliNamespace, "intItemType") -> XsIntEName,
-    EName(XbrliNamespace, "shortItemType") -> XsShortEName,
-    EName(XbrliNamespace, "byteItemType") -> XsByteEName,
-    EName(XbrliNamespace, "nonNegativeIntegerItemType") -> XsNonNegativeIntegerEName,
-    EName(XbrliNamespace, "unsignedLongItemType") -> XsUnsignedLongEName,
-    EName(XbrliNamespace, "unsignedIntItemType") -> XsUnsignedIntEName,
-    EName(XbrliNamespace, "unsignedShortItemType") -> XsUnsignedShortEName,
-    EName(XbrliNamespace, "unsignedByteItemType") -> XsUnsignedByteEName,
-    EName(XbrliNamespace, "positiveIntegerItemType") -> XsPositiveIntegerEName,
-    EName(XbrliNamespace, "monetaryItemType") -> EName(XbrliNamespace, "monetary"),
-    EName(XbrliNamespace, "sharesItemType") -> EName(XbrliNamespace, "shares"),
-    EName(XbrliNamespace, "pureItemType") -> EName(XbrliNamespace, "pure"),
-    EName(XbrliNamespace, "stringItemType") -> XsStringEName,
-    EName(XbrliNamespace, "booleanItemType") -> XsBooleanEName,
-    EName(XbrliNamespace, "hexBinaryItemType") -> XsHexBinaryEName,
-    EName(XbrliNamespace, "base64BinaryItemType") -> XsBase64BinaryEName,
-    EName(XbrliNamespace, "anyURIItemType") -> XsAnyURI_EName,
-    EName(XbrliNamespace, "QNameItemType") -> XsQNameEName,
-    EName(XbrliNamespace, "durationItemType") -> XsDurationEName,
-    EName(XbrliNamespace, "dateTimeItemType") -> EName(XbrliNamespace, "dateUnion"),
-    EName(XbrliNamespace, "timeItemType") -> XsTimeEName,
-    EName(XbrliNamespace, "dateItemType") -> XsDateEName,
-    EName(XbrliNamespace, "gYearMonthItemType") -> XsGYearMonthEName,
-    EName(XbrliNamespace, "gYearItemType") -> XsGYearEName,
-    EName(XbrliNamespace, "gMonthDayItemType") -> XsGMonthDayEName,
-    EName(XbrliNamespace, "gDayItemType") -> XsGDayEName,
-    EName(XbrliNamespace, "gMonthItemType") -> XsGMonthEName,
-    EName(XbrliNamespace, "normalizedStringItemType") -> XsNormalizedStringEName,
-    EName(XbrliNamespace, "tokenItemType") -> XsTokenEName,
-    EName(XbrliNamespace, "languageItemType") -> XsLanguageEName,
-    EName(XbrliNamespace, "NameItemType") -> XsNameEName,
-    EName(XbrliNamespace, "NCNameItemType") -> XsNCNameEName)
+    XbrliDecimalItemTypeEName -> XsDecimalEName,
+    XbrliFloatItemTypeEName -> XsFloatEName,
+    XbrliDoubleItemTypeEName -> XsDoubleEName,
+    XbrliIntegerItemTypeEName -> XsIntegerEName,
+    XbrliNonPositiveIntegerItemTypeEName -> XsNonPositiveIntegerEName,
+    XbrliNegativeIntegerItemTypeEName -> XsNegativeIntegerEName,
+    XbrliLongItemTypeEName -> XsLongEName,
+    XbrliIntItemTypeEName -> XsIntEName,
+    XbrliShortItemTypeEName -> XsShortEName,
+    XbrliByteItemTypeEName -> XsByteEName,
+    XbrliNonNegativeIntegerItemTypeEName -> XsNonNegativeIntegerEName,
+    XbrliUnsignedLongItemTypeEName -> XsUnsignedLongEName,
+    XbrliUnsignedIntItemTypeEName -> XsUnsignedIntEName,
+    XbrliUnsignedShortItemTypeEName -> XsUnsignedShortEName,
+    XbrliUnsignedByteItemTypeEName -> XsUnsignedByteEName,
+    XbrliPositiveIntegerItemTypeEName -> XsPositiveIntegerEName,
+    XbrliMonetaryItemTypeEName -> XbrliMonetaryEName, // Not an "xs" type
+    XbrliSharesItemTypeEName -> XbrliSharesEName, // Not an "xs" type
+    XbrliPureItemTypeEName -> XbrliPureEName, // Not an "xs" type
+    XbrliStringItemTypeEName -> XsStringEName,
+    XbrliBooleanItemTypeEName -> XsBooleanEName,
+    XbrliHexBinaryItemTypeEName -> XsHexBinaryEName,
+    XbrliBase64BinaryItemTypeEName -> XsBase64BinaryEName,
+    XbrliAnyURIItemTypeEName -> XsAnyURI_EName,
+    XbrliQNameItemTypeEName -> XsQNameEName,
+    XbrliDurationItemTypeEName -> XsDurationEName,
+    XbrliDateTimeItemTypeEName -> XbrliDateUnionEName, // Not an "xs" type, but a union type
+    XbrliTimeItemTypeEName -> XsTimeEName,
+    XbrliDateItemTypeEName -> XsDateEName,
+    XbrliGYearMonthItemTypeEName -> XsGYearMonthEName,
+    XbrliGYearItemTypeEName -> XsGYearEName,
+    XbrliGMonthDayItemTypeEName -> XsGMonthDayEName,
+    XbrliGDayItemTypeEName -> XsGDayEName,
+    XbrliGMonthItemTypeEName -> XsGMonthEName,
+    XbrliNormalizedStringItemTypeEName -> XsNormalizedStringEName,
+    XbrliTokenItemTypeEName -> XsTokenEName,
+    XbrliLanguageItemTypeEName -> XsLanguageEName,
+    XbrliNameItemTypeEName -> XsNameEName,
+    XbrliNCNameItemTypeEName -> XsNCNameEName)
 
-  val FractionItemType = EName(XbrliNamespace, "fractionItemType")
+  val FractionItemType = XbrliFractionItemTypeEName
 
   val XbrlNumericTypes = {
     Set(
-      EName(XbrliNamespace, "decimalItemType"),
-      EName(XbrliNamespace, "floatItemType"),
-      EName(XbrliNamespace, "doubleItemType"),
-      EName(XbrliNamespace, "integerItemType"),
-      EName(XbrliNamespace, "nonPositiveIntegerItemType"),
-      EName(XbrliNamespace, "negativeIntegerItemType"),
-      EName(XbrliNamespace, "longItemType"),
-      EName(XbrliNamespace, "intItemType"),
-      EName(XbrliNamespace, "shortItemType"),
-      EName(XbrliNamespace, "byteItemType"),
-      EName(XbrliNamespace, "nonNegativeIntegerItemType"),
-      EName(XbrliNamespace, "unsignedLongItemType"),
-      EName(XbrliNamespace, "unsignedIntItemType"),
-      EName(XbrliNamespace, "unsignedShortItemType"),
-      EName(XbrliNamespace, "unsignedByteItemType"),
-      EName(XbrliNamespace, "positiveIntegerItemType"),
-      EName(XbrliNamespace, "monetaryItemType"),
-      EName(XbrliNamespace, "sharesItemType"),
-      EName(XbrliNamespace, "pureItemType"),
+      XbrliDecimalItemTypeEName,
+      XbrliFloatItemTypeEName,
+      XbrliDoubleItemTypeEName,
+      XbrliIntegerItemTypeEName,
+      XbrliNonPositiveIntegerItemTypeEName,
+      XbrliNegativeIntegerItemTypeEName,
+      XbrliLongItemTypeEName,
+      XbrliIntItemTypeEName,
+      XbrliShortItemTypeEName,
+      XbrliByteItemTypeEName,
+      XbrliNonNegativeIntegerItemTypeEName,
+      XbrliUnsignedLongItemTypeEName,
+      XbrliUnsignedIntItemTypeEName,
+      XbrliUnsignedShortItemTypeEName,
+      XbrliUnsignedByteItemTypeEName,
+      XbrliPositiveIntegerItemTypeEName,
+      XbrliMonetaryItemTypeEName,
+      XbrliSharesItemTypeEName,
+      XbrliPureItemTypeEName,
       FractionItemType)
   }
 

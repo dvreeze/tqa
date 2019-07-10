@@ -313,7 +313,10 @@ final class ParentChildRelationship(
 sealed class CalculationRelationship(
   arc: CalculationArc,
   resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo)
+  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo) {
+
+  def weight: Double = arc.weight
+}
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.CalculationRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/summation-item".

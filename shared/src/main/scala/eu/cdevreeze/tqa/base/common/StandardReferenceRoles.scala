@@ -42,4 +42,17 @@ object StandardReferenceRoles {
   private def makeReferenceRole(suffix: String): String = {
     s"http://www.xbrl.org/2003/role/$suffix"
   }
+
+  val allRoles: Set[String] = Set(
+    Reference,
+    DefinitionRef,
+    DisclosureRef,
+    MandatoryDisclosureRef,
+    RecommendedDisclosureRef,
+    UnspecifiedDisclosureRef,
+    PresentationRef,
+    MeasurementRef,
+    CommentaryRef,
+    ExampleRef
+  )
 }

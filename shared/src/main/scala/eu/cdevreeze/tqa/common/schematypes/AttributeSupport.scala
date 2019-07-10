@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.common
+package eu.cdevreeze.tqa.common.schematypes
 
 import eu.cdevreeze.tqa.ENames
-import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope

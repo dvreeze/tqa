@@ -29,6 +29,7 @@ object Namespaces {
   val XsNamespace = "http://www.w3.org/2001/XMLSchema"
   val XsiNamespace = "http://www.w3.org/2001/XMLSchema-instance"
   val XLinkNamespace = "http://www.w3.org/1999/xlink"
+  val XlNamespace = "http://www.xbrl.org/2003/XLink"
   val LinkNamespace = "http://www.xbrl.org/2003/linkbase"
   val XbrliNamespace = "http://www.xbrl.org/2003/instance"
   val XbrldtNamespace = "http://xbrl.org/2005/xbrldt"

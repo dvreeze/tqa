@@ -24,6 +24,7 @@ import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.common.StandardLabelRoles
 import eu.cdevreeze.tqa.base.common.StandardReferenceRoles
 import eu.cdevreeze.tqa.base.common.Use
+import eu.cdevreeze.tqa.common.schematypes.XsdDoubles
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -236,7 +237,13 @@ final case class OtherPresentationRelationship(
   }
 }
 
-sealed trait CalculationRelationship extends InterConceptRelationship
+sealed trait CalculationRelationship extends InterConceptRelationship {
+
+  final def weight: Double = {
+    nonXLinkArcAttributes.get(ENames.WeightEName).map(v => XsdDoubles.parseDouble(v))
+      .getOrElse(sys.error(s"Missing attribute weight on calculation arc in ELR $elr."))
+  }
+}
 
 final case class SummationItemRelationship(
   elr: String,

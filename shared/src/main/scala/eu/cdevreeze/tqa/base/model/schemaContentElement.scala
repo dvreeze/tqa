@@ -25,7 +25,7 @@ import eu.cdevreeze.tqa.Namespaces
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.base.common.Variety
-import eu.cdevreeze.tqa.common.AttributeSupport
+import eu.cdevreeze.tqa.common.schematypes.AttributeSupport
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.ScopedNodes

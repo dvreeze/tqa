@@ -32,12 +32,14 @@ import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.XmlFragmentKey.XmlFragmentKeyAware
 import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.base.common.BaseSetKey
+import eu.cdevreeze.tqa.base.common.ContentType
 import eu.cdevreeze.tqa.base.common.CyclesAllowed
 import eu.cdevreeze.tqa.base.common.PeriodType
 import eu.cdevreeze.tqa.base.common.StandardLabelRoles
 import eu.cdevreeze.tqa.base.common.StandardReferenceRoles
 import eu.cdevreeze.tqa.base.common.Use
 import eu.cdevreeze.tqa.base.common.Variety
+import eu.cdevreeze.tqa.common.schematypes.XsdDoubles
 import eu.cdevreeze.tqa.xlink
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Path
@@ -1020,6 +1022,25 @@ sealed trait ComplexTypeDefinition extends TypeDefinition {
   final def baseTypeOption: Option[EName] = {
     contentElemOption.flatMap(_.baseTypeOption).orElse(Some(ENames.XsAnyTypeEName))
   }
+
+  final def contentType: ContentType = {
+    val isMixed: Boolean = attributeOption(ENames.MixedEName).exists(v => XsdBooleans.parseBoolean(v) == true)
+
+    contentElemOption match {
+      case Some(complexContent: ComplexContent) =>
+        if (isMixed) ContentType.Mixed else ContentType.ElementOnly
+      case Some(simpleContent: SimpleContent) =>
+        ContentType.Simple
+      case _ =>
+        if (findChildElemOfType(classTag[ModelGroup])(_ => true).isDefined) {
+          if (isMixed) ContentType.Mixed else ContentType.ElementOnly
+        } else if (findChildElemOfType(classTag[ModelGroupReference])(_ => true).isDefined) {
+          if (isMixed) ContentType.Mixed else ContentType.ElementOnly
+        } else {
+          ContentType.Empty
+        }
+    }
+  }
 }
 
 /**
@@ -1293,7 +1314,15 @@ final class PresentationArc private[dom] (
  */
 final class CalculationArc private[dom] (
   backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardArc(backingElem, childElems)
+  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardArc(backingElem, childElems) {
+
+  /**
+   * Returns the mandatory numeric "weight" attribute. This may fail with an exception if the taxonomy is not schema-valid.
+   */
+  def weight: Double = {
+    XsdDoubles.parseDouble(attribute(ENames.WeightEName))
+  }
+}
 
 /**
  * An XBRL label arc. It is a link:labelArc element.
