@@ -53,12 +53,13 @@ object StandardArcroles {
   val FootnoteLinkbaseArcrole = "http://www.xbrl.org/2003/arcrole/fact-footnote"
 
   // XBRL 2.1 5.2.6.2
-  val GeneralSpecialRole = "http://www.xbrl.org/2003/arcrole/general-special"
-  val EssenceAliasRole = "http://www.xbrl.org/2003/arcrole/essence-alias"
-  val SimilarTuplesRole = "http://www.xbrl.org/2003/arcrole/similar-tuples"
-  val RequiresElementRole = "http://www.xbrl.org/2003/arcrole/requires-element"
+  val GeneralSpecialArcrole = "http://www.xbrl.org/2003/arcrole/general-special"
+  val EssenceAliasArcrole = "http://www.xbrl.org/2003/arcrole/essence-alias"
+  val SimilarTuplesArcrole = "http://www.xbrl.org/2003/arcrole/similar-tuples"
+  val RequiresElementArcrole = "http://www.xbrl.org/2003/arcrole/requires-element"
 
-  val StandardDefinitionArcroles: Set[String] = Set(GeneralSpecialRole, EssenceAliasRole, SimilarTuplesRole, RequiresElementRole)
+  val StandardDefinitionArcroles: Set[String] =
+    Set(GeneralSpecialArcrole, EssenceAliasArcrole, SimilarTuplesArcrole, RequiresElementArcrole)
 
   val AllStandardArcroles: Set[String] =
     Set(StandardLabelArcrole, StandardReferenceArcrole, StandardPresentationArcrole, StandardCalculationArcrole) ++
