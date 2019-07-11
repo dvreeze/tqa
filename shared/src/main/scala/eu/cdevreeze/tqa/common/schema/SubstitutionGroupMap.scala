@@ -60,7 +60,7 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
    * Finds all transitively inherited substitution groups from the given substitution group, as found in this mapping,
    * returning this substitution group as well.
    */
-  def transitivelyInheritedSubstitutionGroupsOrSelf(substGroup: EName): Set[EName] = {
+  def transitivelyInheritedSubstitutionGroupsIncludingSelf(substGroup: EName): Set[EName] = {
     transitivelyInheritedSubstitutionGroups(substGroup) + substGroup
   }
 
@@ -92,24 +92,24 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
     SubstitutionGroupMap(this.mappings ++ sgm.mappings)
   }
 
-  def isConceptSubstitutionGroup(sg: EName): Boolean = {
-    isItemSubstitutionGroup(sg) || isTupleSubstitutionGroup(sg)
+  def isOrInheritsItemOrTupleSubstitutionGroup(sg: EName): Boolean = {
+    isOrInheritsItemSubstitutionGroup(sg) || isOrInheritsTupleSubstitutionGroup(sg)
   }
 
-  def isItemSubstitutionGroup(sg: EName): Boolean = {
-    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrliItemEName)
+  def isOrInheritsItemSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsIncludingSelf(sg).contains(ENames.XbrliItemEName)
   }
 
-  def isTupleSubstitutionGroup(sg: EName): Boolean = {
-    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrliTupleEName)
+  def isOrInheritsTupleSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsIncludingSelf(sg).contains(ENames.XbrliTupleEName)
   }
 
-  def isHypercubeItemSubstitutionGroup(sg: EName): Boolean = {
-    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrldtHypercubeItemEName)
+  def isOrInheritsHypercubeItemSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsIncludingSelf(sg).contains(ENames.XbrldtHypercubeItemEName)
   }
 
-  def isDimensionItemSubstitutionGroup(sg: EName): Boolean = {
-    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrldtDimensionItemEName)
+  def isOrInheritsDimensionItemSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsIncludingSelf(sg).contains(ENames.XbrldtDimensionItemEName)
   }
 }
 
