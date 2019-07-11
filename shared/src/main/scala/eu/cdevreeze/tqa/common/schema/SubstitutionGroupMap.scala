@@ -57,6 +57,14 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
   }
 
   /**
+   * Finds all transitively inherited substitution groups from the given substitution group, as found in this mapping,
+   * returning this substitution group as well.
+   */
+  def transitivelyInheritedSubstitutionGroupsOrSelf(substGroup: EName): Set[EName] = {
+    transitivelyInheritedSubstitutionGroups(substGroup) + substGroup
+  }
+
+  /**
    * Finds all transitively inherited substitution groups from the given substitution group, as found in this mapping.
    */
   def transitivelyInheritedSubstitutionGroups(substGroup: EName): Set[EName] = {
@@ -67,7 +75,7 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
       val directlyInheritedSubstGroupOption = effMappings.get(sg)
 
       directlyInheritedSubstGroupOption match {
-        case None => acc
+        case None      => acc
         case Some(isg) =>
           // Recursive call
           transitivelyInheritedSubstitutionGroupList(isg, isg :: acc)
@@ -82,6 +90,26 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
    */
   def append(sgm: SubstitutionGroupMap): SubstitutionGroupMap = {
     SubstitutionGroupMap(this.mappings ++ sgm.mappings)
+  }
+
+  def isConceptSubstitutionGroup(sg: EName): Boolean = {
+    isItemSubstitutionGroup(sg) || isTupleSubstitutionGroup(sg)
+  }
+
+  def isItemSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrliItemEName)
+  }
+
+  def isTupleSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrliTupleEName)
+  }
+
+  def isHypercubeItemSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrldtHypercubeItemEName)
+  }
+
+  def isDimensionItemSubstitutionGroup(sg: EName): Boolean = {
+    transitivelyInheritedSubstitutionGroupsOrSelf(sg).contains(ENames.XbrldtDimensionItemEName)
   }
 }
 
