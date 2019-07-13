@@ -16,7 +16,6 @@
 
 package eu.cdevreeze.tqa.docbuilder.jvm
 
-import java.io.File
 import java.net.URI
 
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
@@ -33,80 +32,6 @@ object PartialUriConverters {
 
   def identity: PartialUriConverter = {
     def convertUri(uri: URI): Option[URI] = Some(uri)
-
-    convertUri _
-  }
-
-  /**
-   * Returns a partial URI converter that converts (absolute) HTTP and HTTPS URIs to file URIs.
-   * Such a conversion assumes the existence of a local mirror of one or more internet sites,
-   * where the host name in the parameter URI is an immediate sub-directory of the local root directory,
-   * and where the URI scheme (such as HTTP) and port number, if any, do not occur in the local mirror.
-   * The conversion then returns the URI in the local mirror that corresponds to the parameter URI.
-   *
-   * The partial URI converter is defined for all URIs that are HTTP(S) URIs (with host).
-   *
-   * For example, if the URI is "http://www.example.com/a/b/c.xml", then the URI is rewritten using
-   * a `SimpleCatalog` which rewrites URI start "http://www.example.com/" to the rewrite prefix,
-   * as file protocol URI, for sub-directory "www.example.com" of the given root directory.
-   */
-  // scalastyle:off null
-  @deprecated(message = "This method has too little control over which URIs to convert. Use 'fromCatalog' instead.", since = "0.8.8")
-  def fromLocalMirrorRootDirectory(rootDir: File): PartialUriConverter = {
-    require(rootDir.isDirectory, s"Not a directory: $rootDir")
-    require(rootDir.isAbsolute, s"Not an absolute path: $rootDir")
-
-    def convertUri(uri: URI): Option[URI] = {
-      if ((uri.getHost == null) || ((uri.getScheme != "http") && (uri.getScheme != "https"))) {
-        None
-      } else {
-        val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-        val rewritePrefix = returnWithTrailingSlash((new File(rootDir, uri.getHost)).toURI)
-
-        val catalog =
-          SimpleCatalog(
-            None,
-            Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
-
-        catalog.findMappedUri(uri)
-      }
-    }
-
-    convertUri _
-  }
-
-  /**
-   * Like `fromLocalMirrorRootDirectory`, but the resulting partial URI converter returns relative URIs.
-   * Such a partial URI converter is useful in ZIP files that contain mirrored sites.
-   *
-   * If the local mirror does not start at the root (of the ZIP file), parameter parentPathOption is
-   * used to specify the relative path of the local mirror.
-   */
-  // scalastyle:off null
-  @deprecated(message = "This method has too little control over which URIs to convert. Use 'fromCatalog' instead.", since = "0.8.8")
-  def fromLocalMirrorInZipFile(parentPathOption: Option[URI]): PartialUriConverter = {
-    require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
-
-    def convertUri(uri: URI): Option[URI] = {
-      if ((uri.getHost == null) || ((uri.getScheme != "http") && (uri.getScheme != "https"))) {
-        None
-      } else {
-        val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-
-        val hostAsRelativeUri = URI.create(uri.getHost + "/")
-
-        val rewritePrefix =
-          parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri)).
-            getOrElse(hostAsRelativeUri).toString.ensuring(_.endsWith("/"))
-
-        val catalog =
-          SimpleCatalog(
-            None,
-            Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
-
-        catalog.findMappedUri(uri)
-      }
-    }
 
     convertUri _
   }

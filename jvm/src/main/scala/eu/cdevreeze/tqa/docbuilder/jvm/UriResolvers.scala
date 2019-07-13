@@ -108,14 +108,6 @@ object UriResolvers {
   }
 
   /**
-   * Returns `fromUriConverter(UriConverters.fromCatalog(catalog))`.
-   */
-  @deprecated(message = "Use method 'fromCatalogWithFallback' instead", since = "0.8.8")
-  def fromCatalog(catalog: SimpleCatalog): UriResolver = {
-    fromUriConverter(UriConverters.fromCatalog(catalog))
-  }
-
-  /**
    * Returns `fromUriConverter(UriConverters.fromCatalogFallingBackToIdentity(catalog))`.
    */
   def fromCatalogWithFallback(catalog: SimpleCatalog): UriResolver = {
@@ -155,14 +147,6 @@ object UriResolvers {
     }
 
     fromUriConverter(convertUri)
-  }
-
-  /**
-   * Returns `forZipFile(zipFile, UriConverters.fromCatalog(catalog))`.
-   */
-  @deprecated(message = "Use method 'forZipFileUsingCatalogWithFallback' instead", since = "0.8.8")
-  def forZipFileUsingCatalog(zipFile: ZipFile, catalog: SimpleCatalog): UriResolver = {
-    forZipFile(zipFile, UriConverters.fromCatalog(catalog))
   }
 
   /**

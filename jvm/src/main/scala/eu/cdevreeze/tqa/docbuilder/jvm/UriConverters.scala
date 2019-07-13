@@ -16,7 +16,6 @@
 
 package eu.cdevreeze.tqa.docbuilder.jvm
 
-import java.io.File
 import java.net.URI
 
 import scala.collection.immutable
@@ -77,32 +76,6 @@ object UriConverters {
 
   def identity: UriConverter = {
     PartialUriConverters.identity.andThen(_.get)
-  }
-
-  /**
-   * Like `PartialUriConverters.fromLocalMirrorRootDirectory(rootDir)`, but otherwise the identity function.
-   */
-  @deprecated(message = "Use method 'fromCatalogFallingBackToIdentity' instead", since = "0.8.8")
-  def fromLocalMirrorRootDirectory(rootDir: File): UriConverter = {
-    fromPartialUriConvertersFallingBackToIdentity(
-      Vector(PartialUriConverters.fromLocalMirrorRootDirectory(rootDir)))
-  }
-
-  /**
-   * Like `PartialUriConverters.fromLocalMirrorInZipFile`, but otherwise the identity function.
-   */
-  @deprecated(message = "Use method 'fromCatalogFallingBackToIdentity' instead", since = "0.8.8")
-  def fromLocalMirrorInZipFile(parentPathOption: Option[URI]): UriConverter = {
-    fromPartialUriConvertersFallingBackToIdentity(
-      Vector(PartialUriConverters.fromLocalMirrorInZipFile(parentPathOption)))
-  }
-
-  /**
-   * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise the identity function.
-   */
-  @deprecated(message = "Use method 'fromCatalogFallingBackToIdentity' instead", since = "0.8.8")
-  def fromCatalog(catalog: SimpleCatalog): UriConverter = {
-    fromCatalogFallingBackToIdentity(catalog)
   }
 
   /**
