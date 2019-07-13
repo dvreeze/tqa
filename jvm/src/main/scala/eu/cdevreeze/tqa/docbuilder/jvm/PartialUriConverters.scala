@@ -49,9 +49,4 @@ object PartialUriConverters {
 
     convertUri _
   }
-
-  private def returnWithTrailingSlash(uri: URI): String = {
-    val s = uri.toString
-    if (s.endsWith("/")) s else s + "/"
-  }
 }
