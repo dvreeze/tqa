@@ -262,7 +262,7 @@ final case class GlobalElementDeclaration(
    */
   def findAllOwnOrTransitivelyInheritedSubstitutionGroups(substitutionGroupMap: SubstitutionGroupMap): Set[EName] = {
     substitutionGroupOption.toSeq.flatMap { sg =>
-      substitutionGroupMap.transitivelyInheritedSubstitutionGroups(sg) + sg
+      substitutionGroupMap.transitivelyInheritedSubstitutionGroupsIncludingSelf(sg)
     }.toSet
   }
 
