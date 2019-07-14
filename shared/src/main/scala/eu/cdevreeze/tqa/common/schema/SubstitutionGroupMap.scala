@@ -17,6 +17,7 @@
 package eu.cdevreeze.tqa.common.schema
 
 import scala.annotation.tailrec
+import scala.collection.immutable
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.yaidom.core.EName
@@ -58,31 +59,32 @@ final case class SubstitutionGroupMap(val mappings: Map[EName, EName]) {
 
   /**
    * Finds all transitively inherited substitution groups from the given substitution group, as found in this mapping,
-   * returning this substitution group as well.
+   * returning this substitution group as well. The result is returned in order of ancestry, this substitution group first.
    */
-  def transitivelyInheritedSubstitutionGroupsIncludingSelf(substGroup: EName): Set[EName] = {
-    transitivelyInheritedSubstitutionGroups(substGroup) + substGroup
+  def transitivelyInheritedSubstitutionGroupsIncludingSelf(substGroup: EName): immutable.IndexedSeq[EName] = {
+    substGroup +: transitivelyInheritedSubstitutionGroups(substGroup)
   }
 
   /**
    * Finds all transitively inherited substitution groups from the given substitution group, as found in this mapping.
+   * The result is returned in order of ancestry, this substitution group first.
    */
-  def transitivelyInheritedSubstitutionGroups(substGroup: EName): Set[EName] = {
+  def transitivelyInheritedSubstitutionGroups(substGroup: EName): immutable.IndexedSeq[EName] = {
     val effMappings: Map[EName, EName] = effectiveMappings
 
     @tailrec
-    def transitivelyInheritedSubstitutionGroupList(sg: EName, acc: List[EName]): List[EName] = {
+    def transitivelyInheritedSubstitutionGroupReversed(sg: EName, acc: List[EName]): List[EName] = {
       val directlyInheritedSubstGroupOption = effMappings.get(sg)
 
       directlyInheritedSubstGroupOption match {
         case None      => acc
         case Some(isg) =>
           // Recursive call
-          transitivelyInheritedSubstitutionGroupList(isg, isg :: acc)
+          transitivelyInheritedSubstitutionGroupReversed(isg, isg :: acc)
       }
     }
 
-    transitivelyInheritedSubstitutionGroupList(substGroup, Nil).toSet
+    transitivelyInheritedSubstitutionGroupReversed(substGroup, Nil).reverse.toIndexedSeq
   }
 
   /**
