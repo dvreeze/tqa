@@ -3,6 +3,25 @@ CHANGELOG
 =========
 
 
+0.8.11
+======
+
+First of all, this release rolled back the changes in version 0.8.10 that turned out to decrease performance.
+
+This release has several small breaking changes, but due to a problem running MiMa they are not shown here. It is safe to
+say that version 0.8.11 cannot be used (without recompilation) instead of earlier versions, but that recompilation of a code
+base using TQA against version 0.8.11 results in several compilation errors that are very easy to fix.
+
+The most important changes compared to version 0.8.9 are:
+
+* The target Scala versions are now 2.13 (new) and 2.12, and support for Scala 2.11 has been dropped
+* There are constants for well-known schema types, roles and arcroles
+* Class ``SubstitutionGroupMap`` has been enriched in its API
+* This release uses yaidom version 1.10.0
+
+Again: do not use this version instead of older versions without recompilation of the code using TQA!
+
+
 0.8.10
 ======
 
