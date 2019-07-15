@@ -3,6 +3,15 @@ CHANGELOG
 =========
 
 
+Version 0.9.0 should offer the following:
+
+* Formula/table DOM/relationships that extend the "base" ones instead of wrapping them (for better usability)
+* Enhanced taxonomy API, with role type and arcrole type query support
+* Faster relationship creation and faster taxonomy creation in general
+* Better extensibility in creating TaxonomyApi implementations, with different performance characteristics
+* Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
+
+
 0.8.11
 ======
 
