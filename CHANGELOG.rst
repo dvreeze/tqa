@@ -27,8 +27,10 @@ The most important changes compared to version 0.8.9 are:
 * There are constants for well-known schema types, roles and arcroles
 * Class ``SubstitutionGroupMap`` has been enriched in its API
 * This release uses yaidom version 1.10.0
+* Helped by the cross-build to Scala 2.13, performance bottlenecks due to naive usage of methods ``Map.mapValues`` and ``Map.filterKeys`` have been tackled
 
-Again: do not use this version instead of older versions without recompilation of the code using TQA!
+Again: do not use this version instead of older versions without recompilation of the code using TQA! This is not reflected
+in the minor version change.
 
 
 0.8.10
