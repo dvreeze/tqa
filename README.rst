@@ -2,6 +2,8 @@
 TQA
 ===
 
+**This is a fork of dvreeze/tqa. Currently this fork is in a state of flux. It will soon change the package names, among other things. Hence, until further notice the original at dvreeze/tqa should be used instead of this fork.**
+
 XBRL Taxonomy Query API (TQA). It is based on the yaidom XML query API, and offers a Scala Collections processing
 experience.
 
