@@ -22,9 +22,7 @@ import java.net.URI
 import java.util.zip.ZipFile
 
 import scala.collection.immutable
-
 import org.xml.sax.InputSource
-
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 
 /**
@@ -102,7 +100,7 @@ object UriResolvers {
    */
   def forZipFile(zipFile: ZipFile, uriConverter: URI => URI): UriResolver = {
     val delegate: PartialUriResolvers.PartialUriResolver =
-      PartialUriResolvers.forZipFile(zipFile, uriConverter.andThen(u => Some(u)))
+      PartialUriResolvers.forZipFile(zipFile, uriConverter.andThen(u => Some(u)), checkEntriesPresented = true)
 
     delegate.andThen(_.ensuring(_.isDefined).get)
   }
@@ -157,26 +155,8 @@ object UriResolvers {
   def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
     require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
 
-    def convertUri(uri: URI): URI = {
-      require(uri.getHost != null, s"Missing host name in URI '$uri'")
-      require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
-
-      val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-
-      val hostAsRelativeUri = URI.create(uri.getHost + "/")
-
-      val rewritePrefix =
-        parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri)).
-          getOrElse(hostAsRelativeUri).toString.ensuring(_.endsWith("/"))
-
-      val catalog =
-        SimpleCatalog(
-          None,
-          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
-
-      val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
-      mappedUri
-    }
+    val convertUri = (uri: URI) => PartialUriResolvers.convertUriUtil(uri, parentPathOption)
+      .getOrElse(sys.error(s"No mapping found for URI '$uri'"))
 
     forZipFile(zipFile, convertUri)
   }

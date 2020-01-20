@@ -24,7 +24,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 import scala.jdk.CollectionConverters._
-
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import org.xml.sax.InputSource
 
@@ -73,22 +72,23 @@ object PartialUriResolvers {
    * The ZIP file should be closed after use (typically when the taxonomy has been loaded), thus closing
    * all its entry input streams.
    */
-  def forZipFile(zipFile: ZipFile, partialUriConverter: URI => Option[URI]): PartialUriResolver = {
+  def forZipFile(zipFile: ZipFile, partialUriConverter: URI => Option[URI], checkEntriesPresented: Boolean = false): PartialUriResolver = {
     val zipEntriesByRelativeUri: Map[URI, ZipEntry] = computeZipEntryMap(zipFile)
 
     def resolveUri(uri: URI): Option[InputSource] = {
       val mappedUriOption = partialUriConverter(uri)
 
-      mappedUriOption map { mappedUri =>
+      mappedUriOption flatMap { mappedUri =>
         require(!mappedUri.isAbsolute, s"Cannot resolve absolute URI '$mappedUri'")
-
         val optionalZipEntry: Option[ZipEntry] = zipEntriesByRelativeUri.get(mappedUri)
+        if (checkEntriesPresented) {
+          require(optionalZipEntry.isDefined, s"Missing ZIP entry in ZIP file $zipFile with URI $mappedUri")
+        }
 
-        require(optionalZipEntry.isDefined, s"Missing ZIP entry in ZIP file $zipFile with URI $mappedUri")
-
-        val is = zipFile.getInputStream(optionalZipEntry.get)
-
-        new InputSource(is)
+        optionalZipEntry.map { zipEntry =>
+          val is = zipFile.getInputStream(zipEntry)
+          new InputSource(is)
+        }
       }
     }
 
@@ -107,6 +107,41 @@ object PartialUriResolvers {
    */
   def forZipFileUsingCatalog(zipFile: ZipFile, catalog: SimpleCatalog): PartialUriResolver = {
     forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))
+  }
+
+  /**
+   * Returns a partial URI resolver that finds some files in a local partial mirror in a ZIP file, with the host name
+   * of the URI mirrored under the given optional parent directory. The protocol (HTTP or HTTPS) is not represented in
+   * the local mirror.
+   */
+  def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): PartialUriResolver = {
+    require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
+
+    def convertUri(uri: URI): Option[URI] = {
+      convertUriUtil(uri, parentPathOption)
+    }
+
+    forZipFile(zipFile, convertUri)
+  }
+
+  private[jvm] def convertUriUtil(uri: URI, parentPathOption: Option[URI]): Option[URI] = {
+    require(uri.getHost != null, s"Missing host name in URI '$uri'")
+    require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
+
+    val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null)) // scalastyle:ignore null
+
+    val hostAsRelativeUri = URI.create(uri.getHost + "/")
+
+    val rewritePrefix =
+      parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri)).
+        getOrElse(hostAsRelativeUri).toString.ensuring(_.endsWith("/"))
+
+    val catalog =
+      SimpleCatalog(
+        None,
+        Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+
+    catalog.findMappedUri(uri)
   }
 
   private def computeZipEntryMap(zipFile: ZipFile): Map[URI, ZipEntry] = {

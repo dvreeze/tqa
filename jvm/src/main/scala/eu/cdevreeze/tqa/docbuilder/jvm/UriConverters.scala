@@ -16,11 +16,12 @@
 
 package eu.cdevreeze.tqa.docbuilder.jvm
 
+import java.io.File
 import java.net.URI
 
 import scala.collection.immutable
-
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriConverters.PartialUriConverter
 
 /**
  * URI converters, typically converting an HTTP or HTTPS URI to a local file URI. The implementations
@@ -69,6 +70,49 @@ object UriConverters {
         case (accOptUri, puc) =>
           accOptUri.orElse(puc(uri))
       } getOrElse (uri)
+    }
+
+    convertUri _
+  }
+
+  /**
+   * Returns the URI converter that for each input URI tries all given partial URI converters until a
+   * Sequentially looks up for a file in file system amongst several catalogs presented in the NonEmptyList if the list
+   * has more than one element.
+   */
+  def fromUriConverterWithPseudoMultiCatalog(catalog: Map[URI, List[URI]]): PartialUriConverter = {
+
+    def convertUri(remote: URI): Option[URI] = {
+      val localUriOption = catalog
+        .flatMap {
+          case (remotePrefix, localPrefixes) if remote.toASCIIString.startsWith(remotePrefix.toASCIIString) =>
+            val remoteSuffix = remote.toASCIIString.stripPrefix(remotePrefix.toASCIIString)
+            val localUris =
+              if (localPrefixes.isEmpty) {
+                List.empty
+              } else {
+                localPrefixes.map(_.resolve(remoteSuffix))
+              }
+            // if there is just a single URI just assume it exists
+            // only for multiple URIs check the first existent
+            // (prevent slowness for the most common scenario)
+            if (localUris.isEmpty) {
+              Option.empty[URI]
+            } else if (localUris.size == 1) {
+              val uri = localUris.headOption
+              Option(URI.create(uri.get.toString))
+            } else {
+              localUris.find { uri =>
+                val uriFile = URI.create(uri.toASCIIString)
+                new File(uriFile).exists()
+              }
+            }
+          case _ =>
+            Option.empty[URI]
+        }
+        .headOption
+      println(s"remote : $remote mapped to local : $localUriOption") // scalastyle:ignore token
+      localUriOption
     }
 
     convertUri _
