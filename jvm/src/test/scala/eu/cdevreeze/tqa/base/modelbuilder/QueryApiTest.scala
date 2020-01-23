@@ -21,7 +21,7 @@ import java.net.URI
 import scala.collection.immutable
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.ENames.XbrldtDimensionItemEName
@@ -42,7 +42,7 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-class QueryApiTest extends FunSuite {
+class QueryApiTest extends AnyFunSuite {
 
   test("testQueryPLink") {
     val docParser = DocumentParserUsingStax.newInstance()

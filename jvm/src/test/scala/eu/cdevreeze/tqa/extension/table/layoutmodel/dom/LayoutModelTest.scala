@@ -20,7 +20,7 @@ import java.net.URI
 
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.Namespaces.XbrliNamespace
 import eu.cdevreeze.tqa.extension.table.common.TableAxis
@@ -38,7 +38,7 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-class LayoutModelTest extends FunSuite {
+class LayoutModelTest extends AnyFunSuite {
 
   private val docParser = DocumentParserUsingStax.newInstance()
 

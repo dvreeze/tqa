@@ -20,7 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
@@ -44,7 +44,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class DimensionRelationshipNodeTest extends FunSuite {
+class DimensionRelationshipNodeTest extends AnyFunSuite {
 
   import DimensionRelationshipNodeData.findAllResultPaths
 

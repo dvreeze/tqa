@@ -19,7 +19,7 @@ package eu.cdevreeze.tqa.docbuilder
 import java.io.StringReader
 import java.net.URI
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.xml.sax.InputSource
 
 import eu.cdevreeze.yaidom.indexed.Elem
@@ -31,7 +31,7 @@ import eu.cdevreeze.yaidom.resolved
  *
  * @author Chris de Vreeze
  */
-class SimpleCatalogTest extends FunSuite {
+class SimpleCatalogTest extends AnyFunSuite {
 
   test("testParseRelativeUriCatalog") {
     val docParser = DocumentParserUsingStax.newInstance()

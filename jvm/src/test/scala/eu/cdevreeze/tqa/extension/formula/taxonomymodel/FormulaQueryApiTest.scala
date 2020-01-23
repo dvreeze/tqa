@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.tqa.extension.formula.taxonomymodel
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import eu.cdevreeze.tqa.ENameValue
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.aspect.AspectModel
@@ -44,7 +44,7 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-class FormulaQueryApiTest extends FunSuite {
+class FormulaQueryApiTest extends AnyFunSuite {
 
   test("testQueryExistenceAssertions") {
     val docParser = DocumentParserUsingStax.newInstance()

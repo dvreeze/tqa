@@ -22,7 +22,7 @@ import java.util.zip.ZipFile
 
 import scala.collection.immutable
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
@@ -41,7 +41,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class DimensionalRelationshipSourceTest extends FunSuite {
+class DimensionalRelationshipSourceTest extends AnyFunSuite {
 
   test("testValidHypercubeDimension") {
     val taxo = makeTestTaxonomy(Vector(

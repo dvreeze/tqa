@@ -22,7 +22,7 @@ import java.util.zip.ZipFile
 
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
@@ -38,7 +38,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class InternalConsistencyTest extends FunSuite {
+class InternalConsistencyTest extends AnyFunSuite {
 
   test("testQueryingForStandardRelationships") {
     val standardRelationships = dts.findAllStandardRelationships.ensuring(_.nonEmpty)

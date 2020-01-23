@@ -18,7 +18,7 @@ package eu.cdevreeze.tqa.base.dom
 
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames.TypeEName
 import eu.cdevreeze.tqa.Namespaces.XsNamespace
@@ -31,7 +31,7 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-class SchemaContentTest extends FunSuite {
+class SchemaContentTest extends AnyFunSuite {
 
   test("testSchemaContent") {
     val docParser = DocumentParserUsingStax.newInstance()

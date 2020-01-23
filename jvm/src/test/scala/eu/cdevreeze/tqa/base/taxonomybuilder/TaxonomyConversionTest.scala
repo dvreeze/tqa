@@ -24,7 +24,7 @@ import scala.collection.immutable
 import scala.collection.compat._
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
@@ -73,7 +73,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class TaxonomyConversionTest extends FunSuite {
+class TaxonomyConversionTest extends AnyFunSuite {
 
   test("testTaxonomyConversion") {
     val convertedDocs: immutable.IndexedSeq[TaxonomyDocument] =

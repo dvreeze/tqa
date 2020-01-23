@@ -20,7 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
@@ -39,7 +39,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class DimensionalInstanceValidationTest extends FunSuite {
+class DimensionalInstanceValidationTest extends AnyFunSuite {
 
   import DimensionalContext.contextToDimensionalContext
 

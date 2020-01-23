@@ -20,7 +20,7 @@ import java.net.URI
 
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.docbuilder.jvm.UriConverters
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
@@ -36,7 +36,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class TaxonomyPackageTest extends FunSuite {
+class TaxonomyPackageTest extends AnyFunSuite {
 
   test("testQueryTaxonomyPackage") {
     val taxoPkgFileUri = classOf[TaxonomyPackageTest].getResource("/taxonomyPackage.xml").toURI

@@ -23,7 +23,7 @@ import java.util.zip.ZipFile
 import scala.collection.immutable
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.dom.LocalElementDeclaration
@@ -44,7 +44,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class DimensionalQueryTest extends FunSuite {
+class DimensionalQueryTest extends AnyFunSuite {
 
   test("testAbstractHypercube") {
     val taxo = makeTestDts(Vector("100-xbrldte/101-HypercubeElementIsNotAbstractError/hypercubeValid.xsd"))

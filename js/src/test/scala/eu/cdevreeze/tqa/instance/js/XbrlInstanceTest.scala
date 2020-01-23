@@ -21,7 +21,7 @@ import java.time.ZonedDateTime
 
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.instance._
 import eu.cdevreeze.yaidom.core.EName
@@ -39,7 +39,7 @@ import org.scalajs.dom.experimental.domparser.SupportedType
  *
  * @author Chris de Vreeze
  */
-class XbrlInstanceTest extends FunSuite {
+class XbrlInstanceTest extends AnyFunSuite {
 
   test("testCreateAndQueryInstance") {
     val db = new DOMParser()

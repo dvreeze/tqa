@@ -20,7 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
@@ -45,7 +45,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class ConceptRelationshipNodeTest extends FunSuite {
+class ConceptRelationshipNodeTest extends AnyFunSuite {
 
   import ConceptRelationshipNodeData._
 

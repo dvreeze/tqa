@@ -18,7 +18,7 @@ package eu.cdevreeze.tqa.base.dom.js
 
 import scala.reflect.classTag
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import org.scalajs.dom.{ raw => sjsdom }
 
@@ -36,7 +36,7 @@ import org.scalajs.dom.experimental.domparser.SupportedType
  *
  * @author Chris de Vreeze
  */
-class SchemaContentTest extends FunSuite {
+class SchemaContentTest extends AnyFunSuite {
 
   test("testSchemaContent") {
     val db = new DOMParser()

@@ -19,7 +19,7 @@ package eu.cdevreeze.tqa.utils
 import java.io.File
 import java.net.URI
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces
@@ -43,7 +43,7 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-class SimpleTaxonomyCreatorTest extends FunSuite {
+class SimpleTaxonomyCreatorTest extends AnyFunSuite {
 
   private def mkConceptNode(tns: String, localName: String): Node.GlobalElementDecl = {
     Node.GlobalElementDecl(EName(tns, localName))

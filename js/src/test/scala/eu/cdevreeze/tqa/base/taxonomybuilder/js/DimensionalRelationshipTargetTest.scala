@@ -23,7 +23,7 @@ import scala.reflect.classTag
 
 import org.scalajs.dom.experimental.domparser.DOMParser
 import org.scalajs.dom.experimental.domparser.SupportedType
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
@@ -44,7 +44,7 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-class DimensionalRelationshipTargetTest extends FunSuite {
+class DimensionalRelationshipTargetTest extends AnyFunSuite {
 
   test("testTargetHypercubeDimensionIsItemInvalid") {
     val taxo = makeTestTaxonomy(Vector(

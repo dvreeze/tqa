@@ -22,7 +22,7 @@ import java.util.zip.ZipFile
 
 import scala.collection.compat._
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames.LinkLabelArcEName
 import eu.cdevreeze.tqa.ENames.NameEName
@@ -44,7 +44,7 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  *
  * @author Chris de Vreeze
  */
-class RelationshipEquivalenceTest extends FunSuite {
+class RelationshipEquivalenceTest extends AnyFunSuite {
 
   test("testProhibition") {
     val docBuilder = getDocumentBuilder()

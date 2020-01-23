@@ -10,9 +10,9 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 // Note that 2.12.5 does not work for Scalatest in sbt (https://github.com/scalatest/scalatest/issues/1342).
 
-val scalaVer = "2.13.0"
+val scalaVer = "2.13.1"
 
-val crossScalaVer = Seq(scalaVer, "2.12.8")
+val crossScalaVer = Seq(scalaVer, "2.12.10")
 
 lazy val commonSettings = Seq(
   name         := "tqa",
@@ -39,15 +39,15 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.10.0",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.10.1",
 
   libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.2.0",
 
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.1",
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.3",
 
-  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.8",
+  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.1.0",
 
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.8" % "test"
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.0" % "test"
 )
 
 lazy val root = project.in(file("."))
@@ -69,9 +69,9 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-3",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-6",
 
-    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.7.0",
+    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.8.1",
 
     libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2",
 
@@ -85,7 +85,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= {
       scalaBinaryVersion.value match {
         case "2.13" => Seq()
-        case _      => Seq("org.scalameta" %%% "scalameta" % "4.1.11" % "test")
+        case _      => Seq("org.scalameta" %%% "scalameta" % "4.3.0" % "test")
       }
     },
 
@@ -105,17 +105,16 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
       }
     },
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.9")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.11")
   )
-  .jsSettings(
-    // Do we need this jsEnv?
+  .jsSettings(    // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.7",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.8",
 
     libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
 
-    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.7.0" % "optional",
+    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.8.4" % "optional",
 
     Compile / unmanagedSourceDirectories += {
       val sourceDir = (Compile / sourceDirectory).value
@@ -127,7 +126,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     Test / parallelExecution := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.9")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.11")
   )
 
 lazy val tqaJVM = tqa.jvm

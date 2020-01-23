@@ -20,7 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyApi
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
@@ -35,7 +35,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-class TaxonomyEquivalenceTest extends FunSuite {
+class TaxonomyEquivalenceTest extends AnyFunSuite {
 
   test("testTaxonomyWithoutLabels") {
     val zipFileUri =

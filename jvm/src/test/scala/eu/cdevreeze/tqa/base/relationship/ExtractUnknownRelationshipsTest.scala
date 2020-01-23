@@ -20,7 +20,7 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.ENames.NameEName
 import eu.cdevreeze.tqa.ENames.RefEName
@@ -46,7 +46,7 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-class ExtractUnknownRelationshipsTest extends FunSuite {
+class ExtractUnknownRelationshipsTest extends AnyFunSuite {
 
   test("testExtractUnknownRelationships") {
     // Using a simple linkbase and schema from the XBRL Core Conformance Suite, but adapted.
