@@ -26,11 +26,14 @@ import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
  * URI converters, typically converting an HTTP or HTTPS URI to a local file URI. The implementations
  * use `SimpleCatalog` objects to perform the actual URI conversions.
  *
+ * Note that this singleton object has only fundamental methods fromPartialUriConvertersWithoutFallback and
+ * fromPartialUriConvertersFallingBackToIdentity.
+ *
  * @author Chris de Vreeze
  */
 object UriConverters {
 
-  type UriConverter = (URI => URI)
+  type UriConverter = URI => URI
 
   /**
    * Returns the URI converter that for each input URI tries all given partial URI converters until a
@@ -51,7 +54,7 @@ object UriConverters {
       }
     }
 
-    convertUri _
+    convertUri
   }
 
   /**
@@ -68,10 +71,10 @@ object UriConverters {
       partialUriConverters.drop(1).foldLeft(partialUriConverters.head(uri)) {
         case (accOptUri, puc) =>
           accOptUri.orElse(puc(uri))
-      } getOrElse (uri)
+      }.getOrElse(uri)
     }
 
-    convertUri _
+    convertUri
   }
 
   def identity: UriConverter = {

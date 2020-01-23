@@ -30,11 +30,13 @@ import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 /**
  * URI resolvers, converting an URI to a SAX InputSource.
  *
+ * Note that this singleton object only has fundamental methods fromPartialUriResolversWithoutFallback and fromPartialUriResolversWithFallback.
+ *
  * @author Chris de Vreeze
  */
 object UriResolvers {
 
-  type UriResolver = (URI => InputSource)
+  type UriResolver = URI => InputSource
 
   /**
    * Returns the URI resolver that for each input URI tries all given partial URI resolvers until a
@@ -55,7 +57,7 @@ object UriResolvers {
       }
     }
 
-    resolveUri _
+    resolveUri
   }
 
   /**
@@ -84,25 +86,37 @@ object UriResolvers {
       }
     }
 
-    resolveUri _
+    resolveUri
   }
 
   /**
-   * Like `PartialUriResolvers.fromPartialUriConverter(liftedUriConverter).andThen(_.get)`.
+   * Returns the equivalent of `PartialUriResolvers.fromPartialUriConverter(liftedUriConverter).andThen(_.get)`.
+   *
+   * It can also be defined as:
+   * {{{
+   * fromPartialUriResolversWithoutFallback(
+   *   Vector(PartialUriResolvers.fromPartialUriConverter(liftedUriConverter)))
+   * }}}
    */
   def fromUriConverter(uriConverter: URI => URI): UriResolver = {
     val delegate: PartialUriResolvers.PartialUriResolver =
-      PartialUriResolvers.fromPartialUriConverter(uriConverter.andThen(u => Some(u)))
+      PartialUriResolvers.fromPartialUriConverter(PartialUriConverters.fromUriConverter(uriConverter))
 
     delegate.andThen(_.ensuring(_.isDefined).get)
   }
 
   /**
-   * Like `PartialUriResolvers.forZipFile(zipFile, liftedUriConverter).andThen(_.get)`, .
+   * Returns the equivalent of `PartialUriResolvers.forZipFile(zipFile, liftedUriConverter).andThen(_.get)`, .
+   *
+   * It can also be defined as:
+   * {{{
+   * fromPartialUriResolversWithoutFallback(
+   *   Vector(PartialUriResolvers.forZipFile(zipFile, liftedUriConverter)))
+   * }}}
    */
   def forZipFile(zipFile: ZipFile, uriConverter: URI => URI): UriResolver = {
     val delegate: PartialUriResolvers.PartialUriResolver =
-      PartialUriResolvers.forZipFile(zipFile, uriConverter.andThen(u => Some(u)))
+      PartialUriResolvers.forZipFile(zipFile, PartialUriConverters.fromUriConverter(uriConverter))
 
     delegate.andThen(_.ensuring(_.isDefined).get)
   }
@@ -135,7 +149,7 @@ object UriResolvers {
       require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
 
       val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-      val rewritePrefix = returnWithTrailingSlash((new File(rootDir, uri.getHost)).toURI)
+      val rewritePrefix = returnWithTrailingSlash(new File(rootDir, uri.getHost).toURI)
 
       val catalog =
         SimpleCatalog(
@@ -193,6 +207,10 @@ object UriResolvers {
    */
   def forZipFileUsingCatalogWithoutFallback(zipFile: ZipFile, catalog: SimpleCatalog): UriResolver = {
     forZipFile(zipFile, UriConverters.fromCatalogWithoutFallback(catalog))
+  }
+
+  def default: UriResolver = {
+    fromUriConverter(UriConverters.identity)
   }
 
   private def returnWithTrailingSlash(uri: URI): String = {

@@ -21,19 +21,28 @@ import java.net.URI
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 
 /**
- * Partial URI converters, typically converting an HTTP or HTTPS URI to a local file URI. The implementations
- * use `SimpleCatalog` objects to perform the actual URI conversions.
+ * Partial URI converters, typically converting HTTP or HTTPS URIs to local file URIs. Typically a PartialUriConverter is
+ * created from a SimpleCatalog. This is also desirable, because catalogs are clear and precise URI mappings. Yet not every
+ * PartialUriConverter can be created from a SimpleCatalog, for example because an URI may map to the first of a list of
+ * local URIs where the document can be found, which cannot be expressed with a SimpleCatalog.
+ *
+ * Sometimes it is desirable to create a SimpleCatalog and corresponding PartialUriConverter from some parent directory,
+ * but there are several possible heuristics for creating a SimpleCatalog from such a parent directory. Hence it is up
+ * to the application to generate a SimpleCatalog from the parent directory. Method PartialUriConverters.fromCatalog
+ * can then be used to turn that SimpleCatalog into a PartialUriConverter.
+ *
+ * Note that this singleton object only has one fundamental method, namely fromCatalog.
  *
  * @author Chris de Vreeze
  */
 object PartialUriConverters {
 
-  type PartialUriConverter = (URI => Option[URI])
+  type PartialUriConverter = URI => Option[URI]
 
   def identity: PartialUriConverter = {
     def convertUri(uri: URI): Option[URI] = Some(uri)
 
-    convertUri _
+    convertUri
   }
 
   /**
@@ -47,6 +56,10 @@ object PartialUriConverters {
       catalog.findMappedUri(uri)
     }
 
-    convertUri _
+    convertUri
+  }
+
+  def fromUriConverter(uriConverter: URI => URI): PartialUriConverter = {
+    uriConverter.andThen(u => Some(u))
   }
 }

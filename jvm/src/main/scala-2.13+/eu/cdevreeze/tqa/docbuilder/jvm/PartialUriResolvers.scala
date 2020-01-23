@@ -31,11 +31,14 @@ import org.xml.sax.InputSource
 /**
  * Partial URI resolvers, converting an URI to a SAX InputSource.
  *
+ * Note that this singleton object only has fundamental methods fromPartialUriConverter and its counterpart for ZIP files,
+ * namely forZipFile.
+ *
  * @author Chris de Vreeze
  */
 object PartialUriResolvers {
 
-  type PartialUriResolver = (URI => Option[InputSource])
+  type PartialUriResolver = URI => Option[InputSource]
 
   /**
    * Creates a PartialUriResolver from a partial URI converter. Typically the URI converter converts HTTP(S) URIs
@@ -61,7 +64,7 @@ object PartialUriResolvers {
       }
     }
 
-    resolveUri _
+    resolveUri
   }
 
   /**
@@ -92,7 +95,7 @@ object PartialUriResolvers {
       }
     }
 
-    resolveUri _
+    resolveUri
   }
 
   /**
@@ -109,16 +112,20 @@ object PartialUriResolvers {
     forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))
   }
 
+  def default: PartialUriResolver = {
+    fromPartialUriConverter(PartialUriConverters.identity)
+  }
+
   private def computeZipEntryMap(zipFile: ZipFile): Map[URI, ZipEntry] = {
     val zipEntries = zipFile.entries().asScala.toIndexedSeq
 
     val zipFileParent = dummyDirectory
 
-    zipEntries.map(e => (toRelativeUri(e, zipFileParent) -> e)).toMap
+    zipEntries.map(e => toRelativeUri(e, zipFileParent) -> e).toMap
   }
 
   private def toRelativeUri(zipEntry: ZipEntry, zipFileParent: File): URI = {
-    val adaptedZipEntryUri = (new File(zipFileParent, zipEntry.getName)).toURI
+    val adaptedZipEntryUri = new File(zipFileParent, zipEntry.getName).toURI
     val zipFileParentUri = URI.create(returnWithTrailingSlash(zipFileParent.toURI))
     val relativeZipEntryUri = zipFileParentUri.relativize(adaptedZipEntryUri)
     require(!relativeZipEntryUri.isAbsolute, s"Not a relative URI: $relativeZipEntryUri")
