@@ -61,6 +61,25 @@ class SimpleCatalogTest extends AnyFunSuite {
     assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
       resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
     }
+
+    assertResult(expectedCatalog) {
+      catalog.netSimpleCatalog
+    }
+
+    assertResult(Map(
+      "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
+      "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
+    )) {
+      catalog.toMap
+    }
+
+    assertResult(expectedCatalog.toMap) {
+      SimpleCatalog.from(catalog.toMap).toMap
+    }
+
+    assertResult(catalog.toMap) {
+      catalog.reverse.reverse.toMap
+    }
   }
 
   test("testParseRelativeUriCatalogWithBaseUri") {
@@ -91,6 +110,38 @@ class SimpleCatalogTest extends AnyFunSuite {
     assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
       resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
     }
+
+    val expectedNetCatalog: SimpleCatalog =
+      SimpleCatalog(
+        None,
+        Vector(
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part1/2015-01-01/",
+            "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part2/2015-01-01/",
+            "../part2/2015-01-01/")))
+
+    assertResult(expectedNetCatalog) {
+      catalog.netSimpleCatalog
+    }
+
+    assertResult(Map(
+      "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
+      "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
+    )) {
+      catalog.toMap
+    }
+
+    assertResult(expectedCatalog.toMap) {
+      SimpleCatalog.from(catalog.toMap).toMap
+    }
+
+    assertResult(catalog.toMap) {
+      catalog.reverse.reverse.toMap
+    }
   }
 
   test("testUseRelativeUriCatalog") {
@@ -111,6 +162,10 @@ class SimpleCatalogTest extends AnyFunSuite {
 
     assertResult(Some(URI.create("../part1/2015-01-01/"))) {
       catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(URI.create("../part1/2015-01-01/")) {
+      catalog.getMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
     }
 
     assertResult(None) {
@@ -136,6 +191,10 @@ class SimpleCatalogTest extends AnyFunSuite {
 
     assertResult(Some(URI.create("../part1/2015-01-01/"))) {
       catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(URI.create("../part1/2015-01-01/")) {
+      catalog.getMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
     }
 
     assertResult(None) {

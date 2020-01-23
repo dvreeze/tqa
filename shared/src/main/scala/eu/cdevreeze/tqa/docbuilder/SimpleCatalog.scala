@@ -61,6 +61,49 @@ final case class SimpleCatalog(
     }
   }
 
+  /**
+   * Returns the equivalent of `findMappedUri(uri).get`.
+   */
+  def getMappedUri(uri: URI): URI = {
+    findMappedUri(uri).getOrElse(sys.error(s"Could not map URI '$uri'"))
+  }
+
+  /**
+   * Returns the same simple catalog, but first resolving XML base attributes. Therefore the result has no XML base attributes anywhere.
+   */
+  def netSimpleCatalog: SimpleCatalog = {
+    val netUriRewrites: immutable.IndexedSeq[SimpleCatalog.UriRewrite] = uriRewrites.map { rewrite =>
+      val effectiveRewritePrefix: URI =
+        xmlBaseAttributeOption.map(_.resolve(rewrite.effectiveRewritePrefix)).getOrElse(URI.create(rewrite.effectiveRewritePrefix))
+
+      SimpleCatalog.UriRewrite(None, rewrite.uriStartString, effectiveRewritePrefix.toString)
+    }
+
+    SimpleCatalog(None, netUriRewrites)
+  }
+
+  /**
+   * Returns this simple catalog as the mapping of the net simple catalog.
+   */
+  def toMap: Map[String, String] = {
+    netSimpleCatalog.uriRewrites.map { rewrite =>
+      rewrite.uriStartString -> rewrite.rewritePrefix
+    }.toMap
+  }
+
+  /**
+   * Tries to reverse this simple catalog (after converting it to the net simple catalog), but if this simple catalog
+   * is not invertible, the result is incorrect.
+   */
+  def reverse: SimpleCatalog = {
+    val reverseMappings: Map[String, String] = toMap.toSeq.map { case (s, p) => p -> s }.toMap
+    SimpleCatalog.from(reverseMappings)
+  }
+
+  def filter(p: SimpleCatalog.UriRewrite => Boolean): SimpleCatalog = {
+    SimpleCatalog(xmlBaseAttributeOption, uriRewrites.filter(p))
+  }
+
   def toElem: simple.Elem = {
     val scope = Scope.from("" -> SimpleCatalog.ErNamespace)
 
@@ -121,6 +164,10 @@ object SimpleCatalog {
 
       UriRewrite(xmlBaseOption, uriStartString, rewritePrefix)
     }
+  }
+
+  def from(uriRewrites: Map[String, String]): SimpleCatalog = {
+    SimpleCatalog(None, uriRewrites.toIndexedSeq.map { case (startString, rewritePrefix) => UriRewrite(None, startString, rewritePrefix) })
   }
 
   def fromElem(catalogElem: BackingNodes.Elem): SimpleCatalog = {
