@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  This file is part of the Dutch Taxonomy (Nederlandse Taxonomie; NT)
+  Intellectual Property of the State of the Netherlands
+  Architecture: NT12
+  Version: 20170714.a
+  Release date: Friday July 14 09:00:00 2017
+-->
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <link:labelLink xlink:role="http://www.xbrl.org/2003/role/link" xlink:type="extended">
+    <link:label id="ez-ncgc-abstr_TheGeneralMeetingOfShareholdersTitle_label_de" xlink:label="ez-ncgc-abstr_TheGeneralMeetingOfShareholdersTitle_label_de" xlink:role="http://www.xbrl.org/2003/role/label" xlink:type="resource" xml:lang="de">Die (allgemeine) Hauptversammlung [Titel]</link:label>
+    <link:label id="ez-ncgc-abstr_LongTermValueTitle_label_de" xlink:label="ez-ncgc-abstr_LongTermValueTitle_label_de" xlink:role="http://www.xbrl.org/2003/role/label" xlink:type="resource" xml:lang="de">Langfristige Wertschöpfung [Titel]</link:label>
+    <link:label id="ez-ncgc-abstr_DutchCorporateGovernanceCodeTitle_label_de" xlink:label="ez-ncgc-abstr_DutchCorporateGovernanceCodeTitle_label_de" xlink:role="http://www.xbrl.org/2003/role/label" xlink:type="resource" xml:lang="de">Niederländische Corporate-Governance-Richtlinie [Titel]</link:label>
+    <link:label id="ez-ncgc-abstr_PreambleTitle_label_de" xlink:label="ez-ncgc-abstr_PreambleTitle_label_de" xlink:role="http://www.xbrl.org/2003/role/label" xlink:type="resource" xml:lang="de">Präambel [Titel]</link:label>
+    <link:label id="ez-ncgc-abstr_EffectivenessOfManagementAndSupervisionTitle_label_de" xlink:label="ez-ncgc-abstr_EffectivenessOfManagementAndSupervisionTitle_label_de" xlink:role="http://www.xbrl.org/2003/role/label" xlink:type="resource" xml:lang="de">Wirksamkeit der Verwaltung und Überwachung [Titel]</link:label>
+    <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="ez-ncgc-abstr_DutchCorporateGovernanceCodeTitle_loc" xlink:to="ez-ncgc-abstr_DutchCorporateGovernanceCodeTitle_label_de" xlink:type="arc"/>
+    <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="ez-ncgc-abstr_EffectivenessOfManagementAndSupervisionTitle_loc" xlink:to="ez-ncgc-abstr_EffectivenessOfManagementAndSupervisionTitle_label_de" xlink:type="arc"/>
+    <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="ez-ncgc-abstr_LongTermValueTitle_loc" xlink:to="ez-ncgc-abstr_LongTermValueTitle_label_de" xlink:type="arc"/>
+    <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="ez-ncgc-abstr_PreambleTitle_loc" xlink:to="ez-ncgc-abstr_PreambleTitle_label_de" xlink:type="arc"/>
+    <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="ez-ncgc-abstr_TheGeneralMeetingOfShareholdersTitle_loc" xlink:to="ez-ncgc-abstr_TheGeneralMeetingOfShareholdersTitle_label_de" xlink:type="arc"/>
+    <link:loc xlink:href="ez-ncgc-abstracts.xsd#ez-ncgc-abstr_DutchCorporateGovernanceCodeTitle" xlink:label="ez-ncgc-abstr_DutchCorporateGovernanceCodeTitle_loc" xlink:type="locator"/>
+    <link:loc xlink:href="ez-ncgc-abstracts.xsd#ez-ncgc-abstr_EffectivenessOfManagementAndSupervisionTitle" xlink:label="ez-ncgc-abstr_EffectivenessOfManagementAndSupervisionTitle_loc" xlink:type="locator"/>
+    <link:loc xlink:href="ez-ncgc-abstracts.xsd#ez-ncgc-abstr_LongTermValueTitle" xlink:label="ez-ncgc-abstr_LongTermValueTitle_loc" xlink:type="locator"/>
+    <link:loc xlink:href="ez-ncgc-abstracts.xsd#ez-ncgc-abstr_PreambleTitle" xlink:label="ez-ncgc-abstr_PreambleTitle_loc" xlink:type="locator"/>
+    <link:loc xlink:href="ez-ncgc-abstracts.xsd#ez-ncgc-abstr_TheGeneralMeetingOfShareholdersTitle" xlink:label="ez-ncgc-abstr_TheGeneralMeetingOfShareholdersTitle_loc" xlink:type="locator"/>
+  </link:labelLink>
+</link:linkbase>

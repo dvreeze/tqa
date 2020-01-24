@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  This file is part of the Dutch Taxonomy (Nederlandse Taxonomie; NT)
+  Intellectual Property of the State of the Netherlands
+  Architecture: NT12
+  Version: 20170714.a
+  Release date: Friday July 14 09:00:00 2017
+-->
+<xs:schema xmlns:ez-ncgc-lr="http://www.nltaxonomie.nl/nt12/ez/20170714.a/dictionary/ez-ncgc-linkroles" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.nltaxonomie.nl/nt12/ez/20170714.a/dictionary/ez-ncgc-linkroles">
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="ez-ncgc-linkroles-generic-lab-en.xml" xlink:role="http://www.xbrl.org/2003/role/link" xlink:type="simple"/>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="ez-ncgc-linkroles-generic-lab-nl.xml" xlink:role="http://www.xbrl.org/2003/role/link" xlink:type="simple"/>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="ez-ncgc-linkroles-generic-lab-de.xml" xlink:role="http://www.xbrl.org/2008/role/link" xlink:type="simple"/>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="ez-ncgc-linkroles-generic-lab-fr.xml" xlink:role="http://www.xbrl.org/2008/role/link" xlink:type="simple"/>
+      <link:roleType id="ez-ncgc-lr_DutchCorporateGovernanceCode" roleURI="urn:ez:linkrole:dutch-corporate-governance-code">
+        <link:definition>Nederlandse Corporate Governance Code</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+</xs:schema>
