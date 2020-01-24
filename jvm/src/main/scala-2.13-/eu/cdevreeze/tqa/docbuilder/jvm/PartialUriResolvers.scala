@@ -112,8 +112,18 @@ object PartialUriResolvers {
     forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))
   }
 
+  /**
+   * Creates a PartialUriResolver from the given UriResolver, returning None for all URIs for which the URI filter returns false.
+   */
+  def fromUriResolver(uriResolver: URI => InputSource, filterUri: URI => Boolean): PartialUriResolver = {
+    { (uri: URI) => if (filterUri(uri)) Some(uriResolver(uri)) else None }
+  }
+
+  /**
+   * Returns `fromUriResolver(uriResolver, _ => true)`.
+   */
   def fromUriResolver(uriResolver: URI => InputSource): PartialUriResolver = {
-    uriResolver.andThen(is => Some(is))
+    fromUriResolver(uriResolver, _ => true)
   }
 
   val default: PartialUriResolver = {

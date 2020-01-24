@@ -22,10 +22,10 @@ import java.net.URI
 import java.util.zip.ZipFile
 
 import scala.collection.immutable
-
-import org.xml.sax.InputSource
+import scala.util.Try
 
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import org.xml.sax.InputSource
 
 /**
  * URI resolvers, converting an URI to a SAX InputSource.
@@ -230,5 +230,22 @@ object UriResolvers {
   private def returnWithTrailingSlash(uri: URI): String = {
     val s = uri.toString
     if (s.endsWith("/")) s else s + "/"
+  }
+
+  /**
+   * Extension of UriResolver with resolution fallback capability.
+   */
+  implicit class WithResolutionFallback(val uriResolver: UriResolver) extends AnyVal {
+
+    /**
+     * Adds a second UriResolver as resolution fallback, if the first UriResolver fails with an exception for some URI.
+     */
+    def withResolutionFallback(otherUriResolver: UriResolver): UriResolver = {
+      def resolve(uri: URI): InputSource = {
+        Try(uriResolver(uri)).getOrElse(otherUriResolver(uri))
+      }
+
+      resolve
+    }
   }
 }
