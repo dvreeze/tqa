@@ -31,7 +31,7 @@ import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
  * to the application to generate a SimpleCatalog from the parent directory. Method PartialUriConverters.fromCatalog
  * can then be used to turn that SimpleCatalog into a PartialUriConverter.
  *
- * Note that this singleton object only has one fundamental method, namely fromCatalog.
+ * Note that there is only one fundamental method in this singleton object, namely fromCatalog.
  *
  * @author Chris de Vreeze
  */
@@ -39,7 +39,7 @@ object PartialUriConverters {
 
   type PartialUriConverter = URI => Option[URI]
 
-  def identity: PartialUriConverter = {
+  val identity: PartialUriConverter = {
     def convertUri(uri: URI): Option[URI] = Some(uri)
 
     convertUri

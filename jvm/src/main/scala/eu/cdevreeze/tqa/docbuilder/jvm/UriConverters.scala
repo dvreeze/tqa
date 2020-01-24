@@ -26,7 +26,7 @@ import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
  * URI converters, typically converting an HTTP or HTTPS URI to a local file URI. The implementations
  * use `SimpleCatalog` objects to perform the actual URI conversions.
  *
- * Note that this singleton object has only fundamental methods fromPartialUriConvertersWithoutFallback and
+ * Note that the only fundamental methods in this singleton object are fromPartialUriConvertersWithoutFallback and
  * fromPartialUriConvertersFallingBackToIdentity.
  *
  * @author Chris de Vreeze
@@ -77,7 +77,21 @@ object UriConverters {
     convertUri
   }
 
-  def identity: UriConverter = {
+  /**
+   * Returns `fromPartialUriConvertersWithoutFallback(immutable.IndexedSeq(partialUriConverter))`.
+   */
+  def fromPartialUriConverterWithoutFallback(partialUriConverter: PartialUriConverters.PartialUriConverter): UriConverter = {
+    fromPartialUriConvertersWithoutFallback(immutable.IndexedSeq(partialUriConverter))
+  }
+
+  /**
+   * Returns `fromPartialUriConvertersFallingBackToIdentity(immutable.IndexedSeq(partialUriConverter))`.
+   */
+  def fromPartialUriConverterFallingBackToIdentity(partialUriConverter: PartialUriConverters.PartialUriConverter): UriConverter = {
+    fromPartialUriConvertersFallingBackToIdentity(immutable.IndexedSeq(partialUriConverter))
+  }
+
+  val identity: UriConverter = {
     PartialUriConverters.identity.andThen(_.get)
   }
 
@@ -85,15 +99,15 @@ object UriConverters {
    * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise the identity function.
    */
   def fromCatalogFallingBackToIdentity(catalog: SimpleCatalog): UriConverter = {
-    fromPartialUriConvertersFallingBackToIdentity(
-      Vector(PartialUriConverters.fromCatalog(catalog)))
+    fromPartialUriConverterFallingBackToIdentity(
+      PartialUriConverters.fromCatalog(catalog))
   }
 
   /**
    * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise throwing an exception.
    */
   def fromCatalogWithoutFallback(catalog: SimpleCatalog): UriConverter = {
-    fromPartialUriConvertersWithoutFallback(
-      Vector(PartialUriConverters.fromCatalog(catalog)))
+    fromPartialUriConverterWithoutFallback(
+      PartialUriConverters.fromCatalog(catalog))
   }
 }

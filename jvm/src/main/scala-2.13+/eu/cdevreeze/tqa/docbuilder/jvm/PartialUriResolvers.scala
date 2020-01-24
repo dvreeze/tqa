@@ -31,7 +31,7 @@ import org.xml.sax.InputSource
 /**
  * Partial URI resolvers, converting an URI to a SAX InputSource.
  *
- * Note that this singleton object only has fundamental methods fromPartialUriConverter and its counterpart for ZIP files,
+ * Note that the only fundamental methods in this singleton object are fromPartialUriConverter and its counterpart for ZIP files,
  * namely forZipFile.
  *
  * @author Chris de Vreeze
@@ -112,7 +112,11 @@ object PartialUriResolvers {
     forZipFile(zipFile, PartialUriConverters.fromCatalog(catalog))
   }
 
-  def default: PartialUriResolver = {
+  def fromUriResolver(uriResolver: URI => InputSource): PartialUriResolver = {
+    uriResolver.andThen(is => Some(is))
+  }
+
+  val default: PartialUriResolver = {
     fromPartialUriConverter(PartialUriConverters.identity)
   }
 

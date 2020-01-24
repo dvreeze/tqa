@@ -30,7 +30,7 @@ import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 /**
  * URI resolvers, converting an URI to a SAX InputSource.
  *
- * Note that this singleton object only has fundamental methods fromPartialUriResolversWithoutFallback and fromPartialUriResolversWithFallback.
+ * Note that the only fundamental methods in this singleton object are fromPartialUriResolversWithoutFallback and fromPartialUriResolversWithFallback.
  *
  * @author Chris de Vreeze
  */
@@ -90,19 +90,33 @@ object UriResolvers {
   }
 
   /**
+   * Returns `fromPartialUriResolversWithoutFallback(immutable.IndexedSeq(partialUriResolver))`.
+   */
+  def fromPartialUriResolverWithoutFallback(partialUriResolver: PartialUriResolvers.PartialUriResolver): UriResolver = {
+    fromPartialUriResolversWithoutFallback(immutable.IndexedSeq(partialUriResolver))
+  }
+
+  /**
+   * Returns `fromPartialUriResolversWithFallback(immutable.IndexedSeq(partialUriResolver))`.
+   */
+  def fromPartialUriResolverWithFallback(partialUriResolver: PartialUriResolvers.PartialUriResolver): UriResolver = {
+    fromPartialUriResolversWithFallback(immutable.IndexedSeq(partialUriResolver))
+  }
+
+  /**
    * Returns the equivalent of `PartialUriResolvers.fromPartialUriConverter(liftedUriConverter).andThen(_.get)`.
    *
    * It can also be defined as:
    * {{{
-   * fromPartialUriResolversWithoutFallback(
-   *   Vector(PartialUriResolvers.fromPartialUriConverter(liftedUriConverter)))
+   * fromPartialUriResolverWithoutFallback(
+   *   PartialUriResolvers.fromPartialUriConverter(liftedUriConverter))
    * }}}
    */
   def fromUriConverter(uriConverter: URI => URI): UriResolver = {
-    val delegate: PartialUriResolvers.PartialUriResolver =
+    val pur: PartialUriResolvers.PartialUriResolver =
       PartialUriResolvers.fromPartialUriConverter(PartialUriConverters.fromUriConverter(uriConverter))
 
-    delegate.andThen(_.ensuring(_.isDefined).get)
+    fromPartialUriResolverWithoutFallback(pur)
   }
 
   /**
@@ -110,15 +124,15 @@ object UriResolvers {
    *
    * It can also be defined as:
    * {{{
-   * fromPartialUriResolversWithoutFallback(
-   *   Vector(PartialUriResolvers.forZipFile(zipFile, liftedUriConverter)))
+   * fromPartialUriResolverWithoutFallback(
+   *   PartialUriResolvers.forZipFile(zipFile, liftedUriConverter))
    * }}}
    */
   def forZipFile(zipFile: ZipFile, uriConverter: URI => URI): UriResolver = {
-    val delegate: PartialUriResolvers.PartialUriResolver =
+    val pur: PartialUriResolvers.PartialUriResolver =
       PartialUriResolvers.forZipFile(zipFile, PartialUriConverters.fromUriConverter(uriConverter))
 
-    delegate.andThen(_.ensuring(_.isDefined).get)
+    fromPartialUriResolverWithoutFallback(pur)
   }
 
   /**
@@ -209,7 +223,7 @@ object UriResolvers {
     forZipFile(zipFile, UriConverters.fromCatalogWithoutFallback(catalog))
   }
 
-  def default: UriResolver = {
+  val default: UriResolver = {
     fromUriConverter(UriConverters.identity)
   }
 
