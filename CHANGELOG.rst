@@ -12,6 +12,21 @@ Version 0.9.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.8.12
+======
+
+This release improves substantially on URI conversion and resolution, as used in document builders. This means that quite
+complex and custom URI resolution scenarios are now better supported than before.
+
+The most important changes compared to version 0.8.11 are:
+
+* Class ``SimpleCatalog`` has been enriched to make it more user-friendly
+* URI resolution is now more composable for the same URIs (it was already composable across URIs)
+* Upgraded dependencies
+
+There are no breaking changes compared to version 0.8.11 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues).
+
+
 0.8.11
 ======
 
