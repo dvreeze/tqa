@@ -23,6 +23,7 @@ import java.util.zip.ZipFile
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriConverters
 import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
 import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers.PartialUriResolver
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
@@ -39,6 +40,22 @@ import org.scalatest.funsuite.AnyFunSuite
 class ComplexTaxonomyBuilderTest extends AnyFunSuite {
 
   test("testComplexTaxonomyBootstrapping") {
+    val taxonomyBuilder: TaxonomyBuilder = getTaxonomyBuilder(uriResolver)
+
+    val dts: BasicTaxonomy = taxonomyBuilder.build(Set(entryPointUri))
+
+    assertResult(true) {
+      dts.taxonomyBase.taxonomyDocUriMap.contains(entryPointUri)
+    }
+
+    assertResult(675) {
+      dts.relationships.size
+    }
+  }
+
+  test("testAlternativeComplexTaxonomyBootstrapping") {
+    val taxonomyBuilder: TaxonomyBuilder = getTaxonomyBuilder(otherUriResolver)
+
     val dts: BasicTaxonomy = taxonomyBuilder.build(Set(entryPointUri))
 
     assertResult(true) {
@@ -136,14 +153,65 @@ class ComplexTaxonomyBuilderTest extends AnyFunSuite {
     UriResolvers.fromPartialUriResolversWithoutFallback(Vector(ntPartialUriResolver, coreFilePartialUriResolver))
   }
 
-  private val docBuilder: SaxonDocumentBuilder = {
+  private val otherNtPartialUriResolver: PartialUriResolver = {
+    val folder1: File = new File(scatteredTaxoFilesDir, "folder1").ensuring(_.isDirectory)
+
+    val catalog1: SimpleCatalog = SimpleCatalog.from(Map(
+      "http://www.nltaxonomie.nl/nt12/ez/" -> s"${folder1.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
+    ))
+
+    val folder2: File = new File(scatteredTaxoFilesDir, "folder2").ensuring(_.isDirectory)
+
+    val catalog2: SimpleCatalog = SimpleCatalog.from(Map(
+      "http://www.nltaxonomie.nl/nt12/ez/" -> s"${folder2.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
+      "http://www.nltaxonomie.nl/nt12/sbr/" -> s"${folder2.toURI}taxonomie/www.nltaxonomie.nl/nt12/sbr/",
+    ))
+
+    val partialUriConverter: URI => Option[URI] =
+      PartialUriConverters.fromCatalogs(Vector(catalog1, catalog2), PartialUriConverters.acceptOnlyExistingFile)
+    val partialUriResolver: PartialUriResolver = PartialUriResolvers.fromPartialUriConverter(partialUriConverter)
+    val uriResolverForFolders: UriResolver = UriResolvers.fromPartialUriResolverWithoutFallback(partialUriResolver)
+
+    val zipFile: File = new File(zipFileUri)
+
+    val catalogForZipFile: SimpleCatalog = SimpleCatalog.from(Map(
+      "http://www.nltaxonomie.nl/nt12/ez/" -> "taxonomie/www.nltaxonomie.nl/nt12/ez/",
+      "http://www.nltaxonomie.nl/nt12/sbr/" -> "taxonomie/www.nltaxonomie.nl/nt12/sbr/",
+    ))
+
+    // TODO Pass ZipFile from the outside, in order to be able to close it
+    val zipResolver: UriResolver = UriResolvers.forZipFileUsingCatalogWithoutFallback(new ZipFile(zipFile), catalogForZipFile)
+
+    val remainingFilesFolder: File = new File(scatteredTaxoFilesDir, "remaining-files").ensuring(_.isDirectory)
+
+    val fallbackCatalog: SimpleCatalog = SimpleCatalog.from(Map(
+      "http://www.nltaxonomie.nl/nt12/ez/" -> s"${remainingFilesFolder.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
+      "http://www.nltaxonomie.nl/nt12/sbr/" -> s"${remainingFilesFolder.toURI}taxonomie/www.nltaxonomie.nl/nt12/sbr/",
+    ))
+
+    val remainingFilesResolver: UriResolver = UriResolvers.fromCatalogWithoutFallback(fallbackCatalog)
+
+    val resolver: UriResolver = uriResolverForFolders
+      .withResolutionFallback(zipResolver)
+      .withResolutionFallback(remainingFilesResolver)
+
+    PartialUriResolvers.fromUriResolver(resolver, _.toString.startsWith("http://www.nltaxonomie.nl/nt12/"))
+  }
+
+  private val otherUriResolver: UriResolver = {
+    UriResolvers.fromPartialUriResolversWithoutFallback(Vector(otherNtPartialUriResolver, coreFilePartialUriResolver))
+  }
+
+  private def getDocBuilder(uriResolver: UriResolver): SaxonDocumentBuilder = {
     SaxonDocumentBuilder(processor.newDocumentBuilder(), uriResolver)
   }
 
-  private val taxonomyBuilder: TaxonomyBuilder = {
+  private def getTaxonomyBuilder(uriResolver: UriResolver): TaxonomyBuilder = {
     val documentCollector = DefaultDtsCollector()
 
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
+
+    val docBuilder = getDocBuilder(uriResolver)
 
     val taxoBuilder =
       TaxonomyBuilder

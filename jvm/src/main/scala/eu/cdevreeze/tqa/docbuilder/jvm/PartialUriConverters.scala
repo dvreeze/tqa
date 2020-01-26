@@ -16,7 +16,10 @@
 
 package eu.cdevreeze.tqa.docbuilder.jvm
 
+import java.io.File
 import java.net.URI
+
+import scala.collection.immutable
 
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 
@@ -61,5 +64,38 @@ object PartialUriConverters {
 
   def fromUriConverter(uriConverter: URI => URI): PartialUriConverter = {
     uriConverter.andThen(u => Some(u))
+  }
+
+  /**
+   * Turns a non-empty collection of catalogs into a partial URI converter, finding the first optional mapped URI for which
+   * the given URI function returns true. This method is useful if some URIs can be mapped to multiple target URIs, and we
+   * can describe this mapping as a non-empty collection of catalogs along with a filtering condition on mapped URIs.
+   */
+  def fromCatalogs(catalogs: immutable.IndexedSeq[SimpleCatalog], acceptTargetUri: URI => Boolean): PartialUriConverter = {
+    require(catalogs.nonEmpty, s"No catalogs given")
+
+    def convertUri(uri: URI): Option[URI] = {
+      catalogs.iterator.flatMap(_.findMappedUri(uri)).find(acceptTargetUri)
+    }
+
+    convertUri
+  }
+
+  // URI filters
+
+  // TODO URI filters for ZIP files
+
+  /**
+   * URI filter that only returns true for absolute "file" protocol URIs for existing normal files (so no directories)
+   */
+  def acceptOnlyExistingFile(uri: URI): Boolean = {
+    uri.isAbsolute && uri.getScheme == "file" && new File(uri).isFile
+  }
+
+  /**
+   * Like `acceptOnlyExistingFile`, but also returning true for absolute "http" or "https" URIs
+   */
+  def acceptExistingFile(uri: URI): Boolean = {
+    uri.isAbsolute && (uri.getScheme == "http" || uri.getScheme == "https" || acceptOnlyExistingFile(uri))
   }
 }

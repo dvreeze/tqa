@@ -116,7 +116,7 @@ object PartialUriResolvers {
    * Creates a PartialUriResolver from the given UriResolver, returning None for all URIs for which the URI filter returns false.
    */
   def fromUriResolver(uriResolver: URI => InputSource, filterUri: URI => Boolean): PartialUriResolver = {
-    { (uri: URI) => if (filterUri(uri)) Some(uriResolver(uri)) else None }
+    { uri: URI => if (filterUri(uri)) Some(uriResolver(uri)) else None }
   }
 
   /**
