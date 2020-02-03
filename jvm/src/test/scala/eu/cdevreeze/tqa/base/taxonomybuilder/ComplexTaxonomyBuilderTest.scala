@@ -20,6 +20,8 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
+import scala.collection.immutable
+
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
@@ -40,21 +42,7 @@ import org.scalatest.funsuite.AnyFunSuite
 class ComplexTaxonomyBuilderTest extends AnyFunSuite {
 
   test("testComplexTaxonomyBootstrapping") {
-    val taxonomyBuilder: TaxonomyBuilder = getTaxonomyBuilder(uriResolver)
-
-    val dts: BasicTaxonomy = taxonomyBuilder.build(Set(entryPointUri))
-
-    assertResult(true) {
-      dts.taxonomyBase.taxonomyDocUriMap.contains(entryPointUri)
-    }
-
-    assertResult(675) {
-      dts.relationships.size
-    }
-  }
-
-  test("testAlternativeComplexTaxonomyBootstrapping") {
-    val taxonomyBuilder: TaxonomyBuilder = getTaxonomyBuilder(otherUriResolver)
+    val taxonomyBuilder: TaxonomyBuilder = getTaxonomyBuilder(resultUriResolver)
 
     val dts: BasicTaxonomy = taxonomyBuilder.build(Set(entryPointUri))
 
@@ -77,14 +65,101 @@ class ComplexTaxonomyBuilderTest extends AnyFunSuite {
 
   private val scatteredTaxoFilesDir: File = new File(zipFileUri).getParentFile.ensuring(_.isDirectory)
 
-  private val ntPartialUriResolver: PartialUriResolver = {
+  /**
+   * Helper class implementing custom URI resolution, where URIs can be resolved from one of several directories where the same
+   * document may be found, or from some ZIP file, or "from the internet" (the latter replaced by another local directory in this test).
+   *
+   * For each URI, if needed it will be tried to resolve it from one of the several local directories, or otherwise from the ZIP file,
+   * or otherwise "from the internet" (see above).
+   *
+   * The tric is to do this URI resolution in such a way that the URI resolution workflow in practice hardly leans on exception
+   * handling. It is also desirable to do URI resolution in such a way that we do not need to build (in-memory) XML catalogs.
+   * This is indeed achieved in this CustomUriResolution class.
+   */
+  final class CustomUriResolution(val localDirCatalogs: immutable.IndexedSeq[SimpleCatalog]) {
+
+    def getResultUriResolver: UriResolver = {
+      UriResolvers.fromPartialUriResolversWithoutFallback(Vector(getFirstPartialUriResolver, getSecondPartialUriResolver))
+    }
+
+    private def getFirstPartialUriResolver: PartialUriResolver = {
+      // Resolution workflow starting with the local root directories
+
+      val uriResolver1: UriResolver = UriResolvers.fromPartialUriResolverWithoutFallback(partialUriResolverForLocalDirs)
+
+      // Next attempt in the resolution workflow
+
+      val uriResolver2: UriResolver = uriResolverForZipFile
+
+      // Falling back "to the internet"
+
+      val uriResolver3: UriResolver = fakeUriResolverForInternet
+
+      // Wiring this resolution workflow together
+
+      val workflow: UriResolver = uriResolver1.withResolutionFallback(uriResolver2).withResolutionFallback(uriResolver3)
+
+      // Make this URI resolver partial, in order to only handle URIs that may be resolved from the local root directories
+
+      PartialUriResolvers.fromUriResolver(workflow, acceptUriInFirstPartialUriResolver)
+    }
+
+    private def getSecondPartialUriResolver: PartialUriResolver = {
+      // In this second resolution workflow, no URIs will be passed that could potentially have been resolved from the local
+      // root directories, so forget about these local root directories here.
+
+      // First attempt in the resolution workflow
+
+      val uriResolver1: UriResolver = uriResolverForZipFile
+
+      // Falling back "to the internet"
+
+      val uriResolver2: UriResolver = fakeUriResolverForInternet
+
+      // Wiring this resolution workflow together
+
+      val workflow: UriResolver = uriResolver1.withResolutionFallback(uriResolver2)
+
+      // Make this URI resolver "partial", but here there is no need to filter on any URIs. After all, each URI is either
+      // handled by the first partial URI resolver, or not (in which case this fallback partial URI resolver is used).
+
+      // Note the 2 different "fallback concepts" in URI resolution terminology: "URI fallback" versus "resolution fallback"
+      // (for the same URIs).
+
+      PartialUriResolvers.fromUriResolver(workflow)
+    }
+
+    private def acceptUriInFirstPartialUriResolver(uri: URI): Boolean = {
+      partialUriResolverForLocalDirs(uri).nonEmpty // Nice, no need to create a new in-memory XML catalog
+    }
+
+    private val partialUriResolverForLocalDirs: PartialUriResolver = {
+      val partialUriConverter: URI => Option[URI] =
+        PartialUriConverters.fromCatalogs(localDirCatalogs, PartialUriConverters.acceptOnlyExistingFile)
+
+      PartialUriResolvers.fromPartialUriConverter(partialUriConverter)
+    }
+
+    private val uriResolverForZipFile: UriResolver = {
+      val zipFile: File = new File(zipFileUri)
+
+      // TODO Pass ZipFile from the outside, in order to be able to close it
+      UriResolvers.forZipFileContainingLocalMirror(new ZipFile(zipFile), Some(URI.create("taxonomie/")))
+    }
+
+    private val fakeUriResolverForInternet: UriResolver = {
+      val taxoFolder: File = new File(scatteredTaxoFilesDir, "remaining-files/taxonomie").ensuring(_.isDirectory)
+
+      UriResolvers.fromLocalMirrorRootDirectory(taxoFolder)
+    }
+  }
+
+  private val resultUriResolver: UriResolver = {
     val folder1: File = new File(scatteredTaxoFilesDir, "folder1").ensuring(_.isDirectory)
 
     val catalog1: SimpleCatalog = SimpleCatalog.from(Map(
       "http://www.nltaxonomie.nl/nt12/ez/" -> s"${folder1.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
     ))
-
-    val folder1Resolver: UriResolver = UriResolvers.fromCatalogWithoutFallback(catalog1)
 
     val folder2: File = new File(scatteredTaxoFilesDir, "folder2").ensuring(_.isDirectory)
 
@@ -93,113 +168,9 @@ class ComplexTaxonomyBuilderTest extends AnyFunSuite {
       "http://www.nltaxonomie.nl/nt12/sbr/" -> s"${folder2.toURI}taxonomie/www.nltaxonomie.nl/nt12/sbr/",
     ))
 
-    val folder2Resolver: UriResolver = UriResolvers.fromCatalogWithoutFallback(catalog2)
+    val customUriResolution = new CustomUriResolution(Vector(catalog1, catalog2))
 
-    val zipFile: File = new File(zipFileUri)
-
-    val catalogForZipFile: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/nt12/ez/" -> "taxonomie/www.nltaxonomie.nl/nt12/ez/",
-      "http://www.nltaxonomie.nl/nt12/sbr/" -> "taxonomie/www.nltaxonomie.nl/nt12/sbr/",
-    ))
-
-    // TODO Pass ZipFile from the outside, in order to be able to close it
-    val zipResolver: UriResolver = UriResolvers.forZipFileUsingCatalogWithoutFallback(new ZipFile(zipFile), catalogForZipFile)
-
-    val remainingFilesFolder: File = new File(scatteredTaxoFilesDir, "remaining-files").ensuring(_.isDirectory)
-
-    val fallbackCatalog: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/nt12/ez/" -> s"${remainingFilesFolder.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
-      "http://www.nltaxonomie.nl/nt12/sbr/" -> s"${remainingFilesFolder.toURI}taxonomie/www.nltaxonomie.nl/nt12/sbr/",
-    ))
-
-    val remainingFilesResolver: UriResolver = UriResolvers.fromCatalogWithoutFallback(fallbackCatalog)
-
-    val resolver: UriResolver = folder1Resolver
-      .withResolutionFallback(folder2Resolver)
-      .withResolutionFallback(zipResolver)
-      .withResolutionFallback(remainingFilesResolver)
-
-    PartialUriResolvers.fromUriResolver(resolver, _.toString.startsWith("http://www.nltaxonomie.nl/nt12/"))
-  }
-
-  private val coreFilePartialUriResolver: PartialUriResolver = {
-    val zipFile: File = new File(zipFileUri)
-
-    val catalogForZipFile: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/" -> "taxonomie/www.nltaxonomie.nl/",
-      "http://www.xbrl.org/" -> "taxonomie/www.xbrl.org/",
-      "http://www.w3.org/" -> "taxonomie/www.w3.org/",
-    ))
-
-    // TODO Pass ZipFile from the outside, in order to be able to close it
-    val zipResolver: UriResolver = UriResolvers.forZipFileUsingCatalogWithoutFallback(new ZipFile(zipFile), catalogForZipFile)
-
-    val remainingFilesFolder: File = new File(scatteredTaxoFilesDir, "remaining-files").ensuring(_.isDirectory)
-
-    val fallbackCatalog: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/" -> s"${remainingFilesFolder.toURI}taxonomie/www.nltaxonomie.nl/",
-      "http://www.xbrl.org/" -> s"${remainingFilesFolder.toURI}taxonomie/www.xbrl.org/",
-      "http://www.w3.org/" -> s"${remainingFilesFolder.toURI}taxonomie/www.w3.org/",
-    ))
-
-    val remainingFilesResolver: UriResolver = UriResolvers.fromCatalogWithoutFallback(fallbackCatalog)
-
-    val resolver: UriResolver = zipResolver.withResolutionFallback(remainingFilesResolver)
-
-    PartialUriResolvers.fromUriResolver(resolver)
-  }
-
-  private val uriResolver: UriResolver = {
-    UriResolvers.fromPartialUriResolversWithoutFallback(Vector(ntPartialUriResolver, coreFilePartialUriResolver))
-  }
-
-  private val otherNtPartialUriResolver: PartialUriResolver = {
-    val folder1: File = new File(scatteredTaxoFilesDir, "folder1").ensuring(_.isDirectory)
-
-    val catalog1: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/nt12/ez/" -> s"${folder1.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
-    ))
-
-    val folder2: File = new File(scatteredTaxoFilesDir, "folder2").ensuring(_.isDirectory)
-
-    val catalog2: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/nt12/ez/" -> s"${folder2.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
-      "http://www.nltaxonomie.nl/nt12/sbr/" -> s"${folder2.toURI}taxonomie/www.nltaxonomie.nl/nt12/sbr/",
-    ))
-
-    val partialUriConverter: URI => Option[URI] =
-      PartialUriConverters.fromCatalogs(Vector(catalog1, catalog2), PartialUriConverters.acceptOnlyExistingFile)
-    val partialUriResolver: PartialUriResolver = PartialUriResolvers.fromPartialUriConverter(partialUriConverter)
-    val uriResolverForFolders: UriResolver = UriResolvers.fromPartialUriResolverWithoutFallback(partialUriResolver)
-
-    val zipFile: File = new File(zipFileUri)
-
-    val catalogForZipFile: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/nt12/ez/" -> "taxonomie/www.nltaxonomie.nl/nt12/ez/",
-      "http://www.nltaxonomie.nl/nt12/sbr/" -> "taxonomie/www.nltaxonomie.nl/nt12/sbr/",
-    ))
-
-    // TODO Pass ZipFile from the outside, in order to be able to close it
-    val zipResolver: UriResolver = UriResolvers.forZipFileUsingCatalogWithoutFallback(new ZipFile(zipFile), catalogForZipFile)
-
-    val remainingFilesFolder: File = new File(scatteredTaxoFilesDir, "remaining-files").ensuring(_.isDirectory)
-
-    val fallbackCatalog: SimpleCatalog = SimpleCatalog.from(Map(
-      "http://www.nltaxonomie.nl/nt12/ez/" -> s"${remainingFilesFolder.toURI}taxonomie/www.nltaxonomie.nl/nt12/ez/",
-      "http://www.nltaxonomie.nl/nt12/sbr/" -> s"${remainingFilesFolder.toURI}taxonomie/www.nltaxonomie.nl/nt12/sbr/",
-    ))
-
-    val remainingFilesResolver: UriResolver = UriResolvers.fromCatalogWithoutFallback(fallbackCatalog)
-
-    val resolver: UriResolver = uriResolverForFolders
-      .withResolutionFallback(zipResolver)
-      .withResolutionFallback(remainingFilesResolver)
-
-    PartialUriResolvers.fromUriResolver(resolver, _.toString.startsWith("http://www.nltaxonomie.nl/nt12/"))
-  }
-
-  private val otherUriResolver: UriResolver = {
-    UriResolvers.fromPartialUriResolversWithoutFallback(Vector(otherNtPartialUriResolver, coreFilePartialUriResolver))
+    customUriResolution.getResultUriResolver
   }
 
   private def getDocBuilder(uriResolver: UriResolver): SaxonDocumentBuilder = {
