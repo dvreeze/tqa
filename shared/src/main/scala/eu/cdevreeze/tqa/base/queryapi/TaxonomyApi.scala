@@ -20,7 +20,6 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
-import eu.cdevreeze.tqa.base.relationship.Relationship
 
 /**
  * Purely abstract trait offering a '''taxonomy query API'''. It combines several other purely abstract query
@@ -30,21 +29,17 @@ import eu.cdevreeze.tqa.base.relationship.Relationship
  * @author Chris de Vreeze
  */
 trait TaxonomyApi
-  extends TaxonomySchemaApi
-  with StandardRelationshipContainerApi
-  with NonStandardRelationshipContainerApi
-  with InterConceptRelationshipContainerApi
-  with PresentationRelationshipContainerApi
-  with ConceptLabelRelationshipContainerApi
-  with ConceptReferenceRelationshipContainerApi
-  with ElementLabelRelationshipContainerApi
-  with ElementReferenceRelationshipContainerApi
-  with DimensionalRelationshipContainerApi {
-
-  /**
-   * Returns all relationships in the taxonomy
-   */
-  def relationships: immutable.IndexedSeq[Relationship]
+    extends TaxonomySchemaApi
+    with RelationshipContainerApi
+    with StandardRelationshipContainerApi
+    with NonStandardRelationshipContainerApi
+    with InterConceptRelationshipContainerApi
+    with PresentationRelationshipContainerApi
+    with ConceptLabelRelationshipContainerApi
+    with ConceptReferenceRelationshipContainerApi
+    with ElementLabelRelationshipContainerApi
+    with ElementReferenceRelationshipContainerApi
+    with DimensionalRelationshipContainerApi {
 
   /**
    * Returns all taxonomy documents.

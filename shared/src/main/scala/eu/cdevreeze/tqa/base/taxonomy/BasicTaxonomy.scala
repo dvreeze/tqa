@@ -39,6 +39,7 @@ import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.relationship.Relationship
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.StandardRelationship
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.DerivedState
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
@@ -59,22 +60,17 @@ import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
  * @author Chris de Vreeze
  */
 final class BasicTaxonomy private (
-  val taxonomyBase: TaxonomyBase,
-  val extraSubstitutionGroupMap: SubstitutionGroupMap,
-  val netSubstitutionGroupMap: SubstitutionGroupMap,
-  val relationships: immutable.IndexedSeq[Relationship],
-  val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
-  val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
-  val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
-  val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
-  val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
-  val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]]) extends TaxonomyLike {
+    val taxonomyBase: TaxonomyBase,
+    val extraSubstitutionGroupMap: SubstitutionGroupMap,
+    val relationships: immutable.IndexedSeq[Relationship],
+    val derivedState: DerivedState)
+    extends TaxonomyLike {
 
   def taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument] = taxonomyBase.taxonomyDocs
 
   def rootElems: immutable.IndexedSeq[TaxonomyElem] = taxonomyBase.rootElems
 
-  def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
+  def substitutionGroupMap: SubstitutionGroupMap = derivedState.netSubstitutionGroupMap
 
   def getRootElem(elem: TaxonomyElem): TaxonomyElem = {
     val docUri = elem.docUri
@@ -96,7 +92,7 @@ final class BasicTaxonomy private (
   }
 
   def findGlobalElementDeclarationByUri(uri: URI): Option[GlobalElementDeclaration] = {
-    taxonomyBase.findElemByUri(uri) collectFirst { case decl: GlobalElementDeclaration => decl }
+    taxonomyBase.findElemByUri(uri).collectFirst { case decl: GlobalElementDeclaration => decl }
   }
 
   def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
@@ -120,28 +116,65 @@ final class BasicTaxonomy private (
   }
 
   def findConceptDeclaration(ename: EName): Option[ConceptDeclaration] = {
-    conceptDeclarationsByEName.get(ename)
+    derivedState.conceptDeclarationsByEName.get(ename)
+  }
+
+  def findAllRelationshipsOfType[A <: Relationship](relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+    implicit val clsTag: ClassTag[A] = relationshipType
+    relationships.collect { case rel: A => rel }
+  }
+
+  def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship] = {
+    derivedState.standardRelationships
+  }
+
+  def standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
+    derivedState.standardRelationshipsBySource
   }
 
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    implicit val clsTag = relationshipType
-    relationships collect { case rel: A => rel }
+    implicit val clsTag: ClassTag[A] = relationshipType
+    findAllStandardRelationships.collect { case rel: A => rel }
   }
 
-  def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
-
-    implicit val clsTag = relationshipType
-    relationships collect { case rel: A => rel }
+  def findAllInterConceptRelationships: immutable.IndexedSeq[InterConceptRelationship] = {
+    derivedState.interConceptRelationships
   }
 
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    implicit val clsTag = relationshipType
-    relationships collect { case rel: A => rel }
+    implicit val clsTag: ClassTag[A] = relationshipType
+    findAllInterConceptRelationships.collect { case rel: A => rel }
+  }
+
+  def interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
+    derivedState.interConceptRelationshipsBySource
+  }
+
+  def interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
+    derivedState.interConceptRelationshipsByTarget
+  }
+
+  def findAllNonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship] = {
+    derivedState.nonStandardRelationships
+  }
+
+  def nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
+    derivedState.nonStandardRelationshipsBySource
+  }
+
+  def nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
+    derivedState.nonStandardRelationshipsByTarget
+  }
+
+  def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+
+    implicit val clsTag: ClassTag[A] = relationshipType
+    findAllNonStandardRelationships.collect { case rel: A => rel }
   }
 
   /**
@@ -154,10 +187,7 @@ final class BasicTaxonomy private (
     val filteredRelationships: immutable.IndexedSeq[Relationship] =
       relationships.groupBy(_.docUri).filter(kv => docUris.contains(kv._1)).values.toIndexedSeq.flatten
 
-    BasicTaxonomy.build(
-      taxonomyBase.filteringDocumentUris(docUris),
-      extraSubstitutionGroupMap,
-      filteredRelationships)
+    BasicTaxonomy.build(taxonomyBase.filteringDocumentUris(docUris), extraSubstitutionGroupMap, filteredRelationships)
   }
 
   /**
@@ -166,10 +196,7 @@ final class BasicTaxonomy private (
    * It can be used to make query methods (not taking an EName) cheaper.
    */
   def filteringRelationships(p: Relationship => Boolean): BasicTaxonomy = {
-    BasicTaxonomy.build(
-      taxonomyBase,
-      extraSubstitutionGroupMap,
-      relationships.filter(p))
+    BasicTaxonomy.build(taxonomyBase, extraSubstitutionGroupMap, relationships.filter(p))
   }
 
   /**
@@ -207,14 +234,87 @@ final class BasicTaxonomy private (
 
 object BasicTaxonomy {
 
+  private[taxonomy] class DerivedState(
+      val netSubstitutionGroupMap: SubstitutionGroupMap,
+      val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
+      val standardRelationships: immutable.IndexedSeq[StandardRelationship],
+      val nonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship],
+      val interConceptRelationships: immutable.IndexedSeq[InterConceptRelationship],
+      val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
+      val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
+      val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
+      val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]],
+      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]])
+
+  private[taxonomy] object DerivedState {
+
+    def build(
+        taxonomyBase: TaxonomyBase,
+        extraSubstitutionGroupMap: SubstitutionGroupMap,
+        relationships: immutable.IndexedSeq[Relationship]): DerivedState = {
+
+      val netSubstitutionGroupMap = taxonomyBase.derivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)
+
+      val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
+
+      val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
+        taxonomyBase.globalElementDeclarationMap.toSeq.flatMap {
+          case (ename, decl) =>
+            conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => ename -> conceptDecl)
+        }.toMap
+      }
+
+      val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
+
+      val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
+        standardRelationships.groupBy(_.sourceConceptEName)
+      }
+
+      val nonStandardRelationships = relationships.collect { case rel: NonStandardRelationship => rel }
+
+      // The performance of the following 2 statements to a large extent depends on the speed of Path computations.
+
+      val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
+        nonStandardRelationships.groupBy(_.sourceElem.key)
+      }
+
+      val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
+        nonStandardRelationships.groupBy(_.targetElem.key)
+      }
+
+      val interConceptRelationships = standardRelationships.collect { case rel: InterConceptRelationship => rel }
+
+      val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
+        interConceptRelationships.groupBy(_.sourceConceptEName)
+      }
+
+      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
+        interConceptRelationships.groupBy(_.targetConceptEName)
+      }
+
+      new DerivedState(
+        netSubstitutionGroupMap,
+        conceptDeclarationsByEName,
+        standardRelationships,
+        nonStandardRelationships,
+        interConceptRelationships,
+        standardRelationshipsBySource,
+        nonStandardRelationshipsBySource,
+        nonStandardRelationshipsByTarget,
+        interConceptRelationshipsBySource,
+        interConceptRelationshipsByTarget
+      )
+    }
+  }
+
   /**
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    * This method invokes the overloaded build method having as 4th parameter the arc filter that always returns true.
    */
   def build(
-    taxonomyBase: TaxonomyBase,
-    extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationshipFactory: RelationshipFactory): BasicTaxonomy = {
+      taxonomyBase: TaxonomyBase,
+      extraSubstitutionGroupMap: SubstitutionGroupMap,
+      relationshipFactory: RelationshipFactory): BasicTaxonomy = {
 
     build(taxonomyBase, extraSubstitutionGroupMap, relationshipFactory, _ => true)
   }
@@ -228,10 +328,10 @@ object BasicTaxonomy {
    * The arc filter is only used during relationship extraction. It is not used to filter any taxonomy DOM content.
    */
   def build(
-    taxonomyBase: TaxonomyBase,
-    extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationshipFactory: RelationshipFactory,
-    arcFilter: XLinkArc => Boolean): BasicTaxonomy = {
+      taxonomyBase: TaxonomyBase,
+      extraSubstitutionGroupMap: SubstitutionGroupMap,
+      relationshipFactory: RelationshipFactory,
+      arcFilter: XLinkArc => Boolean): BasicTaxonomy = {
 
     val relationships = relationshipFactory.extractRelationships(taxonomyBase, arcFilter)
 
@@ -243,59 +343,15 @@ object BasicTaxonomy {
    * Make sure that the relationships are backed by arcs in the underlying taxonomy. This is not checked.
    */
   def build(
-    taxonomyBase: TaxonomyBase,
-    extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
-
-    val netSubstitutionGroupMap = taxonomyBase.derivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)
-
-    val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
-
-    val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-      taxonomyBase.globalElementDeclarationMap.toSeq.flatMap {
-        case (ename, decl) =>
-          conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => ename -> conceptDecl)
-      }.toMap
-    }
-
-    val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
-
-    val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
-      standardRelationships groupBy (_.sourceConceptEName)
-    }
-
-    val nonStandardRelationships = relationships.collect { case rel: NonStandardRelationship => rel }
-
-    // The performance of the following 2 statements to a large extent depends on the speed of Path computations.
-
-    val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
-      nonStandardRelationships groupBy (_.sourceElem.key)
-    }
-
-    val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] = {
-      nonStandardRelationships groupBy (_.targetElem.key)
-    }
-
-    val interConceptRelationships = standardRelationships.collect { case rel: InterConceptRelationship => rel }
-
-    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      interConceptRelationships groupBy (_.sourceConceptEName)
-    }
-
-    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      interConceptRelationships groupBy (_.targetConceptEName)
-    }
+      taxonomyBase: TaxonomyBase,
+      extraSubstitutionGroupMap: SubstitutionGroupMap,
+      relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
     new BasicTaxonomy(
       taxonomyBase,
       extraSubstitutionGroupMap,
-      netSubstitutionGroupMap,
       relationships,
-      conceptDeclarationsByEName,
-      standardRelationshipsBySource,
-      nonStandardRelationshipsBySource,
-      nonStandardRelationshipsByTarget,
-      interConceptRelationshipsBySource,
-      interConceptRelationshipsByTarget)
+      DerivedState.build(taxonomyBase, extraSubstitutionGroupMap, relationships)
+    )
   }
 }

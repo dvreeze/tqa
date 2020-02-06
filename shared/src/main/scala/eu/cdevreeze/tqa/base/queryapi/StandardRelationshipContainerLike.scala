@@ -18,7 +18,6 @@ package eu.cdevreeze.tqa.base.queryapi
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
-import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.base.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
@@ -32,56 +31,55 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
 
   // Abstract methods
 
+  def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship]
+
   /**
    * Returns a map from source concepts to standard relationships. Must be fast in order for this trait to be fast.
    */
   def standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]]
 
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
 
-  final def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship] = {
-    findAllStandardRelationshipsOfType(classTag[StandardRelationship])
-  }
-
   final def filterStandardRelationships(
-    p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
+      p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
 
-    filterStandardRelationshipsOfType(classTag[StandardRelationship])(p)
+    findAllStandardRelationships.filter(p)
   }
 
-  final def filterStandardRelationshipsOfType[A <: StandardRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+  final def filterStandardRelationshipsOfType[A <: StandardRelationship](relationshipType: ClassTag[A])(
+      p: A => Boolean): immutable.IndexedSeq[A] = {
 
     findAllStandardRelationshipsOfType(relationshipType).filter(p)
   }
 
-  final def findAllOutgoingStandardRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[StandardRelationship] = {
+  final def findAllOutgoingStandardRelationships(sourceConcept: EName): immutable.IndexedSeq[StandardRelationship] = {
 
     filterOutgoingStandardRelationships(sourceConcept)(_ => true)
   }
 
-  final def filterOutgoingStandardRelationships(
-    sourceConcept: EName)(p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
+  final def filterOutgoingStandardRelationships(sourceConcept: EName)(
+      p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
 
     standardRelationshipsBySource.getOrElse(sourceConcept, Vector()).filter(p)
   }
 
   final def findAllOutgoingStandardRelationshipsOfType[A <: StandardRelationship](
-    sourceConcept:    EName,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      sourceConcept: EName,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterOutgoingStandardRelationshipsOfType(sourceConcept, relationshipType)(_ => true)
   }
 
   final def filterOutgoingStandardRelationshipsOfType[A <: StandardRelationship](
-    sourceConcept:    EName,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      sourceConcept: EName,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType
-    standardRelationshipsBySource.getOrElse(sourceConcept, Vector()) collect { case relationship: A if p(relationship) => relationship }
+    standardRelationshipsBySource.getOrElse(sourceConcept, Vector()).collect {
+      case relationship: A if p(relationship) => relationship
+    }
   }
 }
