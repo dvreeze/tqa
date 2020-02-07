@@ -34,7 +34,7 @@ import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.dom.XsdSchema
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyLike
-import eu.cdevreeze.tqa.base.queryapi.internal.RelationshipQueryFunctions
+import eu.cdevreeze.tqa.base.queryapi.internal.RelationshipQueries
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.relationship.Relationship
@@ -121,7 +121,7 @@ final class BasicTaxonomy private (
   }
 
   def findAllRelationshipsOfType[A <: Relationship](relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
-    RelationshipQueryFunctions.simpleQueryApi(relationships).findAllRelationshipsOfType[A](relationshipType)
+    RelationshipQueries.simpleRelationshipQueryApi(relationships).findAllRelationshipsOfType[A](relationshipType)
   }
 
   def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship] = {
@@ -135,8 +135,8 @@ final class BasicTaxonomy private (
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    RelationshipQueryFunctions
-      .simpleQueryApi(findAllStandardRelationships)
+    RelationshipQueries
+      .simpleRelationshipQueryApi(findAllStandardRelationships)
       .findAllRelationshipsOfType[A](relationshipType)
   }
 
@@ -147,8 +147,8 @@ final class BasicTaxonomy private (
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    RelationshipQueryFunctions
-      .simpleQueryApi(findAllInterConceptRelationships)
+    RelationshipQueries
+      .simpleRelationshipQueryApi(findAllInterConceptRelationships)
       .findAllRelationshipsOfType[A](relationshipType)
   }
 
@@ -175,8 +175,8 @@ final class BasicTaxonomy private (
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    RelationshipQueryFunctions
-      .simpleQueryApi(findAllNonStandardRelationships)
+    RelationshipQueries
+      .simpleRelationshipQueryApi(findAllNonStandardRelationships)
       .findAllRelationshipsOfType[A](relationshipType)
   }
 

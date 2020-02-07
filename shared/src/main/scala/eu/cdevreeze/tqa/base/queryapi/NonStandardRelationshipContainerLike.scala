@@ -20,6 +20,7 @@ import scala.collection.immutable
 import scala.reflect.ClassTag
 
 import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.base.queryapi.internal.RelationshipQueries
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath
 
@@ -52,13 +53,17 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
   final def filterNonStandardRelationships(
       p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
 
-    findAllNonStandardRelationships.filter(p)
+    RelationshipQueries
+        .simpleRelationshipQueryApi(findAllNonStandardRelationships)
+        .filterRelationships(p)
   }
 
   final def filterNonStandardRelationshipsOfType[A <: NonStandardRelationship](relationshipType: ClassTag[A])(
       p: A => Boolean): immutable.IndexedSeq[A] = {
 
-    findAllNonStandardRelationshipsOfType(relationshipType).filter(p)
+    RelationshipQueries
+        .simpleRelationshipQueryApi(findAllNonStandardRelationships)
+        .filterRelationshipsOfType(relationshipType)(p)
   }
 
   final def findAllOutgoingNonStandardRelationships(

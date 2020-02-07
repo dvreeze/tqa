@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.base.queryapi
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
+import eu.cdevreeze.tqa.base.queryapi.internal.RelationshipQueries
 import eu.cdevreeze.tqa.base.relationship.Relationship
 
 /**
@@ -37,12 +38,12 @@ trait RelationshipContainerLike extends RelationshipContainerApi {
   // Concrete methods
 
   final def filterRelationships(p: Relationship => Boolean): immutable.IndexedSeq[Relationship] = {
-    relationships.filter(p)
+    RelationshipQueries.simpleRelationshipQueryApi(relationships).filterRelationships(p)
   }
 
   final def filterRelationshipsOfType[A <: Relationship](relationshipType: ClassTag[A])(
       p: A => Boolean): immutable.IndexedSeq[A] = {
 
-    findAllRelationshipsOfType(relationshipType).filter(p)
+    RelationshipQueries.simpleRelationshipQueryApi(relationships).filterRelationshipsOfType(relationshipType)(p)
   }
 }
