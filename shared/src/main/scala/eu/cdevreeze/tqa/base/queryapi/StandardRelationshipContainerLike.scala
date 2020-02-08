@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.base.queryapi
 import scala.collection.immutable
 import scala.reflect.ClassTag
 
-import eu.cdevreeze.tqa.base.queryapi.internal.RelationshipQueries
 import eu.cdevreeze.tqa.base.relationship.StandardRelationship
 import eu.cdevreeze.yaidom.core.EName
 
@@ -47,17 +46,13 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
   final def filterStandardRelationships(
       p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
 
-    RelationshipQueries
-      .simpleRelationshipQueryApi(findAllStandardRelationships)
-      .filterRelationships(p)
+    findAllStandardRelationships.filter(p)
   }
 
   final def filterStandardRelationshipsOfType[A <: StandardRelationship](relationshipType: ClassTag[A])(
       p: A => Boolean): immutable.IndexedSeq[A] = {
 
-    RelationshipQueries
-      .simpleRelationshipQueryApi(findAllStandardRelationships)
-      .filterRelationshipsOfType(relationshipType)(p)
+    findAllStandardRelationshipsOfType(relationshipType).filter(p)
   }
 
   final def findAllOutgoingStandardRelationships(sourceConcept: EName): immutable.IndexedSeq[StandardRelationship] = {
@@ -67,9 +62,7 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
   final def filterOutgoingStandardRelationships(sourceConcept: EName)(
       p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {
 
-    RelationshipQueries
-      .outgoingStandardRelationshipQueryApi(standardRelationshipsBySource)
-      .filterOutgoingStandardRelationships(sourceConcept)(p)
+    standardRelationshipsBySource.getOrElse(sourceConcept, Vector()).filter(p)
   }
 
   final def findAllOutgoingStandardRelationshipsOfType[A <: StandardRelationship](
@@ -83,8 +76,10 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
       sourceConcept: EName,
       relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
-    RelationshipQueries
-      .outgoingStandardRelationshipQueryApi(standardRelationshipsBySource)
-      .filterOutgoingStandardRelationshipsOfType(sourceConcept, relationshipType)(p)
+    implicit val relationshipClassTag: ClassTag[A] = relationshipType
+
+    standardRelationshipsBySource.getOrElse(sourceConcept, Vector()).collect {
+      case relationship: A if p(relationship) => relationship
+    }
   }
 }

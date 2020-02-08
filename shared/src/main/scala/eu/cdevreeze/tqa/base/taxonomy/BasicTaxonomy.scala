@@ -34,7 +34,6 @@ import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.dom.XsdSchema
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyLike
-import eu.cdevreeze.tqa.base.queryapi.internal.RelationshipQueries
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.relationship.Relationship
@@ -121,7 +120,9 @@ final class BasicTaxonomy private (
   }
 
   def findAllRelationshipsOfType[A <: Relationship](relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
-    RelationshipQueries.simpleRelationshipQueryApi(relationships).findAllRelationshipsOfType[A](relationshipType)
+    implicit val clsTag: ClassTag[A] = relationshipType
+
+    relationships.collect { case rel: A => rel }
   }
 
   def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship] = {
@@ -135,9 +136,9 @@ final class BasicTaxonomy private (
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    RelationshipQueries
-      .simpleRelationshipQueryApi(findAllStandardRelationships)
-      .findAllRelationshipsOfType[A](relationshipType)
+    implicit val clsTag: ClassTag[A] = relationshipType
+
+    findAllStandardRelationships.collect { case rel: A => rel }
   }
 
   def findAllInterConceptRelationships: immutable.IndexedSeq[InterConceptRelationship] = {
@@ -147,9 +148,9 @@ final class BasicTaxonomy private (
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    RelationshipQueries
-      .simpleRelationshipQueryApi(findAllInterConceptRelationships)
-      .findAllRelationshipsOfType[A](relationshipType)
+    implicit val clsTag: ClassTag[A] = relationshipType
+
+    findAllInterConceptRelationships.collect { case rel: A => rel }
   }
 
   def interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
@@ -175,9 +176,9 @@ final class BasicTaxonomy private (
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    RelationshipQueries
-      .simpleRelationshipQueryApi(findAllNonStandardRelationships)
-      .findAllRelationshipsOfType[A](relationshipType)
+    implicit val clsTag: ClassTag[A] = relationshipType
+
+    findAllNonStandardRelationships.collect { case rel: A => rel }
   }
 
   /**
