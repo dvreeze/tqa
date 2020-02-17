@@ -137,8 +137,8 @@ final case class TaxonomyCommentNode(text: String) extends CanBeTaxonomyDocument
  */
 sealed abstract class TaxonomyElem private[dom](
   val backingElem: BackingNodes.Elem,
-  val childElems: immutable.IndexedSeq[TaxonomyElem]) extends CanBeTaxonomyDocumentChild
-  with AnyTaxonomyElem with ScopedNodes.Elem with IsNavigable with SubtypeAwareElemLike {
+  val childElems: immutable.IndexedSeq[TaxonomyElem])
+  extends CanBeTaxonomyDocumentChild with AnyTaxonomyElem with ScopedNodes.Elem with IsNavigable with SubtypeAwareElemLike {
 
   type ThisElem = TaxonomyElem
 
@@ -191,7 +191,7 @@ sealed abstract class TaxonomyElem private[dom](
    * On the other hand, those wrapper element implementations are convenient, but not intended for heavy use in
    * production. Hence, this method should typically be fast enough.
    */
-  final override def findChildElemByPathEntry(entry: Path.Entry): Option[ThisElem] = {
+  final def findChildElemByPathEntry(entry: Path.Entry): Option[ThisElem] = {
     // The previous implementation used immutable.IndexedSeq.toStream, which turned out to be surprisingly inefficient.
     // This inefficiency was noticed when calling method IsNavigable.findReverseAncestryOrSelfByPath
     // (and therefore this method) many times. Thanks to Johan Walters for pointing out this performance issue.
@@ -224,7 +224,7 @@ sealed abstract class TaxonomyElem private[dom](
    * On the other hand, those wrapper element implementations are convenient, but not intended for heavy use in
    * production. Hence, this method should typically be fast enough.
    */
-  final override def findAllChildElemsWithPathEntries: immutable.IndexedSeq[(ThisElem, Path.Entry)] = {
+  final def findAllChildElemsWithPathEntries: immutable.IndexedSeq[(ThisElem, Path.Entry)] = {
     backingElem.findAllChildElemsWithPathEntries
     val nextEntries = mutable.Map[EName, Int]()
 
