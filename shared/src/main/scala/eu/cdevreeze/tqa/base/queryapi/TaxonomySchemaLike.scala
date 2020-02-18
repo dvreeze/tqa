@@ -40,6 +40,8 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
   // Abstract methods
 
+  def conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration]
+
   /**
    * Finds the optional concept declaration with the given target expanded name (name plus target
    * namespace). Make sure the implementation of this method is very fast, thus ensuring that the
@@ -50,9 +52,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Concept declarations, across documents
 
   final def findAllConceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = {
-    val conceptDeclarationBuilder = new ConceptDeclaration.Builder(substitutionGroupMap)
-
-    findAllGlobalElementDeclarations.flatMap(decl => conceptDeclarationBuilder.optConceptDeclaration(decl))
+    conceptDeclarations
   }
 
   final def filterConceptDeclarations(p: ConceptDeclaration => Boolean): immutable.IndexedSeq[ConceptDeclaration] = {
