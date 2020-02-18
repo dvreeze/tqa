@@ -26,7 +26,7 @@ The most important changes compared to version 0.8.12 are:
 * Class ``BasicTaxonomy`` now caches more data (subsets of relationships), leading to searches in smaller collections, thus improving performance
 * Added query API trait ``RelationshipContainerApi``
 
-There are some (reasonable low impact) breaking changes compared to version 0.8.12 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+There are some (reasonably low impact) breaking changes compared to version 0.8.12 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
 
 * method this(eu.cdevreeze.tqa.base.dom.TaxonomyBase,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.this")
