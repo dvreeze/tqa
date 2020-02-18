@@ -12,6 +12,44 @@ Version 0.9.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.8.13
+======
+
+This release fixes some performance problems, and adds query API trait ``RelationshipContainerApi``.
+Thanks to Johan Walters for pointing out several performance bottlenecks, some of which leading to this release.
+
+This release 0.8.13 requires yaidom 1.10.2 (or later)! It does not work with yaidom 1.10.1 or 1.10.0!
+
+The most important changes compared to version 0.8.12 are:
+
+* Exploiting yaidom 1.10.2, made attribute retrieval in ``TaxonomyElem`` faster
+* Class ``BasicTaxonomy`` now caches more data (subsets of relationships), leading to searches in smaller collections, thus improving performance
+* Added query API trait ``RelationshipContainerApi``
+
+There are some (reasonable low impact) breaking changes compared to version 0.8.12 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method this(eu.cdevreeze.tqa.base.dom.TaxonomyBase,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.this")
+* abstract method filterRelationships(scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.RelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterRelationships")
+* abstract method findAllRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.RelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllRelationshipsOfType")
+* abstract method filterRelationshipsOfType(scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.RelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterRelationshipsOfType")
+* abstract method findAllRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.RelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.findAllRelationshipsOfType")
+* abstract method findAllRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.RelationshipContainerApi is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.findAllRelationshipsOfType")
+* abstract method interConceptRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerLike is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerLike.interConceptRelationships")
+* abstract method nonStandardRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerLike is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerLike.nonStandardRelationships")
+* abstract method standardRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardRelationshipContainerLike is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.StandardRelationshipContainerLike.standardRelationships")
+
+If you do not implement your own classes mixing in query API traits like ``TaxonomyApi``, there are no breaking changes.
+
+
 0.8.12
 ======
 
