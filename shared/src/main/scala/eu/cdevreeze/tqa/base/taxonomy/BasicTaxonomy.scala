@@ -42,7 +42,6 @@ import eu.cdevreeze.tqa.base.relationship.StandardRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.DerivedState
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
  * Basic implementation of a taxonomy that offers the TaxonomyApi query API. It does not enforce closure
@@ -111,11 +110,11 @@ final class BasicTaxonomy private (
   }
 
   def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
-    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[XsdSchema])(anyElem))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[XsdSchema])(_ => true))
   }
 
   def findAllGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
-    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ => true))
   }
 
   def findGlobalElementDeclaration(ename: EName): Option[GlobalElementDeclaration] = {
@@ -127,7 +126,7 @@ final class BasicTaxonomy private (
   }
 
   def findAllGlobalAttributeDeclarations: immutable.IndexedSeq[GlobalAttributeDeclaration] = {
-    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(anyElem))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(_ => true))
   }
 
   def findGlobalAttributeDeclaration(ename: EName): Option[GlobalAttributeDeclaration] = {
@@ -135,7 +134,7 @@ final class BasicTaxonomy private (
   }
 
   def findAllNamedTypeDefinitions: immutable.IndexedSeq[NamedTypeDefinition] = {
-    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(anyElem))
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(_ => true))
   }
 
   def findNamedTypeDefinition(ename: EName): Option[NamedTypeDefinition] = {

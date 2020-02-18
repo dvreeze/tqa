@@ -38,7 +38,6 @@ import eu.cdevreeze.yaidom.core.Path
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
-import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 import eu.cdevreeze.yaidom.queryapi.ClarkElemApi.withEName
 import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
@@ -608,15 +607,15 @@ final class XbrliContext private[instance] (
   def id: String = attribute(IdEName)
 
   def entity: Entity = {
-    getChildElemOfType(classTag[Entity])(anyElem)
+    getChildElemOfType(classTag[Entity])(_ => true)
   }
 
   def period: Period = {
-    getChildElemOfType(classTag[Period])(anyElem)
+    getChildElemOfType(classTag[Period])(_ => true)
   }
 
   def scenarioOption: Option[Scenario] = {
-    findChildElemOfType(classTag[Scenario])(anyElem)
+    findChildElemOfType(classTag[Scenario])(_ => true)
   }
 
   def identifierScheme: String = {
@@ -662,11 +661,11 @@ final class XbrliUnit private[instance] (
   }
 
   def findDivide: Option[Divide] = {
-    findChildElemOfType(classTag[Divide])(anyElem)
+    findChildElemOfType(classTag[Divide])(_ => true)
   }
 
   def divide: Divide = {
-    getChildElemOfType(classTag[Divide])(anyElem)
+    getChildElemOfType(classTag[Divide])(_ => true)
   }
 
   def numeratorMeasures: immutable.IndexedSeq[EName] = {
@@ -898,11 +897,11 @@ final class Entity private[instance] (
   require(resolvedName == XbrliEntityEName, s"Expected EName $XbrliEntityEName but found $resolvedName")
 
   def identifier: Identifier = {
-    getChildElemOfType(classTag[Identifier])(anyElem)
+    getChildElemOfType(classTag[Identifier])(_ => true)
   }
 
   def segmentOption: Option[Segment] = {
-    findChildElemOfType(classTag[Segment])(anyElem)
+    findChildElemOfType(classTag[Segment])(_ => true)
   }
 
   def identifierScheme: String = {
@@ -927,15 +926,15 @@ abstract class Period private[instance] (
   require(resolvedName == XbrliPeriodEName, s"Expected EName $XbrliPeriodEName but found $resolvedName")
 
   def isInstantPeriod: Boolean = {
-    findChildElemOfType(classTag[Instant])(anyElem).isDefined
+    findChildElemOfType(classTag[Instant])(_ => true).isDefined
   }
 
   def isStartEndDatePeriod: Boolean = {
-    findChildElemOfType(classTag[StartDate])(anyElem).isDefined
+    findChildElemOfType(classTag[StartDate])(_ => true).isDefined
   }
 
   def isForeverPeriod: Boolean = {
-    findChildElemOfType(classTag[Forever])(anyElem).isDefined
+    findChildElemOfType(classTag[Forever])(_ => true).isDefined
   }
 
   def asInstantPeriod: InstantPeriod = {
@@ -966,7 +965,7 @@ final class InstantPeriod private[instance] (
 
   require(isInstantPeriod)
 
-  def instant: Instant = getChildElemOfType(classTag[Instant])(anyElem)
+  def instant: Instant = getChildElemOfType(classTag[Instant])(_ => true)
 
   def instantDateTime: Temporal = instant.dateTime
 }
@@ -983,9 +982,9 @@ final class StartEndDatePeriod private[instance] (
 
   require(isStartEndDatePeriod)
 
-  def startDate: StartDate = getChildElemOfType(classTag[StartDate])(anyElem)
+  def startDate: StartDate = getChildElemOfType(classTag[StartDate])(_ => true)
 
-  def endDate: EndDate = getChildElemOfType(classTag[EndDate])(anyElem)
+  def endDate: EndDate = getChildElemOfType(classTag[EndDate])(_ => true)
 
   def startDateTime: Temporal = startDate.dateTime
 

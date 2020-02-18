@@ -45,7 +45,6 @@ import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Path
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
 import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.ScopedNodes
@@ -1057,7 +1056,7 @@ sealed trait SimpleTypeDefinition extends TypeDefinition {
    */
   final def baseTypeOption: Option[EName] = variety match {
     case Variety.Atomic =>
-      findChildElemOfType(classTag[Restriction])(anyElem).flatMap(_.baseTypeOption)
+      findChildElemOfType(classTag[Restriction])(_ => true).flatMap(_.baseTypeOption)
     case _ => None
   }
 }
@@ -1068,8 +1067,8 @@ sealed trait SimpleTypeDefinition extends TypeDefinition {
 sealed trait ComplexTypeDefinition extends TypeDefinition {
 
   final def contentElemOption: Option[Content] = {
-    val complexContentOption = findChildElemOfType(classTag[ComplexContent])(anyElem)
-    val simpleContentOption = findChildElemOfType(classTag[SimpleContent])(anyElem)
+    val complexContentOption = findChildElemOfType(classTag[ComplexContent])(_ => true)
+    val simpleContentOption = findChildElemOfType(classTag[SimpleContent])(_ => true)
 
     complexContentOption.orElse(simpleContentOption)
   }
@@ -1235,8 +1234,8 @@ sealed trait Content extends ElemInXsdNamespace {
    * Returns the derivation. This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def derivation: RestrictionOrExtension = {
-    findChildElemOfType(classTag[Restriction])(anyElem).
-      orElse(findChildElemOfType(classTag[Extension])(anyElem)).
+    findChildElemOfType(classTag[Restriction])(_ => true).
+      orElse(findChildElemOfType(classTag[Extension])(_ => true)).
       getOrElse(sys.error(msg(s"Expected xs:restriction or xs:extension child element")))
   }
 
@@ -1583,7 +1582,7 @@ final class RoleType private[dom](
   }
 
   def definitionOption: Option[Definition] = {
-    findChildElemOfType(classTag[Definition])(anyElem)
+    findChildElemOfType(classTag[Definition])(_ => true)
   }
 
   def usedOn: immutable.IndexedSeq[UsedOn] = {
@@ -1613,7 +1612,7 @@ final class ArcroleType private[dom](
   }
 
   def definitionOption: Option[Definition] = {
-    findChildElemOfType(classTag[Definition])(anyElem)
+    findChildElemOfType(classTag[Definition])(_ => true)
   }
 
   def usedOn: immutable.IndexedSeq[UsedOn] = {

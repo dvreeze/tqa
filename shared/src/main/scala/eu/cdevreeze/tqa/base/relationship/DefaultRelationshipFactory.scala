@@ -54,7 +54,6 @@ import eu.cdevreeze.tqa.base.dom.XLinkLocator
 import eu.cdevreeze.tqa.base.dom.XLinkResource
 import eu.cdevreeze.tqa.common.schematypes.BuiltInSchemaTypes
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 import eu.cdevreeze.yaidom.queryapi.XmlBaseSupport
 
 /**
@@ -92,7 +91,7 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     } else {
       val taxoRootElem = taxoRootElemOption.get
 
-      val extendedLinks = taxoRootElem.findTopmostElemsOrSelfOfType(classTag[ExtendedLink])(anyElem)
+      val extendedLinks = taxoRootElem.findTopmostElemsOrSelfOfType(classTag[ExtendedLink])(_ => true)
 
       extendedLinks.flatMap(extLink => extractRelationshipsFromExtendedLink(extLink, taxonomyBase, arcFilter))
     }

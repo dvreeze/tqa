@@ -33,7 +33,6 @@ import eu.cdevreeze.tqa.XPointer
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.ENameProvider
 import eu.cdevreeze.yaidom.core.Scope
-import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 
 /**
  * Very limited notion of a taxonomy, as a collection of taxonomy documents. It contains a map from URIs
@@ -329,35 +328,35 @@ object TaxonomyBase {
 
   def findAllGlobalElementDeclarations(rootElem: TaxonomyElem): immutable.IndexedSeq[GlobalElementDeclaration] = {
     val xsdSchemaOption: Option[XsdSchema] =
-      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(anyElem)
+      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
 
-    xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem))
+    xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ => true))
   }
 
   def getGlobalElementDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalElementDeclaration] = {
     val xsdSchemaOption: Option[XsdSchema] =
-      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(anyElem)
+      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
 
     // For optimal performance, get the target namespace only once.
 
     val tnsOption: Option[String] = xsdSchemaOption.flatMap(_.targetNamespaceOption)
 
     val globalElementDeclarations =
-      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem))
+      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ => true))
 
     globalElementDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
   }
 
   def getNamedTypeDefinitionMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, NamedTypeDefinition] = {
     val xsdSchemaOption: Option[XsdSchema] =
-      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(anyElem)
+      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
 
     // For optimal performance, get the target namespace only once.
 
     val tnsOption: Option[String] = xsdSchemaOption.flatMap(_.targetNamespaceOption)
 
     val namedTypeDefinitions =
-      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(anyElem))
+      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(_ => true))
 
     namedTypeDefinitions.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
   }
@@ -365,13 +364,13 @@ object TaxonomyBase {
   def getGlobalAttributeDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalAttributeDeclaration] = {
 
     val xsdSchemaOption: Option[XsdSchema] =
-      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(anyElem)
+      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
 
     // For optimal performance, get the target namespace only once.
     val tnsOption: Option[String] = xsdSchemaOption.flatMap(_.targetNamespaceOption)
 
     val globalAttributeDeclarations =
-      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(anyElem))
+      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(_ => true))
 
     globalAttributeDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
   }
