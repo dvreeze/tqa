@@ -67,6 +67,7 @@ final class TaxonomyBase private (
   val taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument],
   val taxonomyDocUriMap: Map[URI, TaxonomyDocument],
   val elemUriMap: Map[URI, TaxonomyElem],
+  val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration],
   val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration],
   val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition],
   val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration],
@@ -198,6 +199,7 @@ final class TaxonomyBase private (
       filteredTaxonomyDocs,
       taxonomyDocUriMap.filter(kv => docUris.contains(kv._1)),
       elemUriMap.filter(kv => filteredElemUris.contains(kv._1)),
+      globalElementDeclarations.filter(e => globalElementDeclarationENames.contains(e.targetEName)),
       globalElementDeclarationMap.filter(kv => globalElementDeclarationENames.contains(kv._1)),
       namedTypeDefinitionMap.filter(kv => namedTypeDefinitionENames.contains(kv._1)),
       globalAttributeDeclarationMap.filter(kv => globalAttributeDeclarationENames.contains(kv._1)),
@@ -295,6 +297,10 @@ object TaxonomyBase {
       rootElems.flatMap(e => getElemUriMap(e).toSeq).toMap
     }
 
+    val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
+      rootElems.flatMap(e => findAllGlobalElementDeclarations(e))
+    }
+
     val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
       rootElems.flatMap(e => getGlobalElementDeclarationMap(e).toSeq).toMap
     }
@@ -314,10 +320,18 @@ object TaxonomyBase {
       taxonomyDocs,
       taxonomyDocUriMap,
       elemUriMap,
+      globalElementDeclarations,
       globalElementDeclarationMap,
       namedTypeDefinitionMap,
       globalAttributeDeclarationMap,
       derivedSubstitutionGroupMap)
+  }
+
+  def findAllGlobalElementDeclarations(rootElem: TaxonomyElem): immutable.IndexedSeq[GlobalElementDeclaration] = {
+    val xsdSchemaOption: Option[XsdSchema] =
+      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(anyElem)
+
+    xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(anyElem))
   }
 
   def getGlobalElementDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalElementDeclaration] = {

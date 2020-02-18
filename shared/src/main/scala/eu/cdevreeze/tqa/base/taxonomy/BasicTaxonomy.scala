@@ -70,6 +70,8 @@ final class BasicTaxonomy private (
 
   def netSubstitutionGroupMap: SubstitutionGroupMap = derivedState.netSubstitutionGroupMap
 
+  def conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = derivedState.conceptDeclarations
+
   def conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = derivedState.conceptDeclarationsByEName
 
   def standardRelationships: immutable.IndexedSeq[StandardRelationship] = derivedState.standardRelationships
@@ -237,6 +239,7 @@ object BasicTaxonomy {
 
   private[taxonomy] class DerivedState(
       val netSubstitutionGroupMap: SubstitutionGroupMap,
+      val conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration],
       val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
       val standardRelationships: immutable.IndexedSeq[StandardRelationship],
       val nonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship],
@@ -258,11 +261,11 @@ object BasicTaxonomy {
 
       val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
 
+      val conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] =
+        taxonomyBase.globalElementDeclarations.flatMap(e => conceptDeclarationBuilder.optConceptDeclaration(e))
+
       val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-        taxonomyBase.globalElementDeclarationMap.toSeq.flatMap {
-          case (ename, decl) =>
-            conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => ename -> conceptDecl)
-        }.toMap
+        conceptDeclarations.map(decl => decl.targetEName -> decl).toMap
       }
 
       val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
@@ -295,6 +298,7 @@ object BasicTaxonomy {
 
       new DerivedState(
         netSubstitutionGroupMap,
+        conceptDeclarations,
         conceptDeclarationsByEName,
         standardRelationships,
         nonStandardRelationships,
