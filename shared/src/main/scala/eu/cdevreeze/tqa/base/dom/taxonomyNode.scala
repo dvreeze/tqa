@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.base.dom
 import java.net.URI
 
 import scala.collection.immutable
-import scala.collection.mutable
 import scala.reflect.classTag
 
 import eu.cdevreeze.tqa.ENames
@@ -48,7 +47,7 @@ import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.ElemApi.anyElem
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
-import eu.cdevreeze.yaidom.queryapi.IsNavigable
+import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 
@@ -138,7 +137,7 @@ final case class TaxonomyCommentNode(text: String) extends CanBeTaxonomyDocument
 sealed abstract class TaxonomyElem private[dom](
   val backingElem: BackingNodes.Elem,
   val childElems: immutable.IndexedSeq[TaxonomyElem])
-  extends CanBeTaxonomyDocumentChild with AnyTaxonomyElem with ScopedNodes.Elem with IsNavigable with SubtypeAwareElemLike {
+  extends CanBeTaxonomyDocumentChild with AnyTaxonomyElem with ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
 
   type ThisElem = TaxonomyElem
 
@@ -180,95 +179,37 @@ sealed abstract class TaxonomyElem private[dom](
    */
   final def findAllChildElems: immutable.IndexedSeq[TaxonomyElem] = childElems
 
-  // IsNavigableApi
-
-  /**
-   * Finds the child element with the given `Path.Entry` (where this element is the root), if any, wrapped in an `Option`.
-   *
-   * This method is final, so more efficient implementations for sub-types are not supported. This implementation
-   * is only efficient if finding all child elements as well as computing their resolved names is efficient.
-   * That is not the case for DOM wrappers or Scala XML Elem wrappers (due to their expensive Scope computations).
-   * On the other hand, those wrapper element implementations are convenient, but not intended for heavy use in
-   * production. Hence, this method should typically be fast enough.
-   */
-  final def findChildElemByPathEntry(entry: Path.Entry): Option[ThisElem] = {
-    // The previous implementation used immutable.IndexedSeq.toStream, which turned out to be surprisingly inefficient.
-    // This inefficiency was noticed when calling method IsNavigable.findReverseAncestryOrSelfByPath
-    // (and therefore this method) many times. Thanks to Johan Walters for pointing out this performance issue.
-
-    var sameENameIdx = 0
-    val childElemOption = findAllChildElems find { e =>
-      val ename = e.resolvedName
-
-      if (ename == entry.elementName) {
-        if (entry.index == sameENameIdx) {
-          true
-        } else {
-          sameENameIdx += 1
-          false
-        }
-      } else {
-        false
-      }
-    }
-    assert(childElemOption.forall(_.resolvedName == entry.elementName))
-    childElemOption
-  }
-
-  /**
-   * Returns all child elements paired with their path entries.
-   *
-   * This method is final, so more efficient implementations for sub-types are not supported. This implementation
-   * is only efficient if finding all child elements as well as computing their resolved names is efficient.
-   * That is not the case for DOM wrappers or Scala XML Elem wrappers (due to their expensive Scope computations).
-   * On the other hand, those wrapper element implementations are convenient, but not intended for heavy use in
-   * production. Hence, this method should typically be fast enough.
-   */
-  final def findAllChildElemsWithPathEntries: immutable.IndexedSeq[(ThisElem, Path.Entry)] = {
-    backingElem.findAllChildElemsWithPathEntries
-    val nextEntries = mutable.Map[EName, Int]()
-
-    findAllChildElems map { e =>
-      val ename = e.resolvedName
-      val entry = Path.Entry(ename, nextEntries.getOrElse(ename, 0))
-      nextEntries.put(ename, entry.index + 1)
-      (e, entry)
-    }
-  }
-
   // ClarkElemApi
 
   final def resolvedName: EName = backingElem.resolvedName
 
   final def resolvedAttributes: immutable.IndexedSeq[(EName, String)] = backingElem.resolvedAttributes.toIndexedSeq
 
-  final def localName: String = {
+  final override def localName: String = {
     backingElem.localName
   }
 
-  final def attributeOption(expandedName: EName): Option[String] = {
+  // "Non-final" to make MiMa happy
+  override def attributeOption(expandedName: EName): Option[String] = {
     backingElem.attributeOption(expandedName)
   }
 
-  final def attribute(expandedName: EName): String = {
+  final override def attribute(expandedName: EName): String = {
     backingElem.attribute(expandedName)
   }
 
-  final def findAttributeByLocalName(localName: String): Option[String] = {
+  // "Non-final" to make MiMa happy
+  override def findAttributeByLocalName(localName: String): Option[String] = {
     backingElem.findAttributeByLocalName(localName)
   }
 
-  final def \@(expandedName: EName): Option[String] = {
-    backingElem \@ expandedName
-  }
+  final override def text: String = backingElem.text
 
-  final def text: String = backingElem.text
-
-  final def trimmedText: String = {
+  final override def trimmedText: String = {
     backingElem.trimmedText
   }
 
-  final def normalizedText: String = {
+  final override def normalizedText: String = {
     backingElem.normalizedText
   }
 
@@ -280,27 +221,27 @@ sealed abstract class TaxonomyElem private[dom](
 
   final def scope: Scope = backingElem.scope
 
-  final def attributeAsQNameOption(expandedName: EName): Option[QName] = {
+  final override def attributeAsQNameOption(expandedName: EName): Option[QName] = {
     backingElem.attributeAsQNameOption(expandedName)
   }
 
-  final def attributeAsQName(expandedName: EName): QName = {
+  final override def attributeAsQName(expandedName: EName): QName = {
     backingElem.attributeAsQName(expandedName)
   }
 
-  final def attributeAsResolvedQNameOption(expandedName: EName): Option[EName] = {
+  final override def attributeAsResolvedQNameOption(expandedName: EName): Option[EName] = {
     backingElem.attributeAsResolvedQNameOption(expandedName)
   }
 
-  final def attributeAsResolvedQName(expandedName: EName): EName = {
+  final override def attributeAsResolvedQName(expandedName: EName): EName = {
     backingElem.attributeAsResolvedQName(expandedName)
   }
 
-  final def textAsQName: QName = {
+  final override def textAsQName: QName = {
     backingElem.textAsQName
   }
 
-  final def textAsResolvedQName: EName = {
+  final override def textAsResolvedQName: EName = {
     backingElem.textAsResolvedQName
   }
 

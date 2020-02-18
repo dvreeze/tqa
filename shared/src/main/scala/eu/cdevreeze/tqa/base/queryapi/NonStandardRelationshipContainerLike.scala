@@ -32,7 +32,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
 
   // Abstract methods
 
-  def findAllNonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship]
+  def nonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship]
 
   /**
    * Returns a map from source XML fragment keys to non-standard relationships. Must be fast in order for this trait to be fast.
@@ -48,6 +48,10 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
+
+  final def findAllNonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship] = {
+    nonStandardRelationships
+  }
 
   final def filterNonStandardRelationships(
       p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {

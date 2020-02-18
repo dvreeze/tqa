@@ -31,7 +31,7 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
 
   // Abstract methods
 
-  def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship]
+  def standardRelationships: immutable.IndexedSeq[StandardRelationship]
 
   /**
    * Returns a map from source concepts to standard relationships. Must be fast in order for this trait to be fast.
@@ -42,6 +42,10 @@ trait StandardRelationshipContainerLike extends StandardRelationshipContainerApi
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
+
+  final def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship] = {
+    standardRelationships
+  }
 
   final def filterStandardRelationships(
       p: StandardRelationship => Boolean): immutable.IndexedSeq[StandardRelationship] = {

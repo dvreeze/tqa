@@ -154,10 +154,6 @@ final class BasicTaxonomy private (
     relationships.collect { case rel: A => rel }
   }
 
-  def findAllStandardRelationships: immutable.IndexedSeq[StandardRelationship] = {
-    derivedState.standardRelationships
-  }
-
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
@@ -166,20 +162,12 @@ final class BasicTaxonomy private (
     findAllStandardRelationships.collect { case rel: A => rel }
   }
 
-  def findAllInterConceptRelationships: immutable.IndexedSeq[InterConceptRelationship] = {
-    derivedState.interConceptRelationships
-  }
-
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag: ClassTag[A] = relationshipType
 
     findAllInterConceptRelationships.collect { case rel: A => rel }
-  }
-
-  def findAllNonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship] = {
-    derivedState.nonStandardRelationships
   }
 
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](

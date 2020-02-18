@@ -32,7 +32,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
 
   // Abstract methods
 
-  def findAllInterConceptRelationships: immutable.IndexedSeq[InterConceptRelationship]
+  def interConceptRelationships: immutable.IndexedSeq[InterConceptRelationship]
 
   /**
    * Returns a map from source concepts to inter-concept relationships. Must be fast in order for this trait to be fast.
@@ -48,6 +48,10 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
+
+  final def findAllInterConceptRelationships: immutable.IndexedSeq[InterConceptRelationship] = {
+    interConceptRelationships
+  }
 
   final def filterInterConceptRelationships(
       p: InterConceptRelationship => Boolean): immutable.IndexedSeq[InterConceptRelationship] = {
