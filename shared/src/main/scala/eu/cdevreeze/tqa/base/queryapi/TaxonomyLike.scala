@@ -20,14 +20,12 @@ package eu.cdevreeze.tqa.base.queryapi
  * Partial implementation of `TaxonomyApi`, formed by combining partial implementations of other
  * query API traits.
  *
- * TODO Mix in RelationshipContainerLike
- *
  * @author Chris de Vreeze
  */
 trait TaxonomyLike
     extends TaxonomyApi
     with TaxonomySchemaLike
-   //  with RelationshipContainerLike
+    with RelationshipContainerLike
     with StandardRelationshipContainerLike
     with NonStandardRelationshipContainerLike
     with InterConceptRelationshipContainerLike

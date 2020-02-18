@@ -27,13 +27,11 @@ import eu.cdevreeze.tqa.base.relationship.Relationship
  * API traits. The query API concerns the taxonomy as taxonomy schema, and as container of relationships,
  * standard relationships, inter-concept relationships and dimensional relationships.
  *
- * TODO Mix in RelationshipContainerApi
- *
  * @author Chris de Vreeze
  */
 trait TaxonomyApi
     extends TaxonomySchemaApi
-    // with RelationshipContainerApi
+    with RelationshipContainerApi
     with StandardRelationshipContainerApi
     with NonStandardRelationshipContainerApi
     with InterConceptRelationshipContainerApi
@@ -43,11 +41,6 @@ trait TaxonomyApi
     with ElementLabelRelationshipContainerApi
     with ElementReferenceRelationshipContainerApi
     with DimensionalRelationshipContainerApi {
-
-  /**
-   * Returns all relationships in the taxonomy
-   */
-  def relationships: immutable.IndexedSeq[Relationship]
 
   /**
    * Returns all taxonomy documents.
