@@ -20,7 +20,6 @@ import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
-import eu.cdevreeze.tqa.base.relationship.Relationship
 
 /**
  * Purely abstract trait offering a '''taxonomy query API'''. It combines several other purely abstract query
