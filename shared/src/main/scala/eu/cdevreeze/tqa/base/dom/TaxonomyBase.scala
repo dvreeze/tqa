@@ -194,12 +194,15 @@ final class TaxonomyBase private (
 
     val filteredDerivedSubstitutionGroup = filterSubstitutionGroupMap(derivedSubstitutionGroupMap, docUris)
 
+    val filteredGlobalElementDeclarationMap: Map[EName, GlobalElementDeclaration] =
+      globalElementDeclarationMap.filter(kv => globalElementDeclarationENames.contains(kv._1))
+
     new TaxonomyBase(
       filteredTaxonomyDocs,
       taxonomyDocUriMap.filter(kv => docUris.contains(kv._1)),
       elemUriMap.filter(kv => filteredElemUris.contains(kv._1)),
-      globalElementDeclarations.filter(e => globalElementDeclarationENames.contains(e.targetEName)), // somewhat expensive
-      globalElementDeclarationMap.filter(kv => globalElementDeclarationENames.contains(kv._1)),
+      filteredGlobalElementDeclarationMap.values.toIndexedSeq,
+      filteredGlobalElementDeclarationMap,
       namedTypeDefinitionMap.filter(kv => namedTypeDefinitionENames.contains(kv._1)),
       globalAttributeDeclarationMap.filter(kv => globalAttributeDeclarationENames.contains(kv._1)),
       filteredDerivedSubstitutionGroup)
@@ -296,14 +299,12 @@ object TaxonomyBase {
       rootElems.flatMap(e => getElemUriMap(e).toSeq).toMap
     }
 
-    val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
-      rootElems.flatMap(e => findAllGlobalElementDeclarations(e))
-    }
-
-    // Retrieving global element declarations again, but retrieving target namespace only once per schema root
-
     val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
       rootElems.flatMap(e => getGlobalElementDeclarationMap(e).toSeq).toMap
+    }
+
+    val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
+      globalElementDeclarationMap.values.toIndexedSeq
     }
 
     val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition] = {
@@ -326,13 +327,6 @@ object TaxonomyBase {
       namedTypeDefinitionMap,
       globalAttributeDeclarationMap,
       derivedSubstitutionGroupMap)
-  }
-
-  def findAllGlobalElementDeclarations(rootElem: TaxonomyElem): immutable.IndexedSeq[GlobalElementDeclaration] = {
-    val xsdSchemaOption: Option[XsdSchema] =
-      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
-
-    xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ => true))
   }
 
   def getGlobalElementDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalElementDeclaration] = {

@@ -260,12 +260,14 @@ object BasicTaxonomy {
 
       val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
 
-      val conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] =
-        taxonomyBase.globalElementDeclarations.flatMap(e => conceptDeclarationBuilder.optConceptDeclaration(e))
-
       val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-        conceptDeclarations.map(decl => decl.targetEName -> decl).toMap // targetEName computations may be somewhat expensive
+        taxonomyBase.globalElementDeclarationMap.toSeq.flatMap {
+          case (ename, decl) =>
+            conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => ename -> conceptDecl)
+        }.toMap
       }
+
+      val conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = conceptDeclarationsByEName.values.toIndexedSeq
 
       val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
 
