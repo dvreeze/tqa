@@ -198,7 +198,7 @@ final class TaxonomyBase private (
       filteredTaxonomyDocs,
       taxonomyDocUriMap.filter(kv => docUris.contains(kv._1)),
       elemUriMap.filter(kv => filteredElemUris.contains(kv._1)),
-      globalElementDeclarations.filter(e => globalElementDeclarationENames.contains(e.targetEName)),
+      globalElementDeclarations.filter(e => globalElementDeclarationENames.contains(e.targetEName)), // somewhat expensive
       globalElementDeclarationMap.filter(kv => globalElementDeclarationENames.contains(kv._1)),
       namedTypeDefinitionMap.filter(kv => namedTypeDefinitionENames.contains(kv._1)),
       globalAttributeDeclarationMap.filter(kv => globalAttributeDeclarationENames.contains(kv._1)),
@@ -300,6 +300,8 @@ object TaxonomyBase {
       rootElems.flatMap(e => findAllGlobalElementDeclarations(e))
     }
 
+    // Retrieving global element declarations again, but retrieving target namespace only once per schema root
+
     val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
       rootElems.flatMap(e => getGlobalElementDeclarationMap(e).toSeq).toMap
     }
@@ -362,7 +364,6 @@ object TaxonomyBase {
   }
 
   def getGlobalAttributeDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalAttributeDeclaration] = {
-
     val xsdSchemaOption: Option[XsdSchema] =
       if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
 

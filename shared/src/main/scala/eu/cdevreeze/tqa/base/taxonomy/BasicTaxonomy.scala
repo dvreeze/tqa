@@ -264,7 +264,7 @@ object BasicTaxonomy {
         taxonomyBase.globalElementDeclarations.flatMap(e => conceptDeclarationBuilder.optConceptDeclaration(e))
 
       val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-        conceptDeclarations.map(decl => decl.targetEName -> decl).toMap
+        conceptDeclarations.map(decl => decl.targetEName -> decl).toMap // targetEName computations may be somewhat expensive
       }
 
       val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
