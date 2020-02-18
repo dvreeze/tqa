@@ -90,7 +90,7 @@ final class TaxonomyBase private (
    * The schema type of the ID attributes is not taken into account, although strictly speaking that is incorrect.
    */
   def findElemByUri(elemUri: URI): Option[TaxonomyElem] = {
-    require(elemUri.isAbsolute, s"URI '${elemUri}' is not absolute")
+    require(elemUri.isAbsolute, s"URI '$elemUri' is not absolute")
 
     if (elemUri.getFragment == null) {
       taxonomyDocUriMap.get(elemUri).map(_.documentElement)
@@ -175,7 +175,7 @@ final class TaxonomyBase private (
     val filteredTaxonomyDocs = taxonomyDocs.filter(d => docUris.contains(d.uri))
 
     val filteredElemUris: Set[URI] =
-      elemUriMap.keySet.toSeq.groupBy(removeFragment _).filter(kv => docUris.contains(kv._1)).values.flatten.toSet
+      elemUriMap.keySet.toSeq.groupBy(removeFragment).filter(kv => docUris.contains(kv._1)).values.flatten.toSet
 
     val globalElementDeclarationENames: Set[EName] =
       filteredTaxonomyDocs.flatMap { d =>
@@ -381,9 +381,9 @@ object TaxonomyBase {
    */
   private def computeDerivedSubstitutionGroupMap(globalElementDeclarationMap: Map[EName, GlobalElementDeclaration]): SubstitutionGroupMap = {
     val rawMappings: Map[EName, EName] =
-      (globalElementDeclarationMap.toSeq.flatMap {
+      globalElementDeclarationMap.toSeq.flatMap {
         case (en, decl) => decl.substitutionGroupOption.map(sg => en -> sg)
-      }).toMap
+      }.toMap
 
     val substGroups: Set[EName] = rawMappings.values.toSet
 
@@ -405,12 +405,12 @@ object TaxonomyBase {
 
     elemsWithId.map { e =>
       val baseUri = if (xmlBaseUsed) e.baseUri else docUri
-      (makeUriWithIdFragment(baseUri, e.attribute(IdEName)) -> e)
+      makeUriWithIdFragment(baseUri, e.attribute(IdEName)) -> e
     }.toMap
   }
 
   private def makeUriWithIdFragment(baseUri: URI, idFragment: String): URI = {
-    require(baseUri.isAbsolute, s"Expected absolute base URI but got '${baseUri}'")
+    require(baseUri.isAbsolute, s"Expected absolute base URI but got '$baseUri'")
     new URI(baseUri.getScheme, baseUri.getSchemeSpecificPart, idFragment)
   }
 }
