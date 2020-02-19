@@ -66,6 +66,7 @@ final class TaxonomyBase private (
   val taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument],
   val taxonomyDocUriMap: Map[URI, TaxonomyDocument],
   val elemUriMap: Map[URI, TaxonomyElem],
+  val globalElementDeclarationsWithTargetENames: immutable.IndexedSeq[(GlobalElementDeclaration, EName)],
   val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration],
   val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration],
   val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition],
@@ -194,14 +195,24 @@ final class TaxonomyBase private (
 
     val filteredDerivedSubstitutionGroup = filterSubstitutionGroupMap(derivedSubstitutionGroupMap, docUris)
 
-    val filteredGlobalElementDeclarationMap: Map[EName, GlobalElementDeclaration] =
-      globalElementDeclarationMap.filter(kv => globalElementDeclarationENames.contains(kv._1))
+    val filteredGlobalElemDeclsWithTargetENames: immutable.IndexedSeq[(GlobalElementDeclaration, EName)] = {
+      globalElementDeclarationsWithTargetENames.filter(p => globalElementDeclarationENames.contains(p._2))
+    }
+
+    val filteredGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
+      filteredGlobalElemDeclsWithTargetENames.map(_._1)
+    }
+
+    val filteredGlobalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
+      filteredGlobalElemDeclsWithTargetENames.groupBy(_._2).view.mapValues(_.head._1).toMap
+    }
 
     new TaxonomyBase(
       filteredTaxonomyDocs,
       taxonomyDocUriMap.filter(kv => docUris.contains(kv._1)),
       elemUriMap.filter(kv => filteredElemUris.contains(kv._1)),
-      filteredGlobalElementDeclarationMap.values.toIndexedSeq,
+      filteredGlobalElemDeclsWithTargetENames,
+      filteredGlobalElementDeclarations,
       filteredGlobalElementDeclarationMap,
       namedTypeDefinitionMap.filter(kv => namedTypeDefinitionENames.contains(kv._1)),
       globalAttributeDeclarationMap.filter(kv => globalAttributeDeclarationENames.contains(kv._1)),
@@ -299,12 +310,18 @@ object TaxonomyBase {
       rootElems.flatMap(e => getElemUriMap(e).toSeq).toMap
     }
 
-    val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
-      rootElems.flatMap(e => getGlobalElementDeclarationMap(e).toSeq).toMap
+    // Below, I would prefer to exploit Scala 2.13 SeqMap instead
+
+    val globalElemDeclsWithTargetENames: immutable.IndexedSeq[(GlobalElementDeclaration, EName)] = {
+      rootElems.flatMap(e => getGlobalElementDeclarationsWithTargetENames(e))
     }
 
     val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
-      globalElementDeclarationMap.values.toIndexedSeq
+      globalElemDeclsWithTargetENames.map(_._1)
+    }
+
+    val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration] = {
+      globalElemDeclsWithTargetENames.groupBy(_._2).view.mapValues(_.head._1).toMap
     }
 
     val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition] = {
@@ -322,6 +339,7 @@ object TaxonomyBase {
       taxonomyDocs,
       taxonomyDocUriMap,
       elemUriMap,
+      globalElemDeclsWithTargetENames,
       globalElementDeclarations,
       globalElementDeclarationMap,
       namedTypeDefinitionMap,
@@ -330,17 +348,9 @@ object TaxonomyBase {
   }
 
   def getGlobalElementDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalElementDeclaration] = {
-    val xsdSchemaOption: Option[XsdSchema] =
-      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
+    val globalElemDeclsWithTargetENames = getGlobalElementDeclarationsWithTargetENames(rootElem)(enameProvider)
 
-    // For optimal performance, get the target namespace only once.
-
-    val tnsOption: Option[String] = xsdSchemaOption.flatMap(_.targetNamespaceOption)
-
-    val globalElementDeclarations =
-      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ => true))
-
-    globalElementDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
+    globalElemDeclsWithTargetENames.groupBy(_._2).view.mapValues(_.head._1).toMap
   }
 
   def getNamedTypeDefinitionMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, NamedTypeDefinition] = {
@@ -368,6 +378,22 @@ object TaxonomyBase {
       xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(_ => true))
 
     globalAttributeDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
+  }
+
+  private def getGlobalElementDeclarationsWithTargetENames(rootElem: TaxonomyElem)(
+    implicit enameProvider: ENameProvider): immutable.IndexedSeq[(GlobalElementDeclaration, EName)] = {
+
+    val xsdSchemaOption: Option[XsdSchema] =
+      if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
+
+    // For optimal performance, get the target namespace only once.
+
+    val tnsOption: Option[String] = xsdSchemaOption.flatMap(_.targetNamespaceOption)
+
+    val globalElementDeclarations =
+      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ => true))
+
+    globalElementDeclarations.map(e => e -> enameProvider.getEName(tnsOption, e.nameAttributeValue))
   }
 
   /**

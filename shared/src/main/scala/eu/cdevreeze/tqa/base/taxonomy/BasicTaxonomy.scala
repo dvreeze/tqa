@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.base.taxonomy
 import java.net.URI
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.ClassTag
 import scala.reflect.classTag
 
@@ -260,14 +261,18 @@ object BasicTaxonomy {
 
       val conceptDeclarationBuilder = new ConceptDeclaration.Builder(netSubstitutionGroupMap)
 
-      val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
-        taxonomyBase.globalElementDeclarationMap.toSeq.flatMap {
-          case (ename, decl) =>
-            conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => ename -> conceptDecl)
-        }.toMap
-      }
+      // Below, I would prefer to exploit Scala 2.13 SeqMap instead
 
-      val conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = conceptDeclarationsByEName.values.toIndexedSeq
+      val conceptDeclsWithTargetENames: immutable.IndexedSeq[(ConceptDeclaration, EName)] =
+        taxonomyBase.globalElementDeclarationsWithTargetENames.flatMap { case (decl, ename) =>
+          conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => conceptDecl -> ename)
+        }
+
+      val conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = conceptDeclsWithTargetENames.map(_._1)
+
+      val conceptDeclarationsByEName: Map[EName, ConceptDeclaration] = {
+        conceptDeclsWithTargetENames.groupBy(_._2).view.mapValues(_.head._1).toMap
+      }
 
       val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
 
