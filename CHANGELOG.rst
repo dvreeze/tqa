@@ -12,10 +12,32 @@ Version 0.9.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.8.15
+======
+
+This release fixed failed release 0.8.14, restoring concept declaration retrieval order.
+
+This release 0.8.15 requires yaidom 1.10.2 or 1.10.3 (or later)! It does not work with yaidom 1.10.1 or 1.10.0!
+
+There are some (reasonably low impact) breaking changes compared to version 0.8.13 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method this(eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.Map,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState.this")
+* abstract method conceptDeclarations()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaLike is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaLike.conceptDeclarations")
+* method this(scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap)Unit in class eu.cdevreeze.tqa.base.dom.TaxonomyBase does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyBase.this")
+
+If you do not implement your own classes mixing in query API traits like ``TaxonomyApi``, there are no breaking changes.
+
+
 0.8.14
 ======
 
 This release fixes performance problems in retrieval of concept declarations. Thanks to Johan Walters for finding this bottleneck.
+
+DO NOT USE THIS RELEASE, AND USE THE NEXT RELEASE INSTEAD OF THIS ONE! (This release does not even exist!) This version
+had failed tests, and did not make it to Maven Central.
 
 This release 0.8.14 requires yaidom 1.10.2 or 1.10.3 (or later)! It does not work with yaidom 1.10.1 or 1.10.0!
 
