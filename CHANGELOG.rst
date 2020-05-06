@@ -12,6 +12,14 @@ Version 0.9.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.8.16
+======
+
+This release uses yaidom 1.11.0, targets ScalaJS 1.0 instead of 0.6, and cross-compiles against Scala 2 13.2 and 2.12.11.
+
+According to MiMa, there are no breaking changes compared to version 0.8.15 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues).
+
+
 0.8.15
 ======
 
