@@ -10,9 +10,9 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 // Note that 2.12.5 does not work for Scalatest in sbt (https://github.com/scalatest/scalatest/issues/1342).
 
-val scalaVer = "2.13.1"
+val scalaVer = "2.13.2"
 
-val crossScalaVer = Seq(scalaVer, "2.12.10")
+val crossScalaVer = Seq(scalaVer, "2.12.11")
 
 lazy val commonSettings = Seq(
   name         := "tqa",
@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   scalaVersion       := scalaVer,
   crossScalaVersions := crossScalaVer,
 
-  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-Xlint", "-target:jvm-1.8"),
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xlint"),
 
   Test / publishArtifact := false,
   publishMavenStyle := true,
@@ -39,15 +39,15 @@ lazy val commonSettings = Seq(
   pomExtra := pomData,
   pomIncludeRepository := { _ => false },
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.10.3",
+  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.11.0",
 
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "1.2.0",
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "2.0.0-M1",
 
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.3",
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6",
 
-  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.1.0",
+  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.1.1",
 
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.0" % "test"
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.1" % "test"
 )
 
 lazy val root = project.in(file("."))
@@ -69,23 +69,16 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-6",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-7",
 
-    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.8.1",
+    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.8.2",
 
     libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2",
 
     libraryDependencies ++= {
       scalaBinaryVersion.value match {
         case "2.13" => Seq()
-        case _      => Seq("org.scala-lang.modules" %%% "scala-java8-compat" % "0.9.0")
-      }
-    },
-
-    libraryDependencies ++= {
-      scalaBinaryVersion.value match {
-        case "2.13" => Seq()
-        case _      => Seq("org.scalameta" %%% "scalameta" % "4.3.0" % "test")
+        case _      => Seq("org.scalameta" %%% "scalameta" % "4.3.10" % "test")
       }
     },
 
@@ -110,11 +103,11 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(    // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.8",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.0.0",
 
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0",
 
-    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.8.4" % "optional",
+    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.9.1" % "optional",
 
     Compile / unmanagedSourceDirectories += {
       val sourceDir = (Compile / sourceDirectory).value
