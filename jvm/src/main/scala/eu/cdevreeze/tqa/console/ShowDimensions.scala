@@ -25,6 +25,7 @@ import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 /**
  * Program that shows dimensional data in a given taxonomy.

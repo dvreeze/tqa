@@ -23,6 +23,7 @@ import java.util.logging.Logger
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 /**
  * Taxonomy parser and analyser, showing counts of used elements in the taxonomy.

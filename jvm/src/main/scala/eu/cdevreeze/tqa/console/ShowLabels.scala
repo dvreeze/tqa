@@ -24,6 +24,7 @@ import eu.cdevreeze.tqa.base.relationship.ConceptLabelRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 /**
  * Program that shows concept labels in a given taxonomy. One use case is finding translations for certain

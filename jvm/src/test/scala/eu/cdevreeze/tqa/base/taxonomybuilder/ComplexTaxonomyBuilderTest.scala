@@ -144,13 +144,13 @@ class ComplexTaxonomyBuilderTest extends AnyFunSuite {
       val zipFile: File = new File(zipFileUri)
 
       // TODO Pass ZipFile from the outside, in order to be able to close it
-      UriResolvers.forZipFileContainingLocalMirror(new ZipFile(zipFile), Some(URI.create("taxonomie/")))
+      UriResolvers.forZipFileContainingLocalMirrorWithoutScheme(new ZipFile(zipFile), Some(URI.create("taxonomie/")))
     }
 
     private val fakeUriResolverForInternet: UriResolver = {
       val taxoFolder: File = new File(scatteredTaxoFilesDir, "remaining-files/taxonomie").ensuring(_.isDirectory)
 
-      UriResolvers.fromLocalMirrorRootDirectory(taxoFolder)
+      UriResolvers.fromLocalMirrorRootDirectoryWithoutScheme(taxoFolder)
     }
   }
 

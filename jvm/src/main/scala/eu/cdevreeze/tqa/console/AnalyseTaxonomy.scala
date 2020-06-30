@@ -23,6 +23,7 @@ import java.util.logging.Logger
 import eu.cdevreeze.tqa.base.relationship.Relationship
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 /**
  * Taxonomy parser and analyser, showing some statistics about the taxonomy.

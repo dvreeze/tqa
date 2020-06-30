@@ -21,11 +21,11 @@ import java.io.FileInputStream
 import java.net.URI
 import java.util.zip.ZipFile
 
-import scala.collection.immutable
-import scala.util.Try
-
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import org.xml.sax.InputSource
+
+import scala.collection.immutable
+import scala.util.Try
 
 /**
  * URI resolvers, converting an URI to a SAX InputSource.
@@ -44,17 +44,20 @@ object UriResolvers {
    * resolver is found, an exception is thrown.
    */
   def fromPartialUriResolversWithoutFallback(
-    partialUriResolvers: immutable.IndexedSeq[PartialUriResolvers.PartialUriResolver]): UriResolver = {
+      partialUriResolvers: immutable.IndexedSeq[PartialUriResolvers.PartialUriResolver]): UriResolver = {
 
     require(partialUriResolvers.nonEmpty, s"No partial URI resolvers given")
 
     def resolveUri(uri: URI): InputSource = {
-      partialUriResolvers.drop(1).foldLeft(partialUriResolvers.head(uri)) {
-        case (accOptInputSource, pur) =>
-          accOptInputSource.orElse(pur(uri))
-      } getOrElse {
-        sys.error(s"Could not resolve URI $uri")
-      }
+      partialUriResolvers
+        .drop(1)
+        .foldLeft(partialUriResolvers.head(uri)) {
+          case (accOptInputSource, pur) =>
+            accOptInputSource.orElse(pur(uri))
+        }
+        .getOrElse {
+          sys.error(s"Could not resolve URI $uri")
+        }
     }
 
     resolveUri
@@ -66,24 +69,27 @@ object UriResolvers {
    * resolver is found, the URI itself is "opened" as InputSource.
    */
   def fromPartialUriResolversWithFallback(
-    partialUriResolvers: immutable.IndexedSeq[PartialUriResolvers.PartialUriResolver]): UriResolver = {
+      partialUriResolvers: immutable.IndexedSeq[PartialUriResolvers.PartialUriResolver]): UriResolver = {
 
     require(partialUriResolvers.nonEmpty, s"No partial URI resolvers given")
 
     def resolveUri(uri: URI): InputSource = {
-      partialUriResolvers.drop(1).foldLeft(partialUriResolvers.head(uri)) {
-        case (accOptInputSource, pur) =>
-          accOptInputSource.orElse(pur(uri))
-      } getOrElse {
-        val is =
-          if (uri.getScheme == "file") {
-            new FileInputStream(new File(uri))
-          } else {
-            uri.toURL.openStream()
-          }
+      partialUriResolvers
+        .drop(1)
+        .foldLeft(partialUriResolvers.head(uri)) {
+          case (accOptInputSource, pur) =>
+            accOptInputSource.orElse(pur(uri))
+        }
+        .getOrElse {
+          val is =
+            if (uri.getScheme == "file") {
+              new FileInputStream(new File(uri))
+            } else {
+              uri.toURL.openStream()
+            }
 
-        new InputSource(is)
-      }
+          new InputSource(is)
+        }
     }
 
     resolveUri
@@ -149,7 +155,7 @@ object UriResolvers {
     fromUriConverter(UriConverters.fromCatalogWithoutFallback(catalog))
   }
 
-  @deprecated(since = "0.8.17", message = "Use 'fromLocalMirrorRootDirectoryWithoutScheme' instead")
+  @deprecated(message = "Use 'fromLocalMirrorRootDirectoryWithoutScheme' instead", since = "0.8.17")
   def fromLocalMirrorRootDirectory(rootDir: File): UriResolver = {
     fromLocalMirrorRootDirectoryWithoutScheme(rootDir)
   }
@@ -171,9 +177,7 @@ object UriResolvers {
       val rewritePrefix = returnWithTrailingSlash(new File(rootDir, uri.getHost).toURI)
 
       val catalog =
-        SimpleCatalog(
-          None,
-          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -198,9 +202,7 @@ object UriResolvers {
       val rewritePrefix = returnWithTrailingSlash(new File(new File(rootDir, uri.getScheme), uri.getHost).toURI)
 
       val catalog =
-        SimpleCatalog(
-          None,
-          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -209,7 +211,7 @@ object UriResolvers {
     fromUriConverter(convertUri)
   }
 
-  @deprecated(since = "0.8.17", message = "Use 'forZipFileContainingLocalMirrorWithoutScheme' instead")
+  @deprecated(message = "Use 'forZipFileContainingLocalMirrorWithoutScheme' instead", since = "0.8.17")
   def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
     forZipFileContainingLocalMirrorWithoutScheme(zipFile, parentPathOption)
   }
@@ -231,13 +233,14 @@ object UriResolvers {
       val hostAsRelativeUri = URI.create(uri.getHost + "/")
 
       val rewritePrefix =
-        parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri)).
-          getOrElse(hostAsRelativeUri).toString.ensuring(_.endsWith("/"))
+        parentPathOption
+          .map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri))
+          .getOrElse(hostAsRelativeUri)
+          .toString
+          .ensuring(_.endsWith("/"))
 
       val catalog =
-        SimpleCatalog(
-          None,
-          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -262,13 +265,14 @@ object UriResolvers {
       val schemePlusHostAsRelativeUri = URI.create(uri.getScheme + "/" + uri.getHost + "/")
 
       val rewritePrefix =
-        parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(schemePlusHostAsRelativeUri)).
-          getOrElse(schemePlusHostAsRelativeUri).toString.ensuring(_.endsWith("/"))
+        parentPathOption
+          .map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(schemePlusHostAsRelativeUri))
+          .getOrElse(schemePlusHostAsRelativeUri)
+          .toString
+          .ensuring(_.endsWith("/"))
 
       val catalog =
-        SimpleCatalog(
-          None,
-          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
