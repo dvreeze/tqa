@@ -149,12 +149,17 @@ object UriResolvers {
     fromUriConverter(UriConverters.fromCatalogWithoutFallback(catalog))
   }
 
+  @deprecated(since = "0.8.17", message = "Use 'fromLocalMirrorRootDirectoryWithoutScheme' instead")
+  def fromLocalMirrorRootDirectory(rootDir: File): UriResolver = {
+    fromLocalMirrorRootDirectoryWithoutScheme(rootDir)
+  }
+
   /**
    * Returns an URI resolver that expects all files to be found in a local mirror, with the host name
    * of the URI mirrored under the given root directory. The protocol (HTTP or HTTPS) is not represented in
    * the local mirror.
    */
-  def fromLocalMirrorRootDirectory(rootDir: File): UriResolver = {
+  def fromLocalMirrorRootDirectoryWithoutScheme(rootDir: File): UriResolver = {
     require(rootDir.isDirectory, s"Not a directory: $rootDir")
     require(rootDir.isAbsolute, s"Not an absolute path: $rootDir")
 
@@ -178,11 +183,43 @@ object UriResolvers {
   }
 
   /**
+   * Returns an URI resolver that expects all files to be found in a local mirror, with the protocol (HTTP or HTTPS, in lowercase)
+   * of the URI mirrored under the given root directory, and the host name in a sub-directory under that.
+   */
+  def fromLocalMirrorRootDirectoryUsingScheme(rootDir: File): UriResolver = {
+    require(rootDir.isDirectory, s"Not a directory: $rootDir")
+    require(rootDir.isAbsolute, s"Not an absolute path: $rootDir")
+
+    def convertUri(uri: URI): URI = {
+      require(uri.getHost != null, s"Missing host name in URI '$uri'")
+      require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
+
+      val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
+      val rewritePrefix = returnWithTrailingSlash(new File(new File(rootDir, uri.getScheme), uri.getHost).toURI)
+
+      val catalog =
+        SimpleCatalog(
+          None,
+          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+
+      val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
+      mappedUri
+    }
+
+    fromUriConverter(convertUri)
+  }
+
+  @deprecated(since = "0.8.17", message = "Use 'forZipFileContainingLocalMirrorWithoutScheme' instead")
+  def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
+    forZipFileContainingLocalMirrorWithoutScheme(zipFile, parentPathOption)
+  }
+
+  /**
    * Returns an URI resolver that expects all files to be found in a local mirror in a ZIP file, with the host name
    * of the URI mirrored under the given optional parent directory. The protocol (HTTP or HTTPS) is not represented in
    * the local mirror.
    */
-  def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
+  def forZipFileContainingLocalMirrorWithoutScheme(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
     require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
 
     def convertUri(uri: URI): URI = {
@@ -196,6 +233,37 @@ object UriResolvers {
       val rewritePrefix =
         parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri)).
           getOrElse(hostAsRelativeUri).toString.ensuring(_.endsWith("/"))
+
+      val catalog =
+        SimpleCatalog(
+          None,
+          Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+
+      val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
+      mappedUri
+    }
+
+    forZipFile(zipFile, convertUri)
+  }
+
+  /**
+   * Returns an URI resolver that expects all files to be found in a local mirror in a ZIP file, with the protocol (HTTP or HTTPS,
+   * in lowercase) of the URI mirrored under the given root directory, and the host name in a sub-directory under that.
+   */
+  def forZipFileContainingLocalMirrorUsingScheme(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
+    require(parentPathOption.forall(!_.isAbsolute), s"Not a relative URI: ${parentPathOption.get}")
+
+    def convertUri(uri: URI): URI = {
+      require(uri.getHost != null, s"Missing host name in URI '$uri'")
+      require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
+
+      val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
+
+      val schemePlusHostAsRelativeUri = URI.create(uri.getScheme + "/" + uri.getHost + "/")
+
+      val rewritePrefix =
+        parentPathOption.map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(schemePlusHostAsRelativeUri)).
+          getOrElse(schemePlusHostAsRelativeUri).toString.ensuring(_.endsWith("/"))
 
       val catalog =
         SimpleCatalog(

@@ -19,23 +19,12 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
-import java.util.zip.ZipFile
 
-import scala.collection.immutable
-import scala.collection.compat._
-
-import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
-import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
-import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
-import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import eu.cdevreeze.yaidom.core.EName
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
-import net.sf.saxon.s9api.Processor
+
+import scala.collection.immutable
 
 /**
  * Program that shows dimensional data in a given taxonomy.
@@ -58,8 +47,11 @@ object ShowDimensions {
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
+    val useScheme = System.getProperty("useScheme", "false").toBoolean
 
-    val basicTaxo = buildTaxonomy(rootDirOrZipFile, parentPathOption, entryPointUris, useSaxon)
+    logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
+
+    val basicTaxo = ConsoleUtil.buildTaxonomy(rootDirOrZipFile, parentPathOption, entryPointUris, useSaxon, useScheme)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -69,9 +61,11 @@ object ShowDimensions {
 
     val hasHypercubes = basicTaxo.findAllHasHypercubeRelationships
 
-    val hasHypercubeGroupsWithSameKey = hasHypercubes.distinct.groupBy(hh => (hh.primary, hh.elr)).filter(_._2.size >= 2)
+    val hasHypercubeGroupsWithSameKey =
+      hasHypercubes.distinct.groupBy(hh => (hh.primary, hh.elr)).filter(_._2.size >= 2)
 
-    logger.info(s"Number of has_hypercube groups with more than 1 has-hypercube for the same primary and ELR: ${hasHypercubeGroupsWithSameKey.size}")
+    logger.info(
+      s"Number of has_hypercube groups with more than 1 has-hypercube for the same primary and ELR: ${hasHypercubeGroupsWithSameKey.size}")
 
     showHasHypercubeTrees(hasHypercubes, basicTaxo)
 
@@ -82,8 +76,10 @@ object ShowDimensions {
     logger.info("Ready")
   }
 
-  private def showHasHypercubeTrees(hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship], basicTaxo: BasicTaxonomy): Unit = {
-    hasHypercubes foreach { hasHypercube =>
+  private def showHasHypercubeTrees(
+      hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
+      basicTaxo: BasicTaxonomy): Unit = {
+    hasHypercubes.foreach { hasHypercube =>
       println(s"Has-hypercube found for primary ${hasHypercube.primary} and ELR ${hasHypercube.elr}")
 
       val hypercubeDimensions = basicTaxo.findAllConsecutiveHypercubeDimensionRelationships(hasHypercube)
@@ -92,11 +88,11 @@ object ShowDimensions {
 
       val usableDimensionMembers: Map[EName, Set[EName]] = basicTaxo.findAllUsableDimensionMembers(hasHypercube)
 
-      usableDimensionMembers.toSeq.sortBy(_._1.toString) foreach {
+      usableDimensionMembers.toSeq.sortBy(_._1.toString).foreach {
         case (dimension, members) =>
           println(s"\tDimension: $dimension. Usable members:")
 
-          members.toSeq.sortBy(_.toString) foreach { member =>
+          members.toSeq.sortBy(_.toString).foreach { member =>
             println(s"\t\t$member")
           }
       }
@@ -104,12 +100,16 @@ object ShowDimensions {
   }
 
   // scalastyle:off method.length
-  private def showHasHypercubeInheritance(hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship], basicTaxo: BasicTaxonomy): Unit = {
+  private def showHasHypercubeInheritance(
+      hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
+      basicTaxo: BasicTaxonomy): Unit = {
     val concretePrimaryItemDecls = basicTaxo.findAllPrimaryItemDeclarations.filter(_.isConcrete)
 
-    val concretePrimariesNotInheritingOrHavingHasHypercube = concretePrimaryItemDecls filter { itemDecl =>
-      basicTaxo.findAllOwnOrInheritedHasHypercubes(itemDecl.targetEName).isEmpty
-    } map (_.targetEName)
+    val concretePrimariesNotInheritingOrHavingHasHypercube = concretePrimaryItemDecls
+      .filter { itemDecl =>
+        basicTaxo.findAllOwnOrInheritedHasHypercubes(itemDecl.targetEName).isEmpty
+      }
+      .map(_.targetEName)
 
     val namespacesOfConcretePrimariesNotInheritingOrHavingHasHypercube =
       concretePrimariesNotInheritingOrHavingHasHypercube.flatMap(_.namespaceUriOption).distinct.sortBy(_.toString)
@@ -123,77 +123,45 @@ object ShowDimensions {
         s"${namespacesOfConcretePrimariesNotInheritingOrHavingHasHypercube.take(50).mkString(", ")}")
 
     val inheritingPrimaries =
-      (hasHypercubes flatMap { hh =>
-        basicTaxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary) { path =>
-          path.firstRelationship.elr == hh.elr
+      hasHypercubes
+        .flatMap { hh =>
+          basicTaxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(hh.primary) { path =>
+            path.firstRelationship.elr == hh.elr
+          }
         }
-      } flatMap (_.relationships.map(_.member))).toSet
+        .flatMap(_.relationships.map(_.member))
+        .toSet
 
     val ownPrimaries = hasHypercubes.map(_.sourceConceptEName).toSet
     val inheritingOrOwnPrimaries = inheritingPrimaries.union(ownPrimaries)
     val inheritingOrOwnConcretePrimaries =
-      inheritingOrOwnPrimaries filter (item => basicTaxo.findPrimaryItemDeclaration(item).exists(_.isConcrete))
+      inheritingOrOwnPrimaries.filter(item => basicTaxo.findPrimaryItemDeclaration(item).exists(_.isConcrete))
 
     require(
       concretePrimariesNotInheritingOrHavingHasHypercube.toSet ==
         concretePrimaryItemDecls.map(_.targetEName).toSet.diff(inheritingOrOwnConcretePrimaries),
-      s"Finding concrete primary items not inheriting or having any has-hypercube from 2 directions must give the same result")
+      s"Finding concrete primary items not inheriting or having any has-hypercube from 2 directions must give the same result"
+    )
 
     logger.info("Showing inheriting concrete items")
 
     val hasHypercubeInheritanceOrSelf = basicTaxo.computeHasHypercubeInheritanceOrSelfReturningElrToPrimariesMaps
 
-    concretePrimaryItemDecls.map(_.targetEName).distinct.sortBy(_.toString) foreach { item =>
+    concretePrimaryItemDecls.map(_.targetEName).distinct.sortBy(_.toString).foreach { item =>
       val hasHypercubes = basicTaxo.findAllOwnOrInheritedHasHypercubes(item)
       val elrPrimariesPairs = hasHypercubes.groupBy(_.elr).view.mapValues(_.map(_.primary)).toSeq.sortBy(_._1)
 
       require(
-        elrPrimariesPairs.toMap.view.mapValues(_.toSet).toMap == hasHypercubeInheritanceOrSelf.getOrElse(item, Map.empty),
-        s"Finding own or inherited has-hypercubes must be consistent with the bulk methods for has-hypercube inheritance-or-self")
+        elrPrimariesPairs.toMap.view.mapValues(_.toSet).toMap == hasHypercubeInheritanceOrSelf
+          .getOrElse(item, Map.empty),
+        s"Finding own or inherited has-hypercubes must be consistent with the bulk methods for has-hypercube inheritance-or-self"
+      )
 
-      elrPrimariesPairs foreach {
+      elrPrimariesPairs.foreach {
         case (elr, primaries) =>
           println(
             s"Concrete item $item inherits or has has-hypercubes for ELR $elr and with primaries ${primaries.distinct.sortBy(_.toString).mkString(", ")}")
       }
-    }
-  }
-
-  private def buildTaxonomy(rootDirOrZipFile: File, parentPathOption: Option[URI], entryPointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
-    val documentBuilder = getDocumentBuilder(useSaxon, rootDirOrZipFile, parentPathOption)
-    val documentCollector = DefaultDtsCollector()
-
-    val lenient = System.getProperty("lenient", "false").toBoolean
-
-    val relationshipFactory =
-      if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
-
-    val taxoBuilder =
-      TaxonomyBuilder.
-        withDocumentBuilder(documentBuilder).
-        withDocumentCollector(documentCollector).
-        withRelationshipFactory(relationshipFactory)
-
-    logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
-
-    val basicTaxo = taxoBuilder.build(entryPointUris)
-    basicTaxo
-  }
-
-  private def getDocumentBuilder(useSaxon: Boolean, rootDirOrZipFile: File, parentPathOption: Option[URI]): DocumentBuilder = {
-    val uriResolver =
-      if (rootDirOrZipFile.isDirectory) {
-        UriResolvers.fromLocalMirrorRootDirectory(rootDirOrZipFile)
-      } else {
-        UriResolvers.forZipFileContainingLocalMirror(new ZipFile(rootDirOrZipFile), parentPathOption)
-      }
-
-    if (useSaxon) {
-      val processor = new Processor(false)
-
-      SaxonDocumentBuilder(processor.newDocumentBuilder(), uriResolver)
-    } else {
-      IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriResolver)
     }
   }
 }

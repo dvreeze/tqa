@@ -19,21 +19,10 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
-import java.util.zip.ZipFile
-
-import scala.collection.immutable
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
-import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
-import eu.cdevreeze.tqa.base.taxonomybuilder.DefaultDtsCollector
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
-import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
-import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
-import net.sf.saxon.s9api.Processor
+
+import scala.collection.immutable
 
 /**
  * Taxonomy parser and analyser, showing counts of used elements in the taxonomy.
@@ -57,8 +46,11 @@ object ShowUsedElements {
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
 
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
+    val useScheme = System.getProperty("useScheme", "false").toBoolean
 
-    val basicTaxo = buildTaxonomy(rootDirOrZipFile, parentPathOption, entryPointUris, useSaxon)
+    logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
+
+    val basicTaxo = ConsoleUtil.buildTaxonomy(rootDirOrZipFile, parentPathOption, entryPointUris, useSaxon, useScheme)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -75,44 +67,6 @@ object ShowUsedElements {
       val sortedENames = elemGroup.map(_.resolvedName).distinct.sortBy(_.toString)
 
       logger.info(s"Element $className. Count: ${elemGroup.size}. Element names: ${sortedENames.mkString(", ")}")
-    }
-  }
-
-  private def buildTaxonomy(rootDirOrZipFile: File, parentPathOption: Option[URI], entryPointUris: Set[URI], useSaxon: Boolean): BasicTaxonomy = {
-    val documentBuilder = getDocumentBuilder(useSaxon, rootDirOrZipFile, parentPathOption)
-    val documentCollector = DefaultDtsCollector()
-
-    val lenient = System.getProperty("lenient", "false").toBoolean
-
-    val relationshipFactory =
-      if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
-
-    val taxoBuilder =
-      TaxonomyBuilder.
-        withDocumentBuilder(documentBuilder).
-        withDocumentCollector(documentCollector).
-        withRelationshipFactory(relationshipFactory)
-
-    logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
-
-    val basicTaxo = taxoBuilder.build(entryPointUris)
-    basicTaxo
-  }
-
-  private def getDocumentBuilder(useSaxon: Boolean, rootDirOrZipFile: File, parentPathOption: Option[URI]): DocumentBuilder = {
-    val uriResolver =
-      if (rootDirOrZipFile.isDirectory) {
-        UriResolvers.fromLocalMirrorRootDirectory(rootDirOrZipFile)
-      } else {
-        UriResolvers.forZipFileContainingLocalMirror(new ZipFile(rootDirOrZipFile), parentPathOption)
-      }
-
-    if (useSaxon) {
-      val processor = new Processor(false)
-
-      SaxonDocumentBuilder(processor.newDocumentBuilder(), uriResolver)
-    } else {
-      IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriResolver)
     }
   }
 }
