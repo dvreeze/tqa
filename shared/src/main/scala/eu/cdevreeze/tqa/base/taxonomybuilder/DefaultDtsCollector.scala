@@ -46,6 +46,10 @@ import eu.cdevreeze.tqa.base.dom.XsdSchema
  */
 final class DefaultDtsCollector(acceptsEmptyUriSet: Boolean) extends AbstractDtsCollector(acceptsEmptyUriSet) {
 
+  def acceptingEmptyUriSet: DefaultDtsCollector = DefaultDtsCollector.acceptingEmptyUriSet(true)
+
+  def notAcceptingEmptyUriSet: DefaultDtsCollector = DefaultDtsCollector.acceptingEmptyUriSet(false)
+
   def findAllUsedDocUris(taxonomyDoc: TaxonomyDocument): Set[URI] = {
     val taxoRootElems =
       taxonomyDoc.documentElement.findTopmostElemsOrSelfOfType(classTag[TaxonomyRootElem])(_ => true)
@@ -118,6 +122,9 @@ final class DefaultDtsCollector(acceptsEmptyUriSet: Boolean) extends AbstractDts
 
 object DefaultDtsCollector {
 
+  /**
+   * Returns a DefaultDtsCollector that does not accept empty URI sets.
+   */
   def apply(): DefaultDtsCollector = {
     acceptingEmptyUriSet(false)
   }

@@ -199,7 +199,7 @@ object UriResolvers {
       require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
 
       val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-      val rewritePrefix = returnWithTrailingSlash(new File(new File(rootDir, uri.getScheme), uri.getHost).toURI)
+      val rewritePrefix = returnWithTrailingSlash(rootDir.toPath.resolve(uri.getScheme).resolve(uri.getHost).toUri)
 
       val catalog =
         SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))

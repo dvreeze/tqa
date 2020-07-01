@@ -48,6 +48,10 @@ final class IndexedDocumentBuilder(
 
 object IndexedDocumentBuilder {
 
+  /**
+   * Creates a SaxonDocumentBuilder from a yaidom DocumentParser, and an URI resolver.
+   * The URI resolver is typically obtained through the UriResolvers singleton object.
+   */
   def apply(docParser: DocumentParser, uriResolver: URI => InputSource): IndexedDocumentBuilder = {
     new IndexedDocumentBuilder(docParser, uriResolver)
   }

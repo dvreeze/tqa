@@ -71,6 +71,10 @@ final class SaxonDocumentBuilder(
 
 object SaxonDocumentBuilder {
 
+  /**
+   * Creates a SaxonDocumentBuilder from an underlying Saxon s9api DocumentBuilder, and an URI resolver.
+   * The URI resolver is typically obtained through the UriResolvers singleton object.
+   */
   def apply(docBuilder: s9api.DocumentBuilder, uriResolver: URI => InputSource): SaxonDocumentBuilder = {
     new SaxonDocumentBuilder(docBuilder, uriResolver)
   }

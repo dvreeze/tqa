@@ -59,6 +59,12 @@ final class TaxonomyBuilder(
   }
 }
 
+/**
+ * Fluent type-safe API to create a TaxonomyBuilder. Note that typically it makes sense to create a TaxonomyBuilder once,
+ * and keep it, using it to create taxonomies for different entrypoints. Hence, creating a TaxonomyBuilder is typically
+ * rather easy, given a DocumentBuilder. Mostly it is the creation of the DocumentBuilder that can be challenging, due to
+ * the URI resolution strategy to pass, and possibly also due to the use of a document cache.
+ */
 object TaxonomyBuilder {
 
   def withDocumentBuilder(documentBuilder: DocumentBuilder): HasDocumentBuilder = {
@@ -71,6 +77,10 @@ object TaxonomyBuilder {
 
     def withDocumentCollector(documentCollector: DocumentCollector): HasDocumentCollector = {
       new HasDocumentCollector(documentBuilder, documentCollector)
+    }
+
+    def withDefaultDtsCollector: HasDocumentCollector = {
+      withDocumentCollector(DefaultDtsCollector.acceptingEmptyUriSet(false))
     }
   }
 

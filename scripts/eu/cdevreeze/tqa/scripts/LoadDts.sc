@@ -86,7 +86,7 @@ def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, len
   val docBuilder =
     new docbuilder.saxon.SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      docbuilder.jvm.UriResolvers.fromLocalMirrorRootDirectory(localRootDir))
+      docbuilder.jvm.UriResolvers.fromLocalMirrorRootDirectoryWithoutScheme(localRootDir))
 
   val documentBuilder =
     new docbuilder.jvm.CachingDocumentBuilder(docbuilder.jvm.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))

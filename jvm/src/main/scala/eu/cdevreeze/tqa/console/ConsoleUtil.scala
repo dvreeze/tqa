@@ -45,7 +45,6 @@ object ConsoleUtil {
       useSaxon: Boolean,
       useScheme: Boolean): BasicTaxonomy = {
     val documentBuilder = getDocumentBuilder(rootDirOrZipFile, parentPathOption, useSaxon, useScheme)
-    val documentCollector = DefaultDtsCollector()
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
@@ -55,7 +54,7 @@ object ConsoleUtil {
     val taxoBuilder =
       TaxonomyBuilder
         .withDocumentBuilder(documentBuilder)
-        .withDocumentCollector(documentCollector)
+        .withDefaultDtsCollector
         .withRelationshipFactory(relationshipFactory)
 
     val basicTaxo = taxoBuilder.build(entryPointUris)
