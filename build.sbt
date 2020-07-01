@@ -10,7 +10,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 // Note that 2.12.5 does not work for Scalatest in sbt (https://github.com/scalatest/scalatest/issues/1342).
 
-val scalaVer = "2.13.2"
+val scalaVer = "2.13.3"
 
 val crossScalaVer = Seq(scalaVer, "2.12.11")
 

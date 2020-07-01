@@ -144,7 +144,7 @@ object XbrlInstanceViewer {
           val minimalInstanceAsSimpleElem = minimalInstance.backingElem.asInstanceOf[indexed.Elem].underlyingElem
 
           val xmlString = SimpleNodePrinting.printElem(minimalInstanceAsSimpleElem, Scope.Empty)
-          val editedXmlString = scala.io.Source.fromString(xmlString).getLines.filter(_.trim.nonEmpty).mkString("\n")
+          val editedXmlString = scala.io.Source.fromString(xmlString).getLines().filter(_.trim.nonEmpty).mkString("\n")
 
           val content = pre(editedXmlString).render
 

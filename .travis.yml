@@ -13,9 +13,9 @@ matrix:
   - jdk: openjdk13
     scala: 2.12.11
   - jdk: oraclejdk9
-    scala: 2.13.2
+    scala: 2.13.3
   - jdk: openjdk13
-    scala: 2.13.2
+    scala: 2.13.3
 
 script:
  - sbt ++$TRAVIS_SCALA_VERSION -J-Xmx3G test

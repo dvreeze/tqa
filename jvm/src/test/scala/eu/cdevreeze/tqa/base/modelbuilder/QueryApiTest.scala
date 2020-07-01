@@ -305,8 +305,8 @@ class QueryApiTest extends AnyFunSuite {
     }
 
     assertResult(true) {
-      val (elr, primaries) = elrToPrimaryMap.iterator.next
-      val rootPrimary = primaries.iterator.next
+      val (elr, primaries) = elrToPrimaryMap.iterator.next()
+      val rootPrimary = primaries.iterator.next()
 
       val dmRelPaths = richTaxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(rootPrimary) {
         _.firstRelationship.elr == elr
