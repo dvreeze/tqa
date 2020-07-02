@@ -69,7 +69,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -131,7 +131,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -197,7 +197,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -260,7 +260,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(3) {
       relationships.size
@@ -332,7 +332,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(3) {
       relationships.size
@@ -628,12 +628,12 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
     val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val filteredRequiresElementRelationships =
-      relationships collect {
+      relationships.collect {
         case rel: RequiresElementRelationship => rel
       }.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
 
     val filteredGeneralSpecialRelationships =
-      relationships collect { case rel: GeneralSpecialRelationship => rel }
+      relationships.collect { case rel: GeneralSpecialRelationship => rel }
 
     assertResult(
       Map(
@@ -672,11 +672,11 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
       relationships.forall(_.arc.resolvedName == LinkLabelArcEName)
     }
     assertResult(2) {
-      (relationships collect { case rel: ConceptLabelRelationship => rel }).size
+      (relationships.collect { case rel: ConceptLabelRelationship => rel }).size
     }
     // The corrupt concept-label relationship pointing to a target concept instead of label
     assertResult(1) {
-      (relationships collect { case rel: UnknownRelationship => rel }).size
+      (relationships.collect { case rel: UnknownRelationship => rel }).size
     }
 
     val relationshipKeys = relationships.map(rel => relationshipFactory.getRelationshipKey(rel, taxo))

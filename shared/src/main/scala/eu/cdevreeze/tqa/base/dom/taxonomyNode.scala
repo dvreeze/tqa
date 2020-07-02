@@ -1743,7 +1743,7 @@ object TaxonomyRootElem {
    * if the cast is unsuccessful.
    */
   def buildOptionally(backingElem: BackingNodes.Elem): Option[TaxonomyRootElem] = {
-    Some(TaxonomyElem.build(backingElem)) collect { case taxoRoot: TaxonomyRootElem => taxoRoot }
+    Some(TaxonomyElem.build(backingElem)).collect { case taxoRoot: TaxonomyRootElem => taxoRoot }
   }
 
   /**

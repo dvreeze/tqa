@@ -137,11 +137,11 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def findImporters(source: Source): immutable.Seq[Importer] = {
-    source collect { case i: Importer => i }
+    source.collect { case i: Importer => i }
   }
 
   private def isScalaImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(1).map(_.structure) ==
       List(Term.Name("scala")).map(_.structure)
@@ -149,7 +149,7 @@ class JvmIndependencyTest extends AnyFunSuite {
 
   private def isAllowedScalaImporter(importer: Importer): Boolean = {
     isScalaImporter(importer) && {
-      val termNames = importer.ref collect { case tn: Term.Name => tn }
+      val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
       !termNames.map(_.structure).contains(Term.Name("parallel").structure) &&
         !termNames.map(_.structure).contains(Term.Name("tools").structure)
@@ -157,14 +157,14 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def isJavaImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(1).map(_.structure) ==
       List(Term.Name("java")).map(_.structure)
   }
 
   private def isJavaIoImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(2).map(_.structure) ==
       List(Term.Name("java"), Term.Name("io")).map(_.structure)
@@ -172,8 +172,8 @@ class JvmIndependencyTest extends AnyFunSuite {
 
   private def isAllowedJavaIoImporter(importer: Importer): Boolean = {
     isJavaIoImporter(importer) && {
-      val termNames = importer.ref collect { case tn: Term.Name => tn }
-      val importeeNames = importer collect { case n: Name.Indeterminate => n }
+      val termNames = importer.ref.collect { case tn: Term.Name => tn }
+      val importeeNames = importer.collect { case n: Name.Indeterminate => n }
 
       val importedNames: immutable.IndexedSeq[ImportedName] =
         importeeNames.toIndexedSeq.map(n => ImportedName(termNames, n))
@@ -185,7 +185,7 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def isJavaMathImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(2).map(_.structure) ==
       List(Term.Name("java"), Term.Name("math")).map(_.structure)
@@ -193,8 +193,8 @@ class JvmIndependencyTest extends AnyFunSuite {
 
   private def isAllowedJavaMathImporter(importer: Importer): Boolean = {
     isJavaMathImporter(importer) && {
-      val termNames = importer.ref collect { case tn: Term.Name => tn }
-      val importeeNames = importer collect { case n: Name.Indeterminate => n }
+      val termNames = importer.ref.collect { case tn: Term.Name => tn }
+      val importeeNames = importer.collect { case n: Name.Indeterminate => n }
 
       val importedNames: immutable.IndexedSeq[ImportedName] =
         importeeNames.toIndexedSeq.map(n => ImportedName(termNames, n))
@@ -206,7 +206,7 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def isJavaNetImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(2).map(_.structure) ==
       List(Term.Name("java"), Term.Name("net")).map(_.structure)
@@ -214,8 +214,8 @@ class JvmIndependencyTest extends AnyFunSuite {
 
   private def isAllowedJavaNetImporter(importer: Importer): Boolean = {
     isJavaNetImporter(importer) && {
-      val termNames = importer.ref collect { case tn: Term.Name => tn }
-      val importeeNames = importer collect { case n: Name.Indeterminate => n }
+      val termNames = importer.ref.collect { case tn: Term.Name => tn }
+      val importeeNames = importer.collect { case n: Name.Indeterminate => n }
 
       val importedNames: immutable.IndexedSeq[ImportedName] =
         importeeNames.toIndexedSeq.map(n => ImportedName(termNames, n))
@@ -227,7 +227,7 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def isJavaUtilImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(2).map(_.structure) ==
       List(Term.Name("java"), Term.Name("util")).map(_.structure)
@@ -235,8 +235,8 @@ class JvmIndependencyTest extends AnyFunSuite {
 
   private def isAllowedJavaUtilImporter(importer: Importer): Boolean = {
     isJavaUtilImporter(importer) && {
-      val termNames = importer.ref collect { case tn: Term.Name => tn }
-      val importeeNames = importer collect { case n: Name.Indeterminate => n }
+      val termNames = importer.ref.collect { case tn: Term.Name => tn }
+      val importeeNames = importer.collect { case n: Name.Indeterminate => n }
 
       val importedNames: immutable.IndexedSeq[ImportedName] =
         importeeNames.toIndexedSeq.map(n => ImportedName(termNames, n))
@@ -252,7 +252,7 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def isJavaNioImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(2).map(_.structure) ==
       List(Term.Name("java"), Term.Name("nio")).map(_.structure)
@@ -260,8 +260,8 @@ class JvmIndependencyTest extends AnyFunSuite {
 
   private def isAllowedJavaNioImporter(importer: Importer): Boolean = {
     isJavaNioImporter(importer) && {
-      val termNames = importer.ref collect { case tn: Term.Name => tn }
-      val importeeNames = importer collect { case n: Name.Indeterminate => n }
+      val termNames = importer.ref.collect { case tn: Term.Name => tn }
+      val importeeNames = importer.collect { case n: Name.Indeterminate => n }
 
       val importedNames: immutable.IndexedSeq[ImportedName] =
         importeeNames.toIndexedSeq.map(n => ImportedName(termNames, n))
@@ -274,7 +274,7 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def isJavaSecurityImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(2).map(_.structure) ==
       List(Term.Name("java"), Term.Name("security")).map(_.structure)
@@ -282,8 +282,8 @@ class JvmIndependencyTest extends AnyFunSuite {
 
   private def isAllowedJavaSecurityImporter(importer: Importer): Boolean = {
     isJavaSecurityImporter(importer) && {
-      val termNames = importer.ref collect { case tn: Term.Name => tn }
-      val importeeNames = importer collect { case n: Name.Indeterminate => n }
+      val termNames = importer.ref.collect { case tn: Term.Name => tn }
+      val importeeNames = importer.collect { case n: Name.Indeterminate => n }
 
       val importedNames: immutable.IndexedSeq[ImportedName] =
         importeeNames.toIndexedSeq.map(n => ImportedName(termNames, n))
@@ -295,29 +295,29 @@ class JvmIndependencyTest extends AnyFunSuite {
   }
 
   private def isScalaJsDomImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(3).map(_.structure) ==
       List(Term.Name("org"), Term.Name("scalajs"), Term.Name("dom")).map(_.structure)
   }
 
   private def isYaidomImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(3).map(_.structure) ==
       List(Term.Name("eu"), Term.Name("cdevreeze"), Term.Name("yaidom")).map(_.structure)
   }
 
   private def isTqaImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn }
 
     termNames.take(3).map(_.structure) ==
       List(Term.Name("eu"), Term.Name("cdevreeze"), Term.Name("tqa")).map(_.structure)
   }
 
   private def isOtherAllowedImporter(importer: Importer): Boolean = {
-    val termNames = importer.ref collect { case tn: Term.Name => tn } ensuring (_.nonEmpty)
-    val importeeNames = importer collect { case n: Name.Indeterminate => n }
+    val termNames = importer.ref.collect { case tn: Term.Name => tn } ensuring (_.nonEmpty)
+    val importeeNames = importer.collect { case n: Name.Indeterminate => n }
 
     val importedNames: immutable.IndexedSeq[ImportedName] =
       importeeNames.toIndexedSeq.map(n => ImportedName(termNames, n))
