@@ -24,6 +24,9 @@ import java.util.zip.ZipFile
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import org.xml.sax.InputSource
+
+import scala.jdk.CollectionConverters._
 
 /**
  * Partial URI resolvers specifically for a taxonomy package
@@ -33,23 +36,57 @@ import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
  */
 object TaxonomyPackagePartialUriResolvers {
 
+  import PartialUriConverters.PartialUriConverter
   import PartialUriResolvers.PartialUriResolver
 
   def forTaxonomyPackage(taxonomyPackageZipFile: ZipFile): PartialUriResolver = {
-    val catalog: SimpleCatalog = parseCatalog(taxonomyPackageZipFile)
+    val zipEntriesByRelativeUri: Map[URI, ZipEntry] = computeZipEntryMap(taxonomyPackageZipFile)
 
-    PartialUriResolvers.forZipFileUsingCatalog(taxonomyPackageZipFile, catalog)
+    val catalog: SimpleCatalog = parseCatalog(taxonomyPackageZipFile, zipEntriesByRelativeUri)
+    val partialUriConverter: PartialUriConverter = PartialUriConverters.fromCatalog(catalog)
+
+    def resolveUri(uri: URI): Option[InputSource] = {
+      val mappedUriOption = partialUriConverter(uri)
+
+      mappedUriOption.map { mappedUri =>
+        require(!mappedUri.isAbsolute, s"Cannot resolve absolute URI '$mappedUri'")
+
+        val optionalZipEntry: Option[ZipEntry] = zipEntriesByRelativeUri.get(mappedUri)
+
+        require(
+          optionalZipEntry.isDefined,
+          s"Missing ZIP entry in ZIP file $taxonomyPackageZipFile with URI $mappedUri")
+
+        val is = taxonomyPackageZipFile.getInputStream(optionalZipEntry.get)
+
+        new InputSource(is)
+      }
+    }
+
+    resolveUri
   }
 
-  private def parseCatalog(zipFile: ZipFile): SimpleCatalog = {
-    val catalogEntry: ZipEntry = zipFile.stream()
-      .filter(entry => toRelativeUri(entry, dummyDirectory).toString.endsWith("/META-INF/catalog.xml"))
-      .findFirst()
-      .orElseThrow(sys.error(s"No META-INF/catalog.xml found in taxonomy package ZIP file ${zipFile.getName}"))
+  private def parseCatalog(zipFile: ZipFile, zipEntriesByRelativeUri: Map[URI, ZipEntry]): SimpleCatalog = {
+    val catalogEntryRelativeUri: URI = zipEntriesByRelativeUri
+      .find { case (uri, _) => uri.toString.endsWith("/META-INF/catalog.xml") }
+      .map(_._1)
+      .getOrElse(sys.error(s"No META-INF/catalog.xml found in taxonomy package ZIP file ${zipFile.getName}"))
+
+    val catalogEntry: ZipEntry = zipEntriesByRelativeUri.apply(catalogEntryRelativeUri)
 
     val docParser = DocumentParserUsingStax.newInstance()
-    val catalogRootElem: indexed.Elem = indexed.Elem(docParser.parse(zipFile.getInputStream(catalogEntry)).documentElement)
-    SimpleCatalog.fromElem(catalogRootElem)
+    val catalogRootElem: indexed.Elem =
+      indexed.Elem(docParser.parse(zipFile.getInputStream(catalogEntry)).documentElement)
+
+    SimpleCatalog.fromElem(catalogRootElem).copy(xmlBaseAttributeOption = Some(catalogEntryRelativeUri))
+  }
+
+  private def computeZipEntryMap(zipFile: ZipFile): Map[URI, ZipEntry] = {
+    val zipEntries = zipFile.entries().asScala.toIndexedSeq
+
+    val zipFileParent = dummyDirectory
+
+    zipEntries.map(e => toRelativeUri(e, zipFileParent) -> e).toMap
   }
 
   private def toRelativeUri(zipEntry: ZipEntry, zipFileParent: File): URI = {

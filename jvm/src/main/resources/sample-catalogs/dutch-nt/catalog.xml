@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <rewriteURI uriStartString="http://www.nltaxonomie.nl/" rewritePrefix="../www.nltaxonomie.nl/"/>
+    <rewriteURI uriStartString="http://www.ebpi.nl/" rewritePrefix="../www.ebpi.nl/"/>
+    <rewriteURI uriStartString="https://www.vismaconnect.nl/" rewritePrefix="../www.vismaconnect.nl/"/>
+    <rewriteURI uriStartString="http://www.w3.org/" rewritePrefix="../www.w3.org/"/>
+    <rewriteURI uriStartString="https://www.xbrl.org/taxonomy/" rewritePrefix="../www.xbrl.org/taxonomy/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2003/" rewritePrefix="../www.xbrl.org/2003/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2004/" rewritePrefix="../www.xbrl.org/2004/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2005/" rewritePrefix="../www.xbrl.org/2005/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2006/" rewritePrefix="../www.xbrl.org/2006/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2007/" rewritePrefix="../www.xbrl.org/2007/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2008/" rewritePrefix="../www.xbrl.org/2008/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2010/" rewritePrefix="../www.xbrl.org/2010/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2013/" rewritePrefix="../www.xbrl.org/2013/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2014/" rewritePrefix="../www.xbrl.org/2014/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/2016/" rewritePrefix="../www.xbrl.org/2016/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/dtr/" rewritePrefix="../www.xbrl.org/dtr/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/lrr/" rewritePrefix="../www.xbrl.org/lrr/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/PWD/" rewritePrefix="../www.xbrl.org/PWD/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/utr/" rewritePrefix="../www.xbrl.org/utr/"/>
+    <rewriteURI uriStartString="http://www.xbrl.org/" rewritePrefix="../www.xbrl.org/"/>
+</catalog>

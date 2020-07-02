@@ -19,11 +19,12 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
+import java.util.zip.ZipFile
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
+import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 
 import scala.collection.immutable
-import scala.collection.compat._
 
 /**
  * Taxonomy parser and analyser, showing counts of used elements in the taxonomy.
@@ -34,24 +35,18 @@ object ShowUsedElements {
 
   private val logger = Logger.getGlobal
 
-  /**
-   * The optional parent path as relative URI, if the taxonomy is in a ZIP file but not at the root.
-   */
-  private val parentPathOption: Option[URI] =
-    Option(System.getProperty("parentPath")).map(p => URI.create(p).ensuring(!_.isAbsolute))
-
   def main(args: Array[String]): Unit = {
-    require(args.size >= 2, s"Usage: ShowUsedElements <taxo root dir or ZIP file> <entry point URI 1> ...")
-    val rootDirOrZipFile = new File(args(0))
+    require(args.size >= 2, s"Usage: ShowUsedElements <taxonomy package ZIP file> <entry point URI 1> ...")
+    val zipFile = new ZipFile(new File(args(0)).ensuring(_.isFile))
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
 
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
-    val useScheme = System.getProperty("useScheme", "false").toBoolean
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val basicTaxo = ConsoleUtil.buildTaxonomy(rootDirOrZipFile, parentPathOption, entryPointUris, useSaxon, useScheme)
+    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon)
+    val basicTaxo = taxoBuilder.build(entryPointUris)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -69,5 +64,7 @@ object ShowUsedElements {
 
       logger.info(s"Element $className. Count: ${elemGroup.size}. Element names: ${sortedENames.mkString(", ")}")
     }
+
+    zipFile.close() // Not robust
   }
 }

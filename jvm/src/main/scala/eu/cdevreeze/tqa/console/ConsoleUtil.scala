@@ -16,19 +16,18 @@
 
 package eu.cdevreeze.tqa.console
 
-import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
+import eu.cdevreeze.tqa.docbuilder.jvm.TaxonomyPackageUriResolvers
 import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import net.sf.saxon.s9api.Processor
+import org.xml.sax.InputSource
 
 /**
  * Taxonomy bootstrapping utility for the console programs.
@@ -37,13 +36,17 @@ import net.sf.saxon.s9api.Processor
  */
 object ConsoleUtil {
 
-  def buildTaxonomy(
-      rootDirOrZipFile: File,
-      parentPathOption: Option[URI],
-      entryPointUris: Set[URI],
-      useSaxon: Boolean,
-      useScheme: Boolean): BasicTaxonomy = {
-    val documentBuilder = getDocumentBuilder(rootDirOrZipFile, parentPathOption, useSaxon, useScheme)
+  def createTaxonomyBuilder(taxonomyPackage: ZipFile, useSaxon: Boolean): TaxonomyBuilder = {
+    val uriResolver: URI => InputSource = TaxonomyPackageUriResolvers.forTaxonomyPackage(taxonomyPackage)
+
+    val documentBuilder: DocumentBuilder =
+      if (useSaxon) {
+        val processor = new Processor(false)
+
+        SaxonDocumentBuilder(processor.newDocumentBuilder(), uriResolver)
+      } else {
+        IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriResolver)
+      }
 
     val lenient = System.getProperty("lenient", "false").toBoolean
 
@@ -55,35 +58,6 @@ object ConsoleUtil {
         .withDocumentBuilder(documentBuilder)
         .withDefaultDtsCollector
         .withRelationshipFactory(relationshipFactory)
-
-    val basicTaxo = taxoBuilder.build(entryPointUris)
-    basicTaxo
+    taxoBuilder
   }
-
-  def getDocumentBuilder(
-      rootDirOrZipFile: File,
-      parentPathOption: Option[URI],
-      useSaxon: Boolean,
-      useScheme: Boolean): DocumentBuilder = {
-    val uriResolver =
-      (rootDirOrZipFile.isDirectory, useScheme) match {
-        case (true, true) =>
-          UriResolvers.fromLocalMirrorRootDirectoryUsingScheme(rootDirOrZipFile)
-        case (true, false) =>
-          UriResolvers.fromLocalMirrorRootDirectoryWithoutScheme(rootDirOrZipFile)
-        case (false, true) =>
-          UriResolvers.forZipFileContainingLocalMirrorUsingScheme(new ZipFile(rootDirOrZipFile), parentPathOption)
-        case (false, false) =>
-          UriResolvers.forZipFileContainingLocalMirrorWithoutScheme(new ZipFile(rootDirOrZipFile), parentPathOption)
-      }
-
-    if (useSaxon) {
-      val processor = new Processor(false)
-
-      SaxonDocumentBuilder(processor.newDocumentBuilder(), uriResolver)
-    } else {
-      IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriResolver)
-    }
-  }
-
 }
