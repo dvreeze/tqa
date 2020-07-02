@@ -25,6 +25,7 @@ import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 /**
  * Taxonomy parser and analyser, showing counts of used elements in the taxonomy.
