@@ -68,15 +68,15 @@ abstract class AbstractDtsCollector(val acceptsEmptyUriSet: Boolean) extends Doc
     // One step, processing all URIs currently known, and not yet processed
     val docUrisToProcess = docUris.diff(processedDocUris)
 
-    val taxoDocsFound = docUrisToProcess.toIndexedSeq.map(uri => buildTaxonomyDoc(uri, documentBuilder))
+    val taxoDocsToProcess = docUrisToProcess.toIndexedSeq.map(uri => buildTaxonomyDoc(uri, documentBuilder))
 
-    val taxoDocMapFound: Map[URI, TaxonomyDocument] = taxoDocsFound.map(e => (e.uri -> e)).toMap
+    val taxoDocToProcessMap: Map[URI, TaxonomyDocument] = taxoDocsToProcess.map(e => (e.uri -> e)).toMap
 
-    val docUrisFound = taxoDocsFound.flatMap(e => findAllUsedDocUris(e)).toSet
+    val docUrisFound = taxoDocsToProcess.flatMap(e => findAllUsedDocUris(e)).toSet
 
     val newDocUris = docUris.union(docUrisFound)
 
-    val newProcessedDocs: Map[URI, TaxonomyDocument] = processedDocs ++ taxoDocMapFound
+    val newProcessedDocs: Map[URI, TaxonomyDocument] = processedDocs ++ taxoDocToProcessMap
 
     assert(newProcessedDocs.keySet == docUris)
 
