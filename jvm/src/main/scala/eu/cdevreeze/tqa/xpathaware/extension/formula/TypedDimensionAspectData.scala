@@ -39,7 +39,7 @@ final class TypedDimensionAspectData(val dimensionAspect: TypedDimensionAspect) 
     // TODO Is this correct?
 
     dimensionAspect.valueElemOption.map(_.underlyingElem.backingElem.findAllChildElems.head) orElse {
-      dimensionAspect.xpathElemOption.map(_.expr) map { expr =>
+      dimensionAspect.xpathElemOption.map(_.expr).map { expr =>
         xpathEvaluator.evaluateAsBackingElem(
           xpathEvaluator.makeXPathExpression(expr.xpathExpression), None)
       }

@@ -630,7 +630,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
     val filteredRequiresElementRelationships =
       relationships collect {
         case rel: RequiresElementRelationship => rel
-      } filter (_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
+      }.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
 
     val filteredGeneralSpecialRelationships =
       relationships collect { case rel: GeneralSpecialRelationship => rel }

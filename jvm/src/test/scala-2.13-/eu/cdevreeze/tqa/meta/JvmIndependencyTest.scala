@@ -125,7 +125,7 @@ class JvmIndependencyTest extends AnyFunSuite {
   private def findSourcesInDirTree(dir: File): immutable.IndexedSeq[Source] = {
     require(!dir.isFile)
 
-    dir.listFiles.toVector flatMap {
+    dir.listFiles.toVector.flatMap {
       case f if f.isFile && f.getName.endsWith(".scala") =>
         Vector(f.parse[Source].get)
       case d if d.isDirectory =>

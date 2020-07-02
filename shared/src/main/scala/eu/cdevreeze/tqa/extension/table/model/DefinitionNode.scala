@@ -39,7 +39,7 @@ sealed trait DefinitionNode extends Resource {
   def definitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree]
 
   final def findAllOwnOrDescendantDefinitionNodeSubtrees: immutable.IndexedSeq[DefinitionNodeSubtree] = {
-    definitionNodeSubtrees flatMap { defNodeSubtree =>
+    definitionNodeSubtrees.flatMap { defNodeSubtree =>
       // Recursive call
       defNodeSubtree +: (defNodeSubtree.target.findAllOwnOrDescendantDefinitionNodeSubtrees)
     }
@@ -108,7 +108,7 @@ final case class RuleNode(
 
   def findAllUntaggedAspectsOfType[A <: AspectRule](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
     implicit val clsTag = cls
-    untaggedAspects collect { case asp: A => asp }
+    untaggedAspects.collect { case asp: A => asp }
   }
 
   def allAspectsByTagOption: Map[Option[String], immutable.IndexedSeq[AspectRule]] = {

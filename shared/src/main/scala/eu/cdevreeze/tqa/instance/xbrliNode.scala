@@ -118,7 +118,7 @@ sealed abstract class XbrliElem private[instance] (
   final def children: immutable.IndexedSeq[XbrliNode] = {
     var childElemIdx = 0
 
-    backingElem.children flatMap {
+    backingElem.children.flatMap {
       case che: BackingNodes.Elem =>
         val e = childElems(childElemIdx)
         childElemIdx += 1
@@ -657,7 +657,7 @@ final class XbrliUnit private[instance] (
   def id: String = attribute(IdEName)
 
   def measures: immutable.IndexedSeq[EName] = {
-    filterChildElems(XbrliMeasureEName) map (e => e.textAsResolvedQName)
+    filterChildElems(XbrliMeasureEName).map (e => e.textAsResolvedQName)
   }
 
   def findDivide: Option[Divide] = {
@@ -1075,7 +1075,7 @@ sealed trait MayContainDimensions extends XbrliElem {
   }
 
   final def explicitDimensionMembers: Map[EName, EName] = {
-    (explicitMembers map { e =>
+    (explicitMembers.map { e =>
       val dim = e.attributeAsResolvedQName(DimensionEName)
       val mem = e.textAsResolvedQName
 
@@ -1088,7 +1088,7 @@ sealed trait MayContainDimensions extends XbrliElem {
   }
 
   final def typedDimensionMembers: Map[EName, XbrliElem] = {
-    (typedMembers flatMap { e =>
+    (typedMembers.flatMap { e =>
       val dim = e.attributeAsResolvedQName(DimensionEName)
       val memOption = e.findAllChildElems.headOption
 

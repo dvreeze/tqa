@@ -49,7 +49,7 @@ final case class SimpleCatalog(
     val uriRewriteOption =
       sortedRewrites.find(rewrite => normalizedUriString.startsWith(rewrite.normalizedUriStartString))
 
-    uriRewriteOption map { rewrite =>
+    uriRewriteOption.map { rewrite =>
       val relativeUri: URI =
         URI.create(rewrite.normalizedUriStartString).relativize(normalizedUri).ensuring(u => !u.isAbsolute)
 

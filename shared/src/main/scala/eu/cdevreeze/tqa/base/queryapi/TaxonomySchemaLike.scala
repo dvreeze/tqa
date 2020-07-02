@@ -70,7 +70,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Item declarations, across documents
 
   final def findAllItemDeclarations: immutable.IndexedSeq[ItemDeclaration] = {
-    findAllConceptDeclarations collect { case decl: ItemDeclaration => decl }
+    findAllConceptDeclarations.collect { case decl: ItemDeclaration => decl }
   }
 
   final def filterItemDeclarations(p: ItemDeclaration => Boolean): immutable.IndexedSeq[ItemDeclaration] = {
@@ -82,7 +82,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def findItemDeclaration(ename: EName): Option[ItemDeclaration] = {
-    findConceptDeclaration(ename) collectFirst { case decl: ItemDeclaration => decl }
+    findConceptDeclaration(ename).collectFirst { case decl: ItemDeclaration => decl }
   }
 
   final def getItemDeclaration(ename: EName): ItemDeclaration = {
@@ -92,7 +92,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Tuple declarations, across documents
 
   final def findAllTupleDeclarations: immutable.IndexedSeq[TupleDeclaration] = {
-    findAllConceptDeclarations collect { case decl: TupleDeclaration => decl }
+    findAllConceptDeclarations.collect { case decl: TupleDeclaration => decl }
   }
 
   final def filterTupleDeclarations(p: TupleDeclaration => Boolean): immutable.IndexedSeq[TupleDeclaration] = {
@@ -104,7 +104,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def findTupleDeclaration(ename: EName): Option[TupleDeclaration] = {
-    findConceptDeclaration(ename) collectFirst { case decl: TupleDeclaration => decl }
+    findConceptDeclaration(ename).collectFirst { case decl: TupleDeclaration => decl }
   }
 
   final def getTupleDeclaration(ename: EName): TupleDeclaration = {
@@ -114,7 +114,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Primary item declarations, across documents
 
   final def findAllPrimaryItemDeclarations: immutable.IndexedSeq[PrimaryItemDeclaration] = {
-    findAllConceptDeclarations collect { case decl: PrimaryItemDeclaration => decl }
+    findAllConceptDeclarations.collect { case decl: PrimaryItemDeclaration => decl }
   }
 
   final def filterPrimaryItemDeclarations(p: PrimaryItemDeclaration => Boolean): immutable.IndexedSeq[PrimaryItemDeclaration] = {
@@ -126,7 +126,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def findPrimaryItemDeclaration(ename: EName): Option[PrimaryItemDeclaration] = {
-    findConceptDeclaration(ename) collectFirst { case decl: PrimaryItemDeclaration => decl }
+    findConceptDeclaration(ename).collectFirst { case decl: PrimaryItemDeclaration => decl }
   }
 
   final def getPrimaryItemDeclaration(ename: EName): PrimaryItemDeclaration = {
@@ -136,7 +136,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Hypercube declarations, across documents
 
   final def findAllHypercubeDeclarations: immutable.IndexedSeq[HypercubeDeclaration] = {
-    findAllConceptDeclarations collect { case decl: HypercubeDeclaration => decl }
+    findAllConceptDeclarations.collect { case decl: HypercubeDeclaration => decl }
   }
 
   final def filterHypercubeDeclarations(p: HypercubeDeclaration => Boolean): immutable.IndexedSeq[HypercubeDeclaration] = {
@@ -148,7 +148,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def findHypercubeDeclaration(ename: EName): Option[HypercubeDeclaration] = {
-    findConceptDeclaration(ename) collectFirst { case decl: HypercubeDeclaration => decl }
+    findConceptDeclaration(ename).collectFirst { case decl: HypercubeDeclaration => decl }
   }
 
   final def getHypercubeDeclaration(ename: EName): HypercubeDeclaration = {
@@ -158,7 +158,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Dimension declarations, across documents
 
   final def findAllDimensionDeclarations: immutable.IndexedSeq[DimensionDeclaration] = {
-    findAllConceptDeclarations collect { case decl: DimensionDeclaration => decl }
+    findAllConceptDeclarations.collect { case decl: DimensionDeclaration => decl }
   }
 
   final def filterDimensionDeclarations(p: DimensionDeclaration => Boolean): immutable.IndexedSeq[DimensionDeclaration] = {
@@ -170,7 +170,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def findDimensionDeclaration(ename: EName): Option[DimensionDeclaration] = {
-    findConceptDeclaration(ename) collectFirst { case decl: DimensionDeclaration => decl }
+    findConceptDeclaration(ename).collectFirst { case decl: DimensionDeclaration => decl }
   }
 
   final def getDimensionDeclaration(ename: EName): DimensionDeclaration = {
@@ -180,7 +180,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Explicit dimension declarations, across documents
 
   final def findAllExplicitDimensionDeclarations: immutable.IndexedSeq[ExplicitDimensionDeclaration] = {
-    findAllConceptDeclarations collect { case decl: ExplicitDimensionDeclaration => decl }
+    findAllConceptDeclarations.collect { case decl: ExplicitDimensionDeclaration => decl }
   }
 
   final def filterExplicitDimensionDeclarations(p: ExplicitDimensionDeclaration => Boolean): immutable.IndexedSeq[ExplicitDimensionDeclaration] = {
@@ -192,7 +192,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def findExplicitDimensionDeclaration(ename: EName): Option[ExplicitDimensionDeclaration] = {
-    findConceptDeclaration(ename) collectFirst { case decl: ExplicitDimensionDeclaration => decl }
+    findConceptDeclaration(ename).collectFirst { case decl: ExplicitDimensionDeclaration => decl }
   }
 
   final def getExplicitDimensionDeclaration(ename: EName): ExplicitDimensionDeclaration = {
@@ -202,7 +202,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   // Typed dimension declarations, across documents
 
   final def findAllTypedDimensionDeclarations: immutable.IndexedSeq[TypedDimensionDeclaration] = {
-    findAllConceptDeclarations collect { case decl: TypedDimensionDeclaration => decl }
+    findAllConceptDeclarations.collect { case decl: TypedDimensionDeclaration => decl }
   }
 
   final def filterTypedDimensionDeclarations(p: TypedDimensionDeclaration => Boolean): immutable.IndexedSeq[TypedDimensionDeclaration] = {
@@ -214,7 +214,7 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def findTypedDimensionDeclaration(ename: EName): Option[TypedDimensionDeclaration] = {
-    findConceptDeclaration(ename) collectFirst { case decl: TypedDimensionDeclaration => decl }
+    findConceptDeclaration(ename).collectFirst { case decl: TypedDimensionDeclaration => decl }
   }
 
   final def getTypedDimensionDeclaration(ename: EName): TypedDimensionDeclaration = {

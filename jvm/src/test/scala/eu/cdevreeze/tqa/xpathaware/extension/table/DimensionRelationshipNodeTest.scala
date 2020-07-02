@@ -64,7 +64,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -108,7 +108,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -156,7 +156,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -200,7 +200,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -244,7 +244,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -289,7 +289,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -334,7 +334,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -378,7 +378,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -422,7 +422,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -466,7 +466,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -510,7 +510,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -554,7 +554,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -598,7 +598,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -642,7 +642,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -686,7 +686,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -730,7 +730,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -774,7 +774,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -822,7 +822,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -870,7 +870,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size
@@ -918,7 +918,7 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
     val tableTaxo = BasicTableTaxonomy.build(basicTaxo)
 
     val dimensionRelationshipNodes =
-      tableTaxo.tableResources collect { case n: DimensionRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: DimensionRelationshipNode => n }
 
     assertResult(1) {
       dimensionRelationshipNodes.size

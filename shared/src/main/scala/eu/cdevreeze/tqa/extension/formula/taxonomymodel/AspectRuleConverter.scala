@@ -34,7 +34,7 @@ object AspectRuleConverter {
     case fa: dom.EntityIdentifierAspect =>
       model.EntityIdentifierAspectRule(fa.sourceOption, fa.schemeExprOption, fa.valueExprOption)
     case fa: dom.PeriodAspect =>
-      val periods: immutable.IndexedSeq[model.PeriodAspectRule.Period] = fa.periodElems map {
+      val periods: immutable.IndexedSeq[model.PeriodAspectRule.Period] = fa.periodElems.map {
         case pe: dom.ForeverElem  => model.PeriodAspectRule.ForeverPeriod
         case pe: dom.InstantElem  => model.PeriodAspectRule.InstantPeriod(pe.valueExprOption)
         case pe: dom.DurationElem => model.PeriodAspectRule.DurationPeriod(pe.startExprOption, pe.endExprOption)

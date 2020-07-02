@@ -160,7 +160,7 @@ class TaxonomyElemTest extends AnyFunSuite {
     }
 
     assertResult(conceptDecls) {
-      conceptDecls collect { case primaryItemDecl: PrimaryItemDeclaration => primaryItemDecl }
+      conceptDecls.collect { case primaryItemDecl: PrimaryItemDeclaration => primaryItemDecl }
     }
   }
 

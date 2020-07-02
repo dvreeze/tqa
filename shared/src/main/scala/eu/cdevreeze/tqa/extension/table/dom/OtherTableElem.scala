@@ -60,7 +60,7 @@ sealed trait OtherTableElem extends tqa.base.dom.AnyTaxonomyElem {
     implicit val clsTag = cls
 
     underlyingElem.findAllChildElemsOfType(classTag[tqa.base.dom.OtherNonXLinkElem]).
-      flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
+      flatMap(e => OtherFormulaElem.opt(e)).collect { case e: A if p(e) => e }
   }
 
   protected[dom] def findAllNonXLinkChildElemsOfFormulaElemType[A <: OtherFormulaElem](
@@ -154,7 +154,7 @@ final class RuleSet(val underlyingElem: tqa.base.dom.OtherNonXLinkElem) extends 
 
   def findAllAspectsOfType[A <: FormulaAspect](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
     implicit val clsTag = cls
-    aspects collect { case asp: A => asp }
+    aspects.collect { case asp: A => asp }
   }
 
   /**

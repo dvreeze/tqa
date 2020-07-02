@@ -123,7 +123,7 @@ trait SchemaLike extends SchemaApi {
   // Named complex type definitions, across documents
 
   final def findAllNamedComplexTypeDefinitions: immutable.IndexedSeq[NamedComplexTypeDefinition] = {
-    findAllNamedTypeDefinitions collect { case t: NamedComplexTypeDefinition => t }
+    findAllNamedTypeDefinitions.collect { case t: NamedComplexTypeDefinition => t }
   }
 
   final def filterNamedComplexTypeDefinitions(p: NamedComplexTypeDefinition => Boolean): immutable.IndexedSeq[NamedComplexTypeDefinition] = {
@@ -135,7 +135,7 @@ trait SchemaLike extends SchemaApi {
   }
 
   final def findNamedComplexTypeDefinition(ename: EName): Option[NamedComplexTypeDefinition] = {
-    findNamedTypeDefinition(ename) collect { case t: NamedComplexTypeDefinition => t }
+    findNamedTypeDefinition(ename).collect { case t: NamedComplexTypeDefinition => t }
   }
 
   final def getNamedComplexTypeDefinition(ename: EName): NamedComplexTypeDefinition = {
@@ -145,7 +145,7 @@ trait SchemaLike extends SchemaApi {
   // Named simple type definitions, across documents
 
   final def findAllNamedSimpleTypeDefinitions: immutable.IndexedSeq[NamedSimpleTypeDefinition] = {
-    findAllNamedTypeDefinitions collect { case t: NamedSimpleTypeDefinition => t }
+    findAllNamedTypeDefinitions.collect { case t: NamedSimpleTypeDefinition => t }
   }
 
   final def filterNamedSimpleTypeDefinitions(p: NamedSimpleTypeDefinition => Boolean): immutable.IndexedSeq[NamedSimpleTypeDefinition] = {
@@ -157,7 +157,7 @@ trait SchemaLike extends SchemaApi {
   }
 
   final def findNamedSimpleTypeDefinition(ename: EName): Option[NamedSimpleTypeDefinition] = {
-    findNamedTypeDefinition(ename) collect { case t: NamedSimpleTypeDefinition => t }
+    findNamedTypeDefinition(ename).collect { case t: NamedSimpleTypeDefinition => t }
   }
 
   final def getNamedSimpleTypeDefinition(ename: EName): NamedSimpleTypeDefinition = {

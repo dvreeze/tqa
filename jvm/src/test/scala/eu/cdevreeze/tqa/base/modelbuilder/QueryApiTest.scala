@@ -105,7 +105,7 @@ class QueryApiTest extends AnyFunSuite {
     }
 
     assertResult(Set(plinkTop)) {
-      val paths = prels.map(_.targetConceptEName).distinct flatMap { concept =>
+      val paths = prels.map(_.targetConceptEName).distinct.flatMap { concept =>
         richTaxo.findAllIncomingConsecutiveParentChildRelationshipPaths(concept)
       }
 
@@ -267,7 +267,7 @@ class QueryApiTest extends AnyFunSuite {
     val hdRelsForElr = richTaxo.findAllConsecutiveHypercubeDimensionRelationships(hhRel)
 
     assertResult(hdRelsForElr) {
-      richTaxo.findAllOutgoingStandardRelationshipsOfType(hhRel.targetConceptEName, classTag[HypercubeDimensionRelationship]) collect {
+      richTaxo.findAllOutgoingStandardRelationshipsOfType(hhRel.targetConceptEName, classTag[HypercubeDimensionRelationship]).collect {
         case hd if hhRel.isFollowedBy(hd) => hd
       }
     }
@@ -591,9 +591,9 @@ class QueryApiTest extends AnyFunSuite {
       val hasHypercubeKeys: Set[(String, Set[EName])] = dimTreeKeys.flatten
 
       val hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship] =
-        hasHypercubeKeys.toIndexedSeq flatMap {
+        hasHypercubeKeys.toIndexedSeq.flatMap {
           case (elr, primaries) =>
-            primaries.toIndexedSeq flatMap { prim =>
+            primaries.toIndexedSeq.flatMap { prim =>
               richTaxo.filterOutgoingHasHypercubeRelationshipsOnElr(prim, elr)
             }
         }

@@ -67,7 +67,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -129,7 +129,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -195,7 +195,7 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -626,9 +626,9 @@ class RelationshipEquivalenceTest extends AnyFunSuite {
     val networkMap = relationshipFactory.computeNetworks(relationships, taxo).view.mapValues(_.retainedRelationships).toMap
 
     val filteredRequiresElementRelationships =
-      relationships collect {
+      relationships.collect {
         case rel: RequiresElementRelationship => rel
-      } filter (_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
+      }.filter(_.resolvedTo.resolvedElem.attributeOption(NameEName).contains("fixedAssets"))
 
     val filteredGeneralSpecialRelationships =
       relationships collect { case rel: GeneralSpecialRelationship => rel }

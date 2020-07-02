@@ -88,7 +88,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType
-    nonStandardRelationshipsBySource.getOrElse(source, Vector()) collect { case relationship: A if p(relationship) => relationship }
+    nonStandardRelationshipsBySource.getOrElse(source, Vector()).collect { case relationship: A if p(relationship) => relationship }
   }
 
   final def findAllIncomingNonStandardRelationships(
@@ -116,7 +116,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
 
     implicit val relationshipClassTag = relationshipType
 
-    nonStandardRelationshipsByTarget.getOrElse(target, Vector()) collect { case relationship: A if p(relationship) => relationship }
+    nonStandardRelationshipsByTarget.getOrElse(target, Vector()).collect { case relationship: A if p(relationship) => relationship }
   }
 
   final def filterOutgoingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
@@ -154,7 +154,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
     if (nextPaths.isEmpty) {
       immutable.IndexedSeq(path)
     } else {
-      nextPaths flatMap { nextPath =>
+      nextPaths.flatMap { nextPath =>
         // Recursive calls
         filterOutgoingUnrestrictedNonStandardRelationshipPaths(nextPath, relationshipType)(p)
       }
@@ -174,7 +174,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
     if (prevPaths.isEmpty) {
       immutable.IndexedSeq(path)
     } else {
-      prevPaths flatMap { prevPath =>
+      prevPaths.flatMap { prevPath =>
         // Recursive calls
         filterIncomingUnrestrictedNonStandardRelationshipPaths(prevPath, relationshipType)(p)
       }

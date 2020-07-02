@@ -53,7 +53,7 @@ final class XsiSchemaLocation private (val namespaceXsdPairs: immutable.IndexedS
   }
 
   def map(f: (String, URI) => (String, URI)): XsiSchemaLocation = {
-    val nsUriPairs = namespaceXsdPairs map { case (ns, uri) => f(ns, uri) }
+    val nsUriPairs = namespaceXsdPairs.map { case (ns, uri) => f(ns, uri) }
     new XsiSchemaLocation(XsiSchemaLocation.removeDuplicateNamespaces(nsUriPairs))
   }
 

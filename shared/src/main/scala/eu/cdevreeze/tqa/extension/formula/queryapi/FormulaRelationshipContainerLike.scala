@@ -59,7 +59,7 @@ trait FormulaRelationshipContainerLike extends FormulaRelationshipContainerApi {
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
-    formulaRelationships collect { case rel: A => rel }
+    formulaRelationships.collect { case rel: A => rel }
   }
 
   final def filterFormulaRelationshipsOfType[A <: FormulaRelationship](
@@ -80,7 +80,7 @@ trait FormulaRelationshipContainerLike extends FormulaRelationshipContainerApi {
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
-    formulaRelationshipsBySource.getOrElse(sourceResource.key, Vector()) collect { case relationship: A if p(relationship) => relationship }
+    formulaRelationshipsBySource.getOrElse(sourceResource.key, Vector()).collect { case relationship: A if p(relationship) => relationship }
   }
 
   // Query API methods for specific formula relationships (likely to be implemented in terms of the methods above)

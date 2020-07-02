@@ -126,7 +126,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       formulaTaxonomy.findAllOutgoingVariableSetFilterRelationships(domVariableSet).sortBy(_.order)
 
     val variableSetFilters: immutable.IndexedSeq[model.VariableSetFilter] =
-      varSetFilterRelationships map { rel =>
+      varSetFilterRelationships.map { rel =>
         // Throwing an exception if not successful, and that is ok here.
         val filter = filterConverter.tryToConvertFilter(rel.filter).get
 
@@ -148,7 +148,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       formulaTaxonomy.findAllOutgoingVariableSetPreconditionRelationships(domVariableSet).sortBy(_.order)
 
     val variableSetPreconditions: immutable.IndexedSeq[model.VariableSetPrecondition] =
-      varSetPreconditionRelationships map { rel =>
+      varSetPreconditionRelationships.map { rel =>
         val precondition = model.Precondition(rel.precondition.underlyingResource.idOption, rel.precondition.testExpr)
 
         model.VariableSetPrecondition(
@@ -168,7 +168,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
       formulaTaxonomy.findAllOutgoingVariableSetRelationships(domVariableSet).sortBy(_.order)
 
     val variableSetVariablesOrParameters: immutable.IndexedSeq[model.VariableSetVariableOrParameter] =
-      varSetRelationships map { rel =>
+      varSetRelationships.map { rel =>
         val domVarOrPar = rel.variableOrParameter
 
         val varOrPar: model.VariableOrParameter = domVarOrPar match {
@@ -180,7 +180,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
             val varFilterRelationships =
               formulaTaxonomy.findAllOutgoingVariableFilterRelationships(factVar).sortBy(_.order)
 
-            val variableFilters: immutable.IndexedSeq[model.VariableFilter] = varFilterRelationships map { rel =>
+            val variableFilters: immutable.IndexedSeq[model.VariableFilter] = varFilterRelationships.map { rel =>
               // Throwing an exception if not successful, and that is ok here.
               val filter = filterConverter.tryToConvertFilter(rel.filter).get
 
@@ -218,7 +218,7 @@ final class VariableSetConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
   }
 
   private def extractAspectRuleGroups(domFormula: dom.Formula): immutable.IndexedSeq[model.AspectRuleGroup] = {
-    domFormula.formulaAspectsElems map { aspectsElem =>
+    domFormula.formulaAspectsElems.map { aspectsElem =>
       model.AspectRuleGroup(
         aspectsElem.sourceOption,
         aspectsElem.formulaAspects.map(asp => AspectRuleConverter.convertAspectRule(asp)))

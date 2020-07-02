@@ -370,7 +370,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
       domainMemberRelationships.map(rel => (rel.elr -> rel.sourceConceptEName)).distinct
 
     val hasHypercubes =
-      inheritedElrSourceConceptPairs flatMap {
+      inheritedElrSourceConceptPairs.flatMap {
         case (elr, sourceConcept) =>
           filterOutgoingHasHypercubeRelationshipsOnElr(sourceConcept, elr)
       }
@@ -390,7 +390,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     val hasHypercubes = filterHasHypercubeRelationships(p)
 
     val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
-      hasHypercubes flatMap { hasHypercube =>
+      hasHypercubes.flatMap { hasHypercube =>
         val domainMemberPaths =
           filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
 
@@ -409,7 +409,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
     val hasHypercubes = filterHasHypercubeRelationships(p)
 
     val conceptHasHypercubes: immutable.IndexedSeq[(EName, HasHypercubeRelationship)] =
-      hasHypercubes flatMap { hasHypercube =>
+      hasHypercubes.flatMap { hasHypercube =>
         val domainMemberPaths =
           filterOutgoingConsecutiveDomainMemberRelationshipPaths(hasHypercube.primary)(_.firstRelationship.elr == hasHypercube.elr)
 
@@ -513,21 +513,21 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   }
 
   final def findAllDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]] = {
-    findAllDomainElrPairsPerDimension(hasHypercubeRelationship) map {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship).map {
       case (dim, domainElrPairs) =>
         (dim -> findAllMembers(dim, domainElrPairs))
     }
   }
 
   final def findAllUsableDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]] = {
-    findAllDomainElrPairsPerDimension(hasHypercubeRelationship) map {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship).map {
       case (dim, domainElrPairs) =>
         (dim -> findAllUsableMembers(dim, domainElrPairs))
     }
   }
 
   final def findAllNonUsableDimensionMembers(hasHypercubeRelationship: HasHypercubeRelationship): Map[EName, Set[EName]] = {
-    findAllDomainElrPairsPerDimension(hasHypercubeRelationship) map {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship).map {
       case (dim, domainElrPairs) =>
         (dim -> findAllNonUsableMembers(dim, domainElrPairs))
     }

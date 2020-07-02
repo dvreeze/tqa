@@ -89,7 +89,7 @@ sealed abstract class TaxonomyPackageElem private[taxonomybuilder] (
   final def children: immutable.IndexedSeq[ThisNode] = {
     var childElemIdx = 0
 
-    backingElem.children flatMap {
+    backingElem.children.flatMap {
       case che: BackingNodes.Elem =>
         val e = childElems(childElemIdx)
         childElemIdx += 1

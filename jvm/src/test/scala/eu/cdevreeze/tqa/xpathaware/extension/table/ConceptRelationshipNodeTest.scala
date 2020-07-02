@@ -73,7 +73,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -122,7 +122,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -171,7 +171,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -220,7 +220,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -269,7 +269,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -322,7 +322,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -375,7 +375,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -428,7 +428,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -481,7 +481,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -534,7 +534,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -587,7 +587,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -640,7 +640,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -693,7 +693,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -746,7 +746,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -799,7 +799,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -852,7 +852,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -905,7 +905,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -958,7 +958,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -1011,7 +1011,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -1068,7 +1068,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -1127,7 +1127,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -1184,7 +1184,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size
@@ -1243,7 +1243,7 @@ class ConceptRelationshipNodeTest extends AnyFunSuite {
     }
 
     val conceptRelationshipNodes =
-      tableTaxo.tableResources collect { case n: ConceptRelationshipNode => n }
+      tableTaxo.tableResources.collect { case n: ConceptRelationshipNode => n }
 
     assertResult(1) {
       conceptRelationshipNodes.size

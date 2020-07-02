@@ -81,8 +81,8 @@ class ExtractUnknownRelationshipsTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
-    val unknownRelationships = relationships collect { case rel: UnknownRelationship => rel }
+    val conceptLabelRelationships = relationships.collect { case rel: ConceptLabelRelationship => rel }
+    val unknownRelationships = relationships.collect { case rel: UnknownRelationship => rel }
 
     assertResult(2) {
       relationships.size

@@ -154,7 +154,7 @@ sealed abstract class TaxonomyElem private[dom](
   final def children: immutable.IndexedSeq[TaxonomyNode] = {
     var childElemIdx = 0
 
-    backingElem.children flatMap {
+    backingElem.children.flatMap {
       case _: BackingNodes.Elem =>
         val e = childElems(childElemIdx)
         childElemIdx += 1

@@ -83,7 +83,7 @@ sealed trait TableResource extends FormulaOrTableResource {
     implicit val clsTag = cls
 
     underlyingResource.findAllChildElemsOfType(classTag[tqa.base.dom.OtherNonXLinkElem]).
-      flatMap(e => OtherTableElem.opt(e)) collect { case e: A if p(e) => e }
+      flatMap(e => OtherTableElem.opt(e)).collect { case e: A if p(e) => e }
   }
 
   protected[dom] def findAllNonXLinkChildElemsOfTableElemType[A <: OtherTableElem](
@@ -98,7 +98,7 @@ sealed trait TableResource extends FormulaOrTableResource {
     implicit val clsTag = cls
 
     underlyingResource.findAllChildElemsOfType(classTag[tqa.base.dom.OtherNonXLinkElem]).
-      flatMap(e => OtherFormulaElem.opt(e)) collect { case e: A if p(e) => e }
+      flatMap(e => OtherFormulaElem.opt(e)).collect { case e: A if p(e) => e }
   }
 
   protected[dom] def findAllNonXLinkChildElemsOfFormulaElemType[A <: OtherFormulaElem](
@@ -184,7 +184,7 @@ final class RuleNode(underlyingResource: tqa.base.dom.NonStandardResource) exten
 
   def findAllUntaggedAspectsOfType[A <: FormulaAspect](cls: ClassTag[A]): immutable.IndexedSeq[A] = {
     implicit val clsTag = cls
-    untaggedAspects collect { case asp: A => asp }
+    untaggedAspects.collect { case asp: A => asp }
   }
 
   def allAspectsByTagOption: Map[Option[String], immutable.IndexedSeq[FormulaAspect]] = {

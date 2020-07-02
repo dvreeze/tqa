@@ -261,7 +261,7 @@ object TableRelationship {
     } else {
       val tableArcOption: Option[TableArc] = toOptionalTableArc(underlyingRelationship.arc)
 
-      tableArcOption flatMap { tableArc =>
+      tableArcOption.flatMap { tableArc =>
         // The resolvedFrom is expected to be a TableResource
         val resolvedFrom =
           ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](

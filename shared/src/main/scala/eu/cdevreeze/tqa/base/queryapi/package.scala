@@ -62,7 +62,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * val concepts: Set[EName] =
  *   taxonomy.findAllConceptDeclarations.map(_.targetEName).toSet
  *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq.map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingConceptLabelRelationships(conceptEName) { rel =>
  *
@@ -90,7 +90,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  * val concepts: Set[EName] =
  *   taxonomy.filterPrimaryItemDeclarations(_.isConcrete).map(_.targetEName).toSet
  *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq.map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingConceptLabelRelationships(conceptEName) { rel =>
  *
@@ -128,7 +128,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  *
  * // Falling back to more general method filterOutgoingStandardRelationshipsOfType
  *
- * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq map { conceptEName =>
+ * val conceptLabelRelationshipsByConceptEName = (concepts.toIndexedSeq.map { conceptEName =>
  *   val conceptLabelRels =
  *     taxonomy.filterOutgoingStandardRelationshipsOfType(
  *       conceptEName,
@@ -163,7 +163,7 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  *     parentChildRelationships.map(_.targetConceptEName).toSet)
  *
  * val topLevelParentChildren: Map[EName, immutable.IndexedSeq[EName]] =
- *   (topLevelConcepts.toIndexedSeq map { conceptEName =>
+ *   (topLevelConcepts.toIndexedSeq.map { conceptEName =>
  *     val parentChildren =
  *       taxonomy.filterOutgoingParentChildRelationships(conceptEName)(_.elr == customElr)
  *

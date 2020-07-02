@@ -105,7 +105,7 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
     val labeledXlinkMap = extendedLink.labeledXlinkMap
     val extLinkBaseUriOption = extendedLink.baseUriOption
 
-    extendedLink.arcs.filter(arcFilter) flatMap { arc =>
+    extendedLink.arcs.filter(arcFilter).flatMap { arc =>
       extractRelationshipsFromArc(arc, labeledXlinkMap, extLinkBaseUriOption, taxonomyBase)
     }
   }

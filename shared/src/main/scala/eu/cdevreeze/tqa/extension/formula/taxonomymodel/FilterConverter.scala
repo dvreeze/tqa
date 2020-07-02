@@ -75,7 +75,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
 
       // Recursive calls to convertFilter
       val subFilters =
-        booleanFilterRelationships map { rel =>
+        booleanFilterRelationships.map { rel =>
           // Throwing an exception if not successful, and that is ok here.
           val subFilter = tryToConvertFilter(rel.subFilter).get
 
@@ -103,7 +103,7 @@ final class FilterConverter(val formulaTaxonomy: BasicFormulaTaxonomy) {
     Try {
       domFilter match {
         case f: dom.ExplicitDimensionFilter =>
-          val dimMembers: immutable.IndexedSeq[model.DimensionFilterMember] = f.members map { mem =>
+          val dimMembers: immutable.IndexedSeq[model.DimensionFilterMember] = f.members.map { mem =>
             model.DimensionFilterMember(
               mem.qnameValueOrExpr,
               mem.linkroleElemOption.map(_.linkrole),

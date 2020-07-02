@@ -62,7 +62,7 @@ class ExtractRelationshipsTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+    val conceptLabelRelationships = relationships.collect { case rel: ConceptLabelRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -101,7 +101,7 @@ class ExtractRelationshipsTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+    val conceptLabelRelationships = relationships.collect { case rel: ConceptLabelRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -151,7 +151,7 @@ class ExtractRelationshipsTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+    val conceptLabelRelationships = relationships.collect { case rel: ConceptLabelRelationship => rel }
 
     assertResult(1) {
       relationships.size
@@ -190,7 +190,7 @@ class ExtractRelationshipsTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+    val conceptLabelRelationships = relationships.collect { case rel: ConceptLabelRelationship => rel }
 
     assertResult(1) {
       relationships.size
@@ -229,7 +229,7 @@ class ExtractRelationshipsTest extends AnyFunSuite {
 
     val relationships = relationshipFactory.extractRelationships(taxo, RelationshipFactory.AnyArc)
 
-    val conceptLabelRelationships = relationships collect { case rel: ConceptLabelRelationship => rel }
+    val conceptLabelRelationships = relationships.collect { case rel: ConceptLabelRelationship => rel }
 
     assertResult(2) {
       relationships.size
@@ -268,14 +268,14 @@ class ExtractRelationshipsTest extends AnyFunSuite {
     // Parent-child relationships
 
     val parentChildRelationshipParents: Set[EName] =
-      (relationships collect { case rel: ParentChildRelationship => rel.sourceConceptEName }).toSet
+      (relationships.collect { case rel: ParentChildRelationship => rel.sourceConceptEName }).toSet
 
     assertResult(Set(EName(tns, "PropertyPlantEquipment"))) {
       parentChildRelationshipParents
     }
 
     val parentChildRelationshipChildren: Set[EName] =
-      (relationships collect { case rel: ParentChildRelationship => rel.targetConceptEName }).toSet
+      (relationships.collect { case rel: ParentChildRelationship => rel.targetConceptEName }).toSet
 
     assertResult(
       Set(
@@ -290,12 +290,12 @@ class ExtractRelationshipsTest extends AnyFunSuite {
       }
 
     assertResult(parentChildRelationshipChildren) {
-      (relationships collect { case rel: ParentChildRelationship => rel.targetGlobalElementDeclaration.targetEName }).toSet
+      (relationships.collect { case rel: ParentChildRelationship => rel.targetGlobalElementDeclaration.targetEName }).toSet
     }
 
     // Calculation relationships
 
-    val calcRelationships = relationships collect { case rel: CalculationRelationship => rel }
+    val calcRelationships = relationships.collect { case rel: CalculationRelationship => rel }
 
     val total = EName(tns, "TotalPropertyPlantEquipment")
 
@@ -317,7 +317,7 @@ class ExtractRelationshipsTest extends AnyFunSuite {
     // Concept-label relationships
 
     val computerEquipmentLabelRelationships =
-      relationships collect { case rel: ConceptLabelRelationship if rel.sourceConceptEName == EName(tns, "ComputerEquipment") => rel }
+      relationships.collect { case rel: ConceptLabelRelationship if rel.sourceConceptEName == EName(tns, "ComputerEquipment") => rel }
 
     // One arc, 2 relationships
     assertResult(2) {

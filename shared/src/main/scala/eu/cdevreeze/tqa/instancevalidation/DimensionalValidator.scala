@@ -93,7 +93,7 @@ final class DimensionalValidator private (
       Success(true)
     } else {
       val elrValidationResults =
-        ownOrInheritedHasHypercubesByElrAndPrimary.toSeq map {
+        ownOrInheritedHasHypercubesByElrAndPrimary.toSeq.map {
           case (elr, hasHypercubesByPrimary) =>
             val primaries = hasHypercubesByPrimary.keySet
 
@@ -305,7 +305,7 @@ final class DimensionalValidator private (
             primaryToHasHypercubeMap.filter(kv => primaries.contains(kv._1)).filter(_._2.nonEmpty).toMap
 
           elr -> filteredPrimaryToHasHypercubeMap
-      } filter {
+      }.filter {
         case (elr, primaryToHasHypercubeMap) =>
           primaryToHasHypercubeMap.nonEmpty
       }).toMap
@@ -347,7 +347,7 @@ object DimensionalValidator {
     val domainAwarePathsByDimensionDomain: Map[(EName, String), immutable.IndexedSeq[DomainAwareRelationshipPath]] =
       domainAwarePaths.groupBy(path => (path.firstRelationship.sourceConceptEName -> path.firstRelationship.elr))
 
-    val dimensionDomains: immutable.IndexedSeq[DimensionDomain] = domainAwarePathsByDimensionDomain.toIndexedSeq map {
+    val dimensionDomains: immutable.IndexedSeq[DimensionDomain] = domainAwarePathsByDimensionDomain.toIndexedSeq.map {
       case ((dimension, dimensionDomainElr), paths) =>
         val domainMembers: Map[EName, DimensionDomain.Member] =
           paths.flatMap(_.relationships).map(rel => DimensionDomain.Member(rel.targetConceptEName, rel.usable)).groupBy(_.ename).

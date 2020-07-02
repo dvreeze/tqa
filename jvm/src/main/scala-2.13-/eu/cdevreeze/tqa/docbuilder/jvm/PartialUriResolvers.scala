@@ -50,7 +50,7 @@ object PartialUriResolvers {
     def resolveUri(uri: URI): Option[InputSource] = {
       val mappedUriOption = partialUriConverter(uri)
 
-      mappedUriOption map { mappedUri =>
+      mappedUriOption.map { mappedUri =>
         require(mappedUri.isAbsolute, s"Cannot resolve relative URI '$mappedUri'")
 
         val is: InputStream =
@@ -82,7 +82,7 @@ object PartialUriResolvers {
     def resolveUri(uri: URI): Option[InputSource] = {
       val mappedUriOption = partialUriConverter(uri)
 
-      mappedUriOption map { mappedUri =>
+      mappedUriOption.map { mappedUri =>
         require(!mappedUri.isAbsolute, s"Cannot resolve absolute URI '$mappedUri'")
 
         val optionalZipEntry: Option[ZipEntry] = zipEntriesByRelativeUri.get(mappedUri)

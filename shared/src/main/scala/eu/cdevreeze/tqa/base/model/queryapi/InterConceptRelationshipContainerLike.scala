@@ -88,7 +88,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType
-    interConceptRelationshipsBySource.getOrElse(sourceConcept, Vector()) collect { case relationship: A if p(relationship) => relationship }
+    interConceptRelationshipsBySource.getOrElse(sourceConcept, Vector()).collect { case relationship: A if p(relationship) => relationship }
   }
 
   final def findAllConsecutiveInterConceptRelationships(relationship: InterConceptRelationship): immutable.IndexedSeq[InterConceptRelationship] = {
@@ -130,7 +130,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType
-    interConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()) collect { case relationship: A if p(relationship) => relationship }
+    interConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()).collect { case relationship: A if p(relationship) => relationship }
   }
 
   final def filterOutgoingConsecutiveInterConceptRelationshipPaths[A <: InterConceptRelationship](
@@ -168,7 +168,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     if (nextPaths.isEmpty) {
       immutable.IndexedSeq(path)
     } else {
-      nextPaths flatMap { nextPath =>
+      nextPaths.flatMap { nextPath =>
         // Recursive calls
         filterOutgoingConsecutiveInterConceptRelationshipPaths(nextPath, relationshipType)(p)
       }
@@ -188,7 +188,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     if (prevPaths.isEmpty) {
       immutable.IndexedSeq(path)
     } else {
-      prevPaths flatMap { prevPath =>
+      prevPaths.flatMap { prevPath =>
         // Recursive calls
         filterIncomingConsecutiveInterConceptRelationshipPaths(prevPath, relationshipType)(p)
       }

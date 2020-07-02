@@ -49,19 +49,19 @@ final class BasicFormulaTaxonomy private (
   val otherFormulaElems:            immutable.IndexedSeq[OtherFormulaElem]) extends FormulaRelationshipContainerLike {
 
   def findAllVariableSets: immutable.IndexedSeq[VariableSet] = {
-    formulaResources collect { case vs: VariableSet => vs }
+    formulaResources.collect { case vs: VariableSet => vs }
   }
 
   def findAllValueAssertions: immutable.IndexedSeq[ValueAssertion] = {
-    findAllVariableSets collect { case vs: ValueAssertion => vs }
+    findAllVariableSets.collect { case vs: ValueAssertion => vs }
   }
 
   def findAllExistenceAssertions: immutable.IndexedSeq[ExistenceAssertion] = {
-    findAllVariableSets collect { case vs: ExistenceAssertion => vs }
+    findAllVariableSets.collect { case vs: ExistenceAssertion => vs }
   }
 
   def findAllVariableSetAssertions: immutable.IndexedSeq[VariableSetAssertion] = {
-    findAllVariableSets collect { case vs: VariableSetAssertion => vs }
+    findAllVariableSets.collect { case vs: VariableSetAssertion => vs }
   }
 }
 

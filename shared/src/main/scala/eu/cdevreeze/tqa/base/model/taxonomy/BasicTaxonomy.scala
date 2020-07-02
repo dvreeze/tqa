@@ -117,21 +117,21 @@ final class BasicTaxonomy private (
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
-    relationships collect { case rel: A => rel }
+    relationships.collect { case rel: A => rel }
   }
 
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
-    relationships collect { case rel: A => rel }
+    relationships.collect { case rel: A => rel }
   }
 
   def findAllInterConceptRelationshipsOfType[A <: InterConceptRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
-    relationships collect { case rel: A => rel }
+    relationships.collect { case rel: A => rel }
   }
 
   // TODO Filtering taxonomies, returning "sub"-taxonomies.
@@ -181,7 +181,7 @@ object BasicTaxonomy {
     val standardRelationships = relationships.collect { case rel: StandardRelationship => rel }
 
     val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] = {
-      standardRelationships groupBy (_.sourceConceptEName)
+      standardRelationships.groupBy(_.sourceConceptEName)
     }
 
     val nonStandardRelationships = relationships.collect { case rel: NonStandardRelationship => rel }
@@ -197,11 +197,11 @@ object BasicTaxonomy {
     val interConceptRelationships = standardRelationships.collect { case rel: InterConceptRelationship => rel }
 
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      interConceptRelationships groupBy (_.sourceConceptEName)
+      interConceptRelationships.groupBy(_.sourceConceptEName)
     }
 
     val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
-      interConceptRelationships groupBy (_.targetConceptEName)
+      interConceptRelationships.groupBy(_.targetConceptEName)
     }
 
     val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]] =

@@ -133,7 +133,7 @@ object XbrlInstanceViewer {
           th(cls := "col-md-9")("aspect values"))).render
 
     val detailRows: Seq[HTMLTableRowElement] =
-      xbrlInstance.findAllFacts map { fact =>
+      xbrlInstance.findAllFacts.map { fact =>
         val contextOption = findContext(fact, xbrlInstance)
         val unitOption = findUnit(fact, xbrlInstance)
 
@@ -207,7 +207,7 @@ object XbrlInstanceViewer {
           th(cls := "col-md-1")(""),
           th(cls := "col-md-6")("value"))),
       tbody(
-        coreAspectValueSeq flatMap {
+        coreAspectValueSeq.flatMap {
           case (Aspect.EntityIdentifierAspect, optionalSchemeValue) =>
             val optSchemeValue: Option[(String, String)] =
               optionalSchemeValue.asInstanceOf[Option[(String, String)]]
@@ -270,7 +270,7 @@ object XbrlInstanceViewer {
                 td(firstMeasureString))
 
             val nonFirstNumeratorRows =
-              numerators.drop(1) map { measure =>
+              numerators.drop(1).map { measure =>
                 tr(
                   td(""),
                   td("numerator"),
@@ -278,7 +278,7 @@ object XbrlInstanceViewer {
               }
 
             val denominatorRows =
-              denominators map { measure =>
+              denominators.map { measure =>
                 tr(
                   td(""),
                   td("denominator"),
@@ -292,7 +292,7 @@ object XbrlInstanceViewer {
               td(""),
               td(value.toString)))
         },
-        dimensionMemberSeq map {
+        dimensionMemberSeq.map {
           case (dim, mem) =>
             tr(
               td(dim.toString),
@@ -312,7 +312,7 @@ object XbrlInstanceViewer {
       contextOption.map(ctx => (ctx.entity.identifierScheme, ctx.entity.identifierValue))
 
     val optStartOptEnd: (Option[Temporal], Option[Temporal]) =
-      contextOption.map(_.period) map {
+      contextOption.map(_.period).map {
         case p if p.isInstantPeriod =>
           (Some(p.asInstantPeriod.instantDateTime), None)
         case p if p.isStartEndDatePeriod =>

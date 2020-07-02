@@ -59,7 +59,7 @@ trait TableRelationshipContainerLike extends TableRelationshipContainerApi {
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
-    tableRelationships collect { case rel: A => rel }
+    tableRelationships.collect { case rel: A => rel }
   }
 
   final def filterTableRelationshipsOfType[A <: TableRelationship](
@@ -80,7 +80,7 @@ trait TableRelationshipContainerLike extends TableRelationshipContainerApi {
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
-    tableRelationshipsBySource.getOrElse(sourceResource.key, Vector()) collect { case relationship: A if p(relationship) => relationship }
+    tableRelationshipsBySource.getOrElse(sourceResource.key, Vector()).collect { case relationship: A if p(relationship) => relationship }
   }
 
   // Query API methods for specific table relationships (likely to be implemented in terms of the methods above)

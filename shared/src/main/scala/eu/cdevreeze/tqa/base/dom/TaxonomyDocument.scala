@@ -52,7 +52,7 @@ final class TaxonomyDocument private (
   def xmlDeclarationOption: Option[XmlDeclaration] = backingDocument.xmlDeclarationOption
 
   def children: immutable.IndexedSeq[CanBeTaxonomyDocumentChild] = {
-    backingDocument.children map {
+    backingDocument.children.map {
       case c: BackingNodes.Comment                => TaxonomyCommentNode(c.text)
       case pi: BackingNodes.ProcessingInstruction => TaxonomyProcessingInstructionNode(pi.target, pi.data)
       case _: BackingNodes.Elem                   => documentElement

@@ -412,7 +412,7 @@ object FormulaRelationship {
     } else {
       val formulaArcOption: Option[FormulaArc] = toOptionalFormulaArc(underlyingRelationship.arc)
 
-      formulaArcOption flatMap { formulaArc =>
+      formulaArcOption.flatMap { formulaArc =>
         val resolvedFrom =
           ResolvedLocatorOrResource.unsafeTransformResource[AnyTaxonomyElem with XLinkResource](
             underlyingRelationship.resolvedFrom,

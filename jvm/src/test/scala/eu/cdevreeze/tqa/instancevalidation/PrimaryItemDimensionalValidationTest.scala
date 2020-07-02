@@ -118,7 +118,7 @@ class PrimaryItemDimensionalValidationTest extends AnyFunSuite {
 
       val fileNames = fileElems.map(_.text)
 
-      val outputFileElems = fileNames map { fileName =>
+      val outputFileElems = fileNames.map { fileName =>
         val outputFileUri: URI = testCaseUri.resolve(s"out/$fileName")
         val outputFileElem = docBuilder.build(outputFileUri).documentElement
 

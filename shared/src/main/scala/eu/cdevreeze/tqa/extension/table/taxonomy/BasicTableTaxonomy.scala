@@ -46,7 +46,7 @@ final class BasicTableTaxonomy private (
   val otherTableElems:            immutable.IndexedSeq[OtherTableElem]) extends TableRelationshipContainerLike {
 
   def findAllTables: immutable.IndexedSeq[Table] = {
-    tableResources collect { case t: Table => t }
+    tableResources.collect { case t: Table => t }
   }
 }
 

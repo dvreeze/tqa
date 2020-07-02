@@ -52,7 +52,7 @@ final class XbrlInstanceDocument private (
   def xmlDeclarationOption: Option[XmlDeclaration] = backingDocument.xmlDeclarationOption
 
   def children: immutable.IndexedSeq[CanBeXbrliDocumentChild] = {
-    backingDocument.children map {
+    backingDocument.children.map {
       case c: BackingNodes.Comment                => XbrliCommentNode(c.text)
       case pi: BackingNodes.ProcessingInstruction => XbrliProcessingInstructionNode(pi.target, pi.data)
       case _: BackingNodes.Elem                   => documentElement
