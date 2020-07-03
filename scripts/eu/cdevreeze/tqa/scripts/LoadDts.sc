@@ -82,11 +82,13 @@ def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): ex
 
 val processor = new Processor(false)
 
-def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
+def loadDts(tpZipFile: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
+  require(tpZipFile.isFile, s"Not a taxonomy package ZIP file: $tpZipFile")
+
   val docBuilder =
     new docbuilder.saxon.SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      docbuilder.jvm.UriResolvers.fromLocalMirrorRootDirectoryWithoutScheme(localRootDir))
+      docbuilder.jvm.TaxonomyPackageUriResolvers.forTaxonomyPackage(tpZipFile))
 
   val documentBuilder =
     new docbuilder.jvm.CachingDocumentBuilder(docbuilder.jvm.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
@@ -111,8 +113,8 @@ def loadDts(localRootDir: File, entrypointUris: Set[URI], docCacheSize: Int, len
   basicTaxo
 }
 
-def loadDts(localRootDir: File, entrypointUri: URI): BasicTaxonomy = {
-  loadDts(localRootDir, Set(entrypointUri), 10000, false)
+def loadDts(tpZipFile: File, entrypointUri: URI): BasicTaxonomy = {
+  loadDts(tpZipFile, Set(entrypointUri), 10000, false)
 }
 
 def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
@@ -137,7 +139,7 @@ def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
 // Now the REPL has been set up for ad-hoc DTS querying (combined with ad-hoc yaidom usage)
 // Do not forget to provide an implicit Scope if we want to create ENames with the "en" or "an" postfix operator!
 
-println(s"Use loadDts(localRootDir, entrypointUri) to get a DTS as BasicTaxonomy")
-println(s"If needed, use loadDts(localRootDir, entrypointUris, docCacheSize, lenient) instead")
+println(s"Use loadDts(tpZipFile, entrypointUri) to get a DTS as BasicTaxonomy")
+println(s"If needed, use loadDts(tpZipFile, entrypointUris, docCacheSize, lenient) instead")
 println(s"If you want to load only a few local taxonomy documents, use loadLocalTaxonomyDocs(localDocUris) instead")
 println(s"Store the result in val taxo, and import taxo._")
