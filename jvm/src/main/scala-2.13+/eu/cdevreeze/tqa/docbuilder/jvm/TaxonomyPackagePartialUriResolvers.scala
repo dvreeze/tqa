@@ -37,6 +37,10 @@ object TaxonomyPackagePartialUriResolvers {
 
   import PartialUriResolvers.PartialUriResolver
 
+  /**
+   * Creates a PartialUriResolver from a ZIP file (as ZipFile instance) containing a taxonomy package with XML catalog.
+   * Consider managing the ZipFile resource with the scala.util.Using API (for Scala 2.13, with ports to Scala 2.12 available as well).
+   */
   def forTaxonomyPackage(taxonomyPackageZipFile: ZipFile): PartialUriResolver = {
     val catalog: SimpleCatalog = parseCatalog(taxonomyPackageZipFile)
 

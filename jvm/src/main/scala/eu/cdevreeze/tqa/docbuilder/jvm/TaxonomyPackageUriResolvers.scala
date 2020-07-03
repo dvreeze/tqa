@@ -30,15 +30,24 @@ object TaxonomyPackageUriResolvers {
 
   import UriResolvers.UriResolver
 
+  /**
+   * Creates a UriResolver from a non-empty ZIP file collection (as ZipFile instances), each containing a taxonomy package with XML catalog.
+   * Consider managing the ZipFile resources with the scala.util.Using API (for Scala 2.13, with ports to Scala 2.12 available as well).
+   */
   def forTaxonomyPackages(taxonomyPackageZipFiles: immutable.IndexedSeq[ZipFile]): UriResolver = {
     require(taxonomyPackageZipFiles.nonEmpty, s"Expected at least one taxonomy package ZIP file, but did not get any")
 
-    val partialUriResolvers: immutable.IndexedSeq[PartialUriResolvers.PartialUriResolver] = taxonomyPackageZipFiles.map { zipFile =>
-      TaxonomyPackagePartialUriResolvers.forTaxonomyPackage(zipFile)
-    }
+    val partialUriResolvers: immutable.IndexedSeq[PartialUriResolvers.PartialUriResolver] =
+      taxonomyPackageZipFiles.map { zipFile =>
+        TaxonomyPackagePartialUriResolvers.forTaxonomyPackage(zipFile)
+      }
     UriResolvers.fromPartialUriResolversWithoutFallback(partialUriResolvers)
   }
 
+  /**
+   * Creates a UriResolver from a ZIP file (as ZipFile instance) containing a taxonomy package with XML catalog.
+   * Consider managing the ZipFile resource with the scala.util.Using API (for Scala 2.13, with ports to Scala 2.12 available as well).
+   */
   def forTaxonomyPackage(taxonomyPackageZipFile: ZipFile): UriResolver = {
     forTaxonomyPackages(immutable.IndexedSeq(taxonomyPackageZipFile))
   }

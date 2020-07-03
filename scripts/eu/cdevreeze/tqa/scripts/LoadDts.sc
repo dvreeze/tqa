@@ -24,6 +24,7 @@ import eu.cdevreeze.yaidom
 import eu.cdevreeze.tqa._
 import eu.cdevreeze.tqa.base._
 import eu.cdevreeze.tqa.base.taxonomy._
+import eu.cdevreeze.tqa.base.taxonomybuilder._
 import eu.cdevreeze.tqa.base.queryapi._
 import eu.cdevreeze.tqa.base.relationship._
 import eu.cdevreeze.tqa.base.dom._
@@ -83,7 +84,7 @@ def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): ex
 
 val processor = new Processor(false)
 
-def loadDts(tpZipFile: ZipFile, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
+def loadTaxonomyBuilder(tpZipFile: ZipFile, docCacheSize: Int, lenient: Boolean): TaxonomyBuilder = {
   val docBuilder =
     new docbuilder.saxon.SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
@@ -108,6 +109,15 @@ def loadDts(tpZipFile: ZipFile, entrypointUris: Set[URI], docCacheSize: Int, len
       withRelationshipFactory(relationshipFactory).
       withArcFilter(filterArc _)
 
+  taxoBuilder
+}
+
+def loadTaxonomyBuilder(tpZipFile: ZipFile): TaxonomyBuilder = {
+  loadTaxonomyBuilder(tpZipFile, 10000, false)
+}
+
+def loadDts(tpZipFile: ZipFile, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
+  val taxoBuilder: TaxonomyBuilder = loadTaxonomyBuilder(tpZipFile, docCacheSize, lenient)
   val basicTaxo = taxoBuilder.build(entrypointUris)
   basicTaxo
 }
@@ -142,3 +152,6 @@ println(s"Use loadDts(tpZipFile, entrypointUri) to get a DTS as BasicTaxonomy")
 println(s"If needed, use loadDts(tpZipFile, entrypointUris, docCacheSize, lenient) instead")
 println(s"If you want to load only a few local taxonomy documents, use loadLocalTaxonomyDocs(localDocUris) instead")
 println(s"Store the result in val taxo, and import taxo._")
+println()
+println(s"Use loadTaxonomyBuilder(tpZipFile) instead to get a re-usable TaxonomyBuilder")
+println(s"If needed, use loadTaxonomyBuilder(tpZipFile, docCacheSize, lenient) instead")
