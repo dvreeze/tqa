@@ -23,7 +23,14 @@ lazy val commonSettings = Seq(
   scalaVersion       := scalaVer,
   crossScalaVersions := crossScalaVer,
 
-  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xlint"),
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) if n >= 13 =>
+        Seq("-Wconf:cat=unused-imports:i,cat=unchecked:w,cat=deprecation:w,cat=feature:w,cat=lint:w")
+      case _ =>
+        Seq("-unchecked", "-deprecation", "-feature", "-Xlint")
+    }
+  },
 
   Test / publishArtifact := false,
   publishMavenStyle := true,
