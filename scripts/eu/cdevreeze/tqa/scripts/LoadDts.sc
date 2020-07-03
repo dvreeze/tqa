@@ -4,12 +4,13 @@
 
 // Taking TQA version 0.8.16
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.8.16`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.9.0-SNAPSHOT`
 
 // Imports that (must) remain available after this initialization script
 
 import java.net.URI
 import java.io._
+import java.util.zip.ZipFile
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
@@ -82,9 +83,7 @@ def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): ex
 
 val processor = new Processor(false)
 
-def loadDts(tpZipFile: File, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
-  require(tpZipFile.isFile, s"Not a taxonomy package ZIP file: $tpZipFile")
-
+def loadDts(tpZipFile: ZipFile, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
   val docBuilder =
     new docbuilder.saxon.SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
@@ -113,7 +112,7 @@ def loadDts(tpZipFile: File, entrypointUris: Set[URI], docCacheSize: Int, lenien
   basicTaxo
 }
 
-def loadDts(tpZipFile: File, entrypointUri: URI): BasicTaxonomy = {
+def loadDts(tpZipFile: ZipFile, entrypointUri: URI): BasicTaxonomy = {
   loadDts(tpZipFile, Set(entrypointUri), 10000, false)
 }
 
