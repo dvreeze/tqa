@@ -18,9 +18,9 @@ package eu.cdevreeze.tqa.docbuilder.jvm
 
 import java.net.URI
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+
+import scala.collection.immutable
 
 /**
  * URI converters, typically converting an HTTP or HTTPS URI to a local file URI. The implementations
@@ -41,17 +41,15 @@ object UriConverters {
    * converter is found, an exception is thrown.
    */
   def fromPartialUriConvertersWithoutFallback(
-    partialUriConverters: immutable.IndexedSeq[PartialUriConverters.PartialUriConverter]): UriConverter = {
+      partialUriConverters: immutable.IndexedSeq[PartialUriConverters.PartialUriConverter]): UriConverter = {
 
     require(partialUriConverters.nonEmpty, s"No partial URI converters given")
 
     def convertUri(uri: URI): URI = {
-      partialUriConverters.drop(1).foldLeft(partialUriConverters.head(uri)) {
-        case (accOptUri, puc) =>
-          accOptUri.orElse(puc(uri))
-      } getOrElse {
-        sys.error(s"Could not convert URI $uri")
-      }
+      partialUriConverters.view
+        .flatMap(_(uri))
+        .headOption
+        .getOrElse(sys.error(s"Could not convert URI $uri"))
     }
 
     convertUri
@@ -63,15 +61,15 @@ object UriConverters {
    * converter is found, the URI itself is returned.
    */
   def fromPartialUriConvertersFallingBackToIdentity(
-    partialUriConverters: immutable.IndexedSeq[PartialUriConverters.PartialUriConverter]): UriConverter = {
+      partialUriConverters: immutable.IndexedSeq[PartialUriConverters.PartialUriConverter]): UriConverter = {
 
     require(partialUriConverters.nonEmpty, s"No partial URI converters given")
 
     def convertUri(uri: URI): URI = {
-      partialUriConverters.drop(1).foldLeft(partialUriConverters.head(uri)) {
-        case (accOptUri, puc) =>
-          accOptUri.orElse(puc(uri))
-      }.getOrElse(uri)
+      partialUriConverters.view
+        .flatMap(_(uri))
+        .headOption
+        .getOrElse(uri)
     }
 
     convertUri
@@ -80,14 +78,16 @@ object UriConverters {
   /**
    * Returns `fromPartialUriConvertersWithoutFallback(immutable.IndexedSeq(partialUriConverter))`.
    */
-  def fromPartialUriConverterWithoutFallback(partialUriConverter: PartialUriConverters.PartialUriConverter): UriConverter = {
+  def fromPartialUriConverterWithoutFallback(
+      partialUriConverter: PartialUriConverters.PartialUriConverter): UriConverter = {
     fromPartialUriConvertersWithoutFallback(immutable.IndexedSeq(partialUriConverter))
   }
 
   /**
    * Returns `fromPartialUriConvertersFallingBackToIdentity(immutable.IndexedSeq(partialUriConverter))`.
    */
-  def fromPartialUriConverterFallingBackToIdentity(partialUriConverter: PartialUriConverters.PartialUriConverter): UriConverter = {
+  def fromPartialUriConverterFallingBackToIdentity(
+      partialUriConverter: PartialUriConverters.PartialUriConverter): UriConverter = {
     fromPartialUriConvertersFallingBackToIdentity(immutable.IndexedSeq(partialUriConverter))
   }
 
@@ -99,15 +99,13 @@ object UriConverters {
    * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise the identity function.
    */
   def fromCatalogFallingBackToIdentity(catalog: SimpleCatalog): UriConverter = {
-    fromPartialUriConverterFallingBackToIdentity(
-      PartialUriConverters.fromCatalog(catalog))
+    fromPartialUriConverterFallingBackToIdentity(PartialUriConverters.fromCatalog(catalog))
   }
 
   /**
    * Like `PartialUriConverters.fromCatalog(catalog)`, but otherwise throwing an exception.
    */
   def fromCatalogWithoutFallback(catalog: SimpleCatalog): UriConverter = {
-    fromPartialUriConverterWithoutFallback(
-      PartialUriConverters.fromCatalog(catalog))
+    fromPartialUriConverterWithoutFallback(PartialUriConverters.fromCatalog(catalog))
   }
 }

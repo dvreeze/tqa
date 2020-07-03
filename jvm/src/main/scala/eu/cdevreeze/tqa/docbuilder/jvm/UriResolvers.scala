@@ -49,15 +49,10 @@ object UriResolvers {
     require(partialUriResolvers.nonEmpty, s"No partial URI resolvers given")
 
     def resolveUri(uri: URI): InputSource = {
-      partialUriResolvers
-        .drop(1)
-        .foldLeft(partialUriResolvers.head(uri)) {
-          case (accOptInputSource, pur) =>
-            accOptInputSource.orElse(pur(uri))
-        }
-        .getOrElse {
-          sys.error(s"Could not resolve URI $uri")
-        }
+      partialUriResolvers.view
+        .flatMap(_(uri))
+        .headOption
+        .getOrElse(sys.error(s"Could not resolve URI $uri"))
     }
 
     resolveUri
@@ -74,12 +69,9 @@ object UriResolvers {
     require(partialUriResolvers.nonEmpty, s"No partial URI resolvers given")
 
     def resolveUri(uri: URI): InputSource = {
-      partialUriResolvers
-        .drop(1)
-        .foldLeft(partialUriResolvers.head(uri)) {
-          case (accOptInputSource, pur) =>
-            accOptInputSource.orElse(pur(uri))
-        }
+      partialUriResolvers.view
+        .flatMap(_(uri))
+        .headOption
         .getOrElse {
           val is =
             if (uri.getScheme == "file") {
