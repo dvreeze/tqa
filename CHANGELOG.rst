@@ -12,6 +12,25 @@ Version 0.9.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.8.17
+======
+
+This release dramatically improves on support for taxonomy bootstrapping from taxonomy packages. It uses Scala 2.13.3 (and 2.12.11).
+
+The most important changes compared to version 0.8.16 are:
+
+* Out-of-the-box URI resolvers and partial URI resolvers for "taxonomy packages" (even when missing the taxonomyPackage.xml, as long as it has a catalog.xml)
+* Support for URI resolvers for local mirrors (and ZIP file counterparts) where the protocol (http or https) is also part of the directory structure
+
+  * For clarity, some of those UriResolvers methods have been renamed, deprecating the old ones
+  * Like the "taxonomy package" (partial) URI resolvers, these new (partial) URI resolvers fit perfectly in the "URI resolution/conversion framework"
+
+* Enhanced and improved LoadDts script
+* Many small improvements in naming, idiomatic Scala use, comments, syntax styling (collection HOFs as "methods" rather than "infix operators")
+
+According to MiMa, there are no breaking changes compared to version 0.8.16 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues).
+
+
 0.8.16
 ======
 
