@@ -26,7 +26,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, n)) if n >= 13 =>
-        Seq("-Wconf:cat=unused-imports:i,cat=unchecked:w,cat=deprecation:w,cat=feature:w,cat=lint:w")
+        Seq("-Wconf:cat=unused-imports:w,cat=unchecked:w,cat=deprecation:w,cat=feature:w,cat=lint:w")
       case _ =>
         Seq("-unchecked", "-deprecation", "-feature", "-Xlint")
     }
