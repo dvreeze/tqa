@@ -28,9 +28,6 @@ import scala.collection.immutable
  * Indexed document builder using an underlying ThreadSafeDocumentBuilder, whose resulting documents are converted to
  * indexed Documents.
  *
- * The URI resolver is used for parsing the documents themselves (unlike SAX EntityResolver).
- * Typically the URI resolver takes HTTP(S) URIs and resolves them to resources in a local mirror.
- *
  * @author Chris de Vreeze
  */
 final class IndexedThreadSafeWrapperDocumentBuilder(

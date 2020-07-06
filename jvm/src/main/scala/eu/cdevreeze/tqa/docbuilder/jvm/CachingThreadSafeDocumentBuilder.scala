@@ -22,6 +22,7 @@ import com.github.benmanes.caffeine.cache.CacheLoader
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.jvm.CachingThreadSafeDocumentBuilder.LoadingCacheWrapper
 import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 
 /**
@@ -30,22 +31,27 @@ import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
  *
  * @author Chris de Vreeze
  */
-final class CachingThreadSafeDocumentBuilder[D <: BackingDocumentApi](val cache: LoadingCache[URI, D])
+final class CachingThreadSafeDocumentBuilder[D <: BackingDocumentApi](val cacheWrapper: LoadingCacheWrapper[D])
     extends DocumentBuilder.ThreadSafeDocumentBuilder {
 
   type BackingDoc = D
 
-  def build(uri: URI): BackingDoc = cache.get(uri)
+  def build(uri: URI): BackingDoc = cacheWrapper.cache.get(uri)
 }
 
 object CachingThreadSafeDocumentBuilder {
 
   /**
-   * Factory method to create a Caffeine BackingDoc cache.
+   * Wrapper around a LoadingCache, to make sure that the cache uses a ThreadSafeDocumentBuilder.
+   */
+  final case class LoadingCacheWrapper[D <: BackingDocumentApi] private (cache: LoadingCache[URI, D])
+
+  /**
+   * Factory method to create a Caffeine BackingDoc cache, returned as LoadingCacheWrapper.
    */
   def createCache[D <: BackingDocumentApi](
       wrappedDocBuilder: DocumentBuilder.ThreadSafeDocumentBuilder.Aux[D],
-      cacheSize: Int): LoadingCache[URI, D] = {
+      cacheSize: Int): LoadingCacheWrapper[D] = {
 
     val cacheBuilder: Caffeine[URI, D] =
       Caffeine.newBuilder().maximumSize(cacheSize).recordStats().asInstanceOf[Caffeine[URI, D]]
@@ -58,6 +64,6 @@ object CachingThreadSafeDocumentBuilder {
     }
 
     val cache: LoadingCache[URI, D] = cacheBuilder.build(cacheLoader)
-    cache
+    LoadingCacheWrapper(cache)
   }
 }
