@@ -23,8 +23,6 @@ import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.base.taxonomybuilder.jvm.TaxonomyBuilderSupport
 import net.sf.saxon.s9api.Processor
 
-import scala.util.chaining._
-
 /**
  * Taxonomy bootstrapping utility for the console programs.
  *
@@ -44,7 +42,10 @@ object ConsoleUtil {
         TaxonomyBuilderSupport.forTaxonomyPackageUsingIndexedDocuments(taxonomyPackage, processor)
       }
 
-    rawTaxonomyBuilder
-      .pipe(tb => if (lenient) tb.withRelationshipFactory(DefaultParallelRelationshipFactory.LenientInstance) else tb)
+    if (lenient) {
+      rawTaxonomyBuilder.withRelationshipFactory(DefaultParallelRelationshipFactory.LenientInstance)
+    } else {
+      rawTaxonomyBuilder
+    }
   }
 }
