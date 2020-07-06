@@ -12,7 +12,7 @@ matrix:
   include:
   - jdk: openjdk11
     scala: 2.12.11
-  - jdk: oraclejdk9
+  - jdk: oraclejdk8
     scala: 2.13.3
   - jdk: openjdk11
     scala: 2.13.3
