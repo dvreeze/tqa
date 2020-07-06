@@ -10,11 +10,11 @@ install:
 
 matrix:
   include:
-  - jdk: openjdk13
+  - jdk: openjdk11
     scala: 2.12.11
   - jdk: oraclejdk9
     scala: 2.13.3
-  - jdk: openjdk13
+  - jdk: openjdk11
     scala: 2.13.3
 
 script:
