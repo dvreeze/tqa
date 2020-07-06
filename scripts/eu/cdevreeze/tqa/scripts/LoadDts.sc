@@ -15,6 +15,7 @@ import java.util.zip.ZipFile
 import scala.collection.immutable
 import scala.reflect.ClassTag
 import scala.reflect.classTag
+import scala.util.chaining._
 
 import net.sf.saxon.s9api.Processor
 
@@ -86,31 +87,15 @@ def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): ex
 val processor = new Processor(false)
 
 def loadTaxonomyBuilder(tpZipFile: ZipFile, docCacheSize: Int, lenient: Boolean): TaxonomyBuilder = {
-  val docBuilder =
-    new docbuilder.saxon.ThreadSafeSaxonDocumentBuilder(
-      processor,
-      docbuilder.jvm.TaxonomyPackageUriResolvers.forTaxonomyPackage(tpZipFile))
+  val cacheWrapper = taxonomybuilder.jvm.TaxonomyBuilderSupport.createDocumentCache(tpZipFile, processor, docCacheSize)
 
-  val documentBuilder =
-    new docbuilder.jvm.CachingThreadSafeDocumentBuilder(docbuilder.jvm.CachingThreadSafeDocumentBuilder.createCache(docBuilder, docCacheSize))
+  import RelationshipFactory.AnyArcHavingArcrole
+  import RelationshipFactory.AnyArc
 
-  val documentCollector = taxonomybuilder.jvm.DefaultParallelDtsCollector()
-
-  val relationshipFactory =
-    if (lenient) DefaultParallelRelationshipFactory.LenientInstance else DefaultParallelRelationshipFactory.StrictInstance
-
-  def filterArc(arc: XLinkArc): Boolean = {
-    if (lenient) RelationshipFactory.AnyArcHavingArcrole(arc) else RelationshipFactory.AnyArc(arc)
-  }
-
-  val taxoBuilder =
-    taxonomybuilder.TaxonomyBuilder.
-      withDocumentBuilder(documentBuilder).
-      withDocumentCollector(documentCollector).
-      withRelationshipFactory(relationshipFactory).
-      withArcFilter(filterArc _)
-
-  taxoBuilder
+  taxonomybuilder.jvm.TaxonomyBuilderSupport.usingDocumentCache(cacheWrapper)
+    .pipe(tb => if (lenient) tb.withRelationshipFactory(DefaultParallelRelationshipFactory.LenientInstance) else tb)
+    .pipe { tb => if (lenient)
+      tb.withArcFilter(arc => AnyArcHavingArcrole(arc)) else tb.withArcFilter(arc => AnyArc(arc)) }
 }
 
 def loadTaxonomyBuilder(tpZipFile: ZipFile): TaxonomyBuilder = {
