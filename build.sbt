@@ -52,7 +52,12 @@ lazy val commonSettings = Seq(
 
   libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6",
 
-  libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0",
+  libraryDependencies ++= {
+    scalaBinaryVersion.value match {
+      case "2.13" => Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0")
+      case _      => Seq()
+    }
+  },
 
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.1.1",
 
