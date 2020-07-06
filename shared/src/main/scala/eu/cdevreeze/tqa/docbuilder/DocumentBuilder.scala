@@ -55,4 +55,14 @@ trait DocumentBuilder {
 object DocumentBuilder {
 
   type Aux[A] = DocumentBuilder { type BackingDoc = A }
+
+  /**
+   * DocumentBuilder promising that it can safely be used by multiple threads simultaneously.
+   */
+  trait ThreadSafeDocumentBuilder extends DocumentBuilder
+
+  object ThreadSafeDocumentBuilder {
+
+    type Aux[A] = ThreadSafeDocumentBuilder { type BackingDoc = A }
+  }
 }

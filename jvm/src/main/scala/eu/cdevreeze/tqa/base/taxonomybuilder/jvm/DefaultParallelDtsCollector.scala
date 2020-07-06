@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.taxonomybuilder
+package eu.cdevreeze.tqa.base.taxonomybuilder.jvm
 
 import java.net.URI
 
@@ -33,7 +33,7 @@ import eu.cdevreeze.tqa.base.dom.XsdSchema
 import scala.reflect.classTag
 
 /**
- * Default DTS discovery implementation. It will fail for all found URIs that cannot be resolved to
+ * Default parallel DTS discovery implementation. It will fail for all found URIs that cannot be resolved to
  * taxonomy documents.
  *
  * This document collector works well with XBRL Taxonomy Packages, passing an entry point in such a
@@ -44,10 +44,11 @@ import scala.reflect.classTag
  *
  * @author Chris de Vreeze
  */
-final class DefaultDtsCollector(acceptsEmptyUriSet: Boolean) extends AbstractDtsCollector(acceptsEmptyUriSet) {
+final class DefaultParallelDtsCollector(acceptsEmptyUriSet: Boolean)
+    extends AbstractParallelDtsCollector(acceptsEmptyUriSet) {
 
-  def allowingEmptyUriSet(acceptsEmptyUriSet: Boolean): DefaultDtsCollector = {
-    DefaultDtsCollector.acceptingEmptyUriSet(acceptsEmptyUriSet)
+  def allowingEmptyUriSet(acceptsEmptyUriSet: Boolean): DefaultParallelDtsCollector = {
+    DefaultParallelDtsCollector.acceptingEmptyUriSet(acceptsEmptyUriSet)
   }
 
   def findAllUsedDocUris(taxonomyDoc: TaxonomyDocument): Set[URI] = {
@@ -120,16 +121,16 @@ final class DefaultDtsCollector(acceptsEmptyUriSet: Boolean) extends AbstractDts
   private val EmptyUri = URI.create("")
 }
 
-object DefaultDtsCollector {
+object DefaultParallelDtsCollector {
 
   /**
-   * Returns a DefaultDtsCollector that does not accept empty URI sets.
+   * Returns a DefaultParallelDtsCollector that does not accept empty URI sets.
    */
-  def apply(): DefaultDtsCollector = {
+  def apply(): DefaultParallelDtsCollector = {
     acceptingEmptyUriSet(false)
   }
 
-  def acceptingEmptyUriSet(acceptsEmptyUriSet: Boolean): DefaultDtsCollector = {
-    new DefaultDtsCollector(acceptsEmptyUriSet)
+  def acceptingEmptyUriSet(acceptsEmptyUriSet: Boolean): DefaultParallelDtsCollector = {
+    new DefaultParallelDtsCollector(acceptsEmptyUriSet)
   }
 }

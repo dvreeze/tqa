@@ -52,6 +52,8 @@ lazy val commonSettings = Seq(
 
   libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6",
 
+  libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0",
+
   libraryDependencies += "org.scalactic" %%% "scalactic" % "3.1.1",
 
   libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.1" % "test"

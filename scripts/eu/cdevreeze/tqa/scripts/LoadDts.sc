@@ -4,7 +4,7 @@
 
 // Taking TQA version 0.8.17
 
-import $ivy.`eu.cdevreeze.tqa::tqa:0.8.17`
+import $ivy.`eu.cdevreeze.tqa::tqa:0.9.0-SNAPSHOT`
 
 // Imports that (must) remain available after this initialization script
 
@@ -27,6 +27,7 @@ import eu.cdevreeze.tqa.base.taxonomy._
 import eu.cdevreeze.tqa.base.taxonomybuilder._
 import eu.cdevreeze.tqa.base.queryapi._
 import eu.cdevreeze.tqa.base.relationship._
+import eu.cdevreeze.tqa.base.relationship.jvm._
 import eu.cdevreeze.tqa.base.dom._
 
 // Yaidom: Easy creation of ENames and QNames
@@ -86,17 +87,17 @@ val processor = new Processor(false)
 
 def loadTaxonomyBuilder(tpZipFile: ZipFile, docCacheSize: Int, lenient: Boolean): TaxonomyBuilder = {
   val docBuilder =
-    new docbuilder.saxon.SaxonDocumentBuilder(
-      processor.newDocumentBuilder(),
+    new docbuilder.saxon.ThreadSafeSaxonDocumentBuilder(
+      processor,
       docbuilder.jvm.TaxonomyPackageUriResolvers.forTaxonomyPackage(tpZipFile))
 
   val documentBuilder =
-    new docbuilder.jvm.CachingDocumentBuilder(docbuilder.jvm.CachingDocumentBuilder.createCache(docBuilder, docCacheSize))
+    new docbuilder.jvm.CachingThreadSafeDocumentBuilder(docbuilder.jvm.CachingThreadSafeDocumentBuilder.createCache(docBuilder, docCacheSize))
 
-  val documentCollector = taxonomybuilder.DefaultDtsCollector()
+  val documentCollector = taxonomybuilder.jvm.DefaultParallelDtsCollector()
 
   val relationshipFactory =
-    if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
+    if (lenient) DefaultParallelRelationshipFactory.LenientInstance else DefaultParallelRelationshipFactory.StrictInstance
 
   def filterArc(arc: XLinkArc): Boolean = {
     if (lenient) RelationshipFactory.AnyArcHavingArcrole(arc) else RelationshipFactory.AnyArc(arc)
@@ -138,7 +139,7 @@ def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
     taxonomybuilder.TaxonomyBuilder.
       withDocumentBuilder(documentBuilder).
       withDocumentCollector(documentCollector).
-      withRelationshipFactory(DefaultRelationshipFactory.LenientInstance).
+      withRelationshipFactory(DefaultParallelRelationshipFactory.LenientInstance).
       withArcFilter(RelationshipFactory.AnyArcHavingArcrole)
 
   val basicTaxo = taxoBuilder.build(localDocUris)

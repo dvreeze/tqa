@@ -43,10 +43,11 @@ object AnalyseTableTaxonomy {
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
+    val lenient = System.getProperty("lenient", "false").toBoolean
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon)
+    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
     val basicTaxo = taxoBuilder.build(entryPointUris)
 
     logger.info(s"Starting building the table-aware taxonomy with entry point(s) ${entryPointUris.mkString(", ")}")

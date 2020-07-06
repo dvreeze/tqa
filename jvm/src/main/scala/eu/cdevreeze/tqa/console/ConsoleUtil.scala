@@ -19,13 +19,13 @@ package eu.cdevreeze.tqa.console
 import java.net.URI
 import java.util.zip.ZipFile
 
-import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
+import eu.cdevreeze.tqa.base.relationship.jvm.DefaultParallelRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.base.taxonomybuilder.jvm.DefaultParallelDtsCollector
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.indexed.IndexedDocumentBuilder
+import eu.cdevreeze.tqa.docbuilder.indexed.IndexedThreadSafeWrapperDocumentBuilder
 import eu.cdevreeze.tqa.docbuilder.jvm.TaxonomyPackageUriResolvers
-import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
-import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import eu.cdevreeze.tqa.docbuilder.saxon.ThreadSafeSaxonDocumentBuilder
 import net.sf.saxon.s9api.Processor
 import org.xml.sax.InputSource
 
@@ -36,27 +36,31 @@ import org.xml.sax.InputSource
  */
 object ConsoleUtil {
 
-  def createTaxonomyBuilder(taxonomyPackage: ZipFile, useSaxon: Boolean): TaxonomyBuilder = {
+  def createTaxonomyBuilder(taxonomyPackage: ZipFile, useSaxon: Boolean, lenient: Boolean): TaxonomyBuilder = {
+    // Exploiting parallelism, in DTS collection and relationship creation.
+
     val uriResolver: URI => InputSource = TaxonomyPackageUriResolvers.forTaxonomyPackage(taxonomyPackage)
 
-    val documentBuilder: DocumentBuilder =
-      if (useSaxon) {
-        val processor = new Processor(false)
+    val processor = new Processor(false)
 
-        SaxonDocumentBuilder(processor.newDocumentBuilder(), uriResolver)
+    val saxonDocBuilder: DocumentBuilder.ThreadSafeDocumentBuilder =
+      ThreadSafeSaxonDocumentBuilder(processor, uriResolver)
+
+    val documentBuilder: DocumentBuilder.ThreadSafeDocumentBuilder =
+      if (useSaxon) {
+        saxonDocBuilder
       } else {
-        IndexedDocumentBuilder(DocumentParserUsingStax.newInstance(), uriResolver)
+        IndexedThreadSafeWrapperDocumentBuilder(saxonDocBuilder)
       }
 
-    val lenient = System.getProperty("lenient", "false").toBoolean
-
     val relationshipFactory =
-      if (lenient) DefaultRelationshipFactory.LenientInstance else DefaultRelationshipFactory.StrictInstance
+      if (lenient) DefaultParallelRelationshipFactory.LenientInstance
+      else DefaultParallelRelationshipFactory.StrictInstance
 
     val taxoBuilder =
       TaxonomyBuilder
         .withDocumentBuilder(documentBuilder)
-        .withDefaultDtsCollector
+        .withDocumentCollector(DefaultParallelDtsCollector())
         .withRelationshipFactory(relationshipFactory)
     taxoBuilder
   }

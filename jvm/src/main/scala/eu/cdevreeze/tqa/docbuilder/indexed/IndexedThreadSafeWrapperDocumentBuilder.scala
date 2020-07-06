@@ -20,37 +20,45 @@ import java.net.URI
 
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 import eu.cdevreeze.yaidom.indexed.Document
-import eu.cdevreeze.yaidom.parse.DocumentParser
-import org.xml.sax.InputSource
+import eu.cdevreeze.yaidom.simple
+
+import scala.collection.immutable
 
 /**
- * Indexed document builder using a yaidom DocumentParser and URI resolver.
+ * Indexed document builder using an underlying ThreadSafeDocumentBuilder, whose resulting documents are converted to
+ * indexed Documents.
  *
  * The URI resolver is used for parsing the documents themselves (unlike SAX EntityResolver).
  * Typically the URI resolver takes HTTP(S) URIs and resolves them to resources in a local mirror.
  *
  * @author Chris de Vreeze
  */
-final class IndexedDocumentBuilder(val docParser: DocumentParser, val uriResolver: URI => InputSource)
-    extends DocumentBuilder {
+final class IndexedThreadSafeWrapperDocumentBuilder(
+    val underlyingDocumentBuilder: DocumentBuilder.ThreadSafeDocumentBuilder)
+    extends DocumentBuilder.ThreadSafeDocumentBuilder {
 
   type BackingDoc = Document
 
   def build(uri: URI): Document = {
-    val is = uriResolver(uri)
+    val underlyingDoc = underlyingDocumentBuilder.build(uri)
 
-    val doc = docParser.parse(is).withUriOption(Some(uri))
-    Document(doc)
+    val simpleDocChildren: immutable.IndexedSeq[simple.CanBeDocumentChild] = underlyingDoc.children
+      .map(ch => simple.Node.from(ch))
+      .collect { case ch: simple.CanBeDocumentChild => ch }
+
+    val simpleDoc: simple.Document = simple.Document.document(Some(uri.toString), simpleDocChildren)
+    Document(simpleDoc)
   }
 }
 
-object IndexedDocumentBuilder {
+object IndexedThreadSafeWrapperDocumentBuilder {
 
   /**
-   * Creates an IndexedDocumentBuilder from a yaidom DocumentParser, and an URI resolver.
+   * Creates an IndexedThreadSafeWrapperDocumentBuilder from an underlying ThreadSafeDocumentBuilder.
    * The URI resolver is typically obtained through the UriResolvers singleton object.
    */
-  def apply(docParser: DocumentParser, uriResolver: URI => InputSource): IndexedDocumentBuilder = {
-    new IndexedDocumentBuilder(docParser, uriResolver)
+  def apply(
+      underlyingDocumentBuilder: DocumentBuilder.ThreadSafeDocumentBuilder): IndexedThreadSafeWrapperDocumentBuilder = {
+    new IndexedThreadSafeWrapperDocumentBuilder(underlyingDocumentBuilder)
   }
 }

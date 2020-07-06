@@ -26,15 +26,15 @@ import net.sf.saxon.s9api
 import org.xml.sax.InputSource
 
 /**
- * Saxon document builder using a Saxon DocumentBuilder and URI resolver.
+ * Thread-safe Saxon document builder using a Saxon Processor and URI resolver.
  *
  * The URI resolver is used for parsing the documents themselves (unlike SAX EntityResolver).
  * Typically the URI resolver takes HTTP(S) URIs and resolves them to resources in a local mirror.
  *
  * @author Chris de Vreeze
  */
-final class SaxonDocumentBuilder(val docBuilder: s9api.DocumentBuilder, val uriResolver: URI => InputSource)
-    extends DocumentBuilder {
+final class ThreadSafeSaxonDocumentBuilder(val processor: s9api.Processor, val uriResolver: URI => InputSource)
+    extends DocumentBuilder.ThreadSafeDocumentBuilder {
 
   type BackingDoc = SaxonDocument
 
@@ -44,6 +44,7 @@ final class SaxonDocumentBuilder(val docBuilder: s9api.DocumentBuilder, val uriR
 
     val src = convertInputSourceToSource(is).ensuring(_.getSystemId == uri.toString)
 
+    val docBuilder = processor.newDocumentBuilder()
     val node = docBuilder.build(src).getUnderlyingNode.ensuring(_.getSystemId == uri.toString)
     SaxonDocument.wrapDocument(node.getTreeInfo)
   }
@@ -67,13 +68,13 @@ final class SaxonDocumentBuilder(val docBuilder: s9api.DocumentBuilder, val uriR
   }
 }
 
-object SaxonDocumentBuilder {
+object ThreadSafeSaxonDocumentBuilder {
 
   /**
-   * Creates a SaxonDocumentBuilder from an underlying Saxon s9api DocumentBuilder, and an URI resolver.
+   * Creates a SaxonDocumentBuilder from an underlying Saxon s9api Processor, and an URI resolver.
    * The URI resolver is typically obtained through the UriResolvers singleton object.
    */
-  def apply(docBuilder: s9api.DocumentBuilder, uriResolver: URI => InputSource): SaxonDocumentBuilder = {
-    new SaxonDocumentBuilder(docBuilder, uriResolver)
+  def apply(processor: s9api.Processor, uriResolver: URI => InputSource): ThreadSafeSaxonDocumentBuilder = {
+    new ThreadSafeSaxonDocumentBuilder(processor, uriResolver)
   }
 }

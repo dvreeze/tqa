@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tqa.base.taxonomybuilder
+package eu.cdevreeze.tqa.base.taxonomybuilder.jvm
 
 import java.net.URI
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
+import eu.cdevreeze.tqa.base.taxonomybuilder.DocumentCollector
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 import scala.annotation.tailrec
 import scala.collection.immutable
+import scala.collection.parallel.CollectionConverters._
 
 /**
- * Abstract partially implemented DTS discovery as document collector. It is memory-hungry in that
+ * Abstract parallel partially implemented DTS discovery as document collector. It is memory-hungry in that
  * all found documents are stored in memory while finding the DTS. It is also unforgiving in that broken
  * links are not allowed.
  *
@@ -33,7 +35,7 @@ import scala.collection.immutable
  *
  * @author Chris de Vreeze
  */
-abstract class AbstractDtsCollector(val acceptsEmptyUriSet: Boolean) extends DocumentCollector {
+abstract class AbstractParallelDtsCollector(val acceptsEmptyUriSet: Boolean) extends DocumentCollector {
 
   final def collectTaxonomyDocuments(
       entryPointUris: Set[URI],
@@ -61,6 +63,10 @@ abstract class AbstractDtsCollector(val acceptsEmptyUriSet: Boolean) extends Doc
       processedDocs: Map[URI, TaxonomyDocument],
       documentBuilder: DocumentBuilder): Map[URI, TaxonomyDocument] = {
 
+    require(
+      documentBuilder.isInstanceOf[DocumentBuilder.ThreadSafeDocumentBuilder],
+      s"The DocumentBuilder must be thread-safe")
+
     val processedDocUris = processedDocs.keySet
 
     assert(processedDocUris.subsetOf(docUris))
@@ -68,7 +74,8 @@ abstract class AbstractDtsCollector(val acceptsEmptyUriSet: Boolean) extends Doc
     // One step, processing all URIs currently known, and not yet processed
     val docUrisToProcess = docUris.diff(processedDocUris)
 
-    val taxoDocsToProcess = docUrisToProcess.toIndexedSeq.map(uri => buildTaxonomyDoc(uri, documentBuilder))
+    val taxoDocsToProcess =
+      docUrisToProcess.toIndexedSeq.par.map(uri => buildTaxonomyDoc(uri, documentBuilder)).seq.toIndexedSeq
 
     val taxoDocToProcessMap: Map[URI, TaxonomyDocument] = taxoDocsToProcess.map(e => (e.uri -> e)).toMap
 
