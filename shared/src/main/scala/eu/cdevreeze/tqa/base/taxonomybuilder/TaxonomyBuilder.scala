@@ -33,18 +33,37 @@ import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
  * @author Chris de Vreeze
  */
 final class TaxonomyBuilder(
-  val documentBuilder:           DocumentBuilder,
-  val documentCollector:         DocumentCollector,
-  val extraSubstitutionGroupMap: SubstitutionGroupMap,
-  val relationshipFactory:       RelationshipFactory,
-  val arcFilter:                 XLinkArc => Boolean) {
+    val documentBuilder: DocumentBuilder,
+    val documentCollector: DocumentCollector,
+    val extraSubstitutionGroupMap: SubstitutionGroupMap,
+    val relationshipFactory: RelationshipFactory,
+    val arcFilter: XLinkArc => Boolean) {
 
   def withExtraSubstitutionGroupMap(newExtraSubstitutionGroupMap: SubstitutionGroupMap): TaxonomyBuilder = {
-    new TaxonomyBuilder(documentBuilder, documentCollector, newExtraSubstitutionGroupMap, relationshipFactory, arcFilter)
+    new TaxonomyBuilder(
+      documentBuilder,
+      documentCollector,
+      newExtraSubstitutionGroupMap,
+      relationshipFactory,
+      arcFilter)
+  }
+
+  def withRelationshipFactory(newRelationshipFactory: RelationshipFactory): TaxonomyBuilder = {
+    new TaxonomyBuilder(
+      documentBuilder,
+      documentCollector,
+      extraSubstitutionGroupMap,
+      newRelationshipFactory,
+      arcFilter)
   }
 
   def withArcFilter(newArcFilter: XLinkArc => Boolean): TaxonomyBuilder = {
-    new TaxonomyBuilder(documentBuilder, documentCollector, extraSubstitutionGroupMap, relationshipFactory, newArcFilter)
+    new TaxonomyBuilder(
+      documentBuilder,
+      documentCollector,
+      extraSubstitutionGroupMap,
+      relationshipFactory,
+      newArcFilter)
   }
 
   /**
@@ -84,12 +103,15 @@ object TaxonomyBuilder {
     }
   }
 
-  final class HasDocumentCollector(
-    val documentBuilder:   DocumentBuilder,
-    val documentCollector: DocumentCollector) {
+  final class HasDocumentCollector(val documentBuilder: DocumentBuilder, val documentCollector: DocumentCollector) {
 
     def withRelationshipFactory(relationshipFactory: RelationshipFactory): TaxonomyBuilder = {
-      new TaxonomyBuilder(documentBuilder, documentCollector, SubstitutionGroupMap.Empty, relationshipFactory, (_ => true))
+      new TaxonomyBuilder(
+        documentBuilder,
+        documentCollector,
+        SubstitutionGroupMap.Empty,
+        relationshipFactory,
+        (_ => true))
     }
 
     def withStrictRelationshipFactory: TaxonomyBuilder = {

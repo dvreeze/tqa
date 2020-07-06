@@ -16,18 +16,12 @@
 
 package eu.cdevreeze.tqa.console
 
-import java.net.URI
 import java.util.zip.ZipFile
 
 import eu.cdevreeze.tqa.base.relationship.jvm.DefaultParallelRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
-import eu.cdevreeze.tqa.base.taxonomybuilder.jvm.DefaultParallelDtsCollector
-import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.indexed.IndexedThreadSafeWrapperDocumentBuilder
-import eu.cdevreeze.tqa.docbuilder.jvm.TaxonomyPackageUriResolvers
-import eu.cdevreeze.tqa.docbuilder.saxon.ThreadSafeSaxonDocumentBuilder
+import eu.cdevreeze.tqa.base.taxonomybuilder.jvm.TaxonomyBuilderSupport
 import net.sf.saxon.s9api.Processor
-import org.xml.sax.InputSource
 
 /**
  * Taxonomy bootstrapping utility for the console programs.
@@ -39,29 +33,19 @@ object ConsoleUtil {
   def createTaxonomyBuilder(taxonomyPackage: ZipFile, useSaxon: Boolean, lenient: Boolean): TaxonomyBuilder = {
     // Exploiting parallelism, in DTS collection and relationship creation.
 
-    val uriResolver: URI => InputSource = TaxonomyPackageUriResolvers.forTaxonomyPackage(taxonomyPackage)
-
     val processor = new Processor(false)
 
-    val saxonDocBuilder: DocumentBuilder.ThreadSafeDocumentBuilder =
-      ThreadSafeSaxonDocumentBuilder(processor, uriResolver)
-
-    val documentBuilder: DocumentBuilder.ThreadSafeDocumentBuilder =
+    val rawTaxonomyBuilder: TaxonomyBuilder =
       if (useSaxon) {
-        saxonDocBuilder
+        TaxonomyBuilderSupport.forTaxonomyPackage(taxonomyPackage, processor)
       } else {
-        IndexedThreadSafeWrapperDocumentBuilder(saxonDocBuilder)
+        TaxonomyBuilderSupport.forTaxonomyPackageUsingIndexedDocuments(taxonomyPackage, processor)
       }
 
-    val relationshipFactory =
-      if (lenient) DefaultParallelRelationshipFactory.LenientInstance
-      else DefaultParallelRelationshipFactory.StrictInstance
-
-    val taxoBuilder =
-      TaxonomyBuilder
-        .withDocumentBuilder(documentBuilder)
-        .withDocumentCollector(DefaultParallelDtsCollector())
-        .withRelationshipFactory(relationshipFactory)
-    taxoBuilder
+    if (lenient) {
+      rawTaxonomyBuilder.withRelationshipFactory(DefaultParallelRelationshipFactory.LenientInstance)
+    } else {
+      rawTaxonomyBuilder
+    }
   }
 }
