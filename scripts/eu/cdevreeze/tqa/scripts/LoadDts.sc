@@ -98,26 +98,18 @@ def loadTaxonomyBuilder(tpZipFiles: IndexedSeq[ZipFile], docCacheSize: Int, leni
       tb.withArcFilter(arc => AnyArcHavingArcrole(arc)) else tb.withArcFilter(arc => AnyArc(arc)) }
 }
 
-def loadTaxonomyBuilder(tpZipFile: ZipFile, docCacheSize: Int, lenient: Boolean): TaxonomyBuilder = {
-  loadTaxonomyBuilder(IndexedSeq(tpZipFile), docCacheSize, lenient)
-}
-
 def loadTaxonomyBuilder(tpZipFiles: IndexedSeq[ZipFile]): TaxonomyBuilder = {
   loadTaxonomyBuilder(tpZipFiles, 10000, false)
 }
 
-def loadTaxonomyBuilder(tpZipFile: ZipFile): TaxonomyBuilder = {
-  loadTaxonomyBuilder(tpZipFile, 10000, false)
-}
-
-def loadDts(tpZipFile: ZipFile, entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
-  val taxoBuilder: TaxonomyBuilder = loadTaxonomyBuilder(tpZipFile, docCacheSize, lenient)
+def loadDts(tpZipFiles: IndexedSeq[ZipFile], entrypointUris: Set[URI], docCacheSize: Int, lenient: Boolean): BasicTaxonomy = {
+  val taxoBuilder: TaxonomyBuilder = loadTaxonomyBuilder(tpZipFiles, docCacheSize, lenient)
   val basicTaxo = taxoBuilder.build(entrypointUris)
   basicTaxo
 }
 
-def loadDts(tpZipFile: ZipFile, entrypointUri: URI): BasicTaxonomy = {
-  loadDts(tpZipFile, Set(entrypointUri), 10000, false)
+def loadDts(tpZipFiles: IndexedSeq[ZipFile], entrypointUri: URI): BasicTaxonomy = {
+  loadDts(tpZipFiles, Set(entrypointUri), 10000, false)
 }
 
 def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
@@ -147,5 +139,5 @@ println(s"If needed, use loadDts(tpZipFiles, entrypointUris, docCacheSize, lenie
 println(s"If you want to load only a few local taxonomy documents, use loadLocalTaxonomyDocs(localDocUris) instead")
 println(s"Store the result in val taxo, and import taxo._")
 println()
-println(s"Use loadTaxonomyBuilder(tpZipFile) instead to get a re-usable TaxonomyBuilder")
-println(s"If needed, use loadTaxonomyBuilder(tpZipFile, docCacheSize, lenient) instead")
+println(s"Use loadTaxonomyBuilder(tpZipFiles) instead to get a re-usable TaxonomyBuilder")
+println(s"If needed, use loadTaxonomyBuilder(tpZipFiles, docCacheSize, lenient) instead")
