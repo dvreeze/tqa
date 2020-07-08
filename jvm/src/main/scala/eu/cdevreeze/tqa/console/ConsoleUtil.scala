@@ -28,7 +28,7 @@ import net.sf.saxon.s9api.Processor
  *
  * @author Chris de Vreeze
  */
-object ConsoleUtil {
+private[console] object ConsoleUtil {
 
   def createTaxonomyBuilder(taxonomyPackage: ZipFile, useSaxon: Boolean, lenient: Boolean): TaxonomyBuilder = {
     // Exploiting parallelism, in DTS collection and relationship creation.

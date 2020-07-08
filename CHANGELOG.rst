@@ -12,6 +12,29 @@ Version 0.9.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.8.18
+======
+
+This release offers faster taxonomy bootstrapping exploiting parallelism during parsing and relationship creation. It targets Scala 2.13.3 (and 2.12.11).
+
+The most important changes compared to version 0.8.17 are:
+
+* New thread-safe DocumentBuilder implementations for Saxon and indexed documents (the latter wrapping another thread-safe DocumentBuilder)
+* Parallel and therefore typically faster DTS Collector that can be wired into a TaxonomyBuilder (using a thread-safe DocumentBuilder)
+* Parallel and therefore typically faster RelationshipFactory that can be wired into a TaxonomyBuilder
+* New ``TaxonomyBuilderSupport`` object, making TaxonomyBuilder creation easy in some common cases
+
+According to MiMa, there are no significant breaking changes compared to version 0.8.17 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* static method createTaxonomyBuilder(java.util.zip.ZipFile,Boolean)eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder in class eu.cdevreeze.tqa.console.ConsoleUtil does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.console.ConsoleUtil.createTaxonomyBuilder")
+* method createTaxonomyBuilder(java.util.zip.ZipFile,Boolean)eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder in object eu.cdevreeze.tqa.console.ConsoleUtil does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.console.ConsoleUtil.createTaxonomyBuilder")
+
+Given that singleton object ConsoleUtil became part of the "public API" only in version 0.8.17, and in all likelyhood is not used
+anywhere outside of TQA, it can be said that in practice there are no breaking changes in version 0.8.18.
+
+
 0.8.17
 ======
 

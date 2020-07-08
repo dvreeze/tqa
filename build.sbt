@@ -112,7 +112,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
       }
     },
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.16")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.17")
   )
   .jsSettings(    // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
@@ -133,7 +133,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     Test / parallelExecution := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.16")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.8.17")
   )
 
 lazy val tqaJVM = tqa.jvm
