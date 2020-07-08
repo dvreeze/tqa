@@ -86,8 +86,8 @@ def toTableConverter(tableTaxo: extension.table.taxonomy.BasicTableTaxonomy): ex
 
 val processor = new Processor(false)
 
-def loadTaxonomyBuilder(tpZipFile: ZipFile, docCacheSize: Int, lenient: Boolean): TaxonomyBuilder = {
-  val cacheWrapper = taxonomybuilder.jvm.TaxonomyBuilderSupport.createDocumentCache(tpZipFile, processor, docCacheSize)
+def loadTaxonomyBuilder(tpZipFiles: IndexedSeq[ZipFile], docCacheSize: Int, lenient: Boolean): TaxonomyBuilder = {
+  val cacheWrapper = taxonomybuilder.jvm.TaxonomyBuilderSupport.createDocumentCache(tpZipFiles, processor, docCacheSize)
 
   import RelationshipFactory.AnyArcHavingArcrole
   import RelationshipFactory.AnyArc
@@ -96,6 +96,14 @@ def loadTaxonomyBuilder(tpZipFile: ZipFile, docCacheSize: Int, lenient: Boolean)
     .pipe(tb => if (lenient) tb.withRelationshipFactory(DefaultParallelRelationshipFactory.LenientInstance) else tb)
     .pipe { tb => if (lenient)
       tb.withArcFilter(arc => AnyArcHavingArcrole(arc)) else tb.withArcFilter(arc => AnyArc(arc)) }
+}
+
+def loadTaxonomyBuilder(tpZipFile: ZipFile, docCacheSize: Int, lenient: Boolean): TaxonomyBuilder = {
+  loadTaxonomyBuilder(IndexedSeq(tpZipFile), docCacheSize, lenient)
+}
+
+def loadTaxonomyBuilder(tpZipFiles: IndexedSeq[ZipFile]): TaxonomyBuilder = {
+  loadTaxonomyBuilder(tpZipFiles, 10000, false)
 }
 
 def loadTaxonomyBuilder(tpZipFile: ZipFile): TaxonomyBuilder = {
@@ -134,8 +142,8 @@ def loadLocalTaxonomyDocs(localDocUris: Set[URI]): BasicTaxonomy = {
 // Now the REPL has been set up for ad-hoc DTS querying (combined with ad-hoc yaidom usage)
 // Do not forget to provide an implicit Scope if we want to create ENames with the "en" or "an" postfix operator!
 
-println(s"Use loadDts(tpZipFile, entrypointUri) to get a DTS as BasicTaxonomy")
-println(s"If needed, use loadDts(tpZipFile, entrypointUris, docCacheSize, lenient) instead")
+println(s"Use loadDts(tpZipFiles, entrypointUri) to get a DTS as BasicTaxonomy")
+println(s"If needed, use loadDts(tpZipFiles, entrypointUris, docCacheSize, lenient) instead")
 println(s"If you want to load only a few local taxonomy documents, use loadLocalTaxonomyDocs(localDocUris) instead")
 println(s"Store the result in val taxo, and import taxo._")
 println()
