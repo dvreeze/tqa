@@ -18,9 +18,6 @@ package eu.cdevreeze.tqa.base.dom
 
 import java.net.URI
 
-import scala.collection.immutable
-import scala.reflect.classTag
-
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.Namespaces.LabelNamespace
 import eu.cdevreeze.tqa.Namespaces.LinkNamespace
@@ -50,6 +47,9 @@ import eu.cdevreeze.yaidom.queryapi.ScopedElemLike
 import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.queryapi.SubtypeAwareElemLike
 
+import scala.collection.immutable
+import scala.reflect.classTag
+
 /**
  * "Taxonomy DOM node".
  *
@@ -61,8 +61,9 @@ sealed abstract class CanBeTaxonomyDocumentChild extends TaxonomyNode with Scope
 
 final case class TaxonomyTextNode(text: String) extends TaxonomyNode with ScopedNodes.Text
 
-final case class TaxonomyProcessingInstructionNode(target: String, data: String) extends CanBeTaxonomyDocumentChild
-  with ScopedNodes.ProcessingInstruction
+final case class TaxonomyProcessingInstructionNode(target: String, data: String)
+    extends CanBeTaxonomyDocumentChild
+    with ScopedNodes.ProcessingInstruction
 
 final case class TaxonomyCommentNode(text: String) extends CanBeTaxonomyDocumentChild with ScopedNodes.Comment
 
@@ -133,10 +134,14 @@ final case class TaxonomyCommentNode(text: String) extends CanBeTaxonomyDocument
  *
  * @author Chris de Vreeze
  */
-sealed abstract class TaxonomyElem private[dom](
-  val backingElem: BackingNodes.Elem,
-  val childElems: immutable.IndexedSeq[TaxonomyElem])
-  extends CanBeTaxonomyDocumentChild with AnyTaxonomyElem with ScopedNodes.Elem with ScopedElemLike with SubtypeAwareElemLike {
+sealed abstract class TaxonomyElem private[dom] (
+    val backingElem: BackingNodes.Elem,
+    val childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends CanBeTaxonomyDocumentChild
+    with AnyTaxonomyElem
+    with ScopedNodes.Elem
+    with ScopedElemLike
+    with SubtypeAwareElemLike {
 
   type ThisElem = TaxonomyElem
 
@@ -154,20 +159,22 @@ sealed abstract class TaxonomyElem private[dom](
   final def children: immutable.IndexedSeq[TaxonomyNode] = {
     var childElemIdx = 0
 
-    backingElem.children.flatMap {
-      case _: BackingNodes.Elem =>
-        val e = childElems(childElemIdx)
-        childElemIdx += 1
-        Some(e)
-      case ch: BackingNodes.Text =>
-        Some(TaxonomyTextNode(ch.text))
-      case ch: BackingNodes.Comment =>
-        Some(TaxonomyCommentNode(ch.text))
-      case ch: BackingNodes.ProcessingInstruction =>
-        Some(TaxonomyProcessingInstructionNode(ch.target, ch.data))
-      case _ =>
-        None
-    } ensuring (childElemIdx == childElems.size)
+    backingElem.children
+      .flatMap {
+        case _: BackingNodes.Elem =>
+          val e = childElems(childElemIdx)
+          childElemIdx += 1
+          Some(e)
+        case ch: BackingNodes.Text =>
+          Some(TaxonomyTextNode(ch.text))
+        case ch: BackingNodes.Comment =>
+          Some(TaxonomyCommentNode(ch.text))
+        case ch: BackingNodes.ProcessingInstruction =>
+          Some(TaxonomyProcessingInstructionNode(ch.target, ch.data))
+        case _ =>
+          None
+      }
+      .ensuring(childElemIdx == childElems.size)
   }
 
   // ElemApi
@@ -612,7 +619,9 @@ sealed trait ElemInXsdNamespace extends TaxonomyElem {
    * this is an included chameleon schema.
    */
   final def schemaTargetNamespaceOption: Option[String] = {
-    backingElem.findAncestorOrSelf(_.resolvedName == ENames.XsSchemaEName).flatMap(_.attributeOption(ENames.TargetNamespaceEName))
+    backingElem
+      .findAncestorOrSelf(_.resolvedName == ENames.XsSchemaEName)
+      .flatMap(_.attributeOption(ENames.TargetNamespaceEName))
   }
 }
 
@@ -693,9 +702,10 @@ sealed trait Reference extends ElemInXsdNamespace {
  *   globalElemDecls.flatMap(_.typeOption).toSet
  * }}}
  */
-final class XsdSchema private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInXsdNamespace with TaxonomyRootElem {
+final class XsdSchema private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInXsdNamespace
+    with TaxonomyRootElem {
 
   def isXsdSchema: Boolean = true
 
@@ -712,7 +722,8 @@ final class XsdSchema private[dom](
     findAllChildElemsOfType(classTag[Import])
   }
 
-  def filterGlobalElementDeclarations(p: GlobalElementDeclaration => Boolean): immutable.IndexedSeq[GlobalElementDeclaration] = {
+  def filterGlobalElementDeclarations(
+      p: GlobalElementDeclaration => Boolean): immutable.IndexedSeq[GlobalElementDeclaration] = {
     filterChildElemsOfType(classTag[GlobalElementDeclaration])(p)
   }
 
@@ -720,7 +731,8 @@ final class XsdSchema private[dom](
     filterGlobalElementDeclarations(_ => true)
   }
 
-  def filterGlobalAttributeDeclarations(p: GlobalAttributeDeclaration => Boolean): immutable.IndexedSeq[GlobalAttributeDeclaration] = {
+  def filterGlobalAttributeDeclarations(
+      p: GlobalAttributeDeclaration => Boolean): immutable.IndexedSeq[GlobalAttributeDeclaration] = {
     filterChildElemsOfType(classTag[GlobalAttributeDeclaration])(p)
   }
 
@@ -752,11 +764,13 @@ final class XsdSchema private[dom](
     filterSimpleTypeDefinitions(_ => true)
   }
 
-  def filterModelGroupDefinitionOrReferences(p: ModelGroupDefinitionOrReference => Boolean): immutable.IndexedSeq[ModelGroupDefinitionOrReference] = {
+  def filterModelGroupDefinitionOrReferences(
+      p: ModelGroupDefinitionOrReference => Boolean): immutable.IndexedSeq[ModelGroupDefinitionOrReference] = {
     filterChildElemsOfType(classTag[ModelGroupDefinitionOrReference])(p)
   }
 
-  def filterAttributeGroupDefinitionOrReferences(p: AttributeGroupDefinitionOrReference => Boolean): immutable.IndexedSeq[AttributeGroupDefinitionOrReference] = {
+  def filterAttributeGroupDefinitionOrReferences(
+      p: AttributeGroupDefinitionOrReference => Boolean): immutable.IndexedSeq[AttributeGroupDefinitionOrReference] = {
     filterChildElemsOfType(classTag[AttributeGroupDefinitionOrReference])(p)
   }
 }
@@ -764,9 +778,10 @@ final class XsdSchema private[dom](
 /**
  * The link:linkbase root element of a linkbase. It may be embedded within a taxonomy schema document.
  */
-final class Linkbase private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with TaxonomyRootElem {
+final class Linkbase private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with TaxonomyRootElem {
 
   def isXsdSchema: Boolean = false
 
@@ -810,8 +825,8 @@ sealed trait Particle extends ElemInXsdNamespace {
   final def maxOccursOption: Option[Int] = {
     attributeOption(ENames.MaxOccursEName) match {
       case Some("unbounded") => None
-      case Some(i) => Some(i.toInt)
-      case None => Some(1)
+      case Some(i)           => Some(i.toInt)
+      case None              => Some(1)
     }
   }
 }
@@ -856,9 +871,12 @@ sealed trait ElementDeclaration extends ElementDeclarationOrReference with Named
  * Once we have a `SubstitutionGroupMap` as context, we can turn the global element declaration into a `ConceptDeclaration`,
  * if the global element declaration is indeed an item or tuple declaration according to the `SubstitutionGroupMap`.
  */
-final class GlobalElementDeclaration private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElementDeclaration with CanBeAbstract {
+final class GlobalElementDeclaration private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElementDeclaration
+    with CanBeAbstract {
 
   /**
    * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
@@ -925,17 +943,23 @@ final class GlobalElementDeclaration private[dom](
  * are global element declarations declaring item or tuple concepts, and tuple concept content models refer to other
  * (item or tuple) concept declarations.
  */
-final class LocalElementDeclaration private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElementDeclaration with Particle
+final class LocalElementDeclaration private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElementDeclaration
+    with Particle
 
 /**
  * Element reference, referring to a global element declaration. Like local element declarations it is not a child element of
  * the xs:schema root element, but unlike global and local element declarations it has a ref attribute instead of a name attribute.
  */
-final class ElementReference private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElementDeclarationOrReference with Reference
+final class ElementReference private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElementDeclarationOrReference
+    with Reference
 
 // Attribute declarations or references.
 
@@ -960,9 +984,11 @@ sealed trait AttributeDeclaration extends AttributeDeclarationOrReference with N
 /**
  * Global attribute declaration. It is an xs:attribute element, and a child element of the xs:schema root element.
  */
-final class GlobalAttributeDeclaration private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeDeclaration {
+final class GlobalAttributeDeclaration private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with AttributeDeclaration {
 
   /**
    * Returns the "target EName". That is, returns the EName composed of the optional target namespace and the
@@ -978,17 +1004,22 @@ final class GlobalAttributeDeclaration private[dom](
 /**
  * Local attribute declaration. It is an xs:attribute element, but not a direct child element of the xs:schema root element.
  */
-final class LocalAttributeDeclaration private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeDeclaration
+final class LocalAttributeDeclaration private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with AttributeDeclaration
 
 /**
  * Attribute reference. It is an xs:attribute element referring to a global attribute declaration. It is not a direct child element of
  * the xs:schema root element.
  */
-final class AttributeReference private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeDeclarationOrReference with Reference
+final class AttributeReference private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with AttributeDeclarationOrReference
+    with Reference
 
 // Type definitions.
 
@@ -1103,30 +1134,42 @@ sealed trait ComplexTypeDefinition extends TypeDefinition {
 /**
  * Named simple type definition. It is a top-level xs:simpleType element with a name attribute.
  */
-final class NamedSimpleTypeDefinition private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with NamedTypeDefinition with SimpleTypeDefinition
+final class NamedSimpleTypeDefinition private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with NamedTypeDefinition
+    with SimpleTypeDefinition
 
 /**
  * Anonymous simple type definition. It is a non-top-level xs:simpleType element without any name attribute.
  */
-final class AnonymousSimpleTypeDefinition private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AnonymousTypeDefinition with SimpleTypeDefinition
+final class AnonymousSimpleTypeDefinition private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with AnonymousTypeDefinition
+    with SimpleTypeDefinition
 
 /**
  * Named complex type definition. It is a top-level xs:complexType element with a name attribute.
  */
-final class NamedComplexTypeDefinition private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with NamedTypeDefinition with ComplexTypeDefinition
+final class NamedComplexTypeDefinition private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with NamedTypeDefinition
+    with ComplexTypeDefinition
 
 /**
  * Anonymous complex type definition. It is a non-top-level xs:complexType element without any name attribute.
  */
-final class AnonymousComplexTypeDefinition private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AnonymousTypeDefinition with ComplexTypeDefinition
+final class AnonymousComplexTypeDefinition private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with AnonymousTypeDefinition
+    with ComplexTypeDefinition
 
 // Attribute group definitions and references.
 
@@ -1138,16 +1181,22 @@ sealed trait AttributeGroupDefinitionOrReference extends ElemInXsdNamespace
 /**
  * Attribute group definition, so a top-level xs:attributeGroup element with a name attribute.
  */
-final class AttributeGroupDefinition private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeGroupDefinitionOrReference with NamedDeclOrDef
+final class AttributeGroupDefinition private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with AttributeGroupDefinitionOrReference
+    with NamedDeclOrDef
 
 /**
  * Attribute group reference, so a non-top-level xs:attributeGroup element with a ref attribute, referring to an attribute group definition.
  */
-final class AttributeGroupReference private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with AttributeGroupDefinitionOrReference with Reference
+final class AttributeGroupReference private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with AttributeGroupDefinitionOrReference
+    with Reference
 
 // Model group definitions and references.
 
@@ -1159,16 +1208,21 @@ sealed trait ModelGroupDefinitionOrReference extends ElemInXsdNamespace
 /**
  * Model group definition, so a top-level xs:group element with a name attribute.
  */
-final class ModelGroupDefinition private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ModelGroupDefinitionOrReference
+final class ModelGroupDefinition private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ModelGroupDefinitionOrReference
 
 /**
  * Model group reference, so a non-top-level xs:group element with a ref attribute, referring to a model group definition.
  */
-final class ModelGroupReference private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ModelGroupDefinitionOrReference with Reference
+final class ModelGroupReference private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ModelGroupDefinitionOrReference
+    with Reference
 
 // Ignoring identity constraints, notations, wildcards.
 
@@ -1180,23 +1234,27 @@ sealed trait ModelGroup extends ElemInXsdNamespace
 /**
  * Sequence model group, so an xs:sequence element.
  */
-final class SequenceModelGroup private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ModelGroup
+final class SequenceModelGroup private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ModelGroup
 
 /**
  * Choice model group, so an xs:choice element.
  */
-final class ChoiceModelGroup private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ModelGroup
+final class ChoiceModelGroup private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ModelGroup
 
 /**
  * All model group, so an xs:all element.
  */
-final class AllModelGroup private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ModelGroup
+final class AllModelGroup private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ModelGroup
 
 /**
  * Either a restriction or an extension.
@@ -1214,16 +1272,16 @@ sealed trait RestrictionOrExtension extends ElemInXsdNamespace {
 /**
  * An xs:restriction element.
  */
-final class Restriction private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with RestrictionOrExtension
+final class Restriction private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with RestrictionOrExtension
 
 /**
  * An xs:extension element.
  */
-final class Extension private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with RestrictionOrExtension
+final class Extension private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with RestrictionOrExtension
 
 /**
  * Either simple content or complex content.
@@ -1234,9 +1292,9 @@ sealed trait Content extends ElemInXsdNamespace {
    * Returns the derivation. This may fail with an exception if the taxonomy is not schema-valid.
    */
   final def derivation: RestrictionOrExtension = {
-    findChildElemOfType(classTag[Restriction])(_ => true).
-      orElse(findChildElemOfType(classTag[Extension])(_ => true)).
-      getOrElse(sys.error(msg(s"Expected xs:restriction or xs:extension child element")))
+    findChildElemOfType(classTag[Restriction])(_ => true)
+      .orElse(findChildElemOfType(classTag[Extension])(_ => true))
+      .getOrElse(sys.error(msg(s"Expected xs:restriction or xs:extension child element")))
   }
 
   /**
@@ -1249,44 +1307,44 @@ sealed trait Content extends ElemInXsdNamespace {
 /**
  * An xs:simpleContent element.
  */
-final class SimpleContent private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with Content
+final class SimpleContent private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with Content
 
 /**
  * An xs:complexContent element.
  */
-final class ComplexContent private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with Content
+final class ComplexContent private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with Content
 
 /**
  * An xs:annotation element.
  */
-final class Annotation private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInXsdNamespace
+final class Annotation private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInXsdNamespace
 
 /**
  * An xs:appinfo element.
  */
-final class Appinfo private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInXsdNamespace
+final class Appinfo private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInXsdNamespace
 
 /**
  * An xs:import element.
  */
-final class Import private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInXsdNamespace
+final class Import private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInXsdNamespace
 
 /**
  * An xs:include element.
  */
-final class Include private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInXsdNamespace
+final class Include private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInXsdNamespace
 
 // No redefines.
 
@@ -1295,9 +1353,11 @@ final class Include private[dom](
  * this is valid schema content not modeled in the `ElemInXsdNamespace` sub-type hierarchy, or it is syntactically incorrect.
  * As an example of the latter, an xs:element XML element with both a name and a ref attribute is clearly invalid.
  */
-final class OtherElemInXsdNamespace private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInXsdNamespace
+final class OtherElemInXsdNamespace private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInXsdNamespace
 
 // Linkbase content.
 
@@ -1305,73 +1365,77 @@ final class OtherElemInXsdNamespace private[dom](
  * An XBRL standard extended link. This is an XLink extended link, and it is either a definition link, presentation link,
  * calculation link, label link or reference link.
  */
-sealed abstract class StandardExtendedLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with ExtendedLink
+sealed abstract class StandardExtendedLink private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with ExtendedLink
 
 /**
  * An XBRL definition link. It is a link:definitionLink element.
  */
-final class DefinitionLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
+final class DefinitionLink private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL presentation link. It is a link:presentationLink element.
  */
-final class PresentationLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
+final class PresentationLink private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL calculation link. It is a link:calculationLink element.
  */
-final class CalculationLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
+final class CalculationLink private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL label link. It is a link:labelLink element.
  */
-final class LabelLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
+final class LabelLink private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL reference link. It is a link:referenceLink element.
  */
-final class ReferenceLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardExtendedLink(backingElem, childElems)
+final class ReferenceLink private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardExtendedLink(backingElem, childElems)
 
 /**
  * An XBRL standard arc. This is an XLink arc, and it is either a definition arc, presentation arc,
  * calculation arc, label arc or reference arc.
  */
-sealed abstract class StandardArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with XLinkArc
+sealed abstract class StandardArc private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with XLinkArc
 
 /**
  * An XBRL definition arc. It is a link:definitionArc element.
  */
-final class DefinitionArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardArc(backingElem, childElems)
+final class DefinitionArc private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardArc(backingElem, childElems)
 
 /**
  * An XBRL presentation arc. It is a link:presentationArc element.
  */
-final class PresentationArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardArc(backingElem, childElems)
+final class PresentationArc private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardArc(backingElem, childElems)
 
 /**
  * An XBRL calculation arc. It is a link:calculationArc element.
  */
-final class CalculationArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardArc(backingElem, childElems) {
+final class CalculationArc private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardArc(backingElem, childElems) {
 
   /**
    * Returns the mandatory numeric "weight" attribute. This may fail with an exception if the taxonomy is not schema-valid.
@@ -1384,37 +1448,40 @@ final class CalculationArc private[dom](
 /**
  * An XBRL label arc. It is a link:labelArc element.
  */
-final class LabelArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardArc(backingElem, childElems)
+final class LabelArc private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardArc(backingElem, childElems)
 
 /**
  * An XBRL reference arc. It is a link:referenceArc element.
  */
-final class ReferenceArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardArc(backingElem, childElems)
+final class ReferenceArc private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardArc(backingElem, childElems)
 
 /**
  * An XBRL standard locator. This is an XLink locator, and it is a link:loc element.
  */
-final class StandardLoc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with XLinkLocator
+final class StandardLoc private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with XLinkLocator
 
 /**
  * Either a concept-label resource or a concept-reference resource.
  */
-sealed abstract class StandardResource private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with XLinkResource
+sealed abstract class StandardResource private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with XLinkResource
 
 /**
  * Concept-label resource. It is a link:label element.
  */
-final class ConceptLabelResource private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardResource(backingElem, childElems) {
+final class ConceptLabelResource private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardResource(backingElem, childElems) {
 
   def isStandardLabel: Boolean = {
     roleOption.forall(_ == StandardLabelRoles.StandardLabel)
@@ -1424,9 +1491,10 @@ final class ConceptLabelResource private[dom](
 /**
  * Concept-reference resource. It is a link:reference element.
  */
-final class ConceptReferenceResource private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends StandardResource(backingElem, childElems) {
+final class ConceptReferenceResource private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends StandardResource(backingElem, childElems) {
 
   def isStandardReference: Boolean = {
     roleOption.forall(_ == StandardReferenceRoles.StandardReference)
@@ -1441,112 +1509,134 @@ final class ConceptReferenceResource private[dom](
  * Note that in general it is very hard to determine if a non-standard link is a generic link by looking
  * at the link element itself, because we need substitution group (inheritance) context.
  */
-sealed abstract class NonStandardExtendedLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ExtendedLink
+sealed abstract class NonStandardExtendedLink private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ExtendedLink
 
 /**
  * Non-standard extended link that is not in one of the known namespaces.
  */
-final class OtherNonStandardExtendedLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardExtendedLink(backingElem, childElems)
+final class OtherNonStandardExtendedLink private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends NonStandardExtendedLink(backingElem, childElems)
 
 /**
  * Non-standard simple link, so an XLink simple link that is not a standard simple link. Rarely, if ever, encountered in practice.
  */
-sealed abstract class NonStandardSimpleLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with SimpleLink
+sealed abstract class NonStandardSimpleLink private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with SimpleLink
 
 /**
  * Non-standard simple link that is not in one of the known namespaces.
  */
-final class OtherNonStandardSimpleLink private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardSimpleLink(backingElem, childElems)
+final class OtherNonStandardSimpleLink private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends NonStandardSimpleLink(backingElem, childElems)
 
 /**
  * Non-standard arc, so an XLink arc that is not a standard arc. Typically it is a generic arc.
  * Some well-known formula/table-related arcs also fall into this category. Finally, unknown (and
  * possibly incorrect) arcs also fall into this category.
  */
-sealed abstract class NonStandardArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkArc
+sealed abstract class NonStandardArc private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with XLinkArc
 
 /**
  * Non-standard XLink arc that is not in one of the known namespaces.
  */
-final class OtherNonStandardArc private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardArc(backingElem, childElems)
+final class OtherNonStandardArc private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends NonStandardArc(backingElem, childElems)
 
 /**
  * Non-standard resource, so an XLink resource that is not a standard resource. Typically it is a generic label or generic reference.
  * Formula/table-related XLink resources also fall into this category.
  */
-sealed abstract class NonStandardResource private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkResource
+sealed abstract class NonStandardResource private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with XLinkResource
 
 /**
  * A label:label element. Not any element in that substitution group, but only a label:label element.
  */
-final class LabelInLabelNamespace private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardResource(backingElem, childElems) with ElemInLabelNamespace
+final class LabelInLabelNamespace private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends NonStandardResource(backingElem, childElems)
+    with ElemInLabelNamespace
 
 /**
  * A reference:reference element. Not any element in that substitution group, but only a reference:reference element.
  */
-final class ReferenceInReferenceNamespace private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardResource(backingElem, childElems) with ElemInReferenceNamespace
+final class ReferenceInReferenceNamespace private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends NonStandardResource(backingElem, childElems)
+    with ElemInReferenceNamespace
 
 /**
  * Non-standard XLink resource that is not in one of the known namespaces.
  */
-final class OtherNonStandardResource private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardResource(backingElem, childElems)
+final class OtherNonStandardResource private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends NonStandardResource(backingElem, childElems)
 
 /**
  * Non-standard locator, so an XLink locator that is not a standard locator. Rarely, if ever, encountered in practice.
  */
-sealed abstract class NonStandardLocator private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with XLinkLocator
+sealed abstract class NonStandardLocator private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with XLinkLocator
 
 /**
  * Non-standard XLink locator that is not in one of the known namespaces.
  */
-final class OtherNonStandardLocator private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends NonStandardLocator(backingElem, childElems)
+final class OtherNonStandardLocator private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends NonStandardLocator(backingElem, childElems)
 
 // Known simple links etc.
 
 /**
  * A link:linkbaseRef element.
  */
-final class LinkbaseRef private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with SimpleLink
+final class LinkbaseRef private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with SimpleLink
 
 /**
  * A link:schemaRef element.
  */
-final class SchemaRef private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with SimpleLink
+final class SchemaRef private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with SimpleLink
 
 /**
  * A link:roleRef element.
  */
-final class RoleRef private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with SimpleLink {
+final class RoleRef private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with SimpleLink {
 
   def roleUri: String = {
     attribute(ENames.RoleURIEName)
@@ -1556,9 +1646,10 @@ final class RoleRef private[dom](
 /**
  * A link:arcroleRef element.
  */
-final class ArcroleRef private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace with SimpleLink {
+final class ArcroleRef private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
+    with SimpleLink {
 
   def arcroleUri: String = {
     attribute(ENames.ArcroleURIEName)
@@ -1570,9 +1661,9 @@ final class ArcroleRef private[dom](
 /**
  * A link:roleType element.
  */
-final class RoleType private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace {
+final class RoleType private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace {
 
   /**
    * Returns the roleURI attribute. This may fail with an exception if the taxonomy is not schema-valid.
@@ -1593,9 +1684,9 @@ final class RoleType private[dom](
 /**
  * A link:arcroleType element.
  */
-final class ArcroleType private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace {
+final class ArcroleType private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace {
 
   /**
    * Returns the arcroleURI attribute. This may fail with an exception if the taxonomy is not schema-valid.
@@ -1623,16 +1714,16 @@ final class ArcroleType private[dom](
 /**
  * A link:definition element.
  */
-final class Definition private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace
+final class Definition private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
 
 /**
  * A link:usedOn element.
  */
-final class UsedOn private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace {
+final class UsedOn private[dom] (backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace {
 
   /**
    * Returns the usedOn value as EName. This may fail with an exception if the taxonomy is not schema-valid.
@@ -1648,25 +1739,31 @@ final class UsedOn private[dom](
  * Any `ElemInLinkNamespace` not recognized as an instance of one of the other concrete `ElemInLinkNamespace` sub-types. This means that either
  * this is valid linkbase content not modeled in the `ElemInLinkNamespace` sub-type hierarchy, or it is syntactically incorrect.
  */
-final class OtherElemInLinkNamespace private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLinkNamespace
+final class OtherElemInLinkNamespace private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLinkNamespace
 
 /**
  * Any `ElemInLabelNamespace` not recognized as an instance of one of the other concrete `ElemInLabelNamespace` sub-types. This means that either
  * this is valid linkbase content not modeled in the `ElemInLabelNamespace` sub-type hierarchy, or it is syntactically incorrect.
  */
-final class OtherElemInLabelNamespace private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInLabelNamespace
+final class OtherElemInLabelNamespace private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInLabelNamespace
 
 /**
  * Any `ElemInReferenceNamespace` not recognized as an instance of one of the other concrete `ElemInReferenceNamespace` sub-types. This means that either
  * this is valid linkbase content not modeled in the `ElemInReferenceNamespace` sub-type hierarchy, or it is syntactically incorrect.
  */
-final class OtherElemInReferenceNamespace private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems) with ElemInReferenceNamespace
+final class OtherElemInReferenceNamespace private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
+    with ElemInReferenceNamespace
 
 /**
  * Any element that is not in one of the "known" namespaces, and that is also not recognized as a non-standard link,
@@ -1677,9 +1774,10 @@ final class OtherElemInReferenceNamespace private[dom](
  * The elements that do fall into this `OtherNonXLinkElem` category are typically either reference parts (used in reference linkbases)
  * or formula/table-related non-XLink content.
  */
-final class OtherNonXLinkElem private[dom](
-  backingElem: BackingNodes.Elem,
-  childElems: immutable.IndexedSeq[TaxonomyElem]) extends TaxonomyElem(backingElem, childElems)
+final class OtherNonXLinkElem private[dom] (
+    backingElem: BackingNodes.Elem,
+    childElems: immutable.IndexedSeq[TaxonomyElem])
+    extends TaxonomyElem(backingElem, childElems)
 
 // Companion objects.
 
@@ -1698,9 +1796,13 @@ object TaxonomyElem {
    * recognized and possibly rejected during validation. The same may be true for some `NonStandardArc` objects, etc.
    */
   def build(backingElem: BackingNodes.Elem): TaxonomyElem = {
+    build(backingElem, backingElem.parentOption)
+  }
+
+  private def build(backingElem: BackingNodes.Elem, backingElemParentOption: Option[BackingNodes.Elem]): TaxonomyElem = {
     // Recursive calls
-    val childElems = backingElem.findAllChildElems.map(che => build(che))
-    apply(backingElem, childElems)
+    val childElems = backingElem.findAllChildElems.map(che => build(che, Option(backingElem)))
+    apply(backingElem, backingElemParentOption, childElems)
   }
 
   /**
@@ -1710,13 +1812,16 @@ object TaxonomyElem {
     Set(XsNamespace, LinkNamespace, LabelNamespace, ReferenceNamespace)
   }
 
-  private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyElem = {
+  private[dom] def apply(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): TaxonomyElem = {
     backingElem.resolvedName.namespaceUriOption match {
-      case Some(XsNamespace) => ElemInXsdNamespace(backingElem, childElems)
-      case Some(LinkNamespace) => ElemInLinkNamespace(backingElem, childElems)
-      case Some(LabelNamespace) => ElemInLabelNamespace(backingElem, childElems)
-      case Some(ReferenceNamespace) => ElemInReferenceNamespace(backingElem, childElems)
-      case _ =>
+      case Some(XsNamespace)        => ElemInXsdNamespace(backingElem, backingElemParentOption, childElems)
+      case Some(LinkNamespace)      => ElemInLinkNamespace(backingElem, backingElemParentOption, childElems)
+      case Some(LabelNamespace)     => ElemInLabelNamespace(backingElem, backingElemParentOption, childElems)
+      case Some(ReferenceNamespace) => ElemInReferenceNamespace(backingElem, backingElemParentOption, childElems)
+      case _                        =>
         // Elements not in one of the "known" namespaces, but that may still be XLink elements.
         // Note that a NonStandardArc may be a known generic arc, or an unknown or even incorrect arc.
 
@@ -1726,11 +1831,11 @@ object TaxonomyElem {
 
         backingElem.attributeOption(ENames.XLinkTypeEName) match {
           case Some("extended") => new OtherNonStandardExtendedLink(backingElem, childElems)
-          case Some("simple") => new OtherNonStandardSimpleLink(backingElem, childElems)
-          case Some("arc") => new OtherNonStandardArc(backingElem, childElems)
+          case Some("simple")   => new OtherNonStandardSimpleLink(backingElem, childElems)
+          case Some("arc")      => new OtherNonStandardArc(backingElem, childElems)
           case Some("resource") => new OtherNonStandardResource(backingElem, childElems)
-          case Some("locator") => new OtherNonStandardLocator(backingElem, childElems)
-          case _ => new OtherNonXLinkElem(backingElem, childElems)
+          case Some("locator")  => new OtherNonStandardLocator(backingElem, childElems)
+          case _                => new OtherNonXLinkElem(backingElem, childElems)
         }
     }
   }
@@ -1753,7 +1858,8 @@ object TaxonomyRootElem {
   def build(backingElem: BackingNodes.Elem): TaxonomyRootElem = {
     require(
       Set(ENames.XsSchemaEName, ENames.LinkLinkbaseEName).contains(backingElem.resolvedName),
-      s"Expected ${ENames.XsSchemaEName} or ${ENames.LinkLinkbaseEName} but found ${backingElem.resolvedName}")
+      s"Expected ${ENames.XsSchemaEName} or ${ENames.LinkLinkbaseEName} but found ${backingElem.resolvedName}"
+    )
 
     TaxonomyElem.build(backingElem).asInstanceOf[TaxonomyRootElem]
   }
@@ -1791,102 +1897,129 @@ object Linkbase {
 
 object ElemInXsdNamespace {
 
-  private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInXsdNamespace = {
+  private[dom] def apply(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInXsdNamespace = {
     require(backingElem.resolvedName.namespaceUriOption.contains(XsNamespace))
 
     backingElem.resolvedName match {
       case ENames.XsSchemaEName => new XsdSchema(backingElem, childElems)
       case ENames.XsElementEName =>
-        ElementDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+        ElementDeclarationOrReference
+          .opt(backingElem, backingElemParentOption, childElems)
+          .getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
       case ENames.XsAttributeEName =>
-        AttributeDeclarationOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+        AttributeDeclarationOrReference
+          .opt(backingElem, backingElemParentOption, childElems)
+          .getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
       case ENames.XsSimpleTypeEName =>
-        SimpleTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+        SimpleTypeDefinition
+          .opt(backingElem, backingElemParentOption, childElems)
+          .getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
       case ENames.XsComplexTypeEName =>
-        ComplexTypeDefinition.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+        ComplexTypeDefinition
+          .opt(backingElem, backingElemParentOption, childElems)
+          .getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
       case ENames.XsGroupEName =>
-        ModelGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+        ModelGroupDefinitionOrReference
+          .opt(backingElem, backingElemParentOption, childElems)
+          .getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
       case ENames.XsAttributeGroupEName =>
-        AttributeGroupDefinitionOrReference.opt(backingElem, childElems).getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
-      case ENames.XsSequenceEName => new SequenceModelGroup(backingElem, childElems)
-      case ENames.XsChoiceEName => new ChoiceModelGroup(backingElem, childElems)
-      case ENames.XsAllEName => new AllModelGroup(backingElem, childElems)
-      case ENames.XsRestrictionEName => new Restriction(backingElem, childElems)
-      case ENames.XsExtensionEName => new Extension(backingElem, childElems)
-      case ENames.XsSimpleContentEName => new SimpleContent(backingElem, childElems)
+        AttributeGroupDefinitionOrReference
+          .opt(backingElem, backingElemParentOption, childElems)
+          .getOrElse(new OtherElemInXsdNamespace(backingElem, childElems))
+      case ENames.XsSequenceEName       => new SequenceModelGroup(backingElem, childElems)
+      case ENames.XsChoiceEName         => new ChoiceModelGroup(backingElem, childElems)
+      case ENames.XsAllEName            => new AllModelGroup(backingElem, childElems)
+      case ENames.XsRestrictionEName    => new Restriction(backingElem, childElems)
+      case ENames.XsExtensionEName      => new Extension(backingElem, childElems)
+      case ENames.XsSimpleContentEName  => new SimpleContent(backingElem, childElems)
       case ENames.XsComplexContentEName => new ComplexContent(backingElem, childElems)
-      case ENames.XsAnnotationEName => new Annotation(backingElem, childElems)
-      case ENames.XsAppinfoEName => new Appinfo(backingElem, childElems)
-      case ENames.XsImportEName => new Import(backingElem, childElems)
-      case ENames.XsIncludeEName => new Include(backingElem, childElems)
-      case _ => new OtherElemInXsdNamespace(backingElem, childElems)
+      case ENames.XsAnnotationEName     => new Annotation(backingElem, childElems)
+      case ENames.XsAppinfoEName        => new Appinfo(backingElem, childElems)
+      case ENames.XsImportEName         => new Import(backingElem, childElems)
+      case ENames.XsIncludeEName        => new Include(backingElem, childElems)
+      case _                            => new OtherElemInXsdNamespace(backingElem, childElems)
     }
   }
 }
 
 object ElemInLinkNamespace {
 
-  private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInLinkNamespace = {
+  private[dom] def apply(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInLinkNamespace = {
     require(backingElem.resolvedName.namespaceUriOption.contains(LinkNamespace))
 
     backingElem.resolvedName match {
-      case ENames.LinkLinkbaseEName => new Linkbase(backingElem, childElems)
-      case ENames.LinkLocEName => new StandardLoc(backingElem, childElems)
-      case ENames.LinkLabelEName => new ConceptLabelResource(backingElem, childElems)
-      case ENames.LinkReferenceEName => new ConceptReferenceResource(backingElem, childElems)
-      case ENames.LinkDefinitionLinkEName => new DefinitionLink(backingElem, childElems)
+      case ENames.LinkLinkbaseEName         => new Linkbase(backingElem, childElems)
+      case ENames.LinkLocEName              => new StandardLoc(backingElem, childElems)
+      case ENames.LinkLabelEName            => new ConceptLabelResource(backingElem, childElems)
+      case ENames.LinkReferenceEName        => new ConceptReferenceResource(backingElem, childElems)
+      case ENames.LinkDefinitionLinkEName   => new DefinitionLink(backingElem, childElems)
       case ENames.LinkPresentationLinkEName => new PresentationLink(backingElem, childElems)
-      case ENames.LinkCalculationLinkEName => new CalculationLink(backingElem, childElems)
-      case ENames.LinkLabelLinkEName => new LabelLink(backingElem, childElems)
-      case ENames.LinkReferenceLinkEName => new ReferenceLink(backingElem, childElems)
-      case ENames.LinkDefinitionArcEName => new DefinitionArc(backingElem, childElems)
-      case ENames.LinkPresentationArcEName => new PresentationArc(backingElem, childElems)
-      case ENames.LinkCalculationArcEName => new CalculationArc(backingElem, childElems)
-      case ENames.LinkLabelArcEName => new LabelArc(backingElem, childElems)
-      case ENames.LinkReferenceArcEName => new ReferenceArc(backingElem, childElems)
-      case ENames.LinkLinkbaseRefEName => new LinkbaseRef(backingElem, childElems)
-      case ENames.LinkSchemaRefEName => new SchemaRef(backingElem, childElems)
-      case ENames.LinkRoleRefEName => new RoleRef(backingElem, childElems)
-      case ENames.LinkArcroleRefEName => new ArcroleRef(backingElem, childElems)
-      case ENames.LinkRoleTypeEName => new RoleType(backingElem, childElems)
-      case ENames.LinkArcroleTypeEName => new ArcroleType(backingElem, childElems)
-      case ENames.LinkDefinitionEName => new Definition(backingElem, childElems)
-      case ENames.LinkUsedOnEName => new UsedOn(backingElem, childElems)
-      case _ => new OtherElemInLinkNamespace(backingElem, childElems)
+      case ENames.LinkCalculationLinkEName  => new CalculationLink(backingElem, childElems)
+      case ENames.LinkLabelLinkEName        => new LabelLink(backingElem, childElems)
+      case ENames.LinkReferenceLinkEName    => new ReferenceLink(backingElem, childElems)
+      case ENames.LinkDefinitionArcEName    => new DefinitionArc(backingElem, childElems)
+      case ENames.LinkPresentationArcEName  => new PresentationArc(backingElem, childElems)
+      case ENames.LinkCalculationArcEName   => new CalculationArc(backingElem, childElems)
+      case ENames.LinkLabelArcEName         => new LabelArc(backingElem, childElems)
+      case ENames.LinkReferenceArcEName     => new ReferenceArc(backingElem, childElems)
+      case ENames.LinkLinkbaseRefEName      => new LinkbaseRef(backingElem, childElems)
+      case ENames.LinkSchemaRefEName        => new SchemaRef(backingElem, childElems)
+      case ENames.LinkRoleRefEName          => new RoleRef(backingElem, childElems)
+      case ENames.LinkArcroleRefEName       => new ArcroleRef(backingElem, childElems)
+      case ENames.LinkRoleTypeEName         => new RoleType(backingElem, childElems)
+      case ENames.LinkArcroleTypeEName      => new ArcroleType(backingElem, childElems)
+      case ENames.LinkDefinitionEName       => new Definition(backingElem, childElems)
+      case ENames.LinkUsedOnEName           => new UsedOn(backingElem, childElems)
+      case _                                => new OtherElemInLinkNamespace(backingElem, childElems)
     }
   }
 }
 
 object ElemInLabelNamespace {
 
-  private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInLabelNamespace = {
+  private[dom] def apply(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInLabelNamespace = {
     require(backingElem.resolvedName.namespaceUriOption.contains(LabelNamespace))
 
     backingElem.resolvedName match {
       case ENames.LabelLabelEName => new LabelInLabelNamespace(backingElem, childElems)
-      case _ => new OtherElemInLabelNamespace(backingElem, childElems)
+      case _                      => new OtherElemInLabelNamespace(backingElem, childElems)
     }
   }
 }
 
 object ElemInReferenceNamespace {
 
-  private[dom] def apply(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInReferenceNamespace = {
+  private[dom] def apply(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): ElemInReferenceNamespace = {
     require(backingElem.resolvedName.namespaceUriOption.contains(ReferenceNamespace))
 
     backingElem.resolvedName match {
       case ENames.ReferenceReferenceEName => new ReferenceInReferenceNamespace(backingElem, childElems)
-      case _ => new OtherElemInReferenceNamespace(backingElem, childElems)
+      case _                              => new OtherElemInReferenceNamespace(backingElem, childElems)
     }
   }
 }
 
 object ElementDeclarationOrReference {
 
-  private[dom] def opt(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ElementDeclarationOrReference] = {
+  private[dom] def opt(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ElementDeclarationOrReference] = {
     require(backingElem.resolvedName == ENames.XsElementEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val parentIsSchema = backingElemParentOption.exists(_.resolvedName == ENames.XsSchemaEName)
     val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
     val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
@@ -1904,10 +2037,13 @@ object ElementDeclarationOrReference {
 
 object AttributeDeclarationOrReference {
 
-  private[dom] def opt(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[AttributeDeclarationOrReference] = {
+  private[dom] def opt(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): Option[AttributeDeclarationOrReference] = {
     require(backingElem.resolvedName == ENames.XsAttributeEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val parentIsSchema = backingElemParentOption.exists(_.resolvedName == ENames.XsSchemaEName)
     val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
     val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
@@ -1925,10 +2061,13 @@ object AttributeDeclarationOrReference {
 
 object SimpleTypeDefinition {
 
-  private[dom] def opt(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[SimpleTypeDefinition] = {
+  private[dom] def opt(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): Option[SimpleTypeDefinition] = {
     require(backingElem.resolvedName == ENames.XsSimpleTypeEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val parentIsSchema = backingElemParentOption.exists(_.resolvedName == ENames.XsSchemaEName)
     val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
 
     if (parentIsSchema && hasName) {
@@ -1943,10 +2082,13 @@ object SimpleTypeDefinition {
 
 object ComplexTypeDefinition {
 
-  private[dom] def opt(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ComplexTypeDefinition] = {
+  private[dom] def opt(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ComplexTypeDefinition] = {
     require(backingElem.resolvedName == ENames.XsComplexTypeEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val parentIsSchema = backingElemParentOption.exists(_.resolvedName == ENames.XsSchemaEName)
     val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
 
     if (parentIsSchema && hasName) {
@@ -1961,10 +2103,13 @@ object ComplexTypeDefinition {
 
 object ModelGroupDefinitionOrReference {
 
-  private[dom] def opt(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ModelGroupDefinitionOrReference] = {
+  private[dom] def opt(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): Option[ModelGroupDefinitionOrReference] = {
     require(backingElem.resolvedName == ENames.XsGroupEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val parentIsSchema = backingElemParentOption.exists(_.resolvedName == ENames.XsSchemaEName)
     val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
     val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
@@ -1980,10 +2125,13 @@ object ModelGroupDefinitionOrReference {
 
 object AttributeGroupDefinitionOrReference {
 
-  private[dom] def opt(backingElem: BackingNodes.Elem, childElems: immutable.IndexedSeq[TaxonomyElem]): Option[AttributeGroupDefinitionOrReference] = {
+  private[dom] def opt(
+      backingElem: BackingNodes.Elem,
+      backingElemParentOption: Option[BackingNodes.Elem],
+      childElems: immutable.IndexedSeq[TaxonomyElem]): Option[AttributeGroupDefinitionOrReference] = {
     require(backingElem.resolvedName == ENames.XsAttributeGroupEName)
 
-    val parentIsSchema = backingElem.reverseAncestryENames.lastOption.contains(ENames.XsSchemaEName)
+    val parentIsSchema = backingElemParentOption.exists(_.resolvedName == ENames.XsSchemaEName)
     val hasName = backingElem.attributeOption(ENames.NameEName).isDefined
     val hasRef = backingElem.attributeOption(ENames.RefEName).isDefined
 
