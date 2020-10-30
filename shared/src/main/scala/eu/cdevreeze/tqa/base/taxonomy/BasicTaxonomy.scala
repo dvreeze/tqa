@@ -292,7 +292,7 @@ object BasicTaxonomy {
         nonStandardRelationships.groupBy(_.targetElem.key)
       }
 
-      val interConceptRelationships = standardRelationships.collect { case rel: InterConceptRelationship => rel }
+      val interConceptRelationships = relationships.collect { case rel: InterConceptRelationship => rel }
 
       val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterConceptRelationship]] = {
         interConceptRelationships.groupBy(_.sourceConceptEName)
