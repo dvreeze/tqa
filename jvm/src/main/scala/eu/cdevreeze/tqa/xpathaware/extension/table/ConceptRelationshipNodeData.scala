@@ -224,7 +224,7 @@ object ConceptRelationshipNodeData {
     taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val paths = taxo.underlyingTaxonomy
-      .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[StandardInterConceptRelationship]) { path =>
+      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(sourceConcept, classTag[StandardInterConceptRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
           effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
           hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
@@ -243,7 +243,7 @@ object ConceptRelationshipNodeData {
     taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val paths = taxo.underlyingTaxonomy
-      .filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[StandardInterConceptRelationship]) { path =>
+      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(sourceConcept, classTag[StandardInterConceptRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
           effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
           hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
@@ -359,7 +359,7 @@ object ConceptRelationshipNodeData {
 
     val relationships =
       taxo.underlyingTaxonomy
-        .filterInterConceptRelationships { rel =>
+        .filterStandardInterConceptRelationships { rel =>
           relationshipMatchesCriteria(rel, linkrole, arcrole, linknameOption, arcnameOption)
         }
 
@@ -392,14 +392,14 @@ object ConceptRelationshipNodeData {
     taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
 
     val incomingRelationships =
-      taxo.underlyingTaxonomy.filterIncomingInterConceptRelationships(concept) { rel =>
+      taxo.underlyingTaxonomy.filterIncomingStandardInterConceptRelationships(concept) { rel =>
         relationshipMatchesCriteria(rel, linkrole, arcrole, linknameOption, arcnameOption)
       }
 
     val targetConcepts: immutable.IndexedSeq[EName] =
       incomingRelationships
         .flatMap { rel =>
-          taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationships(rel.sourceConceptEName) { r =>
+          taxo.underlyingTaxonomy.filterOutgoingStandardInterConceptRelationships(rel.sourceConceptEName) { r =>
             relationshipMatchesCriteria(r, linkrole, arcrole, linknameOption, arcnameOption)
           }
         }
@@ -435,7 +435,7 @@ object ConceptRelationshipNodeData {
 
     if (endsInAbstract) {
       val followingPathsWithConcreteConcepts =
-        taxo.underlyingTaxonomy.filterOutgoingConsecutiveInterConceptRelationshipPaths(path.targetConcept, classTag[StandardInterConceptRelationship]) { p =>
+        taxo.underlyingTaxonomy.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(path.targetConcept, classTag[StandardInterConceptRelationship]) { p =>
           path.lastRelationship.isFollowedBy(p.firstRelationship) &&
             effectiveGenerationsOption.forall(gen => path.relationships.size + p.relationships.size <= gen) &&
             p.relationships.map(_.targetConceptEName).exists(c => taxo.underlyingTaxonomy.findConceptDeclaration(c).map(_.isConcrete).getOrElse(false))

@@ -53,18 +53,18 @@ class InternalConsistencyTest extends AnyFunSuite {
   }
 
   test("testQueryingForInterConceptRelationships") {
-    val interConceptRelationships = dts.findAllInterConceptRelationships.ensuring(_.nonEmpty)
+    val interConceptRelationships = dts.findAllStandardInterConceptRelationships.ensuring(_.nonEmpty)
 
     val sourceConcepts = interConceptRelationships.map(_.sourceConceptEName).toSet
     val targetConcepts = interConceptRelationships.map(_.targetConceptEName).toSet
 
     assertResult(targetConcepts) {
-      sourceConcepts.toSeq.flatMap(c => dts.findAllOutgoingInterConceptRelationships(c))
+      sourceConcepts.toSeq.flatMap(c => dts.findAllOutgoingStandardInterConceptRelationships(c))
         .map(_.targetConceptEName).toSet
     }
 
     assertResult(sourceConcepts) {
-      targetConcepts.toSeq.flatMap(c => dts.findAllIncomingInterConceptRelationships(c))
+      targetConcepts.toSeq.flatMap(c => dts.findAllIncomingStandardInterConceptRelationships(c))
         .map(_.sourceConceptEName).toSet
     }
   }
@@ -87,7 +87,7 @@ class InternalConsistencyTest extends AnyFunSuite {
   }
 
   test("testQueryingForInterConceptRelationshipPaths") {
-    val interConceptRelationships = dts.findAllInterConceptRelationships.ensuring(_.nonEmpty)
+    val interConceptRelationships = dts.findAllStandardInterConceptRelationships.ensuring(_.nonEmpty)
 
     val sourceConcepts = interConceptRelationships.map(_.sourceConceptEName).toSet
     val targetConcepts = interConceptRelationships.map(_.targetConceptEName).toSet
@@ -97,13 +97,13 @@ class InternalConsistencyTest extends AnyFunSuite {
 
     assertResult(leafConcepts) {
       rootConcepts.toSeq
-        .flatMap(c => dts.filterOutgoingConsecutiveInterConceptRelationshipPaths(c, classTag[StandardInterConceptRelationship])(_ => true))
+        .flatMap(c => dts.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(c, classTag[StandardInterConceptRelationship])(_ => true))
         .map(_.targetConcept).toSet
     }
 
     assertResult(rootConcepts) {
       leafConcepts.toSeq
-        .flatMap(c => dts.filterIncomingConsecutiveInterConceptRelationshipPaths(c, classTag[StandardInterConceptRelationship])(_ => true))
+        .flatMap(c => dts.filterIncomingConsecutiveStandardInterConceptRelationshipPaths(c, classTag[StandardInterConceptRelationship])(_ => true))
         .map(_.sourceConcept).toSet
     }
   }

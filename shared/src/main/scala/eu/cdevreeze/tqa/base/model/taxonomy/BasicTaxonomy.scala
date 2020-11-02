@@ -63,8 +63,8 @@ final class BasicTaxonomy private (
   val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
   val nonStandardRelationshipsBySource: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
   val nonStandardRelationshipsByTarget: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
-  val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
-  val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]]) extends TaxonomyLike {
+  val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
+  val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]]) extends TaxonomyLike {
 
   def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
 
@@ -127,7 +127,7 @@ final class BasicTaxonomy private (
     relationships.collect { case rel: A => rel }
   }
 
-  def findAllInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def findAllStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag = relationshipType
@@ -196,11 +196,11 @@ object BasicTaxonomy {
 
     val interConceptRelationships = standardRelationships.collect { case rel: StandardInterConceptRelationship => rel }
 
-    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+    val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
       interConceptRelationships.groupBy(_.sourceConceptEName)
     }
 
-    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+    val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
       interConceptRelationships.groupBy(_.targetConceptEName)
     }
 
@@ -222,8 +222,8 @@ object BasicTaxonomy {
       standardRelationshipsBySource,
       nonStandardRelationshipsBySource,
       nonStandardRelationshipsByTarget,
-      interConceptRelationshipsBySource,
-      interConceptRelationshipsByTarget)
+      standardInterConceptRelationshipsBySource,
+      standardInterConceptRelationshipsByTarget)
   }
 
   /**

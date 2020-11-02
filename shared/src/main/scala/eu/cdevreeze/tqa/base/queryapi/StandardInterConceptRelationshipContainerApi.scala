@@ -34,107 +34,107 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-trait InterConceptRelationshipContainerApi {
+trait StandardInterConceptRelationshipContainerApi {
 
-  def findAllInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship]
+  def findAllStandardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship]
 
-  def filterInterConceptRelationships(
+  def filterStandardInterConceptRelationships(
     p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
 
-  def findAllInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def findAllStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
-  def filterInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def filterStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Finds all standard inter-concept relationships that are outgoing from the given concept.
    */
-  def findAllOutgoingInterConceptRelationships(
+  def findAllOutgoingStandardInterConceptRelationships(
     sourceConcept: EName): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Filters standard inter-concept relationships that are outgoing from the given concept.
    */
-  def filterOutgoingInterConceptRelationships(
+  def filterOutgoingStandardInterConceptRelationships(
     sourceConcept: EName)(p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Finds all standard inter-concept relationships of the given type that are outgoing from the given concept.
    */
-  def findAllOutgoingInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def findAllOutgoingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     sourceConcept:    EName,
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters standard inter-concept relationships of the given type that are outgoing from the given concept.
    */
-  def filterOutgoingInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def filterOutgoingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     sourceConcept:    EName,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Finds all "following" ("consecutive") standard inter-concept relationships of the given result type.
    *
-   * Two relationships "follow" each other if method `InterConceptRelationship.isFollowedBy` says so.
+   * Two relationships "follow" each other if method `StandardInterConceptRelationship.isFollowedBy` says so.
    *
    * Note that for non-dimensional relationships this implies that the parameter and result relationship
    * types must be the same, or else no relationships are returned.
    *
    * This method is shorthand for:
    * {{{
-   * filterOutgoingInterConceptRelationshipsOfType(relationship.targetConceptEName, resultRelationshipType) { rel =>
+   * filterOutgoingStandardInterConceptRelationshipsOfType(relationship.targetConceptEName, resultRelationshipType) { rel =>
    *   relationship.isFollowedBy(rel)
    * }
    * }}}
    */
-  def findAllConsecutiveInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def findAllConsecutiveStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     relationship:           StandardInterConceptRelationship,
     resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Finds all standard inter-concept relationships that are incoming to the given concept.
    */
-  def findAllIncomingInterConceptRelationships(
+  def findAllIncomingStandardInterConceptRelationships(
     targetConcept: EName): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Filters standard inter-concept relationships that are incoming to the given concept.
    */
-  def filterIncomingInterConceptRelationships(
+  def filterIncomingStandardInterConceptRelationships(
     targetConcept: EName)(p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Finds all standard inter-concept relationships of the given type that are incoming to the given concept.
    */
-  def findAllIncomingInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def findAllIncomingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     targetConcept:    EName,
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters standard inter-concept relationships of the given type that are incoming to the given concept.
    */
-  def filterIncomingInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def filterIncomingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
     targetConcept:    EName,
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
-   * Calls method `filterOutgoingUnrestrictedInterConceptRelationshipPaths`, adding sub-predicate
+   * Calls method `filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths`, adding sub-predicate
    * `isConsecutiveRelationshipPath` to the relationship path predicate.
    *
-   * Typically this method should be preferred over method `filterOutgoingUnrestrictedInterConceptRelationshipPaths`.
+   * Typically this method should be preferred over method `filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths`.
    */
-  def filterOutgoingConsecutiveInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
+  def filterOutgoingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
     sourceConcept:    EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
 
   /**
-   * Calls method `filterIncomingUnrestrictedInterConceptRelationshipPaths`, adding sub-predicate
+   * Calls method `filterIncomingUnrestrictedStandardInterConceptRelationshipPaths`, adding sub-predicate
    * `isConsecutiveRelationshipPath` to the relationship path predicate.
    *
-   * Typically this method should be preferred over method `filterIncomingUnrestrictedInterConceptRelationshipPaths`.
+   * Typically this method should be preferred over method `filterIncomingUnrestrictedStandardInterConceptRelationshipPaths`.
    */
-  def filterIncomingConsecutiveInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
+  def filterIncomingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
     targetConcept:    EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
 
@@ -148,9 +148,9 @@ trait InterConceptRelationshipContainerApi {
    * not allowed, when we do not yet know that the taxonomy is XBRL-valid.
    *
    * This is a very general method that is used to implement specific methods in more specific
-   * relationship query API traits. Typically prefer method `filterOutgoingConsecutiveInterConceptRelationshipPaths` instead.
+   * relationship query API traits. Typically prefer method `filterOutgoingConsecutiveStandardInterConceptRelationshipPaths` instead.
    */
-  def filterOutgoingUnrestrictedInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
+  def filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
     sourceConcept:    EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
 
@@ -164,9 +164,9 @@ trait InterConceptRelationshipContainerApi {
    * not allowed, when we do not yet know that the taxonomy is XBRL-valid.
    *
    * This is a very general method that is used to implement specific methods in more specific
-   * relationship query API traits. Typically prefer method `filterIncomingConsecutiveInterConceptRelationshipPaths` instead.
+   * relationship query API traits. Typically prefer method `filterIncomingConsecutiveStandardInterConceptRelationshipPaths` instead.
    */
-  def filterIncomingUnrestrictedInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
+  def filterIncomingUnrestrictedStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
     targetConcept:    EName,
     relationshipType: ClassTag[A])(p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]]
 

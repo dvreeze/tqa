@@ -31,7 +31,7 @@ trait TaxonomyApi
   extends TaxonomySchemaApi
   with StandardRelationshipContainerApi
   with NonStandardRelationshipContainerApi
-  with InterConceptRelationshipContainerApi
+  with StandardInterConceptRelationshipContainerApi
   with PresentationRelationshipContainerApi
   with ConceptLabelRelationshipContainerApi
   with ConceptReferenceRelationshipContainerApi

@@ -78,7 +78,7 @@ final class BasicTaxonomy private (
 
   def nonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship] = derivedState.nonStandardRelationships
 
-  def interConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship] = derivedState.interConceptRelationships
+  def standardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship] = derivedState.standardInterConceptRelationships
 
   def standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] =
     derivedState.standardRelationshipsBySource
@@ -89,11 +89,11 @@ final class BasicTaxonomy private (
   def nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]] =
     derivedState.nonStandardRelationshipsByTarget
 
-  def interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] =
-    derivedState.interConceptRelationshipsBySource
+  def standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] =
+    derivedState.standardInterConceptRelationshipsBySource
 
-  def interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] =
-    derivedState.interConceptRelationshipsByTarget
+  def standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] =
+    derivedState.standardInterConceptRelationshipsByTarget
 
   // Other methods
 
@@ -164,12 +164,12 @@ final class BasicTaxonomy private (
     findAllStandardRelationships.collect { case rel: A => rel }
   }
 
-  def findAllInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+  def findAllStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     implicit val clsTag: ClassTag[A] = relationshipType
 
-    findAllInterConceptRelationships.collect { case rel: A => rel }
+    findAllStandardInterConceptRelationships.collect { case rel: A => rel }
   }
 
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
@@ -243,12 +243,12 @@ object BasicTaxonomy {
       val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
       val standardRelationships: immutable.IndexedSeq[StandardRelationship],
       val nonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship],
-      val interConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship],
+      val standardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship],
       val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
       val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
       val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
-      val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
-      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]])
+      val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
+      val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]])
 
   private[taxonomy] object DerivedState {
 
@@ -292,14 +292,14 @@ object BasicTaxonomy {
         nonStandardRelationships.groupBy(_.targetElem.key)
       }
 
-      val interConceptRelationships = standardRelationships.collect { case rel: StandardInterConceptRelationship => rel }
+      val standardInterConceptRelationships = standardRelationships.collect { case rel: StandardInterConceptRelationship => rel }
 
-      val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
-        interConceptRelationships.groupBy(_.sourceConceptEName)
+      val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+        standardInterConceptRelationships.groupBy(_.sourceConceptEName)
       }
 
-      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
-        interConceptRelationships.groupBy(_.targetConceptEName)
+      val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+        standardInterConceptRelationships.groupBy(_.targetConceptEName)
       }
 
       new DerivedState(
@@ -308,12 +308,12 @@ object BasicTaxonomy {
         conceptDeclarationsByEName,
         standardRelationships,
         nonStandardRelationships,
-        interConceptRelationships,
+        standardInterConceptRelationships,
         standardRelationshipsBySource,
         nonStandardRelationshipsBySource,
         nonStandardRelationshipsByTarget,
-        interConceptRelationshipsBySource,
-        interConceptRelationshipsByTarget
+        standardInterConceptRelationshipsBySource,
+        standardInterConceptRelationshipsByTarget
       )
     }
   }

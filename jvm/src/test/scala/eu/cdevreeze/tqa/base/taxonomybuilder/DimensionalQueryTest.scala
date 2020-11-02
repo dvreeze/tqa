@@ -1331,7 +1331,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
 
     val outgoingPaths =
-      taxo.filterOutgoingUnrestrictedInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(2)(outgoingPaths.size)
 
@@ -1346,7 +1346,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Not so if we follow consecutive relationships
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1375,7 +1375,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
 
     val outgoingPaths =
-      taxo.filterOutgoingUnrestrictedInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(2)(outgoingPaths.size)
 
@@ -1390,7 +1390,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Not so if we follow consecutive relationships
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1417,7 +1417,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1446,7 +1446,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1475,7 +1475,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
         // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
         paths.forall(_.isMinimalIfHavingCycle)
       }
@@ -1511,7 +1511,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1544,7 +1544,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(2)(outgoingDimPaths.size)
 
@@ -1580,13 +1580,13 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPathsFromPrimary =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     val outgoingDimPathsFromDomain =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true)
 
     val outgoingDimPathsFromDomainMember =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(domainMember, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domainMember, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1) {
       outgoingDimPathsFromPrimary.size
@@ -1630,7 +1630,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1664,7 +1664,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPathsFromDomain =
-      taxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
         // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
         paths.forall(_.isMinimalIfHavingCycle)
       }

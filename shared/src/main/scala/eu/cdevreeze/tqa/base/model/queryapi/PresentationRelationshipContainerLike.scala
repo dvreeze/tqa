@@ -30,30 +30,30 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-trait PresentationRelationshipContainerLike extends PresentationRelationshipContainerApi { self: InterConceptRelationshipContainerApi =>
+trait PresentationRelationshipContainerLike extends PresentationRelationshipContainerApi { self: StandardInterConceptRelationshipContainerApi =>
 
   // Finding and filtering relationships without looking at source or target concept
 
   final def findAllPresentationRelationshipsOfType[A <: PresentationRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    findAllInterConceptRelationshipsOfType(relationshipType)
+    findAllStandardInterConceptRelationshipsOfType(relationshipType)
   }
 
   final def filterPresentationRelationshipsOfType[A <: PresentationRelationship](
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
-    filterInterConceptRelationshipsOfType(relationshipType)(p)
+    filterStandardInterConceptRelationshipsOfType(relationshipType)(p)
   }
 
   final def findAllParentChildRelationships: immutable.IndexedSeq[ParentChildRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[ParentChildRelationship])
+    findAllStandardInterConceptRelationshipsOfType(classTag[ParentChildRelationship])
   }
 
   final def filterParentChildRelationships(
     p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[ParentChildRelationship])(p)
+    filterStandardInterConceptRelationshipsOfType(classTag[ParentChildRelationship])(p)
   }
 
   // Finding and filtering outgoing relationships
@@ -61,13 +61,13 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
   final def findAllOutgoingParentChildRelationships(
     sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationship] = {
 
-    findAllOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[ParentChildRelationship])
+    findAllOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[ParentChildRelationship])
   }
 
   final def filterOutgoingParentChildRelationships(
     sourceConcept: EName)(p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship] = {
 
-    filterOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[ParentChildRelationship])(p)
+    filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[ParentChildRelationship])(p)
   }
 
   final def filterOutgoingParentChildRelationshipsOnElr(
@@ -89,13 +89,13 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
   final def findAllIncomingParentChildRelationships(
     targetConcept: EName): immutable.IndexedSeq[ParentChildRelationship] = {
 
-    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[ParentChildRelationship])
+    findAllIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[ParentChildRelationship])
   }
 
   final def filterIncomingParentChildRelationships(
     targetConcept: EName)(p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship] = {
 
-    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[ParentChildRelationship])(p)
+    filterIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[ParentChildRelationship])(p)
   }
 
   // Filtering outgoing and incoming relationship paths
@@ -109,7 +109,7 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
   final def filterOutgoingConsecutiveParentChildRelationshipPaths(
     sourceConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship])(p)
+    filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(sourceConcept, classTag[ParentChildRelationship])(p)
   }
 
   final def findAllIncomingConsecutiveParentChildRelationshipPaths(
@@ -121,6 +121,6 @@ trait PresentationRelationshipContainerLike extends PresentationRelationshipCont
   final def filterIncomingConsecutiveParentChildRelationshipPaths(
     targetConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath] = {
 
-    filterIncomingConsecutiveInterConceptRelationshipPaths(targetConcept, classTag[ParentChildRelationship])(p)
+    filterIncomingConsecutiveStandardInterConceptRelationshipPaths(targetConcept, classTag[ParentChildRelationship])(p)
   }
 }

@@ -156,7 +156,7 @@ class DimensionalRelationshipTargetTest extends AnyFunSuite {
     val invalidDimensionName = EName("{http://www.xbrl.org/dim/conf}ProdDim")
 
     val incomingHypercubeDimensions =
-      taxo.findAllIncomingInterConceptRelationshipsOfType(invalidDimensionName, classTag[HypercubeDimensionRelationship])
+      taxo.findAllIncomingStandardInterConceptRelationshipsOfType(invalidDimensionName, classTag[HypercubeDimensionRelationship])
 
     assertResult(1) {
       incomingHypercubeDimensions.size
@@ -183,7 +183,7 @@ class DimensionalRelationshipTargetTest extends AnyFunSuite {
     val targetName = EName("{http://www.example.com/new}Hypercube")
 
     val hasHypercubes =
-      taxo.findAllIncomingInterConceptRelationshipsOfType(targetName, classTag[HasHypercubeRelationship])
+      taxo.findAllIncomingStandardInterConceptRelationshipsOfType(targetName, classTag[HasHypercubeRelationship])
 
     assertResult(1) {
       hasHypercubes.size

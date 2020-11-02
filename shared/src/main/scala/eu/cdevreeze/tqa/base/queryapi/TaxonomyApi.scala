@@ -33,7 +33,7 @@ trait TaxonomyApi
     with RelationshipContainerApi
     with StandardRelationshipContainerApi
     with NonStandardRelationshipContainerApi
-    with InterConceptRelationshipContainerApi
+    with StandardInterConceptRelationshipContainerApi
     with PresentationRelationshipContainerApi
     with ConceptLabelRelationshipContainerApi
     with ConceptReferenceRelationshipContainerApi

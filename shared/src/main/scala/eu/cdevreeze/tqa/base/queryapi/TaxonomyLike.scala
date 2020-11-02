@@ -28,7 +28,7 @@ trait TaxonomyLike
     with RelationshipContainerLike
     with StandardRelationshipContainerLike
     with NonStandardRelationshipContainerLike
-    with InterConceptRelationshipContainerLike
+    with StandardInterConceptRelationshipContainerLike
     with PresentationRelationshipContainerLike
     with ConceptLabelRelationshipContainerLike
     with ConceptReferenceRelationshipContainerLike

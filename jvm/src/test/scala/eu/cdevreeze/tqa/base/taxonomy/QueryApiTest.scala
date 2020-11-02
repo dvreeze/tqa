@@ -205,7 +205,7 @@ class QueryApiTest extends AnyFunSuite {
     val hypercubes = richTaxo.findAllHypercubeDeclarations.map(_.targetEName).distinct
 
     val paths =
-      hypercubes.flatMap(hc => richTaxo.filterOutgoingConsecutiveInterConceptRelationshipPaths(hc, classTag[DimensionalRelationship])(_ => true))
+      hypercubes.flatMap(hc => richTaxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(hc, classTag[DimensionalRelationship])(_ => true))
 
     assertResult(richTaxo.findAllHypercubeDimensionRelationships.toSet) {
       paths.map(_.firstRelationship).toSet
@@ -276,7 +276,7 @@ class QueryApiTest extends AnyFunSuite {
     val ddPathLeaves = ddPathsForElr.map(_.targetConcept).toSet
 
     val incomingPaths = ddPathLeaves.toIndexedSeq.flatMap(c =>
-      richTaxo.filterIncomingConsecutiveInterConceptRelationshipPaths(c, classTag[DimensionalRelationship])(_ => true))
+      richTaxo.filterIncomingConsecutiveStandardInterConceptRelationshipPaths(c, classTag[DimensionalRelationship])(_ => true))
 
     assertResult(true) {
       incomingPaths.exists(_.firstRelationship == hhRel)

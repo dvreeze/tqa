@@ -37,80 +37,80 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContainerApi { self: InterConceptRelationshipContainerApi =>
+trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContainerApi { self: StandardInterConceptRelationshipContainerApi =>
 
   // Finding and filtering relationships without looking at source or target concept
 
   final def findAllDimensionalRelationships: immutable.IndexedSeq[DimensionalRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[DimensionalRelationship])
+    findAllStandardInterConceptRelationshipsOfType(classTag[DimensionalRelationship])
   }
 
   final def filterDimensionalRelationships(
     p: DimensionalRelationship => Boolean): immutable.IndexedSeq[DimensionalRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[DimensionalRelationship])(p)
+    filterStandardInterConceptRelationshipsOfType(classTag[DimensionalRelationship])(p)
   }
 
   final def findAllDimensionalRelationshipsOfType[A <: DimensionalRelationship](
     relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    findAllInterConceptRelationshipsOfType(relationshipType)
+    findAllStandardInterConceptRelationshipsOfType(relationshipType)
   }
 
   final def filterDimensionalRelationshipsOfType[A <: DimensionalRelationship](
     relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
-    filterInterConceptRelationshipsOfType(relationshipType)(p)
+    filterStandardInterConceptRelationshipsOfType(relationshipType)(p)
   }
 
   final def findAllHasHypercubeRelationships: immutable.IndexedSeq[HasHypercubeRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[HasHypercubeRelationship])
+    findAllStandardInterConceptRelationshipsOfType(classTag[HasHypercubeRelationship])
   }
 
   final def filterHasHypercubeRelationships(
     p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[HasHypercubeRelationship])(p)
+    filterStandardInterConceptRelationshipsOfType(classTag[HasHypercubeRelationship])(p)
   }
 
   final def findAllHypercubeDimensionRelationships: immutable.IndexedSeq[HypercubeDimensionRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[HypercubeDimensionRelationship])
+    findAllStandardInterConceptRelationshipsOfType(classTag[HypercubeDimensionRelationship])
   }
 
   final def filterHypercubeDimensionRelationships(
     p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[HypercubeDimensionRelationship])(p)
+    filterStandardInterConceptRelationshipsOfType(classTag[HypercubeDimensionRelationship])(p)
   }
 
   final def findAllDimensionDomainRelationships: immutable.IndexedSeq[DimensionDomainRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[DimensionDomainRelationship])
+    findAllStandardInterConceptRelationshipsOfType(classTag[DimensionDomainRelationship])
   }
 
   final def filterDimensionDomainRelationships(
     p: DimensionDomainRelationship => Boolean): immutable.IndexedSeq[DimensionDomainRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[DimensionDomainRelationship])(p)
+    filterStandardInterConceptRelationshipsOfType(classTag[DimensionDomainRelationship])(p)
   }
 
   final def findAllDomainMemberRelationships: immutable.IndexedSeq[DomainMemberRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[DomainMemberRelationship])
+    findAllStandardInterConceptRelationshipsOfType(classTag[DomainMemberRelationship])
   }
 
   final def filterDomainMemberRelationships(
     p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[DomainMemberRelationship])(p)
+    filterStandardInterConceptRelationshipsOfType(classTag[DomainMemberRelationship])(p)
   }
 
   final def findAllDimensionDefaultRelationships: immutable.IndexedSeq[DimensionDefaultRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[DimensionDefaultRelationship])
+    findAllStandardInterConceptRelationshipsOfType(classTag[DimensionDefaultRelationship])
   }
 
   final def filterDimensionDefaultRelationships(
     p: DimensionDefaultRelationship => Boolean): immutable.IndexedSeq[DimensionDefaultRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[DimensionDefaultRelationship])(p)
+    filterStandardInterConceptRelationshipsOfType(classTag[DimensionDefaultRelationship])(p)
   }
 
   // Finding and filtering outgoing relationships
@@ -118,13 +118,13 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def findAllOutgoingHasHypercubeRelationships(
     sourceConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
 
-    findAllOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[HasHypercubeRelationship])
+    findAllOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[HasHypercubeRelationship])
   }
 
   final def filterOutgoingHasHypercubeRelationships(
     sourceConcept: EName)(p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship] = {
 
-    filterOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[HasHypercubeRelationship])(p)
+    filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[HasHypercubeRelationship])(p)
   }
 
   final def filterOutgoingHasHypercubeRelationshipsOnElr(
@@ -136,13 +136,13 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def findAllOutgoingHypercubeDimensionRelationships(
     sourceConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
 
-    findAllOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[HypercubeDimensionRelationship])
+    findAllOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[HypercubeDimensionRelationship])
   }
 
   final def filterOutgoingHypercubeDimensionRelationships(
     sourceConcept: EName)(p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
 
-    filterOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[HypercubeDimensionRelationship])(p)
+    filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[HypercubeDimensionRelationship])(p)
   }
 
   final def filterOutgoingHypercubeDimensionRelationshipsOnElr(
@@ -162,13 +162,13 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def findAllOutgoingDimensionDomainRelationships(
     sourceConcept: EName): immutable.IndexedSeq[DimensionDomainRelationship] = {
 
-    findAllOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDomainRelationship])
+    findAllOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDomainRelationship])
   }
 
   final def filterOutgoingDimensionDomainRelationships(
     sourceConcept: EName)(p: DimensionDomainRelationship => Boolean): immutable.IndexedSeq[DimensionDomainRelationship] = {
 
-    filterOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDomainRelationship])(p)
+    filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDomainRelationship])(p)
   }
 
   final def filterOutgoingDimensionDomainRelationshipsOnElr(
@@ -188,13 +188,13 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def findAllOutgoingDomainMemberRelationships(
     sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationship] = {
 
-    findAllOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[DomainMemberRelationship])
+    findAllOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[DomainMemberRelationship])
   }
 
   final def filterOutgoingDomainMemberRelationships(
     sourceConcept: EName)(p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship] = {
 
-    filterOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[DomainMemberRelationship])(p)
+    filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[DomainMemberRelationship])(p)
   }
 
   final def filterOutgoingDomainMemberRelationshipsOnElr(
@@ -214,13 +214,13 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def findAllOutgoingDimensionDefaultRelationships(
     sourceConcept: EName): immutable.IndexedSeq[DimensionDefaultRelationship] = {
 
-    findAllOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDefaultRelationship])
+    findAllOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDefaultRelationship])
   }
 
   final def filterOutgoingDimensionDefaultRelationships(
     sourceConcept: EName)(p: DimensionDefaultRelationship => Boolean): immutable.IndexedSeq[DimensionDefaultRelationship] = {
 
-    filterOutgoingInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDefaultRelationship])(p)
+    filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, classTag[DimensionDefaultRelationship])(p)
   }
 
   final def filterOutgoingDimensionDefaultRelationshipsOnElr(
@@ -234,49 +234,49 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def findAllIncomingDomainMemberRelationships(
     targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationship] = {
 
-    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainMemberRelationship])
+    findAllIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[DomainMemberRelationship])
   }
 
   final def filterIncomingDomainMemberRelationships(
     targetConcept: EName)(p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship] = {
 
-    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainMemberRelationship])(p)
+    filterIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[DomainMemberRelationship])(p)
   }
 
   final def findAllIncomingDomainAwareRelationships(
     targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationship] = {
 
-    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainAwareRelationship])
+    findAllIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[DomainAwareRelationship])
   }
 
   final def filterIncomingDomainAwareRelationships(
     targetConcept: EName)(p: DomainAwareRelationship => Boolean): immutable.IndexedSeq[DomainAwareRelationship] = {
 
-    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[DomainAwareRelationship])(p)
+    filterIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[DomainAwareRelationship])(p)
   }
 
   final def findAllIncomingHypercubeDimensionRelationships(
     targetConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
 
-    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HypercubeDimensionRelationship])
+    findAllIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[HypercubeDimensionRelationship])
   }
 
   final def filterIncomingHypercubeDimensionRelationships(
     targetConcept: EName)(p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship] = {
 
-    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HypercubeDimensionRelationship])(p)
+    filterIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[HypercubeDimensionRelationship])(p)
   }
 
   final def findAllIncomingHasHypercubeRelationships(
     targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship] = {
 
-    findAllIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HasHypercubeRelationship])
+    findAllIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[HasHypercubeRelationship])
   }
 
   final def filterIncomingHasHypercubeRelationships(
     targetConcept: EName)(p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship] = {
 
-    filterIncomingInterConceptRelationshipsOfType(targetConcept, classTag[HasHypercubeRelationship])(p)
+    filterIncomingStandardInterConceptRelationshipsOfType(targetConcept, classTag[HasHypercubeRelationship])(p)
   }
 
   // Filtering outgoing and incoming relationship paths
@@ -290,7 +290,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def filterOutgoingConsecutiveDomainAwareRelationshipPaths(
     sourceConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship])(p)
+    filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(sourceConcept, classTag[DomainAwareRelationship])(p)
   }
 
   final def findAllOutgoingConsecutiveDomainMemberRelationshipPaths(
@@ -302,7 +302,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def filterOutgoingConsecutiveDomainMemberRelationshipPaths(
     sourceConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterOutgoingConsecutiveInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship])(p)
+    filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(sourceConcept, classTag[DomainMemberRelationship])(p)
   }
 
   final def findAllIncomingConsecutiveDomainAwareRelationshipPaths(
@@ -314,7 +314,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def filterIncomingConsecutiveDomainAwareRelationshipPaths(
     targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
-    filterIncomingConsecutiveInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship])(p)
+    filterIncomingConsecutiveStandardInterConceptRelationshipPaths(targetConcept, classTag[DomainAwareRelationship])(p)
   }
 
   final def findAllIncomingConsecutiveDomainMemberRelationshipPaths(
@@ -326,7 +326,7 @@ trait DimensionalRelationshipContainerLike extends DimensionalRelationshipContai
   final def filterIncomingConsecutiveDomainMemberRelationshipPaths(
     targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath] = {
 
-    filterIncomingConsecutiveInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship])(p)
+    filterIncomingConsecutiveStandardInterConceptRelationshipPaths(targetConcept, classTag[DomainMemberRelationship])(p)
   }
 
   // Other query methods
