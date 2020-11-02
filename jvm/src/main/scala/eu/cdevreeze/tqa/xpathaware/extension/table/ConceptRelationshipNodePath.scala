@@ -16,11 +16,11 @@
 
 package eu.cdevreeze.tqa.xpathaware.extension.table
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath
 import eu.cdevreeze.yaidom.core.EName
+
+import scala.collection.immutable
 
 /**
  * Inter-concept relationship path in the context of concept relationship node resolution.
@@ -71,9 +71,11 @@ object ConceptRelationshipNodePath {
   }
 
   final case class DescendantPath(
-    interConceptRelationshipPath: InterConceptRelationshipPath[StandardInterConceptRelationship]) extends ConceptRelationshipNodePath {
+      interConceptRelationshipPath: StandardInterConceptRelationshipPath[StandardInterConceptRelationship])
+      extends ConceptRelationshipNodePath {
 
-    def relationships: immutable.IndexedSeq[StandardInterConceptRelationship] = interConceptRelationshipPath.relationships
+    def relationships: immutable.IndexedSeq[StandardInterConceptRelationship] =
+      interConceptRelationshipPath.relationships
 
     def sourceConcept: EName = interConceptRelationshipPath.firstRelationship.targetConceptEName
 
@@ -87,9 +89,11 @@ object ConceptRelationshipNodePath {
   }
 
   final case class DescendantOrSelfPath(
-    interConceptRelationshipPath: InterConceptRelationshipPath[StandardInterConceptRelationship]) extends ConceptRelationshipNodePath {
+      interConceptRelationshipPath: StandardInterConceptRelationshipPath[StandardInterConceptRelationship])
+      extends ConceptRelationshipNodePath {
 
-    def relationships: immutable.IndexedSeq[StandardInterConceptRelationship] = interConceptRelationshipPath.relationships
+    def relationships: immutable.IndexedSeq[StandardInterConceptRelationship] =
+      interConceptRelationshipPath.relationships
 
     def sourceConcept: EName = interConceptRelationshipPath.sourceConcept
 

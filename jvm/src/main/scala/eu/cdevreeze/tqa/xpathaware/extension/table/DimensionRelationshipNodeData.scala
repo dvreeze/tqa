@@ -16,12 +16,10 @@
 
 package eu.cdevreeze.tqa.xpathaware.extension.table
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.queryapi.DomainAwareRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath
 import eu.cdevreeze.tqa.extension.table.common.DimensionRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.DimensionRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
@@ -30,6 +28,8 @@ import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
+
+import scala.collection.immutable
 
 /**
  * Wrapper around a DimensionRelationshipNode, which can extract the relevant data by evaluating XPath where needed.
@@ -46,28 +46,29 @@ final class DimensionRelationshipNodeData(val dimensionRelationshipNode: Dimensi
   def dimensionName: EName = dimensionRelationshipNode.dimensionName
 
   def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
-    dimensionRelationshipNode.sourceValuesOrExpressions.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+    dimensionRelationshipNode.sourceValuesOrExpressions.map(valueOrExpr =>
+      ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    dimensionRelationshipNode.linkroleValueOrExprOption.
-      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+    dimensionRelationshipNode.linkroleValueOrExprOption.map(valueOrExpr =>
+      StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def formulaAxis(implicit xpathEvaluator: XPathEvaluator): DimensionRelationshipNodes.FormulaAxis = {
     val stringResultOption =
-      dimensionRelationshipNode.formulaAxisValueOrExprOption.
-        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      dimensionRelationshipNode.formulaAxisValueOrExprOption.map(valueOrExpr =>
+        StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
-    stringResultOption.map(v => DimensionRelationshipNodes.FormulaAxis.fromString(v)).
-      getOrElse(DimensionRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
+    stringResultOption
+      .map(v => DimensionRelationshipNodes.FormulaAxis.fromString(v))
+      .getOrElse(DimensionRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
   def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
     val resultAsBigDecimalOption =
-      dimensionRelationshipNode.generationsValueOrExprOption.
-        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      dimensionRelationshipNode.generationsValueOrExprOption.map(valueOrExpr =>
+        BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
     resultAsBigDecimalOption.map(_.toInt).getOrElse(0)
   }
@@ -82,9 +83,8 @@ object DimensionRelationshipNodeData {
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
-  def findAllResultPaths(
-    dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
+  def findAllResultPaths(dimensionRelationshipNode: DimensionRelationshipNode, taxo: BasicTableTaxonomy)(
+      implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     val relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship] =
       findAllDomainAwareRelationshipsToRelationshipSources(dimensionRelationshipNode, taxo)(xpathEvaluator)
@@ -99,8 +99,9 @@ object DimensionRelationshipNodeData {
    * Finds all relationships to relationship sources according to the given dimension relationship node in the given taxonomy.
    */
   def findAllDomainAwareRelationshipsToRelationshipSources(
-    dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationship] = {
+      dimensionRelationshipNode: DimensionRelationshipNode,
+      taxo: BasicTableTaxonomy)(
+      implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationship] = {
 
     // Start with reading the needed information in the dimension relationship node.
 
@@ -147,17 +148,15 @@ object DimensionRelationshipNodeData {
           .filter(_.relationships.size == 1)
           .distinct
       } else {
-        rawRelationshipSources
-          .flatMap { source =>
-            hypercubeDimensions
-              .flatMap { hd =>
-                taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
-                  hd.isFollowedBy(path.firstRelationship) && path.initOption.forall(!_.concepts.toSet.contains(source))
-                }
+        rawRelationshipSources.flatMap { source =>
+          hypercubeDimensions
+            .flatMap { hd =>
+              taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(dimension) { path =>
+                hd.isFollowedBy(path.firstRelationship) && path.initOption.forall(!_.concepts.toSet.contains(source))
               }
-              .filter(_.targetConcept == source)
-          }
-          .distinct
+            }
+            .filter(_.targetConcept == source)
+        }.distinct
       }
 
     pathsToRelationshipSources.map(_.lastRelationship).distinct
@@ -171,9 +170,10 @@ object DimensionRelationshipNodeData {
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
   def findAllResultPaths(
-    relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship],
-    dimensionRelationshipNode: DimensionRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
+      relationshipsToSources: immutable.IndexedSeq[DomainAwareRelationship],
+      dimensionRelationshipNode: DimensionRelationshipNode,
+      taxo: BasicTableTaxonomy)(
+      implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[DomainAwareRelationshipPath] = {
 
     // Start with reading the needed information in the dimension relationship node.
 
@@ -198,14 +198,17 @@ object DimensionRelationshipNodeData {
       if (includeSelf) {
         relationshipsToSources
       } else {
-        relationshipsToSources.flatMap(rel => taxo.underlyingTaxonomy.findAllConsecutiveDomainMemberRelationships(rel)).distinct
+        relationshipsToSources
+          .flatMap(rel => taxo.underlyingTaxonomy.findAllConsecutiveDomainMemberRelationships(rel))
+          .distinct
       }
 
     val rawResultPaths: immutable.IndexedSeq[DomainAwareRelationshipPath] =
       incomingRelationshipsToHighestResults
         .flatMap { rel =>
-          taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(rel.sourceConceptEName) { path =>
-            (path.firstRelationship == rel) &&
+          taxo.underlyingTaxonomy.filterOutgoingConsecutiveDomainAwareRelationshipPaths(rel.sourceConceptEName) {
+            path =>
+              (path.firstRelationship == rel) &&
               effectiveGenerationsOption.forall(gen => compareAgainstGenerations(path, gen, includeSelf))
           }
         }
@@ -223,7 +226,7 @@ object DimensionRelationshipNodeData {
           if (relationships.isEmpty) {
             None
           } else {
-            Some(InterConceptRelationshipPath.from(relationships))
+            Some(StandardInterConceptRelationshipPath.from(relationships))
           }
         }
 

@@ -52,7 +52,7 @@ class InternalConsistencyTest extends AnyFunSuite {
     }
   }
 
-  test("testQueryingForInterConceptRelationships") {
+  test("testQueryingForStandardInterConceptRelationships") {
     val interConceptRelationships = dts.findAllStandardInterConceptRelationships.ensuring(_.nonEmpty)
 
     val sourceConcepts = interConceptRelationships.map(_.sourceConceptEName).toSet
@@ -86,7 +86,7 @@ class InternalConsistencyTest extends AnyFunSuite {
     }
   }
 
-  test("testQueryingForInterConceptRelationshipPaths") {
+  test("testQueryingForStandardInterConceptRelationshipPaths") {
     val interConceptRelationships = dts.findAllStandardInterConceptRelationships.ensuring(_.nonEmpty)
 
     val sourceConcepts = interConceptRelationships.map(_.sourceConceptEName).toSet

@@ -31,7 +31,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final case class InterConceptRelationshipPath[A <: StandardInterConceptRelationship] private (val relationships: immutable.IndexedSeq[A]) {
+final case class StandardInterConceptRelationshipPath[A <: StandardInterConceptRelationship] private(val relationships: immutable.IndexedSeq[A]) {
   require(relationships.size >= 1, s"A relationship path must have at least one relationship")
 
   def sourceConcept: EName = firstRelationship.sourceConceptEName
@@ -59,14 +59,14 @@ final case class InterConceptRelationshipPath[A <: StandardInterConceptRelations
     initOption.map(p => !p.hasCycle).getOrElse(true)
   }
 
-  def append(relationship: A): InterConceptRelationshipPath[A] = {
+  def append(relationship: A): StandardInterConceptRelationshipPath[A] = {
     require(canAppend(relationship), s"Could not append relationship $relationship")
-    new InterConceptRelationshipPath(relationships :+ relationship)
+    new StandardInterConceptRelationshipPath(relationships :+ relationship)
   }
 
-  def prepend(relationship: A): InterConceptRelationshipPath[A] = {
+  def prepend(relationship: A): StandardInterConceptRelationshipPath[A] = {
     require(canPrepend(relationship), s"Could not prepend relationship $relationship")
-    new InterConceptRelationshipPath(relationship +: relationships)
+    new StandardInterConceptRelationshipPath(relationship +: relationships)
   }
 
   def canAppend(relationship: A): Boolean = {
@@ -77,20 +77,20 @@ final case class InterConceptRelationshipPath[A <: StandardInterConceptRelations
     this.sourceConcept == relationship.targetConceptEName
   }
 
-  def inits: immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
-    relationships.inits.filter(_.nonEmpty).toVector.map(rels => new InterConceptRelationshipPath[A](rels))
+  def inits: immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
+    relationships.inits.filter(_.nonEmpty).toVector.map(rels => new StandardInterConceptRelationshipPath[A](rels))
   }
 
-  def tails: immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
-    relationships.tails.filter(_.nonEmpty).toVector.map(rels => new InterConceptRelationshipPath[A](rels))
+  def tails: immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
+    relationships.tails.filter(_.nonEmpty).toVector.map(rels => new StandardInterConceptRelationshipPath[A](rels))
   }
 
-  def initOption: Option[InterConceptRelationshipPath[A]] = {
+  def initOption: Option[StandardInterConceptRelationshipPath[A]] = {
     if (relationships.size == 1) {
       None
     } else {
       assert(relationships.size >= 2)
-      Some(new InterConceptRelationshipPath(relationships.init))
+      Some(new StandardInterConceptRelationshipPath(relationships.init))
     }
   }
 
@@ -103,18 +103,18 @@ final case class InterConceptRelationshipPath[A <: StandardInterConceptRelations
   }
 }
 
-object InterConceptRelationshipPath {
+object StandardInterConceptRelationshipPath {
 
-  def apply[A <: StandardInterConceptRelationship](relationship: A): InterConceptRelationshipPath[A] = {
-    new InterConceptRelationshipPath(Vector(relationship))
+  def apply[A <: StandardInterConceptRelationship](relationship: A): StandardInterConceptRelationshipPath[A] = {
+    new StandardInterConceptRelationshipPath(Vector(relationship))
   }
 
-  def from[A <: StandardInterConceptRelationship](relationships: immutable.IndexedSeq[A]): InterConceptRelationshipPath[A] = {
+  def from[A <: StandardInterConceptRelationship](relationships: immutable.IndexedSeq[A]): StandardInterConceptRelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => haveMatchingConcepts(pair(0), pair(1))),
       s"All subsequent relationships in a path must have matching target/source concepts")
 
-    new InterConceptRelationshipPath(relationships.toVector)
+    new StandardInterConceptRelationshipPath(relationships.toVector)
   }
 
   private def haveMatchingConcepts[A <: StandardInterConceptRelationship](relationship1: A, relationship2: A): Boolean = {

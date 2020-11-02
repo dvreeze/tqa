@@ -16,13 +16,10 @@
 
 package eu.cdevreeze.tqa.xpathaware.extension.table
 
-import scala.collection.immutable
-import scala.reflect.classTag
-
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
@@ -31,6 +28,9 @@ import eu.cdevreeze.tqa.xpathaware.ENameValueOrExprEvaluator
 import eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.xpath.XPathEvaluator
+
+import scala.collection.immutable
+import scala.reflect.classTag
 
 /**
  * Wrapper around a ConceptRelationshipNode, which can extract the relevant data by evaluating XPath where needed.
@@ -42,13 +42,13 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   // Below, make sure that the passed XPathEvaluator knows about the needed namespace bindings in the XPath expressions.
 
   def relationshipSources(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
-    conceptRelationshipNode.sourceValuesOrExpressions.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+    conceptRelationshipNode.sourceValuesOrExpressions.map(valueOrExpr =>
+      ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def linkroleOption(implicit xpathEvaluator: XPathEvaluator): Option[String] = {
-    conceptRelationshipNode.linkroleValueOrExprOption.
-      map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+    conceptRelationshipNode.linkroleValueOrExprOption.map(valueOrExpr =>
+      StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def arcrole(implicit xpathEvaluator: XPathEvaluator): String = {
@@ -56,28 +56,29 @@ final class ConceptRelationshipNodeData(val conceptRelationshipNode: ConceptRela
   }
 
   def linknameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
-    conceptRelationshipNode.linknameValueOrExprOption.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+    conceptRelationshipNode.linknameValueOrExprOption.map(valueOrExpr =>
+      ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def arcnameOption(implicit xpathEvaluator: XPathEvaluator): Option[EName] = {
-    conceptRelationshipNode.arcnameValueOrExprOption.
-      map(valueOrExpr => ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+    conceptRelationshipNode.arcnameValueOrExprOption.map(valueOrExpr =>
+      ENameValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
   }
 
   def formulaAxis(implicit xpathEvaluator: XPathEvaluator): ConceptRelationshipNodes.FormulaAxis = {
     val stringResultOption =
-      conceptRelationshipNode.formulaAxisValueOrExprOption.
-        map(valueOrExpr => StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      conceptRelationshipNode.formulaAxisValueOrExprOption.map(valueOrExpr =>
+        StringValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
-    stringResultOption.map(v => ConceptRelationshipNodes.FormulaAxis.fromString(v)).
-      getOrElse(ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
+    stringResultOption
+      .map(v => ConceptRelationshipNodes.FormulaAxis.fromString(v))
+      .getOrElse(ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis)
   }
 
   def generations(implicit xpathEvaluator: XPathEvaluator): Int = {
     val resultAsBigDecimalOption =
-      conceptRelationshipNode.generationsValueOrExprOption.
-        map(valueOrExpr => BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
+      conceptRelationshipNode.generationsValueOrExprOption.map(valueOrExpr =>
+        BigDecimalValueOrExprEvaluator.evaluate(valueOrExpr)(xpathEvaluator))
 
     resultAsBigDecimalOption.map(_.toInt).getOrElse(0)
   }
@@ -93,9 +94,8 @@ object ConceptRelationshipNodeData {
    *
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
-  def findAllResultPaths(
-    conceptRelationshipNode: ConceptRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+  def findAllResultPaths(conceptRelationshipNode: ConceptRelationshipNode, taxo: BasicTableTaxonomy)(
+      implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val relationshipSources: immutable.IndexedSeq[EName] =
       findAllRelationshipSources(conceptRelationshipNode, taxo)(xpathEvaluator)
@@ -113,9 +113,8 @@ object ConceptRelationshipNodeData {
    * by root concepts of the specified network. The latter root concepts are sorted by expanded name (first on namespace,
    * then on local name). Note that it is possible that the relationship sources contain duplicate concept names.
    */
-  def findAllRelationshipSources(
-    conceptRelationshipNode: ConceptRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
+  def findAllRelationshipSources(conceptRelationshipNode: ConceptRelationshipNode, taxo: BasicTableTaxonomy)(
+      implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[EName] = {
 
     // Start with reading the needed information in the concept relationship node.
 
@@ -127,7 +126,8 @@ object ConceptRelationshipNodeData {
       conceptRelationNodeData.relationshipSources(xpathEvaluator).distinct
 
     val linkrole: String =
-      conceptRelationNodeData.linkroleOption(xpathEvaluator)
+      conceptRelationNodeData
+        .linkroleOption(xpathEvaluator)
         .getOrElse(BaseSetKey.StandardElr)
 
     val arcrole: String = conceptRelationNodeData.arcrole(xpathEvaluator)
@@ -159,16 +159,18 @@ object ConceptRelationshipNodeData {
    * TODO Mind networks of relationships (that is, after resolution of prohibition/overriding).
    */
   def findAllResultPaths(
-    relationshipSources: immutable.IndexedSeq[EName],
-    conceptRelationshipNode: ConceptRelationshipNode,
-    taxo: BasicTableTaxonomy)(implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+      relationshipSources: immutable.IndexedSeq[EName],
+      conceptRelationshipNode: ConceptRelationshipNode,
+      taxo: BasicTableTaxonomy)(
+      implicit xpathEvaluator: XPathEvaluator): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     // Start with reading the needed information in the concept relationship node.
 
     val conceptRelationNodeData = new ConceptRelationshipNodeData(conceptRelationshipNode)
 
     val linkrole: String =
-      conceptRelationNodeData.linkroleOption(xpathEvaluator)
+      conceptRelationNodeData
+        .linkroleOption(xpathEvaluator)
         .getOrElse(BaseSetKey.StandardElr)
 
     val arcrole: String = conceptRelationNodeData.arcrole(xpathEvaluator)
@@ -195,9 +197,23 @@ object ConceptRelationshipNodeData {
       .flatMap { sourceConcept =>
         axis match {
           case ConceptRelationshipNodes.FormulaAxis.DescendantAxis =>
-            findAllDescendants(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+            findAllDescendants(
+              sourceConcept,
+              linkrole,
+              arcrole,
+              linknameOption,
+              arcnameOption,
+              effectiveGenerationsOption,
+              taxo)
           case ConceptRelationshipNodes.FormulaAxis.DescendantOrSelfAxis =>
-            findAllDescendantsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+            findAllDescendantsOrSelf(
+              sourceConcept,
+              linkrole,
+              arcrole,
+              linknameOption,
+              arcnameOption,
+              effectiveGenerationsOption,
+              taxo)
           case ConceptRelationshipNodes.FormulaAxis.ChildAxis =>
             findAllDescendants(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, Some(1), taxo)
           case ConceptRelationshipNodes.FormulaAxis.ChildOrSelfAxis =>
@@ -207,46 +223,64 @@ object ConceptRelationshipNodeData {
           case ConceptRelationshipNodes.FormulaAxis.SiblingOrSelfAxis =>
             findAllSiblingsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
           case ConceptRelationshipNodes.FormulaAxis.SiblingOrDescendantAxis =>
-            findAllSiblingsOrDescendants(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+            findAllSiblingsOrDescendants(
+              sourceConcept,
+              linkrole,
+              arcrole,
+              linknameOption,
+              arcnameOption,
+              effectiveGenerationsOption,
+              taxo)
           case ConceptRelationshipNodes.FormulaAxis.SiblingOrDescendantOrSelfAxis =>
-            findAllSiblingsOrDescendantsOrSelf(sourceConcept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+            findAllSiblingsOrDescendantsOrSelf(
+              sourceConcept,
+              linkrole,
+              arcrole,
+              linknameOption,
+              arcnameOption,
+              effectiveGenerationsOption,
+              taxo)
         }
       }
   }
 
   private def findAllDescendants(
-    sourceConcept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    effectiveGenerationsOption: Option[Int],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+      sourceConcept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      effectiveGenerationsOption: Option[Int],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val paths = taxo.underlyingTaxonomy
-      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(sourceConcept, classTag[StandardInterConceptRelationship]) { path =>
+      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(
+        sourceConcept,
+        classTag[StandardInterConceptRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
-          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
-          hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
+        effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
+        hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
       }
 
     paths.map(p => DescendantPath(p))
   }
 
   private def findAllDescendantsOrSelf(
-    sourceConcept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    effectiveGenerationsOption: Option[Int],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+      sourceConcept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      effectiveGenerationsOption: Option[Int],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val paths = taxo.underlyingTaxonomy
-      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(sourceConcept, classTag[StandardInterConceptRelationship]) { path =>
+      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(
+        sourceConcept,
+        classTag[StandardInterConceptRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
-          effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
-          hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
+        effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
+        hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
       }
 
     if (paths.isEmpty) {
@@ -257,12 +291,12 @@ object ConceptRelationshipNodeData {
   }
 
   private def findAllSiblings(
-    sourceConcept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+      sourceConcept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
@@ -277,12 +311,12 @@ object ConceptRelationshipNodeData {
   }
 
   private def findAllSiblingsOrSelf(
-    sourceConcept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+      sourceConcept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
@@ -297,13 +331,13 @@ object ConceptRelationshipNodeData {
   }
 
   private def findAllSiblingsOrDescendants(
-    sourceConcept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    effectiveGenerationsOption: Option[Int],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+      sourceConcept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      effectiveGenerationsOption: Option[Int],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
@@ -324,13 +358,13 @@ object ConceptRelationshipNodeData {
   }
 
   private def findAllSiblingsOrDescendantsOrSelf(
-    sourceConcept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    effectiveGenerationsOption: Option[Int],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
+      sourceConcept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      effectiveGenerationsOption: Option[Int],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val roots = resolveXfiRoot(linkrole, arcrole, linknameOption, arcnameOption, taxo)
 
@@ -343,7 +377,14 @@ object ConceptRelationshipNodeData {
 
     siblingsOrSelf.flatMap { concept =>
       if (concept == sourceConcept) {
-        findAllDescendantsOrSelf(concept, linkrole, arcrole, linknameOption, arcnameOption, effectiveGenerationsOption, taxo)
+        findAllDescendantsOrSelf(
+          concept,
+          linkrole,
+          arcrole,
+          linknameOption,
+          arcnameOption,
+          effectiveGenerationsOption,
+          taxo)
       } else {
         immutable.IndexedSeq(SingleConceptPath(concept))
       }
@@ -351,11 +392,11 @@ object ConceptRelationshipNodeData {
   }
 
   private def resolveXfiRoot(
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
 
     val relationships =
       taxo.underlyingTaxonomy
@@ -371,25 +412,25 @@ object ConceptRelationshipNodeData {
   }
 
   private def relationshipMatchesCriteria(
-    relationship: StandardInterConceptRelationship,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName]): Boolean = {
+      relationship: StandardInterConceptRelationship,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName]): Boolean = {
 
     (relationship.elr == linkrole) &&
-      (relationship.arcrole == arcrole) &&
-      linknameOption.forall(ln => relationship.baseSetKey.extLinkEName == ln) &&
-      arcnameOption.forall(an => relationship.baseSetKey.arcEName == an)
+    (relationship.arcrole == arcrole) &&
+    linknameOption.forall(ln => relationship.baseSetKey.extLinkEName == ln) &&
+    arcnameOption.forall(an => relationship.baseSetKey.arcEName == an)
   }
 
   private def findAllNonRootSiblingsOrSelf(
-    concept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
+      concept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
 
     val incomingRelationships =
       taxo.underlyingTaxonomy.filterIncomingStandardInterConceptRelationships(concept) { rel =>
@@ -410,12 +451,12 @@ object ConceptRelationshipNodeData {
   }
 
   private def findAllNonRootSiblings(
-    concept: EName,
-    linkrole: String,
-    arcrole: String,
-    linknameOption: Option[EName],
-    arcnameOption: Option[EName],
-    taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
+      concept: EName,
+      linkrole: String,
+      arcrole: String,
+      linknameOption: Option[EName],
+      arcnameOption: Option[EName],
+      taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
 
     findAllNonRootSiblingsOrSelf(concept, linkrole, arcrole, linknameOption, arcnameOption, taxo)
       .filterNot(Set(concept))
@@ -427,18 +468,23 @@ object ConceptRelationshipNodeData {
   }
 
   private def hasMoreMatchingDescendantsIfEndingInAbstract(
-    path: InterConceptRelationshipPath[StandardInterConceptRelationship],
-    effectiveGenerationsOption: Option[Int],
-    taxo: BasicTableTaxonomy): Boolean = {
+      path: StandardInterConceptRelationshipPath[StandardInterConceptRelationship],
+      effectiveGenerationsOption: Option[Int],
+      taxo: BasicTableTaxonomy): Boolean = {
 
-    val endsInAbstract = taxo.underlyingTaxonomy.findConceptDeclaration(path.targetConcept).filter(_.isAbstract).nonEmpty
+    val endsInAbstract =
+      taxo.underlyingTaxonomy.findConceptDeclaration(path.targetConcept).filter(_.isAbstract).nonEmpty
 
     if (endsInAbstract) {
       val followingPathsWithConcreteConcepts =
-        taxo.underlyingTaxonomy.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(path.targetConcept, classTag[StandardInterConceptRelationship]) { p =>
+        taxo.underlyingTaxonomy.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(
+          path.targetConcept,
+          classTag[StandardInterConceptRelationship]) { p =>
           path.lastRelationship.isFollowedBy(p.firstRelationship) &&
-            effectiveGenerationsOption.forall(gen => path.relationships.size + p.relationships.size <= gen) &&
-            p.relationships.map(_.targetConceptEName).exists(c => taxo.underlyingTaxonomy.findConceptDeclaration(c).map(_.isConcrete).getOrElse(false))
+          effectiveGenerationsOption.forall(gen => path.relationships.size + p.relationships.size <= gen) &&
+          p.relationships
+            .map(_.targetConceptEName)
+            .exists(c => taxo.underlyingTaxonomy.findConceptDeclaration(c).map(_.isConcrete).getOrElse(false))
         }
 
       followingPathsWithConcreteConcepts.nonEmpty

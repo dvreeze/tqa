@@ -16,12 +16,12 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath
+import eu.cdevreeze.yaidom.core.EName
+
 import scala.collection.immutable
 import scala.reflect.ClassTag
-
-import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
-import eu.cdevreeze.yaidom.core.EName
 
 /**
  * Partial implementation of `StandardInterConceptRelationshipContainerApi`.
@@ -35,12 +35,12 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
   def standardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
-   * Returns a map from source concepts to inter-concept relationships. Must be fast in order for this trait to be fast.
+   * Returns a map from source concepts to standard inter-concept relationships. Must be fast in order for this trait to be fast.
    */
   def standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]]
 
   /**
-   * Returns a map from target concepts to inter-concept relationships. Must be fast in order for this trait to be fast.
+   * Returns a map from target concepts to standard inter-concept relationships. Must be fast in order for this trait to be fast.
    */
   def standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]]
 
@@ -59,8 +59,8 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
     findAllStandardInterConceptRelationships.filter(p)
   }
 
-  final def filterStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](relationshipType: ClassTag[A])(
-      p: A => Boolean): immutable.IndexedSeq[A] = {
+  final def filterStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     findAllStandardInterConceptRelationshipsOfType(relationshipType).filter(p)
   }
@@ -99,8 +99,9 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
       relationship: StandardInterConceptRelationship,
       resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    filterOutgoingStandardInterConceptRelationshipsOfType(relationship.targetConceptEName, resultRelationshipType) { rel =>
-      relationship.isFollowedBy(rel)
+    filterOutgoingStandardInterConceptRelationshipsOfType(relationship.targetConceptEName, resultRelationshipType) {
+      rel =>
+        relationship.isFollowedBy(rel)
     }
   }
 
@@ -136,8 +137,8 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
 
   final def filterOutgoingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
       sourceConcept: EName,
-      relationshipType: ClassTag[A])(
-      p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+      relationshipType: ClassTag[A])(p: StandardInterConceptRelationshipPath[A] => Boolean)
+    : immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
 
     filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(sourceConcept, relationshipType) { path =>
       path.isConsecutiveRelationshipPath && p(path)
@@ -146,8 +147,8 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
 
   final def filterIncomingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
       targetConcept: EName,
-      relationshipType: ClassTag[A])(
-      p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+      relationshipType: ClassTag[A])(p: StandardInterConceptRelationshipPath[A] => Boolean)
+    : immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
 
     filterIncomingUnrestrictedStandardInterConceptRelationshipPaths(targetConcept, relationshipType) { path =>
       path.isConsecutiveRelationshipPath && p(path)
@@ -156,36 +157,42 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
 
   final def filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
       sourceConcept: EName,
-      relationshipType: ClassTag[A])(
-      p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+      relationshipType: ClassTag[A])(p: StandardInterConceptRelationshipPath[A] => Boolean)
+    : immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
 
-    val nextRelationships = filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, relationshipType)(rel =>
-      p(InterConceptRelationshipPath(rel)))
+    val nextRelationships = filterOutgoingStandardInterConceptRelationshipsOfType(sourceConcept, relationshipType)(
+      rel => p(StandardInterConceptRelationshipPath(rel)))
 
-    val paths = nextRelationships.flatMap(rel =>
-      filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(InterConceptRelationshipPath(rel), relationshipType)(p))
+    val paths = nextRelationships.flatMap(
+      rel =>
+        filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(
+          StandardInterConceptRelationshipPath(rel),
+          relationshipType)(p))
     paths
   }
 
   final def filterIncomingUnrestrictedStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
       targetConcept: EName,
-      relationshipType: ClassTag[A])(
-      p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+      relationshipType: ClassTag[A])(p: StandardInterConceptRelationshipPath[A] => Boolean)
+    : immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
 
-    val prevRelationships = filterIncomingStandardInterConceptRelationshipsOfType(targetConcept, relationshipType)(rel =>
-      p(InterConceptRelationshipPath(rel)))
+    val prevRelationships = filterIncomingStandardInterConceptRelationshipsOfType(targetConcept, relationshipType)(
+      rel => p(StandardInterConceptRelationshipPath(rel)))
 
-    val paths = prevRelationships.flatMap(rel =>
-      filterIncomingUnrestrictedStandardInterConceptRelationshipPaths(InterConceptRelationshipPath(rel), relationshipType)(p))
+    val paths = prevRelationships.flatMap(
+      rel =>
+        filterIncomingUnrestrictedStandardInterConceptRelationshipPaths(
+          StandardInterConceptRelationshipPath(rel),
+          relationshipType)(p))
     paths
   }
 
   // Private methods
 
   private def filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
-      path: InterConceptRelationshipPath[A],
-      relationshipType: ClassTag[A])(
-      p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+      path: StandardInterConceptRelationshipPath[A],
+      relationshipType: ClassTag[A])(p: StandardInterConceptRelationshipPath[A] => Boolean)
+    : immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
 
     val nextRelationships =
       filterOutgoingStandardInterConceptRelationshipsOfType(path.targetConcept, relationshipType)(relationship =>
@@ -204,9 +211,9 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
   }
 
   private def filterIncomingUnrestrictedStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
-      path: InterConceptRelationshipPath[A],
-      relationshipType: ClassTag[A])(
-      p: InterConceptRelationshipPath[A] => Boolean): immutable.IndexedSeq[InterConceptRelationshipPath[A]] = {
+      path: StandardInterConceptRelationshipPath[A],
+      relationshipType: ClassTag[A])(p: StandardInterConceptRelationshipPath[A] => Boolean)
+    : immutable.IndexedSeq[StandardInterConceptRelationshipPath[A]] = {
 
     val prevRelationships =
       filterIncomingStandardInterConceptRelationshipsOfType(path.sourceConcept, relationshipType)(relationship =>

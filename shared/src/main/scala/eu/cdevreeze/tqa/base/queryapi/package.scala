@@ -18,7 +18,7 @@ package eu.cdevreeze.tqa.base
 
 import eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship
 import eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath
 import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
 
 /**
@@ -198,9 +198,9 @@ import eu.cdevreeze.tqa.base.relationship.ParentChildRelationship
  */
 package object queryapi {
 
-  type ParentChildRelationshipPath = InterConceptRelationshipPath[ParentChildRelationship]
+  type ParentChildRelationshipPath = StandardInterConceptRelationshipPath[ParentChildRelationship]
 
-  type DomainMemberRelationshipPath = InterConceptRelationshipPath[DomainMemberRelationship]
+  type DomainMemberRelationshipPath = StandardInterConceptRelationshipPath[DomainMemberRelationship]
 
-  type DomainAwareRelationshipPath = InterConceptRelationshipPath[DomainAwareRelationship]
+  type DomainAwareRelationshipPath = StandardInterConceptRelationshipPath[DomainAwareRelationship]
 }

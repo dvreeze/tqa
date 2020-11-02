@@ -73,7 +73,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
   def addParentChildArcs(docUri: URI, elr: String, relationships: immutable.IndexedSeq[model.ParentChildRelationship]): SimpleTaxonomyCreator = {
     // Do some validations
 
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, relationships, ENames.LinkPresentationLinkEName)
+    validateExtendedLinkAndStandardInterConceptArcs(docUri, elr, relationships, ENames.LinkPresentationLinkEName)
 
     val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
     val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
@@ -85,7 +85,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     // Edit
 
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, relationships, makeParentChildArc _)
+    val endTaxo = addStandardInterConceptArcs(startLinkbase, extLink, relationships, makeParentChildArc _)
 
     new SimpleTaxonomyCreator(endTaxo)
   }
@@ -96,7 +96,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
   def addDimensionalArcs(docUri: URI, elr: String, relationships: immutable.IndexedSeq[model.DimensionalRelationship]): SimpleTaxonomyCreator = {
     // Do some validations
 
-    validateExtendedLinkAndInterConceptArcs(docUri, elr, relationships, ENames.LinkDefinitionLinkEName)
+    validateExtendedLinkAndStandardInterConceptArcs(docUri, elr, relationships, ENames.LinkDefinitionLinkEName)
 
     val doc: TaxonomyDocument = startTaxonomy.taxonomyBase.taxonomyDocUriMap(docUri)
     val startLinkbase = doc.documentElement.asInstanceOf[Linkbase]
@@ -108,12 +108,12 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
 
     // Edit
 
-    val endTaxo = addInterConceptArcs(startLinkbase, extLink, relationships, makeDimensionalArc _)
+    val endTaxo = addStandardInterConceptArcs(startLinkbase, extLink, relationships, makeDimensionalArc _)
 
     new SimpleTaxonomyCreator(endTaxo)
   }
 
-  // Private methods, for example for adding (and pre-validating) any inter-concept relationships
+  // Private methods, for example for adding (and pre-validating) any standard inter-concept relationships
 
   private def validateSchemaAndElementDeclarations(
     docUri: URI,
@@ -159,7 +159,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
       s"Not all needed (attribute) namespaces declared")
   }
 
-  private def validateExtendedLinkAndInterConceptArcs(
+  private def validateExtendedLinkAndStandardInterConceptArcs(
     docUri: URI,
     elr: String,
     relationships: immutable.IndexedSeq[model.StandardInterConceptRelationship],
@@ -235,7 +235,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
     endTaxo
   }
 
-  private def addInterConceptArcs[A <: model.StandardInterConceptRelationship](
+  private def addStandardInterConceptArcs[A <: model.StandardInterConceptRelationship](
     linkbase: Linkbase,
     extendedLink: ExtendedLink,
     relationships: immutable.IndexedSeq[A],
@@ -288,7 +288,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
     endTaxo
   }
 
-  // Private methods, for example for creating (specific) inter-concept relationships
+  // Private methods, for example for creating (specific) standard inter-concept relationships
 
   private def makeGlobalElementDeclaration(decl: model.GlobalElementDeclaration, scope: Scope): resolved.Elem = {
     val otherAttributes: Map[EName, String] = decl.attributes.otherAttributes
@@ -302,7 +302,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
       .plusAttribute(ENames.NillableEName, decl.attributes.isNillable.toString)
   }
 
-  private def makeInterConceptArc(
+  private def makeStandardInterConceptArc(
     relationship: model.StandardInterConceptRelationship,
     sourceXLinkLabel: String,
     targetXLinkLabel: String,
@@ -322,7 +322,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
     targetXLinkLabel: String,
     arcrole: String): resolved.Elem = {
 
-    makeInterConceptArc(relationship, sourceXLinkLabel, targetXLinkLabel, ENames.LinkPresentationArcEName, arcrole)
+    makeStandardInterConceptArc(relationship, sourceXLinkLabel, targetXLinkLabel, ENames.LinkPresentationArcEName, arcrole)
   }
 
   private def makeDefinitionArc(
@@ -331,7 +331,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
     targetXLinkLabel: String,
     arcrole: String): resolved.Elem = {
 
-    makeInterConceptArc(relationship, sourceXLinkLabel, targetXLinkLabel, ENames.LinkDefinitionArcEName, arcrole)
+    makeStandardInterConceptArc(relationship, sourceXLinkLabel, targetXLinkLabel, ENames.LinkDefinitionArcEName, arcrole)
   }
 
   private def makeParentChildArc(relationship: model.ParentChildRelationship, sourceXLinkLabel: String, targetXLinkLabel: String): resolved.Elem = {
