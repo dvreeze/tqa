@@ -21,17 +21,17 @@ import scala.collection.immutable
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Inter-concept relationship path. Subsequent relationships in the path must match in target and
+ * Standard inter-concept relationship path. Subsequent relationships in the path must match in target and
  * source concept, respectively. It is not required that the arc role remains the same, or that
  * targetRole attributes are followed, although in practice this will be the case. A relationship path
  * must have at least one relationship.
  *
- * In practice, inter-concept relationship paths are "ELR-valid", that is, their relationships are in the same ELR,
+ * In practice, standard inter-concept relationship paths are "ELR-valid", that is, their relationships are in the same ELR,
  * or, in the case of dimensional relationship paths, their relationships are consecutive relationships.
  *
  * @author Chris de Vreeze
  */
-final case class InterConceptRelationshipPath[A <: InterConceptRelationship] private (val relationships: immutable.IndexedSeq[A]) {
+final case class InterConceptRelationshipPath[A <: StandardInterConceptRelationship] private (val relationships: immutable.IndexedSeq[A]) {
   require(relationships.size >= 1, s"A relationship path must have at least one relationship")
 
   def sourceConcept: EName = firstRelationship.sourceConceptEName
@@ -105,11 +105,11 @@ final case class InterConceptRelationshipPath[A <: InterConceptRelationship] pri
 
 object InterConceptRelationshipPath {
 
-  def apply[A <: InterConceptRelationship](relationship: A): InterConceptRelationshipPath[A] = {
+  def apply[A <: StandardInterConceptRelationship](relationship: A): InterConceptRelationshipPath[A] = {
     new InterConceptRelationshipPath(Vector(relationship))
   }
 
-  def from[A <: InterConceptRelationship](relationships: immutable.IndexedSeq[A]): InterConceptRelationshipPath[A] = {
+  def from[A <: StandardInterConceptRelationship](relationships: immutable.IndexedSeq[A]): InterConceptRelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => haveMatchingConcepts(pair(0), pair(1))),
       s"All subsequent relationships in a path must have matching target/source concepts")
@@ -117,7 +117,7 @@ object InterConceptRelationshipPath {
     new InterConceptRelationshipPath(relationships.toVector)
   }
 
-  private def haveMatchingConcepts[A <: InterConceptRelationship](relationship1: A, relationship2: A): Boolean = {
+  private def haveMatchingConcepts[A <: StandardInterConceptRelationship](relationship1: A, relationship2: A): Boolean = {
     relationship1.targetConceptEName == relationship2.sourceConceptEName
   }
 }

@@ -25,7 +25,7 @@ import scala.reflect.classTag
 import org.scalatest.funsuite.AnyFunSuite
 
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
@@ -97,13 +97,13 @@ class InternalConsistencyTest extends AnyFunSuite {
 
     assertResult(leafConcepts) {
       rootConcepts.toSeq
-        .flatMap(c => dts.filterOutgoingConsecutiveInterConceptRelationshipPaths(c, classTag[InterConceptRelationship])(_ => true))
+        .flatMap(c => dts.filterOutgoingConsecutiveInterConceptRelationshipPaths(c, classTag[StandardInterConceptRelationship])(_ => true))
         .map(_.targetConcept).toSet
     }
 
     assertResult(rootConcepts) {
       leafConcepts.toSeq
-        .flatMap(c => dts.filterIncomingConsecutiveInterConceptRelationshipPaths(c, classTag[InterConceptRelationship])(_ => true))
+        .flatMap(c => dts.filterIncomingConsecutiveInterConceptRelationshipPaths(c, classTag[StandardInterConceptRelationship])(_ => true))
         .map(_.sourceConcept).toSet
     }
   }

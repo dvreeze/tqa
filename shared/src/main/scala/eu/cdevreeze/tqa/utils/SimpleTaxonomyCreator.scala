@@ -162,7 +162,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
   private def validateExtendedLinkAndInterConceptArcs(
     docUri: URI,
     elr: String,
-    relationships: immutable.IndexedSeq[model.InterConceptRelationship],
+    relationships: immutable.IndexedSeq[model.StandardInterConceptRelationship],
     extLinkEName: EName): Unit = {
 
     val doc: TaxonomyDocument =
@@ -235,7 +235,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
     endTaxo
   }
 
-  private def addInterConceptArcs[A <: model.InterConceptRelationship](
+  private def addInterConceptArcs[A <: model.StandardInterConceptRelationship](
     linkbase: Linkbase,
     extendedLink: ExtendedLink,
     relationships: immutable.IndexedSeq[A],
@@ -303,7 +303,7 @@ final class SimpleTaxonomyCreator(val startTaxonomy: BasicTaxonomy) {
   }
 
   private def makeInterConceptArc(
-    relationship: model.InterConceptRelationship,
+    relationship: model.StandardInterConceptRelationship,
     sourceXLinkLabel: String,
     targetXLinkLabel: String,
     extLinkEName: EName,

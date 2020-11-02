@@ -18,7 +18,7 @@ package eu.cdevreeze.tqa.xpathaware.extension.table
 
 import scala.collection.immutable
 
-import eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
 import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
 import eu.cdevreeze.yaidom.core.EName
 
@@ -32,7 +32,7 @@ sealed trait ConceptRelationshipNodePath {
   /**
    * Returns the relationships of the path, which may be an empty collection
    */
-  def relationships: immutable.IndexedSeq[InterConceptRelationship]
+  def relationships: immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Returns the source concept of the path
@@ -59,7 +59,7 @@ object ConceptRelationshipNodePath {
 
   final case class SingleConceptPath(rootConcept: EName) extends ConceptRelationshipNodePath {
 
-    def relationships: immutable.IndexedSeq[InterConceptRelationship] = immutable.IndexedSeq()
+    def relationships: immutable.IndexedSeq[StandardInterConceptRelationship] = immutable.IndexedSeq()
 
     def sourceConcept: EName = rootConcept
 
@@ -71,9 +71,9 @@ object ConceptRelationshipNodePath {
   }
 
   final case class DescendantPath(
-    interConceptRelationshipPath: InterConceptRelationshipPath[InterConceptRelationship]) extends ConceptRelationshipNodePath {
+    interConceptRelationshipPath: InterConceptRelationshipPath[StandardInterConceptRelationship]) extends ConceptRelationshipNodePath {
 
-    def relationships: immutable.IndexedSeq[InterConceptRelationship] = interConceptRelationshipPath.relationships
+    def relationships: immutable.IndexedSeq[StandardInterConceptRelationship] = interConceptRelationshipPath.relationships
 
     def sourceConcept: EName = interConceptRelationshipPath.firstRelationship.targetConceptEName
 
@@ -87,9 +87,9 @@ object ConceptRelationshipNodePath {
   }
 
   final case class DescendantOrSelfPath(
-    interConceptRelationshipPath: InterConceptRelationshipPath[InterConceptRelationship]) extends ConceptRelationshipNodePath {
+    interConceptRelationshipPath: InterConceptRelationshipPath[StandardInterConceptRelationship]) extends ConceptRelationshipNodePath {
 
-    def relationships: immutable.IndexedSeq[InterConceptRelationship] = interConceptRelationshipPath.relationships
+    def relationships: immutable.IndexedSeq[StandardInterConceptRelationship] = interConceptRelationshipPath.relationships
 
     def sourceConcept: EName = interConceptRelationshipPath.sourceConcept
 

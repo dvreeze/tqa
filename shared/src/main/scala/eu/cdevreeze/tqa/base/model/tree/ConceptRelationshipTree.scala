@@ -20,17 +20,17 @@ import scala.collection.immutable
 import scala.collection.compat._
 
 import eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
-import eu.cdevreeze.tqa.base.model.InterConceptRelationship
+import eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Tree of concepts connected by inter-concept relationships of some (inter-concept) relationship type.
+ * Tree of concepts connected by standard inter-concept relationships of some (inter-concept) relationship type.
  *
  * TODO Make more interesting.
  *
  * @author Chris de Vreeze
  */
-final class ConceptRelationshipTree[R <: InterConceptRelationship] private (
+final class ConceptRelationshipTree[R <: StandardInterConceptRelationship] private (
   val sourceConcept: EName,
   val paths: immutable.IndexedSeq[ConsecutiveRelationshipPath[R]],
   val pathsIndexedByConcept: Map[EName, immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]]) {
@@ -41,7 +41,7 @@ final class ConceptRelationshipTree[R <: InterConceptRelationship] private (
 
 object ConceptRelationshipTree {
 
-  def build[R <: InterConceptRelationship](
+  def build[R <: StandardInterConceptRelationship](
     sourceConcept: EName,
     paths: immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]): ConceptRelationshipTree[R] = {
 

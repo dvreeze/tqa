@@ -143,7 +143,7 @@ sealed abstract class Relationship(
 }
 
 /**
- * Standard relationship. Either an [[eu.cdevreeze.tqa.base.relationship.InterConceptRelationship]] or a
+ * Standard relationship. Either an [[eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship]] or a
  * [[eu.cdevreeze.tqa.base.relationship.ConceptResourceRelationship]].
  */
 sealed abstract class StandardRelationship(
@@ -185,7 +185,7 @@ final class UnknownRelationship(
  * Standard inter-concept relationship. Either an [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]],
  * [[eu.cdevreeze.tqa.base.relationship.PresentationRelationship]], or a [[eu.cdevreeze.tqa.base.relationship.CalculationRelationship]].
  */
-sealed abstract class InterConceptRelationship(
+sealed abstract class StandardInterConceptRelationship(
   arc: StandardArc,
   resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
   resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
@@ -201,11 +201,11 @@ sealed abstract class InterConceptRelationship(
    * For dimensional relationships, returns true if this and the parameter relationship form a pair of consecutive
    * relationships.
    *
-   * This method does not check for the target relationship type, although for non-dimensional inter-concept relationships
+   * This method does not check for the target relationship type, although for non-dimensional standard inter-concept relationships
    * the relationship type remains the same, and for dimensional relationships the target relationship type is as expected
    * for consecutive relationships.
    */
-  final def isFollowedBy(rel: InterConceptRelationship): Boolean = {
+  final def isFollowedBy(rel: StandardInterConceptRelationship): Boolean = {
     (this.targetConceptEName == rel.sourceConceptEName) &&
       (this.effectiveTargetBaseSetKey == rel.baseSetKey)
   }
@@ -287,7 +287,7 @@ final class ConceptReferenceRelationship(
 sealed class PresentationRelationship(
   arc: PresentationArc,
   resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo) {
+  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo) {
 
   /**
    * Returns the optional preferredLabel attribute on the underlying arc.
@@ -313,7 +313,7 @@ final class ParentChildRelationship(
 sealed class CalculationRelationship(
   arc: CalculationArc,
   resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo) {
+  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo) {
 
   def weight: Double = arc.weight
 }
@@ -334,7 +334,7 @@ final class SummationItemRelationship(
 sealed class DefinitionRelationship(
   arc: DefinitionArc,
   resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends InterConceptRelationship(arc, resolvedFrom, resolvedTo)
+  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/general-special".
@@ -619,7 +619,7 @@ object StandardRelationship {
 
     resolvedTo.resolvedElem match {
       case elemDecl: GlobalElementDeclaration =>
-        InterConceptRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]])
+        StandardInterConceptRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]])
       case res: XLinkResource =>
         ConceptResourceRelationship.opt(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource]))
       case _ => None
@@ -658,17 +658,17 @@ object NonStandardRelationship {
   }
 }
 
-object InterConceptRelationship {
+object StandardInterConceptRelationship {
 
   /**
-   * Optionally builds a [[eu.cdevreeze.tqa.base.relationship.InterConceptRelationship]] from an underlying [[eu.cdevreeze.tqa.base.dom.StandardArc]],
+   * Optionally builds a [[eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship]] from an underlying [[eu.cdevreeze.tqa.base.dom.StandardArc]],
    * a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]] and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]],
    * and returning None otherwise.
    */
   def opt(
     arc: StandardArc,
     resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): Option[InterConceptRelationship] = {
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): Option[StandardInterConceptRelationship] = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,

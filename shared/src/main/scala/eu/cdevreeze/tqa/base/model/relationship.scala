@@ -111,7 +111,7 @@ sealed trait NonStandardRelationship extends Relationship {
   // TODO Preferred label
 }
 
-sealed trait InterConceptRelationship extends StandardRelationship {
+sealed trait StandardInterConceptRelationship extends StandardRelationship {
 
   def target: Node.GlobalElementDecl
 
@@ -128,7 +128,7 @@ sealed trait InterConceptRelationship extends StandardRelationship {
    * the relationship type remains the same, and for dimensional relationships the target relationship type is as expected
    * for consecutive relationships.
    */
-  final def isFollowedBy(rel: InterConceptRelationship): Boolean = {
+  final def isFollowedBy(rel: StandardInterConceptRelationship): Boolean = {
     (this.targetConceptEName == rel.sourceConceptEName) &&
       (this.effectiveTargetBaseSetKey == rel.baseSetKey)
   }
@@ -205,7 +205,7 @@ final case class ConceptReferenceRelationship(
   }
 }
 
-sealed trait PresentationRelationship extends InterConceptRelationship {
+sealed trait PresentationRelationship extends StandardInterConceptRelationship {
 
   final def preferredLabelOption: Option[String] = {
     nonXLinkArcAttributes.get(ENames.PreferredLabelEName)
@@ -237,7 +237,7 @@ final case class OtherPresentationRelationship(
   }
 }
 
-sealed trait CalculationRelationship extends InterConceptRelationship {
+sealed trait CalculationRelationship extends StandardInterConceptRelationship {
 
   final def weight: Double = {
     nonXLinkArcAttributes.get(ENames.WeightEName).map(v => XsdDoubles.parseDouble(v))
@@ -270,7 +270,7 @@ final case class OtherCalculationRelationship(
   }
 }
 
-sealed trait DefinitionRelationship extends InterConceptRelationship
+sealed trait DefinitionRelationship extends StandardInterConceptRelationship
 
 final case class GeneralSpecialRelationship(
   elr: String,
@@ -658,7 +658,7 @@ object StandardRelationship extends Relationships.Factory {
 
     (baseSetKey.arcEName.namespaceUriOption, target) match {
       case (Some(Namespaces.LinkNamespace), targetConcept @ Node.GlobalElementDecl(_)) =>
-        InterConceptRelationship.opt(baseSetKey, source, targetConcept, nonXLinkArcAttributes)
+        StandardInterConceptRelationship.opt(baseSetKey, source, targetConcept, nonXLinkArcAttributes)
       case (Some(Namespaces.LinkNamespace), resource: Node.StandardDocumentationResource) =>
         ConceptResourceRelationship.opt(baseSetKey, source, resource, nonXLinkArcAttributes)
       case _ =>
@@ -667,9 +667,9 @@ object StandardRelationship extends Relationships.Factory {
   }
 }
 
-object InterConceptRelationship extends Relationships.Factory {
+object StandardInterConceptRelationship extends Relationships.Factory {
 
-  type RelationshipType = InterConceptRelationship
+  type RelationshipType = StandardInterConceptRelationship
   type SourceNodeType = Node.GlobalElementDecl
   type TargetNodeType = Node.GlobalElementDecl
 
@@ -677,7 +677,7 @@ object InterConceptRelationship extends Relationships.Factory {
     baseSetKey: BaseSetKey,
     source: Node.GlobalElementDecl,
     target: Node.GlobalElementDecl,
-    nonXLinkArcAttributes: Map[EName, String]): Option[InterConceptRelationship] = {
+    nonXLinkArcAttributes: Map[EName, String]): Option[StandardInterConceptRelationship] = {
 
     baseSetKey.arcEName match {
       case ENames.LinkDefinitionArcEName =>

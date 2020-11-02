@@ -21,7 +21,7 @@ import scala.collection.immutable
 import eu.cdevreeze.yaidom.core.EName
 
 /**
- * Inter-concept relationship path. Subsequent relationships in the path must be "consecutive". For non-dimensional
+ * Standard inter-concept relationship path. Subsequent relationships in the path must be "consecutive". For non-dimensional
  * relationships that means that (of course) target concepts match the subsequent source concepts, and that the ELR
  * remain the same.
  *
@@ -29,7 +29,7 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final case class ConsecutiveRelationshipPath[A <: InterConceptRelationship] private (
+final case class ConsecutiveRelationshipPath[A <: StandardInterConceptRelationship] private (
   relationships: immutable.IndexedSeq[A]) {
 
   require(relationships.size >= 1, s"A relationship path must have at least one relationship")
@@ -97,11 +97,11 @@ final case class ConsecutiveRelationshipPath[A <: InterConceptRelationship] priv
 
 object ConsecutiveRelationshipPath {
 
-  def apply[A <: InterConceptRelationship](relationship: A): ConsecutiveRelationshipPath[A] = {
+  def apply[A <: StandardInterConceptRelationship](relationship: A): ConsecutiveRelationshipPath[A] = {
     new ConsecutiveRelationshipPath(immutable.IndexedSeq(relationship))
   }
 
-  def from[A <: InterConceptRelationship](relationships: immutable.IndexedSeq[A]): ConsecutiveRelationshipPath[A] = {
+  def from[A <: StandardInterConceptRelationship](relationships: immutable.IndexedSeq[A]): ConsecutiveRelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => pair(0).isFollowedBy(pair(1))),
       s"All subsequent relationships in a path must be consecutive")
