@@ -16,24 +16,26 @@
 
 package eu.cdevreeze.tqa.base.model.taxonomy
 
-import scala.collection.immutable
-import scala.collection.compat._
-import scala.reflect.ClassTag
-
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.base.model.ConceptDeclaration
 import eu.cdevreeze.tqa.base.model.GlobalAttributeDeclaration
 import eu.cdevreeze.tqa.base.model.GlobalElementDeclaration
+import eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship
 import eu.cdevreeze.tqa.base.model.NamedTypeDefinition
-import eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike
-import eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship
 import eu.cdevreeze.tqa.base.model.Node
+import eu.cdevreeze.tqa.base.model.NonStandardInterElementDeclarationRelationship
 import eu.cdevreeze.tqa.base.model.NonStandardRelationship
 import eu.cdevreeze.tqa.base.model.Relationship
 import eu.cdevreeze.tqa.base.model.SchemaContentElement
+import eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship
 import eu.cdevreeze.tqa.base.model.StandardRelationship
+import eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike
 import eu.cdevreeze.yaidom.core.EName
+
+import scala.collection.immutable
+import scala.collection.compat._
+import scala.reflect.ClassTag
 
 /**
  * Basic implementation of a taxonomy that offers the TaxonomyApi query API. It does not enforce
@@ -50,21 +52,25 @@ import eu.cdevreeze.yaidom.core.EName
  * @author Chris de Vreeze
  */
 final class BasicTaxonomy private (
-  val extraSubstitutionGroupMap: SubstitutionGroupMap,
-  val netSubstitutionGroupMap: SubstitutionGroupMap,
-  val topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
-  val topmostSchemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]],
-  val relationships: immutable.IndexedSeq[Relationship],
-  val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration],
-  val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration],
-  val namedTypeDefinitionsByEName: Map[EName, NamedTypeDefinition],
-  val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
-  val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]],
-  val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
-  val nonStandardRelationshipsBySource: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
-  val nonStandardRelationshipsByTarget: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
-  val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
-  val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]]) extends TaxonomyLike {
+    val extraSubstitutionGroupMap: SubstitutionGroupMap,
+    val netSubstitutionGroupMap: SubstitutionGroupMap,
+    val topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
+    val topmostSchemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]],
+    val relationships: immutable.IndexedSeq[Relationship],
+    val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration],
+    val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration],
+    val namedTypeDefinitionsByEName: Map[EName, NamedTypeDefinition],
+    val conceptDeclarationsByEName: Map[EName, ConceptDeclaration],
+    val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]],
+    val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
+    val nonStandardRelationshipsBySource: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
+    val nonStandardRelationshipsByTarget: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
+    val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
+    val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
+    val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship],
+    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]],
+    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]])
+    extends TaxonomyLike {
 
   def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
 
@@ -114,24 +120,31 @@ final class BasicTaxonomy private (
   }
 
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    implicit val clsTag = relationshipType
+    implicit val clsTag: ClassTag[A] = relationshipType
     relationships.collect { case rel: A => rel }
   }
 
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    implicit val clsTag = relationshipType
+    implicit val clsTag: ClassTag[A] = relationshipType
     relationships.collect { case rel: A => rel }
   }
 
   def findAllStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    implicit val clsTag = relationshipType
-    relationships.collect { case rel: A => rel }
+    implicit val clsTag: ClassTag[A] = relationshipType
+    interConceptRelationships.collect { case rel: A => rel }
+  }
+
+  def findAllInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+
+    implicit val clsTag: ClassTag[A] = relationshipType
+    interConceptRelationships.collect { case rel: A => rel }
   }
 
   // TODO Filtering taxonomies, returning "sub"-taxonomies.
@@ -144,25 +157,40 @@ object BasicTaxonomy {
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    */
   def build(
-    topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
-    extraSubstitutionGroupMap: SubstitutionGroupMap,
-    relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
+      topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
+      extraSubstitutionGroupMap: SubstitutionGroupMap,
+      relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
 
     val topmostSchemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]] =
-      topmostSchemaContentElements.groupBy(_.resolvedName)
-        .view.mapValues(_.filter(_.attributes.idOption.nonEmpty).groupBy(_.attributes.idOption.get)).toMap
+      topmostSchemaContentElements
+        .groupBy(_.resolvedName)
+        .view
+        .mapValues(_.filter(_.attributes.idOption.nonEmpty).groupBy(_.attributes.idOption.get))
+        .toMap
 
     val globalElementDeclarationsByEName: Map[EName, GlobalElementDeclaration] =
-      topmostSchemaContentElements.collect { case e: GlobalElementDeclaration => e }
-        .groupBy(_.targetEName).view.mapValues(_.head).toMap
+      topmostSchemaContentElements
+        .collect { case e: GlobalElementDeclaration => e }
+        .groupBy(_.targetEName)
+        .view
+        .mapValues(_.head)
+        .toMap
 
     val globalAttributeDeclarationsByEName: Map[EName, GlobalAttributeDeclaration] =
-      topmostSchemaContentElements.collect { case e: GlobalAttributeDeclaration => e }
-        .groupBy(_.targetEName).view.mapValues(_.head).toMap
+      topmostSchemaContentElements
+        .collect { case e: GlobalAttributeDeclaration => e }
+        .groupBy(_.targetEName)
+        .view
+        .mapValues(_.head)
+        .toMap
 
     val namedTypeDefinitionsByEName: Map[EName, NamedTypeDefinition] =
-      topmostSchemaContentElements.collect { case e: NamedTypeDefinition => e }
-        .groupBy(_.targetEName).view.mapValues(_.head).toMap
+      topmostSchemaContentElements
+        .collect { case e: NamedTypeDefinition => e }
+        .groupBy(_.targetEName)
+        .view
+        .mapValues(_.head)
+        .toMap
 
     val derivedSubstitutionGroupMap: SubstitutionGroupMap =
       computeDerivedSubstitutionGroupMap(globalElementDeclarationsByEName)
@@ -194,19 +222,47 @@ object BasicTaxonomy {
       nonStandardRelationships.groupBy(_.target)
     }
 
-    val interConceptRelationships = standardRelationships.collect { case rel: StandardInterConceptRelationship => rel }
-
-    val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
-      interConceptRelationships.groupBy(_.sourceConceptEName)
+    val standardInterConceptRelationships = standardRelationships.collect {
+      case rel: StandardInterConceptRelationship => rel
     }
 
-    val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
-      interConceptRelationships.groupBy(_.targetConceptEName)
+    val standardInterConceptRelationshipsBySource
+      : Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+      standardInterConceptRelationships.groupBy(_.sourceConceptEName)
+    }
+
+    val standardInterConceptRelationshipsByTarget
+      : Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+      standardInterConceptRelationships.groupBy(_.targetConceptEName)
+    }
+
+    val conceptENames: Set[EName] = conceptDeclarationsByEName.keySet
+
+    def isInterConceptRelationship(rel: NonStandardInterElementDeclarationRelationship): Boolean = {
+      conceptENames.contains(rel.sourceElementTargetEName) && conceptENames.contains(rel.targetElementTargetEName)
+    }
+
+    val nonStandardInterConceptRelationships = nonStandardRelationships.collect {
+      case rel: NonStandardInterElementDeclarationRelationship if isInterConceptRelationship(rel) => rel
+    }
+
+    val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship] =
+      standardInterConceptRelationships.appendedAll(nonStandardInterConceptRelationships)
+
+    val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] = {
+      interConceptRelationships.groupBy(_.sourceElementTargetEName)
+    }
+
+    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] = {
+      interConceptRelationships.groupBy(_.targetElementTargetEName)
     }
 
     val globalElementDeclarationsById: Map[String, immutable.IndexedSeq[GlobalElementDeclaration]] =
-      topmostSchemaContentElementsByENameAndId.getOrElse(ENames.XsElementEName, Map())
-        .view.mapValues(_.collect { case e: GlobalElementDeclaration => e }).toMap
+      topmostSchemaContentElementsByENameAndId
+        .getOrElse(ENames.XsElementEName, Map())
+        .view
+        .mapValues(_.collect { case e: GlobalElementDeclaration => e })
+        .toMap
 
     new BasicTaxonomy(
       extraSubstitutionGroupMap,
@@ -223,18 +279,23 @@ object BasicTaxonomy {
       nonStandardRelationshipsBySource,
       nonStandardRelationshipsByTarget,
       standardInterConceptRelationshipsBySource,
-      standardInterConceptRelationshipsByTarget)
+      standardInterConceptRelationshipsByTarget,
+      interConceptRelationships,
+      interConceptRelationshipsBySource,
+      interConceptRelationshipsByTarget
+    )
   }
 
   /**
    * Returns the SubstitutionGroupMap that can be derived from this taxonomy base alone.
    * This is an expensive operation that should be performed only once, if possible.
    */
-  private def computeDerivedSubstitutionGroupMap(globalElementDeclarationMap: Map[EName, GlobalElementDeclaration]): SubstitutionGroupMap = {
+  private def computeDerivedSubstitutionGroupMap(
+      globalElementDeclarationMap: Map[EName, GlobalElementDeclaration]): SubstitutionGroupMap = {
     val rawMappings: Map[EName, EName] =
-      (globalElementDeclarationMap.toSeq.flatMap {
+      globalElementDeclarationMap.toSeq.flatMap {
         case (en, decl) => decl.substitutionGroupOption.map(sg => en -> sg)
-      }).toMap
+      }.toMap
 
     val substGroups: Set[EName] = rawMappings.values.toSet
 

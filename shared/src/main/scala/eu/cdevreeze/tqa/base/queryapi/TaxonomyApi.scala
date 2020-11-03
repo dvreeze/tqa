@@ -16,10 +16,10 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
+
+import scala.collection.immutable
 
 /**
  * Purely abstract trait offering a '''taxonomy query API'''. It combines several other purely abstract query
@@ -39,7 +39,8 @@ trait TaxonomyApi
     with ConceptReferenceRelationshipContainerApi
     with ElementLabelRelationshipContainerApi
     with ElementReferenceRelationshipContainerApi
-    with DimensionalRelationshipContainerApi {
+    with DimensionalRelationshipContainerApi
+    with InterConceptRelationshipContainerApi {
 
   /**
    * Returns all taxonomy documents.

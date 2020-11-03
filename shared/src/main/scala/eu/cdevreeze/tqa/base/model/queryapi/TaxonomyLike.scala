@@ -23,14 +23,15 @@ package eu.cdevreeze.tqa.base.model.queryapi
  * @author Chris de Vreeze
  */
 trait TaxonomyLike
-  extends TaxonomyApi
-  with TaxonomySchemaLike
-  with StandardRelationshipContainerLike
-  with NonStandardRelationshipContainerLike
-  with StandardInterConceptRelationshipContainerLike
-  with PresentationRelationshipContainerLike
-  with ConceptLabelRelationshipContainerLike
-  with ConceptReferenceRelationshipContainerLike
-  with ElementLabelRelationshipContainerLike
-  with ElementReferenceRelationshipContainerLike
-  with DimensionalRelationshipContainerLike
+    extends TaxonomyApi
+    with TaxonomySchemaLike
+    with StandardRelationshipContainerLike
+    with NonStandardRelationshipContainerLike
+    with StandardInterConceptRelationshipContainerLike
+    with PresentationRelationshipContainerLike
+    with ConceptLabelRelationshipContainerLike
+    with ConceptReferenceRelationshipContainerLike
+    with ElementLabelRelationshipContainerLike
+    with ElementReferenceRelationshipContainerLike
+    with DimensionalRelationshipContainerLike
+    with InterConceptRelationshipContainerLike

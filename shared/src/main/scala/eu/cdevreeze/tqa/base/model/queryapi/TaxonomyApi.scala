@@ -16,9 +16,9 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.base.model.Relationship
+
+import scala.collection.immutable
 
 /**
  * Purely abstract trait offering a '''taxonomy query API'''. It combines several other purely abstract query
@@ -28,16 +28,17 @@ import eu.cdevreeze.tqa.base.model.Relationship
  * @author Chris de Vreeze
  */
 trait TaxonomyApi
-  extends TaxonomySchemaApi
-  with StandardRelationshipContainerApi
-  with NonStandardRelationshipContainerApi
-  with StandardInterConceptRelationshipContainerApi
-  with PresentationRelationshipContainerApi
-  with ConceptLabelRelationshipContainerApi
-  with ConceptReferenceRelationshipContainerApi
-  with ElementLabelRelationshipContainerApi
-  with ElementReferenceRelationshipContainerApi
-  with DimensionalRelationshipContainerApi {
+    extends TaxonomySchemaApi
+    with StandardRelationshipContainerApi
+    with NonStandardRelationshipContainerApi
+    with StandardInterConceptRelationshipContainerApi
+    with PresentationRelationshipContainerApi
+    with ConceptLabelRelationshipContainerApi
+    with ConceptReferenceRelationshipContainerApi
+    with ElementLabelRelationshipContainerApi
+    with ElementReferenceRelationshipContainerApi
+    with DimensionalRelationshipContainerApi
+    with InterConceptRelationshipContainerApi {
 
   /**
    * Returns all relationships in the taxonomy

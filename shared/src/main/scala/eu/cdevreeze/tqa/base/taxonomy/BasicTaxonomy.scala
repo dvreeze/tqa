@@ -18,11 +18,6 @@ package eu.cdevreeze.tqa.base.taxonomy
 
 import java.net.URI
 
-import scala.collection.immutable
-import scala.collection.compat._
-import scala.reflect.ClassTag
-import scala.reflect.classTag
-
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.dom.ConceptDeclaration
@@ -35,14 +30,21 @@ import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.dom.XsdSchema
 import eu.cdevreeze.tqa.base.queryapi.TaxonomyLike
-import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
+import eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship
+import eu.cdevreeze.tqa.base.relationship.NonStandardInterElementDeclarationRelationship
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.relationship.Relationship
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
+import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
 import eu.cdevreeze.tqa.base.relationship.StandardRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.DerivedState
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Scope
+
+import scala.collection.immutable
+import scala.collection.compat._
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 /**
  * Basic implementation of a taxonomy that offers the TaxonomyApi query API. It does not enforce closure
@@ -78,7 +80,8 @@ final class BasicTaxonomy private (
 
   def nonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship] = derivedState.nonStandardRelationships
 
-  def standardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship] = derivedState.standardInterConceptRelationships
+  def standardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship] =
+    derivedState.standardInterConceptRelationships
 
   def standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]] =
     derivedState.standardRelationshipsBySource
@@ -94,6 +97,15 @@ final class BasicTaxonomy private (
 
   def standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] =
     derivedState.standardInterConceptRelationshipsByTarget
+
+  def interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship] =
+    derivedState.interConceptRelationships
+
+  def interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] =
+    derivedState.interConceptRelationshipsBySource
+
+  def interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] =
+    derivedState.interConceptRelationshipsByTarget
 
   // Other methods
 
@@ -180,6 +192,14 @@ final class BasicTaxonomy private (
     findAllNonStandardRelationships.collect { case rel: A => rel }
   }
 
+  def findAllInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+
+    implicit val clsTag: ClassTag[A] = relationshipType
+
+    interConceptRelationships.collect { case rel: A => rel }
+  }
+
   /**
    * Creates a "sub-taxonomy" in which only the given document URIs occur.
    * It can be used for a specific entry point DTS, or to make query methods (not taking an EName) cheaper.
@@ -248,7 +268,10 @@ object BasicTaxonomy {
       val nonStandardRelationshipsBySource: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
       val nonStandardRelationshipsByTarget: Map[XmlFragmentKey, immutable.IndexedSeq[NonStandardRelationship]],
       val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
-      val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]])
+      val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
+      val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship],
+      val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]],
+      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]])
 
   private[taxonomy] object DerivedState {
 
@@ -264,8 +287,9 @@ object BasicTaxonomy {
       // Below, I would prefer to exploit Scala 2.13 SeqMap instead
 
       val conceptDeclsWithTargetENames: immutable.IndexedSeq[(ConceptDeclaration, EName)] =
-        taxonomyBase.globalElementDeclarationsWithTargetENames.flatMap { case (decl, ename) =>
-          conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => conceptDecl -> ename)
+        taxonomyBase.globalElementDeclarationsWithTargetENames.flatMap {
+          case (decl, ename) =>
+            conceptDeclarationBuilder.optConceptDeclaration(decl).map(conceptDecl => conceptDecl -> ename)
         }
 
       val conceptDeclarations: immutable.IndexedSeq[ConceptDeclaration] = conceptDeclsWithTargetENames.map(_._1)
@@ -292,15 +316,39 @@ object BasicTaxonomy {
         nonStandardRelationships.groupBy(_.targetElem.key)
       }
 
-      val standardInterConceptRelationships = standardRelationships.collect { case rel: StandardInterConceptRelationship => rel }
+      val standardInterConceptRelationships = standardRelationships.collect {
+        case rel: StandardInterConceptRelationship => rel
+      }
 
-      val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+      val standardInterConceptRelationshipsBySource
+        : Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
         standardInterConceptRelationships.groupBy(_.sourceConceptEName)
       }
 
-      val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
+      val standardInterConceptRelationshipsByTarget
+        : Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]] = {
         standardInterConceptRelationships.groupBy(_.targetConceptEName)
       }
+
+      val conceptENames: Set[EName] = conceptDeclarationsByEName.keySet
+
+      def isInterConceptRelationship(rel: NonStandardInterElementDeclarationRelationship): Boolean = {
+        // Note entirely correct, because the element declarations themselves are not checked
+        conceptENames.contains(rel.sourceElementTargetEName) && conceptENames.contains(rel.targetElementTargetEName)
+      }
+
+      val nonStandardInterConceptRelationships = nonStandardRelationships.collect {
+        case rel: NonStandardInterElementDeclarationRelationship if isInterConceptRelationship(rel) => rel
+      }
+
+      val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship] =
+        standardInterConceptRelationships.appendedAll(nonStandardInterConceptRelationships)
+
+      val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] =
+        interConceptRelationships.groupBy(_.sourceElementTargetEName)
+
+      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] =
+        interConceptRelationships.groupBy(_.targetElementTargetEName)
 
       new DerivedState(
         netSubstitutionGroupMap,
@@ -313,7 +361,10 @@ object BasicTaxonomy {
         nonStandardRelationshipsBySource,
         nonStandardRelationshipsByTarget,
         standardInterConceptRelationshipsBySource,
-        standardInterConceptRelationshipsByTarget
+        standardInterConceptRelationshipsByTarget,
+        interConceptRelationships,
+        interConceptRelationshipsBySource,
+        interConceptRelationshipsByTarget
       )
     }
   }

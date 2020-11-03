@@ -35,3 +35,4 @@ trait TaxonomyLike
     with ElementLabelRelationshipContainerLike
     with ElementReferenceRelationshipContainerLike
     with DimensionalRelationshipContainerLike
+    with InterConceptRelationshipContainerLike
