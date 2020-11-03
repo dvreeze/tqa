@@ -74,6 +74,24 @@ trait StandardInterConceptRelationshipContainerApi {
       relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
+   * Finds all "consecutive" standard inter-concept relationships.
+   *
+   * Two relationships "follow" each other if method `StandardInterConceptRelationship.isFollowedBy` says so.
+   *
+   * Note that for non-dimensional relationships this implies that the parameter and result relationship
+   * types must be the same, or else no relationships are returned.
+   *
+   * This method is shorthand for:
+   * {{{
+   * filterOutgoingStandardInterConceptRelationships(relationship.targetConceptEName) { rel =>
+   *   relationship.isFollowedBy(rel)
+   * }
+   * }}}
+   */
+  def findAllConsecutiveStandardInterConceptRelationships(
+      relationship: StandardInterConceptRelationship): immutable.IndexedSeq[StandardInterConceptRelationship]
+
+  /**
    * Finds all "following" ("consecutive") standard inter-concept relationships of the given result type.
    *
    * Two relationships "follow" each other if method `StandardInterConceptRelationship.isFollowedBy` says so.

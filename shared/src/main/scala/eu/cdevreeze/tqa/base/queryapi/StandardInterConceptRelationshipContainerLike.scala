@@ -95,6 +95,13 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
     }
   }
 
+  final def findAllConsecutiveStandardInterConceptRelationships(
+      relationship: StandardInterConceptRelationship): immutable.IndexedSeq[StandardInterConceptRelationship] = {
+    filterOutgoingStandardInterConceptRelationships(relationship.targetConceptEName) { rel =>
+      relationship.isFollowedBy(rel)
+    }
+  }
+
   final def findAllConsecutiveStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
       relationship: StandardInterConceptRelationship,
       resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {

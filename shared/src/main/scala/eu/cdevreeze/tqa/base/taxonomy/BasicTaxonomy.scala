@@ -173,7 +173,7 @@ final class BasicTaxonomy private (
 
     implicit val clsTag: ClassTag[A] = relationshipType
 
-    findAllStandardRelationships.collect { case rel: A => rel }
+    standardRelationships.collect { case rel: A => rel }
   }
 
   def findAllStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
@@ -181,7 +181,7 @@ final class BasicTaxonomy private (
 
     implicit val clsTag: ClassTag[A] = relationshipType
 
-    findAllStandardInterConceptRelationships.collect { case rel: A => rel }
+    standardInterConceptRelationships.collect { case rel: A => rel }
   }
 
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
@@ -189,7 +189,7 @@ final class BasicTaxonomy private (
 
     implicit val clsTag: ClassTag[A] = relationshipType
 
-    findAllNonStandardRelationships.collect { case rel: A => rel }
+    nonStandardRelationships.collect { case rel: A => rel }
   }
 
   def findAllInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
@@ -342,7 +342,7 @@ object BasicTaxonomy {
       }
 
       val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship] =
-        standardInterConceptRelationships.appendedAll(nonStandardInterConceptRelationships)
+        standardInterConceptRelationships ++ nonStandardInterConceptRelationships
 
       val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] =
         interConceptRelationships.groupBy(_.sourceElementTargetEName)

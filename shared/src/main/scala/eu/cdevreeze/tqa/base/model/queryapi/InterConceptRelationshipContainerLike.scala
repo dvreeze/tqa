@@ -22,7 +22,6 @@ import eu.cdevreeze.yaidom.core.EName
 
 import scala.collection.immutable
 import scala.reflect.ClassTag
-import scala.reflect.classTag
 
 /**
  * Partial implementation of `InterConceptRelationshipContainerApi`.
@@ -32,6 +31,8 @@ import scala.reflect.classTag
 trait InterConceptRelationshipContainerLike extends InterConceptRelationshipContainerApi {
 
   // Abstract methods
+
+  def interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship]
 
   /**
    * Returns a map from source concepts to standard/generic inter-concept relationships. Must be fast in order for this trait to be fast.
@@ -44,124 +45,140 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
   def interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]]
 
   def findAllInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
 
   final def findAllInterConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship] = {
-    findAllInterConceptRelationshipsOfType(classTag[InterElementDeclarationRelationship])
+    interConceptRelationships
   }
 
   final def filterInterConceptRelationships(
-    p: InterElementDeclarationRelationship => Boolean): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+      p: InterElementDeclarationRelationship => Boolean): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
 
-    filterInterConceptRelationshipsOfType(classTag[InterElementDeclarationRelationship])(p)
+    findAllInterConceptRelationships.filter(p)
   }
 
   final def filterInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     findAllInterConceptRelationshipsOfType(relationshipType).filter(p)
   }
 
   final def findAllOutgoingInterConceptRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+      sourceConcept: EName): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
 
     filterOutgoingInterConceptRelationships(sourceConcept)(_ => true)
   }
 
-  final def filterOutgoingInterConceptRelationships(
-    sourceConcept: EName)(p: InterElementDeclarationRelationship => Boolean): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+  final def filterOutgoingInterConceptRelationships(sourceConcept: EName)(
+      p: InterElementDeclarationRelationship => Boolean): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
 
     interConceptRelationshipsBySource.getOrElse(sourceConcept, Vector()).filter(p)
   }
 
   final def findAllOutgoingInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      sourceConcept: EName,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterOutgoingInterConceptRelationshipsOfType(sourceConcept, relationshipType)(_ => true)
   }
 
   final def filterOutgoingInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      sourceConcept: EName,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag: ClassTag[A] = relationshipType
-    interConceptRelationshipsBySource.getOrElse(sourceConcept, Vector()).collect { case relationship: A if p(relationship) => relationship }
+
+    interConceptRelationshipsBySource.getOrElse(sourceConcept, Vector()).collect {
+      case relationship: A if p(relationship) => relationship
+    }
   }
 
-  final def findAllConsecutiveInterConceptRelationships(relationship: InterElementDeclarationRelationship): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+  final def findAllConsecutiveInterConceptRelationships(
+      relationship: InterElementDeclarationRelationship): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+
     filterOutgoingInterConceptRelationships(relationship.targetElementTargetEName) { rel =>
       relationship.isFollowedBy(rel)
     }
   }
 
   final def findAllConsecutiveInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
-    relationship: InterElementDeclarationRelationship,
-    resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      relationship: InterElementDeclarationRelationship,
+      resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
-    filterOutgoingInterConceptRelationshipsOfType(relationship.targetElementTargetEName, resultRelationshipType) { rel =>
-      relationship.isFollowedBy(rel)
+    filterOutgoingInterConceptRelationshipsOfType(relationship.targetElementTargetEName, resultRelationshipType) {
+      rel =>
+        relationship.isFollowedBy(rel)
     }
   }
 
   final def findAllIncomingInterConceptRelationships(
-    targetConcept: EName): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+      targetConcept: EName): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
 
     filterIncomingInterConceptRelationships(targetConcept)(_ => true)
   }
 
-  final def filterIncomingInterConceptRelationships(
-    targetConcept: EName)(p: InterElementDeclarationRelationship => Boolean): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+  final def filterIncomingInterConceptRelationships(targetConcept: EName)(
+      p: InterElementDeclarationRelationship => Boolean): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
 
     interConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()).filter(p)
   }
 
   final def findAllIncomingInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      targetConcept: EName,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterIncomingInterConceptRelationshipsOfType(targetConcept, relationshipType)(_ => true)
   }
 
   final def filterIncomingInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      targetConcept: EName,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag: ClassTag[A] = relationshipType
-    interConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()).collect { case relationship: A if p(relationship) => relationship }
+
+    interConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()).collect {
+      case relationship: A if p(relationship) => relationship
+    }
   }
 
   final def filterOutgoingConsecutiveInterConceptRelationshipPaths[A <: InterElementDeclarationRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A])(p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
+      sourceConcept: EName,
+      relationshipType: ClassTag[A])(
+      p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
 
-    val nextRelationships = filterOutgoingInterConceptRelationshipsOfType(sourceConcept, relationshipType)(rel => p(ConsecutiveRelationshipPath(rel)))
+    val nextRelationships = filterOutgoingInterConceptRelationshipsOfType(sourceConcept, relationshipType)(rel =>
+      p(ConsecutiveRelationshipPath(rel)))
 
-    val paths = nextRelationships.flatMap(rel => filterOutgoingConsecutiveInterConceptRelationshipPaths(ConsecutiveRelationshipPath(rel), relationshipType)(p))
+    val paths = nextRelationships.flatMap(rel =>
+      filterOutgoingConsecutiveInterConceptRelationshipPaths(ConsecutiveRelationshipPath(rel), relationshipType)(p))
     paths
   }
 
   final def filterIncomingConsecutiveInterConceptRelationshipPaths[A <: InterElementDeclarationRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A])(p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
+      targetConcept: EName,
+      relationshipType: ClassTag[A])(
+      p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
 
-    val prevRelationships = filterIncomingInterConceptRelationshipsOfType(targetConcept, relationshipType)(rel => p(ConsecutiveRelationshipPath(rel)))
+    val prevRelationships = filterIncomingInterConceptRelationshipsOfType(targetConcept, relationshipType)(rel =>
+      p(ConsecutiveRelationshipPath(rel)))
 
-    val paths = prevRelationships.flatMap(rel => filterIncomingConsecutiveInterConceptRelationshipPaths(ConsecutiveRelationshipPath(rel), relationshipType)(p))
+    val paths = prevRelationships.flatMap(rel =>
+      filterIncomingConsecutiveInterConceptRelationshipPaths(ConsecutiveRelationshipPath(rel), relationshipType)(p))
     paths
   }
 
   // Private methods
 
   private def filterOutgoingConsecutiveInterConceptRelationshipPaths[A <: InterElementDeclarationRelationship](
-    path: ConsecutiveRelationshipPath[A],
-    relationshipType: ClassTag[A])(p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
+      path: ConsecutiveRelationshipPath[A],
+      relationshipType: ClassTag[A])(
+      p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
 
     val nextRelationships =
-      filterOutgoingInterConceptRelationshipsOfType(
-        path.targetConcept, relationshipType)(relationship => !path.hasCycle && path.canAppend(relationship) && p(path.append(relationship)))
+      filterOutgoingInterConceptRelationshipsOfType(path.targetConcept, relationshipType)(relationship =>
+        !path.hasCycle && path.canAppend(relationship) && p(path.append(relationship)))
 
     val nextPaths = nextRelationships.map(rel => path.append(rel))
 
@@ -176,12 +193,13 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
   }
 
   private def filterIncomingConsecutiveInterConceptRelationshipPaths[A <: InterElementDeclarationRelationship](
-    path: ConsecutiveRelationshipPath[A],
-    relationshipType: ClassTag[A])(p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
+      path: ConsecutiveRelationshipPath[A],
+      relationshipType: ClassTag[A])(
+      p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
 
     val prevRelationships =
-      filterIncomingInterConceptRelationshipsOfType(
-        path.sourceConcept, relationshipType)(relationship => !path.hasCycle && path.canPrepend(relationship) && p(path.prepend(relationship)))
+      filterIncomingInterConceptRelationshipsOfType(path.sourceConcept, relationshipType)(relationship =>
+        !path.hasCycle && path.canPrepend(relationship) && p(path.prepend(relationship)))
 
     val prevPaths = prevRelationships.map(rel => path.prepend(rel))
 

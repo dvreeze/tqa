@@ -95,6 +95,14 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
     }
   }
 
+  final def findAllConsecutiveInterConceptRelationships(
+      relationship: InterElementDeclarationRelationship): immutable.IndexedSeq[InterElementDeclarationRelationship] = {
+
+    filterOutgoingInterConceptRelationships(relationship.targetElementTargetEName) { rel =>
+      relationship.isFollowedBy(rel)
+    }
+  }
+
   final def findAllConsecutiveInterConceptRelationshipsOfType[A <: InterElementDeclarationRelationship](
       relationship: InterElementDeclarationRelationship,
       resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {

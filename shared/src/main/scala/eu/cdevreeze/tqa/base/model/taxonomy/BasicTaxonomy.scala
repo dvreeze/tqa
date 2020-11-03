@@ -65,6 +65,7 @@ final class BasicTaxonomy private (
     val standardRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardRelationship]],
     val nonStandardRelationshipsBySource: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
     val nonStandardRelationshipsByTarget: Map[Node, immutable.IndexedSeq[NonStandardRelationship]],
+    val standardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship],
     val standardInterConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
     val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
     val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship],
@@ -247,7 +248,7 @@ object BasicTaxonomy {
     }
 
     val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship] =
-      standardInterConceptRelationships.appendedAll(nonStandardInterConceptRelationships)
+      standardInterConceptRelationships ++ nonStandardInterConceptRelationships
 
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] = {
       interConceptRelationships.groupBy(_.sourceElementTargetEName)
@@ -278,6 +279,7 @@ object BasicTaxonomy {
       standardRelationshipsBySource,
       nonStandardRelationshipsBySource,
       nonStandardRelationshipsByTarget,
+      standardInterConceptRelationships,
       standardInterConceptRelationshipsBySource,
       standardInterConceptRelationshipsByTarget,
       interConceptRelationships,
