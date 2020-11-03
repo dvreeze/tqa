@@ -18,11 +18,6 @@ package eu.cdevreeze.tqa.base.relationship
 
 import java.net.URI
 
-import scala.collection.immutable
-import scala.reflect.classTag
-
-import eu.cdevreeze.tqa.XmlFragmentKey
-import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.ENames.GplPreferredLabelEName
 import eu.cdevreeze.tqa.ENames.LinkCalculationArcEName
 import eu.cdevreeze.tqa.ENames.LinkDefinitionArcEName
@@ -37,6 +32,8 @@ import eu.cdevreeze.tqa.ENames.XbrldtContextElementEName
 import eu.cdevreeze.tqa.ENames.XbrldtTargetRoleEName
 import eu.cdevreeze.tqa.ENames.XbrldtUsableEName
 import eu.cdevreeze.tqa.ENames.XmlLangEName
+import eu.cdevreeze.tqa.XmlFragmentKey
+import eu.cdevreeze.tqa.XsdBooleans
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.common.ContextElement
 import eu.cdevreeze.tqa.base.common.StandardLabelRoles
@@ -57,6 +54,9 @@ import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.dom.XLinkResource
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.Path
+
+import scala.collection.immutable
+import scala.reflect.classTag
 
 /**
  * Any '''relationship'''. Relationships are like their underlying arcs, but resolving the locators.
@@ -81,13 +81,17 @@ import eu.cdevreeze.yaidom.core.Path
  * @author Chris de Vreeze
  */
 sealed abstract class Relationship(
-  val arc: XLinkArc,
-  val resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  val resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) {
+    val arc: XLinkArc,
+    val resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    val resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) {
 
-  require(arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'from' not matching on label in $docUri")
+  require(
+    arc.from == resolvedFrom.xlinkLocatorOrResource.xlinkLabel,
+    s"Arc and 'from' not matching on label in $docUri")
   require(arc.to == resolvedTo.xlinkLocatorOrResource.xlinkLabel, s"Arc and 'to' not matching on label in $docUri")
-  require(arc.attributeOption(XLinkArcroleEName).isDefined, s"Missing arcrole attribute in ${arc.resolvedName} element in $docUri")
+  require(
+    arc.attributeOption(XLinkArcroleEName).isDefined,
+    s"Missing arcrole attribute in ${arc.resolvedName} element in $docUri")
 
   final def validated: Relationship = {
     require(resolvedFrom.elr == arc.elr, s"Arc and 'from' not in same ELR in $docUri")
@@ -147,9 +151,10 @@ sealed abstract class Relationship(
  * [[eu.cdevreeze.tqa.base.relationship.ConceptResourceRelationship]].
  */
 sealed abstract class StandardRelationship(
-  arc: StandardArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo) {
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem])
+    extends Relationship(arc, resolvedFrom, resolvedTo) {
 
   final def sourceGlobalElementDeclaration: GlobalElementDeclaration = resolvedFrom.resolvedElem
 
@@ -160,9 +165,10 @@ sealed abstract class StandardRelationship(
  * Non-standard relationship. Typically a generic relationship.
  */
 sealed abstract class NonStandardRelationship(
-  arc: NonStandardArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo) {
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem])
+    extends Relationship(arc, resolvedFrom, resolvedTo) {
 
   /**
    * Returns the optional gpl:preferredLabel attribute on the underlying arc.
@@ -177,22 +183,48 @@ sealed abstract class NonStandardRelationship(
  * an invalid relationship.
  */
 final class UnknownRelationship(
-  arc: XLinkArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends Relationship(arc, resolvedFrom, resolvedTo)
+    arc: XLinkArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem])
+    extends Relationship(arc, resolvedFrom, resolvedTo)
 
 /**
- * Standard inter-concept relationship. Either an [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]],
+ * Common super-trait for relationships (whether standard or generic) between global element declarations.
+ * Typically they are relationships between concepts. An element declaration relationship is either a
+ * [[eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship]] or a [[eu.cdevreeze.tqa.base.relationship.NonStandardInterElementDeclarationRelationship]].
+ *
+ * This trait is rich enough to model both standard inter-concept relationships and potentially generic inter-concept
+ * relationships that make up concept relationship trees that are allowed according to XBRL table and formula specifications.
+ */
+sealed trait InterElementDeclarationRelationship extends Relationship {
+
+  def sourceGlobalElementDeclaration: GlobalElementDeclaration
+
+  def sourceElementTargetEName: EName
+
+  def targetGlobalElementDeclaration: GlobalElementDeclaration
+
+  def targetElementTargetEName: EName
+}
+
+/**
+ * Standard inter-concept relationship. Either a [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]],
  * [[eu.cdevreeze.tqa.base.relationship.PresentationRelationship]], or a [[eu.cdevreeze.tqa.base.relationship.CalculationRelationship]].
  */
 sealed abstract class StandardInterConceptRelationship(
-  arc: StandardArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends StandardRelationship(arc, resolvedFrom, resolvedTo)
+    with InterElementDeclarationRelationship {
 
   final def targetGlobalElementDeclaration: GlobalElementDeclaration = resolvedTo.resolvedElem
 
   final def targetConceptEName: EName = targetGlobalElementDeclaration.targetEName
+
+  final def sourceElementTargetEName: EName = sourceConceptEName
+
+  final def targetElementTargetEName: EName = targetConceptEName
 
   /**
    * For non-dimensional relationships, returns true if the target concept of this relationship matches the source
@@ -207,7 +239,7 @@ sealed abstract class StandardInterConceptRelationship(
    */
   final def isFollowedBy(rel: StandardInterConceptRelationship): Boolean = {
     (this.targetConceptEName == rel.sourceConceptEName) &&
-      (this.effectiveTargetBaseSetKey == rel.baseSetKey)
+    (this.effectiveTargetBaseSetKey == rel.baseSetKey)
   }
 
   /**
@@ -238,9 +270,10 @@ sealed abstract class StandardInterConceptRelationship(
  * [[eu.cdevreeze.tqa.base.relationship.ConceptReferenceRelationship]].
  */
 sealed abstract class ConceptResourceRelationship(
-  arc: StandardArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: StandardArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource])
+    extends StandardRelationship(arc, resolvedFrom, resolvedTo) {
 
   def resource: XLinkResource
 }
@@ -249,9 +282,10 @@ sealed abstract class ConceptResourceRelationship(
  * Concept-label relationship. Its underlying arc is of type [[eu.cdevreeze.tqa.base.dom.LabelArc]].
  */
 final class ConceptLabelRelationship(
-  arc: LabelArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: ConceptLabelResource]) extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: LabelArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: ConceptLabelResource])
+    extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
 
   def resource: ConceptLabelResource = resolvedTo.resolvedElem
 
@@ -268,9 +302,10 @@ final class ConceptLabelRelationship(
  * Concept-reference relationship. Its underlying arc is of type [[eu.cdevreeze.tqa.base.dom.ReferenceArc]].
  */
 final class ConceptReferenceRelationship(
-  arc: ReferenceArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource[_ <: ConceptReferenceResource]) extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: ReferenceArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource[_ <: ConceptReferenceResource])
+    extends ConceptResourceRelationship(arc, resolvedFrom, resolvedTo) {
 
   def resource: ConceptReferenceResource = resolvedTo.resolvedElem
 
@@ -285,9 +320,10 @@ final class ConceptReferenceRelationship(
  * Presentation relationship. Its underlying arc is of type [[eu.cdevreeze.tqa.base.dom.PresentationArc]].
  */
 sealed class PresentationRelationship(
-  arc: PresentationArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: PresentationArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo) {
 
   /**
    * Returns the optional preferredLabel attribute on the underlying arc.
@@ -301,9 +337,10 @@ sealed class PresentationRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.PresentationRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/parent-child".
  */
 final class ParentChildRelationship(
-  arc: PresentationArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends PresentationRelationship(arc, resolvedFrom, resolvedTo)
+    arc: PresentationArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends PresentationRelationship(arc, resolvedFrom, resolvedTo)
 
 // Standard calculation link relationships
 
@@ -311,9 +348,10 @@ final class ParentChildRelationship(
  * Calculation relationship. Its underlying arc is of type [[eu.cdevreeze.tqa.base.dom.CalculationArc]].
  */
 sealed class CalculationRelationship(
-  arc: CalculationArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: CalculationArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo) {
 
   def weight: Double = arc.weight
 }
@@ -322,9 +360,10 @@ sealed class CalculationRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.CalculationRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/summation-item".
  */
 final class SummationItemRelationship(
-  arc: CalculationArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends CalculationRelationship(arc, resolvedFrom, resolvedTo)
+    arc: CalculationArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends CalculationRelationship(arc, resolvedFrom, resolvedTo)
 
 // Standard definition link relationships, including dimensional ones
 
@@ -332,57 +371,64 @@ final class SummationItemRelationship(
  * Definition relationship. Its underlying arc is of type [[eu.cdevreeze.tqa.base.dom.DefinitionArc]].
  */
 sealed class DefinitionRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends StandardInterConceptRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/general-special".
  */
 final class GeneralSpecialRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/essence-alias".
  */
 final class EssenceAliasRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/similar-tuples".
  */
 final class SimilarTuplesRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.DefinitionRelationship]] with arcrole "http://www.xbrl.org/2003/arcrole/requires-element".
  */
 final class RequiresElementRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * Dimensional definition relationship.
  */
 sealed abstract class DimensionalRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DefinitionRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * Either an [[eu.cdevreeze.tqa.base.relationship.AllRelationship]] or a [[eu.cdevreeze.tqa.base.relationship.NotAllRelationship]].
  */
 sealed abstract class HasHypercubeRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
   final def primary: EName = sourceConceptEName
 
@@ -393,12 +439,13 @@ sealed abstract class HasHypercubeRelationship(
   final def isNotAllRelationship: Boolean = !isAllRelationship
 
   final def closed: Boolean = {
-    arc.attributeOption(XbrldtClosedEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
+    arc.attributeOption(XbrldtClosedEName).exists(v => XsdBooleans.parseBoolean(v))
   }
 
   final def contextElement: ContextElement = {
-    val attrValue = arc.attributeOption(XbrldtContextElementEName).getOrElse(
-      sys.error(s"Missing attribute @xbrldt:contextElement on has-hypercube arc in $docUri."))
+    val attrValue = arc
+      .attributeOption(XbrldtContextElementEName)
+      .getOrElse(sys.error(s"Missing attribute @xbrldt:contextElement on has-hypercube arc in $docUri."))
 
     ContextElement.fromString(attrValue)
   }
@@ -416,9 +463,10 @@ sealed abstract class HasHypercubeRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.DimensionalRelationship]] with arcrole "http://xbrl.org/int/dim/arcrole/all".
  */
 final class AllRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo) {
 
   def isAllRelationship: Boolean = true
 }
@@ -427,9 +475,10 @@ final class AllRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.DimensionalRelationship]] with arcrole "http://xbrl.org/int/dim/arcrole/notAll".
  */
 final class NotAllRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends HasHypercubeRelationship(arc, resolvedFrom, resolvedTo) {
 
   def isAllRelationship: Boolean = false
 }
@@ -438,9 +487,10 @@ final class NotAllRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.DimensionalRelationship]] with arcrole "http://xbrl.org/int/dim/arcrole/hypercube-dimension".
  */
 final class HypercubeDimensionRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
   def hypercube: EName = sourceConceptEName
 
@@ -459,12 +509,13 @@ final class HypercubeDimensionRelationship(
  * Either an [[eu.cdevreeze.tqa.base.relationship.DimensionDomainRelationship]] or a [[eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship]].
  */
 sealed abstract class DomainAwareRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
   final def usable: Boolean = {
-    arc.attributeOption(XbrldtUsableEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(true)
+    arc.attributeOption(XbrldtUsableEName).forall(v => XsdBooleans.parseBoolean(v))
   }
 
   final override def effectiveTargetRole: String = {
@@ -480,9 +531,10 @@ sealed abstract class DomainAwareRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.DimensionalRelationship]] with arcrole "http://xbrl.org/int/dim/arcrole/dimension-domain".
  */
 final class DimensionDomainRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
 
   def dimension: EName = sourceConceptEName
 
@@ -493,9 +545,10 @@ final class DimensionDomainRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.DimensionalRelationship]] with arcrole "http://xbrl.org/int/dim/arcrole/domain-member".
  */
 final class DomainMemberRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DomainAwareRelationship(arc, resolvedFrom, resolvedTo) {
 
   def domain: EName = sourceConceptEName
 
@@ -506,9 +559,10 @@ final class DomainMemberRelationship(
  * A [[eu.cdevreeze.tqa.base.relationship.DimensionalRelationship]] with arcrole "http://xbrl.org/int/dim/arcrole/dimension-default".
  */
 final class DimensionDefaultRelationship(
-  arc: DefinitionArc,
-  resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-  resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]) extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
+    arc: DefinitionArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends DimensionalRelationship(arc, resolvedFrom, resolvedTo) {
 
   def dimension: EName = sourceConceptEName
 
@@ -518,44 +572,68 @@ final class DimensionDefaultRelationship(
 // Generic relationships
 
 /**
+ * A non-standard [[eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship]].
+ */
+final class NonStandardInterElementDeclarationRelationship(
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
+    with InterElementDeclarationRelationship {
+
+  def sourceGlobalElementDeclaration: GlobalElementDeclaration = resolvedFrom.resolvedElem
+
+  def sourceElementTargetEName: EName = sourceGlobalElementDeclaration.targetEName
+
+  def targetGlobalElementDeclaration: GlobalElementDeclaration = resolvedTo.resolvedElem
+
+  def targetElementTargetEName: EName = targetGlobalElementDeclaration.targetEName
+}
+
+/**
  * Either an [[eu.cdevreeze.tqa.base.relationship.ElementLabelRelationship]] or an [[eu.cdevreeze.tqa.base.relationship.ElementReferenceRelationship]].
  */
 sealed abstract class ElementResourceRelationship(
-  arc: NonStandardArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource])
+    extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.NonStandardRelationship]] with arcrole "http://xbrl.org/arcrole/2008/element-label".
  */
 final class ElementLabelRelationship(
-  arc: NonStandardArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends ElementResourceRelationship(arc, resolvedFrom, resolvedTo)
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource])
+    extends ElementResourceRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.NonStandardRelationship]] with arcrole "http://xbrl.org/arcrole/2008/element-reference".
  */
 final class ElementReferenceRelationship(
-  arc: NonStandardArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends ElementResourceRelationship(arc, resolvedFrom, resolvedTo)
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource])
+    extends ElementResourceRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.NonStandardRelationship]] whose target is a msg:message element.
  */
 final class ElementMessageRelationship(
-  arc: NonStandardArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]) extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource])
+    extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
 
 /**
  * A [[eu.cdevreeze.tqa.base.relationship.NonStandardRelationship]] not falling in the other categories of non-standard relationships.
  */
 final class OtherNonStandardRelationship(
-  arc: NonStandardArc,
-  resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-  resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]) extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
+    arc: NonStandardArc,
+    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem])
+    extends NonStandardRelationship(arc, resolvedFrom, resolvedTo)
 
 // Companion objects
 
@@ -579,20 +657,25 @@ object Relationship {
    * a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]] and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]].
    */
   def apply(
-    arc: XLinkArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Relationship = {
+      arc: XLinkArc,
+      resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+      resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Relationship = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     (arc, resolvedFrom.resolvedElem) match {
-      case (arc: StandardArc, elemDecl: GlobalElementDeclaration) =>
+      case (arc: StandardArc, _: GlobalElementDeclaration) =>
         val from = resolvedFrom.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]]
-        StandardRelationship.opt(arc, from, resolvedTo).getOrElse(new UnknownRelationship(arc, resolvedFrom, resolvedTo))
+        StandardRelationship
+          .opt(arc, from, resolvedTo)
+          .getOrElse(new UnknownRelationship(arc, resolvedFrom, resolvedTo))
       case (arc: NonStandardArc, _) =>
-        NonStandardRelationship.opt(arc, resolvedFrom, resolvedTo).getOrElse(new UnknownRelationship(arc, resolvedFrom, resolvedTo))
+        NonStandardRelationship
+          .opt(arc, resolvedFrom, resolvedTo)
+          .getOrElse(new UnknownRelationship(arc, resolvedFrom, resolvedTo))
       case (_, _) =>
         new UnknownRelationship(arc, resolvedFrom, resolvedTo)
     }
@@ -609,18 +692,22 @@ object StandardRelationship {
    * and returning None otherwise.
    */
   def opt(
-    arc: StandardArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[StandardRelationship] = {
+      arc: StandardArc,
+      resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+      resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[StandardRelationship] = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     resolvedTo.resolvedElem match {
-      case elemDecl: GlobalElementDeclaration =>
-        StandardInterConceptRelationship.opt(arc, resolvedFrom, resolvedTo.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]])
-      case res: XLinkResource =>
+      case _: GlobalElementDeclaration =>
+        StandardInterConceptRelationship.opt(
+          arc,
+          resolvedFrom,
+          resolvedTo.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]])
+      case _: XLinkResource =>
         ConceptResourceRelationship.opt(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource]))
       case _ => None
     }
@@ -637,21 +724,30 @@ object NonStandardRelationship {
    * and returning None otherwise.
    */
   def opt(
-    arc: NonStandardArc,
-    resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
-    resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[NonStandardRelationship] = {
+      arc: NonStandardArc,
+      resolvedFrom: ResolvedLocatorOrResource[_ <: TaxonomyElem],
+      resolvedTo: ResolvedLocatorOrResource[_ <: TaxonomyElem]): Option[NonStandardRelationship] = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
-    (arc.arcrole, arc, resolvedTo.resolvedElem) match {
-      case ("http://xbrl.org/arcrole/2008/element-label", arc: NonStandardArc, res: XLinkResource) =>
+    (arc.arcrole, arc, resolvedFrom.resolvedElem, resolvedTo.resolvedElem) match {
+      case ("http://xbrl.org/arcrole/2008/element-label", arc: NonStandardArc, _, _: XLinkResource) =>
         Some(new ElementLabelRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource])))
-      case ("http://xbrl.org/arcrole/2008/element-reference", arc: NonStandardArc, res: XLinkResource) =>
-        Some(new ElementReferenceRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource])))
-      case (_, arc: NonStandardArc, res: XLinkResource) if resolvedTo.resolvedElem.resolvedName == MsgMessageEName =>
+      case ("http://xbrl.org/arcrole/2008/element-reference", arc: NonStandardArc, _, _: XLinkResource) =>
+        Some(
+          new ElementReferenceRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource])))
+      case (_, arc: NonStandardArc, _, _: XLinkResource) if resolvedTo.resolvedElem.resolvedName == MsgMessageEName =>
         Some(new ElementMessageRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[XLinkResource])))
+      case (_, arc: NonStandardArc, _: GlobalElementDeclaration, _: GlobalElementDeclaration) =>
+        Some(
+          new NonStandardInterElementDeclarationRelationship(
+            arc,
+            resolvedFrom.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]],
+            resolvedTo.asInstanceOf[ResolvedLocatorOrResource.Locator[GlobalElementDeclaration]]
+          ))
       case _ =>
         Some(new OtherNonStandardRelationship(arc, resolvedFrom, resolvedTo))
     }
@@ -666,18 +762,22 @@ object StandardInterConceptRelationship {
    * and returning None otherwise.
    */
   def opt(
-    arc: StandardArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): Option[StandardInterConceptRelationship] = {
+      arc: StandardArc,
+      resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+      resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration])
+    : Option[StandardInterConceptRelationship] = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     (arc.resolvedName, arc) match {
       case (LinkDefinitionArcEName, arc: DefinitionArc) => Some(DefinitionRelationship(arc, resolvedFrom, resolvedTo))
-      case (LinkPresentationArcEName, arc: PresentationArc) => Some(PresentationRelationship(arc, resolvedFrom, resolvedTo))
-      case (LinkCalculationArcEName, arc: CalculationArc) => Some(CalculationRelationship(arc, resolvedFrom, resolvedTo))
+      case (LinkPresentationArcEName, arc: PresentationArc) =>
+        Some(PresentationRelationship(arc, resolvedFrom, resolvedTo))
+      case (LinkCalculationArcEName, arc: CalculationArc) =>
+        Some(CalculationRelationship(arc, resolvedFrom, resolvedTo))
       case _ => None
     }
   }
@@ -693,19 +793,28 @@ object ConceptResourceRelationship {
    * and returning None otherwise.
    */
   def opt(
-    arc: StandardArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]): Option[ConceptResourceRelationship] = {
+      arc: StandardArc,
+      resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+      resolvedTo: ResolvedLocatorOrResource[_ <: XLinkResource]): Option[ConceptResourceRelationship] = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     (arc.resolvedName, arc, resolvedTo.resolvedElem) match {
-      case (LinkLabelArcEName, arc: LabelArc, lbl: ConceptLabelResource) =>
-        Some(new ConceptLabelRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[ConceptLabelResource])))
-      case (LinkReferenceArcEName, arc: ReferenceArc, ref: ConceptReferenceResource) =>
-        Some(new ConceptReferenceRelationship(arc, resolvedFrom, unsafeCastResource(resolvedTo, classTag[ConceptReferenceResource])))
+      case (LinkLabelArcEName, arc: LabelArc, _: ConceptLabelResource) =>
+        Some(
+          new ConceptLabelRelationship(
+            arc,
+            resolvedFrom,
+            unsafeCastResource(resolvedTo, classTag[ConceptLabelResource])))
+      case (LinkReferenceArcEName, arc: ReferenceArc, _: ConceptReferenceResource) =>
+        Some(
+          new ConceptReferenceRelationship(
+            arc,
+            resolvedFrom,
+            unsafeCastResource(resolvedTo, classTag[ConceptReferenceResource])))
       case _ => None
     }
   }
@@ -718,20 +827,28 @@ object DefinitionRelationship {
    * a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]] and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]].
    */
   def apply(
-    arc: DefinitionArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): DefinitionRelationship = {
+      arc: DefinitionArc,
+      resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+      resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): DefinitionRelationship = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     arc.arcrole match {
-      case "http://www.xbrl.org/2003/arcrole/general-special" => new GeneralSpecialRelationship(arc, resolvedFrom, resolvedTo)
-      case "http://www.xbrl.org/2003/arcrole/essence-alias" => new EssenceAliasRelationship(arc, resolvedFrom, resolvedTo)
-      case "http://www.xbrl.org/2003/arcrole/similar-tuples" => new SimilarTuplesRelationship(arc, resolvedFrom, resolvedTo)
-      case "http://www.xbrl.org/2003/arcrole/requires-element" => new RequiresElementRelationship(arc, resolvedFrom, resolvedTo)
-      case _ => DimensionalRelationship.opt(arc, resolvedFrom, resolvedTo).getOrElse(new DefinitionRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://www.xbrl.org/2003/arcrole/general-special" =>
+        new GeneralSpecialRelationship(arc, resolvedFrom, resolvedTo)
+      case "http://www.xbrl.org/2003/arcrole/essence-alias" =>
+        new EssenceAliasRelationship(arc, resolvedFrom, resolvedTo)
+      case "http://www.xbrl.org/2003/arcrole/similar-tuples" =>
+        new SimilarTuplesRelationship(arc, resolvedFrom, resolvedTo)
+      case "http://www.xbrl.org/2003/arcrole/requires-element" =>
+        new RequiresElementRelationship(arc, resolvedFrom, resolvedTo)
+      case _ =>
+        DimensionalRelationship
+          .opt(arc, resolvedFrom, resolvedTo)
+          .getOrElse(new DefinitionRelationship(arc, resolvedFrom, resolvedTo))
     }
   }
 }
@@ -744,22 +861,27 @@ object DimensionalRelationship {
    * and returning None otherwise.
    */
   def opt(
-    arc: DefinitionArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): Option[DimensionalRelationship] = {
+      arc: DefinitionArc,
+      resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+      resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): Option[DimensionalRelationship] = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     arc.arcrole match {
-      case "http://xbrl.org/int/dim/arcrole/hypercube-dimension" => Some(new HypercubeDimensionRelationship(arc, resolvedFrom, resolvedTo))
-      case "http://xbrl.org/int/dim/arcrole/dimension-domain" => Some(new DimensionDomainRelationship(arc, resolvedFrom, resolvedTo))
-      case "http://xbrl.org/int/dim/arcrole/domain-member" => Some(new DomainMemberRelationship(arc, resolvedFrom, resolvedTo))
-      case "http://xbrl.org/int/dim/arcrole/dimension-default" => Some(new DimensionDefaultRelationship(arc, resolvedFrom, resolvedTo))
-      case "http://xbrl.org/int/dim/arcrole/all" => Some(new AllRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/hypercube-dimension" =>
+        Some(new HypercubeDimensionRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/dimension-domain" =>
+        Some(new DimensionDomainRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/domain-member" =>
+        Some(new DomainMemberRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/dimension-default" =>
+        Some(new DimensionDefaultRelationship(arc, resolvedFrom, resolvedTo))
+      case "http://xbrl.org/int/dim/arcrole/all"    => Some(new AllRelationship(arc, resolvedFrom, resolvedTo))
       case "http://xbrl.org/int/dim/arcrole/notAll" => Some(new NotAllRelationship(arc, resolvedFrom, resolvedTo))
-      case _ => None
+      case _                                        => None
     }
   }
 }
@@ -771,17 +893,18 @@ object PresentationRelationship {
    * a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]] and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]].
    */
   def apply(
-    arc: PresentationArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): PresentationRelationship = {
+      arc: PresentationArc,
+      resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+      resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): PresentationRelationship = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     arc.arcrole match {
       case "http://www.xbrl.org/2003/arcrole/parent-child" => new ParentChildRelationship(arc, resolvedFrom, resolvedTo)
-      case _ => new PresentationRelationship(arc, resolvedFrom, resolvedTo)
+      case _                                               => new PresentationRelationship(arc, resolvedFrom, resolvedTo)
     }
   }
 }
@@ -793,16 +916,18 @@ object CalculationRelationship {
    * a "from" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]] and a "to" [[eu.cdevreeze.tqa.base.relationship.ResolvedLocatorOrResource]].
    */
   def apply(
-    arc: CalculationArc,
-    resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
-    resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): CalculationRelationship = {
+      arc: CalculationArc,
+      resolvedFrom: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration],
+      resolvedTo: ResolvedLocatorOrResource.Locator[_ <: GlobalElementDeclaration]): CalculationRelationship = {
 
     require(
       arc.attributeOption(XLinkArcroleEName).isDefined,
-      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}")
+      s"Missing arcrole attribute in ${arc.resolvedName} element. Document: ${arc.docUri}. Path: ${arc.path}"
+    )
 
     arc.arcrole match {
-      case "http://www.xbrl.org/2003/arcrole/summation-item" => new SummationItemRelationship(arc, resolvedFrom, resolvedTo)
+      case "http://www.xbrl.org/2003/arcrole/summation-item" =>
+        new SummationItemRelationship(arc, resolvedFrom, resolvedTo)
       case _ => new CalculationRelationship(arc, resolvedFrom, resolvedTo)
     }
   }

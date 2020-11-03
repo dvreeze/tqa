@@ -79,21 +79,22 @@ sealed trait Relationship {
   def arcrole: String
 
   final def use: Use = {
-    Use.fromString(nonXLinkArcAttributes.get(ENames.UseEName).getOrElse("optional"))
+    Use.fromString(nonXLinkArcAttributes.getOrElse(ENames.UseEName, "optional"))
   }
 
   final def priority: Int = {
-    nonXLinkArcAttributes.get(ENames.PriorityEName).getOrElse("0").toInt
+    nonXLinkArcAttributes.getOrElse(ENames.PriorityEName, "0").toInt
   }
 
   final def order: BigDecimal = {
-    BigDecimal(nonXLinkArcAttributes.get(ENames.OrderEName).getOrElse("1"))
+    BigDecimal(nonXLinkArcAttributes.getOrElse(ENames.OrderEName, "1"))
   }
 
   final def validated: this.type = {
     require(
       nonXLinkArcAttributes.keySet.forall(!_.namespaceUriOption.contains(Namespaces.XLinkNamespace)),
-      s"Expected non-XLink arcattributes, but got attributes ${nonXLinkArcAttributes.keySet}")
+      s"Expected non-XLink arcattributes, but got attributes ${nonXLinkArcAttributes.keySet}"
+    )
 
     this
   }
@@ -111,11 +112,34 @@ sealed trait NonStandardRelationship extends Relationship {
   // TODO Preferred label
 }
 
-sealed trait StandardInterConceptRelationship extends StandardRelationship {
+/**
+ * Common super-trait for relationships (whether standard or generic) between global element declarations.
+ * Typically they are relationships between concepts. An element declaration relationship is either a
+ * [[eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship]] or a [[eu.cdevreeze.tqa.base.model.NonStandardInterElementDeclarationRelationship]].
+ *
+ * This trait is rich enough to model both standard inter-concept relationships and potentially generic inter-concept
+ * relationships that make up concept relationship trees that are allowed according to XBRL table and formula specifications.
+ */
+sealed trait InterElementDeclarationRelationship extends Relationship {
+
+  def source: Node.GlobalElementDecl
+
+  def sourceElementTargetEName: EName
+
+  def target: Node.GlobalElementDecl
+
+  def targetElementTargetEName: EName
+}
+
+sealed trait StandardInterConceptRelationship extends StandardRelationship with InterElementDeclarationRelationship {
 
   def target: Node.GlobalElementDecl
 
   final def targetConceptEName: EName = target.targetEName
+
+  final def sourceElementTargetEName: EName = sourceConceptEName
+
+  final def targetElementTargetEName: EName = targetConceptEName
 
   /**
    * For non-dimensional relationships, returns true if the target concept of this relationship matches the source
@@ -130,7 +154,7 @@ sealed trait StandardInterConceptRelationship extends StandardRelationship {
    */
   final def isFollowedBy(rel: StandardInterConceptRelationship): Boolean = {
     (this.targetConceptEName == rel.sourceConceptEName) &&
-      (this.effectiveTargetBaseSetKey == rel.baseSetKey)
+    (this.effectiveTargetBaseSetKey == rel.baseSetKey)
   }
 
   /**
@@ -164,10 +188,11 @@ sealed trait ConceptResourceRelationship extends StandardRelationship {
 }
 
 final case class ConceptLabelRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.ConceptLabelResource,
-  nonXLinkArcAttributes: Map[EName, String]) extends ConceptResourceRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.ConceptLabelResource,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends ConceptResourceRelationship {
 
   def resource: Node.ConceptLabelResource = target
 
@@ -187,10 +212,11 @@ final case class ConceptLabelRelationship(
 }
 
 final case class ConceptReferenceRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.ConceptReferenceResource,
-  nonXLinkArcAttributes: Map[EName, String]) extends ConceptResourceRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.ConceptReferenceResource,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends ConceptResourceRelationship {
 
   def resource: Node.ConceptReferenceResource = target
 
@@ -213,10 +239,11 @@ sealed trait PresentationRelationship extends StandardInterConceptRelationship {
 }
 
 final case class ParentChildRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends PresentationRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends PresentationRelationship {
 
   def arcrole: String = baseSetKey.arcrole
 
@@ -226,11 +253,12 @@ final case class ParentChildRelationship(
 }
 
 final case class OtherPresentationRelationship(
-  elr: String,
-  arcrole: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends PresentationRelationship {
+    elr: String,
+    arcrole: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends PresentationRelationship {
 
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forPresentationArc(arcrole, elr)
@@ -240,16 +268,19 @@ final case class OtherPresentationRelationship(
 sealed trait CalculationRelationship extends StandardInterConceptRelationship {
 
   final def weight: Double = {
-    nonXLinkArcAttributes.get(ENames.WeightEName).map(v => XsdDoubles.parseDouble(v))
+    nonXLinkArcAttributes
+      .get(ENames.WeightEName)
+      .map(v => XsdDoubles.parseDouble(v))
       .getOrElse(sys.error(s"Missing attribute weight on calculation arc in ELR $elr."))
   }
 }
 
 final case class SummationItemRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends CalculationRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends CalculationRelationship {
 
   def arcrole: String = baseSetKey.arcrole
 
@@ -259,11 +290,12 @@ final case class SummationItemRelationship(
 }
 
 final case class OtherCalculationRelationship(
-  elr: String,
-  arcrole: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends CalculationRelationship {
+    elr: String,
+    arcrole: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends CalculationRelationship {
 
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forCalculationArc(arcrole, elr)
@@ -273,10 +305,11 @@ final case class OtherCalculationRelationship(
 sealed trait DefinitionRelationship extends StandardInterConceptRelationship
 
 final case class GeneralSpecialRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
 
@@ -286,10 +319,11 @@ final case class GeneralSpecialRelationship(
 }
 
 final case class EssenceAliasRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
 
@@ -299,10 +333,11 @@ final case class EssenceAliasRelationship(
 }
 
 final case class SimilarTuplesRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
 
@@ -312,10 +347,11 @@ final case class SimilarTuplesRelationship(
 }
 
 final case class RequiresElementRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DefinitionRelationship {
 
   def arcrole: String = baseSetKey.arcrole
 
@@ -344,18 +380,20 @@ sealed trait HasHypercubeRelationship extends DimensionalRelationship {
   final def isNotAllRelationship: Boolean = !isAllRelationship
 
   final def closed: Boolean = {
-    nonXLinkArcAttributes.get(ENames.XbrldtClosedEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(false)
+    nonXLinkArcAttributes.get(ENames.XbrldtClosedEName).exists(v => XsdBooleans.parseBoolean(v))
   }
 
   final def contextElement: ContextElement = {
-    val attrValue = nonXLinkArcAttributes.get(ENames.XbrldtContextElementEName).getOrElse(
-      sys.error(s"Missing attribute @xbrldt:contextElement on has-hypercube arc in ELR $elr."))
+    val attrValue = nonXLinkArcAttributes
+      .getOrElse(
+        ENames.XbrldtContextElementEName,
+        sys.error(s"Missing attribute @xbrldt:contextElement on has-hypercube arc in ELR $elr."))
 
     ContextElement.fromString(attrValue)
   }
 
   final override def effectiveTargetRole: String = {
-    nonXLinkArcAttributes.get(ENames.XbrldtTargetRoleEName).getOrElse(elr)
+    nonXLinkArcAttributes.getOrElse(ENames.XbrldtTargetRoleEName, elr)
   }
 
   final override def effectiveTargetBaseSetKey: BaseSetKey = {
@@ -368,10 +406,11 @@ sealed trait HasHypercubeRelationship extends DimensionalRelationship {
 }
 
 final case class AllRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends HasHypercubeRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends HasHypercubeRelationship {
 
   def isAllRelationship: Boolean = true
 
@@ -395,10 +434,11 @@ final case class AllRelationship(
 }
 
 final case class NotAllRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends HasHypercubeRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends HasHypercubeRelationship {
 
   def isAllRelationship: Boolean = false
 
@@ -413,7 +453,11 @@ final case class NotAllRelationship(
   }
 
   def withContextElement(contextElement: String): NotAllRelationship = {
-    NotAllRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtContextElementEName -> contextElement))
+    NotAllRelationship(
+      elr,
+      source,
+      target,
+      nonXLinkArcAttributes + (ENames.XbrldtContextElementEName -> contextElement))
   }
 
   def withClosed(closed: Boolean): NotAllRelationship = {
@@ -422,10 +466,11 @@ final case class NotAllRelationship(
 }
 
 final case class HypercubeDimensionRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DimensionalRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DimensionalRelationship {
 
   def hypercube: EName = sourceConceptEName
 
@@ -438,7 +483,7 @@ final case class HypercubeDimensionRelationship(
   }
 
   override def effectiveTargetRole: String = {
-    nonXLinkArcAttributes.get(ENames.XbrldtTargetRoleEName).getOrElse(elr)
+    nonXLinkArcAttributes.getOrElse(ENames.XbrldtTargetRoleEName, elr)
   }
 
   override def effectiveTargetBaseSetKey: BaseSetKey = {
@@ -446,18 +491,22 @@ final case class HypercubeDimensionRelationship(
   }
 
   def withTargetRole(targetRole: String): HypercubeDimensionRelationship = {
-    HypercubeDimensionRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
+    HypercubeDimensionRelationship(
+      elr,
+      source,
+      target,
+      nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
   }
 }
 
 sealed trait DomainAwareRelationship extends DimensionalRelationship {
 
   final def usable: Boolean = {
-    nonXLinkArcAttributes.get(ENames.XbrldtUsableEName).map(v => XsdBooleans.parseBoolean(v)).getOrElse(true)
+    nonXLinkArcAttributes.get(ENames.XbrldtUsableEName).forall(v => XsdBooleans.parseBoolean(v))
   }
 
   final override def effectiveTargetRole: String = {
-    nonXLinkArcAttributes.get(ENames.XbrldtTargetRoleEName).getOrElse(elr)
+    nonXLinkArcAttributes.getOrElse(ENames.XbrldtTargetRoleEName, elr)
   }
 
   final override def effectiveTargetBaseSetKey: BaseSetKey = {
@@ -466,10 +515,11 @@ sealed trait DomainAwareRelationship extends DimensionalRelationship {
 }
 
 final case class DimensionDomainRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DomainAwareRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DomainAwareRelationship {
 
   def dimension: EName = sourceConceptEName
 
@@ -482,7 +532,11 @@ final case class DimensionDomainRelationship(
   }
 
   def withTargetRole(targetRole: String): DimensionDomainRelationship = {
-    DimensionDomainRelationship(elr, source, target, nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
+    DimensionDomainRelationship(
+      elr,
+      source,
+      target,
+      nonXLinkArcAttributes + (ENames.XbrldtTargetRoleEName -> targetRole))
   }
 
   def withUsable(targetRole: String): DimensionDomainRelationship = {
@@ -491,10 +545,11 @@ final case class DimensionDomainRelationship(
 }
 
 final case class DomainMemberRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DomainAwareRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DomainAwareRelationship {
 
   def domain: EName = sourceConceptEName
 
@@ -516,10 +571,11 @@ final case class DomainMemberRelationship(
 }
 
 final case class DimensionDefaultRelationship(
-  elr: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DimensionalRelationship {
+    elr: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DimensionalRelationship {
 
   def dimension: EName = sourceConceptEName
 
@@ -538,11 +594,12 @@ final case class DimensionDefaultRelationship(
 }
 
 final case class OtherDefinitionRelationship(
-  elr: String,
-  arcrole: String,
-  source: Node.GlobalElementDecl,
-  target: Node.GlobalElementDecl,
-  nonXLinkArcAttributes: Map[EName, String]) extends DefinitionRelationship {
+    elr: String,
+    arcrole: String,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends DefinitionRelationship {
 
   def baseSetKey: BaseSetKey = {
     BaseSetKey.forDefinitionArc(arcrole, elr)
@@ -550,6 +607,27 @@ final case class OtherDefinitionRelationship(
 }
 
 // Generic relationships
+
+final case class NonStandardInterElementDeclarationRelationship(
+    baseSetKey: BaseSetKey,
+    source: Node.GlobalElementDecl,
+    target: Node.GlobalElementDecl,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends NonStandardRelationship
+    with InterElementDeclarationRelationship {
+
+  def sourceElementTargetEName: EName = source.targetEName
+
+  def targetElementTargetEName: EName = target.targetEName
+
+  def linkName: EName = baseSetKey.extLinkEName
+
+  def elr: String = baseSetKey.extLinkRole
+
+  def arcName: EName = baseSetKey.arcEName
+
+  def arcrole: String = baseSetKey.arcrole
+}
 
 sealed trait ElementResourceRelationship extends NonStandardRelationship {
 
@@ -561,10 +639,11 @@ sealed trait ElementResourceRelationship extends NonStandardRelationship {
 // TODO Element-label and element-reference relationships with other resource element name
 
 final case class ElementLabelRelationship(
-  elr: String,
-  source: Node,
-  target: Node.ElementLabelResource,
-  nonXLinkArcAttributes: Map[EName, String]) extends ElementResourceRelationship {
+    elr: String,
+    source: Node,
+    target: Node.ElementLabelResource,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends ElementResourceRelationship {
 
   def resource: Node.ElementLabelResource = target
 
@@ -586,10 +665,11 @@ final case class ElementLabelRelationship(
 }
 
 final case class ElementReferenceRelationship(
-  elr: String,
-  source: Node,
-  target: Node.ElementReferenceResource,
-  nonXLinkArcAttributes: Map[EName, String]) extends ElementResourceRelationship {
+    elr: String,
+    source: Node,
+    target: Node.ElementReferenceResource,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends ElementResourceRelationship {
 
   def resource: Node.ElementReferenceResource = target
 
@@ -609,10 +689,11 @@ final case class ElementReferenceRelationship(
 // TODO Element-message relationship
 
 final case class OtherNonStandardRelationship(
-  baseSetKey: BaseSetKey,
-  source: Node,
-  target: Node,
-  nonXLinkArcAttributes: Map[EName, String]) extends NonStandardRelationship {
+    baseSetKey: BaseSetKey,
+    source: Node,
+    target: Node,
+    nonXLinkArcAttributes: Map[EName, String])
+    extends NonStandardRelationship {
 
   def elr: String = baseSetKey.extLinkRole
 
@@ -628,10 +709,10 @@ object Relationship extends Relationships.Factory {
   type TargetNodeType = Node
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node,
-    target: Node,
-    nonXLinkArcAttributes: Map[EName, String]): Option[Relationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node,
+      target: Node,
+      nonXLinkArcAttributes: Map[EName, String]): Option[Relationship] = {
 
     (baseSetKey.arcEName.namespaceUriOption, source) match {
       case (Some(Namespaces.LinkNamespace), sourceConcept @ Node.GlobalElementDecl(_)) =>
@@ -651,10 +732,10 @@ object StandardRelationship extends Relationships.Factory {
   type TargetNodeType = Node
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node.GlobalElementDecl,
-    target: Node,
-    nonXLinkArcAttributes: Map[EName, String]): Option[StandardRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node.GlobalElementDecl,
+      target: Node,
+      nonXLinkArcAttributes: Map[EName, String]): Option[StandardRelationship] = {
 
     (baseSetKey.arcEName.namespaceUriOption, target) match {
       case (Some(Namespaces.LinkNamespace), targetConcept @ Node.GlobalElementDecl(_)) =>
@@ -674,10 +755,10 @@ object StandardInterConceptRelationship extends Relationships.Factory {
   type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node.GlobalElementDecl,
-    target: Node.GlobalElementDecl,
-    nonXLinkArcAttributes: Map[EName, String]): Option[StandardInterConceptRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node.GlobalElementDecl,
+      target: Node.GlobalElementDecl,
+      nonXLinkArcAttributes: Map[EName, String]): Option[StandardInterConceptRelationship] = {
 
     baseSetKey.arcEName match {
       case ENames.LinkDefinitionArcEName =>
@@ -699,10 +780,10 @@ object ConceptResourceRelationship extends Relationships.Factory {
   type TargetNodeType = Node.StandardDocumentationResource
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node.GlobalElementDecl,
-    target: Node.StandardDocumentationResource,
-    nonXLinkArcAttributes: Map[EName, String]): Option[ConceptResourceRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node.GlobalElementDecl,
+      target: Node.StandardDocumentationResource,
+      nonXLinkArcAttributes: Map[EName, String]): Option[ConceptResourceRelationship] = {
 
     (baseSetKey.arcEName, target) match {
       case (ENames.LinkLabelArcEName, resource: Node.ConceptLabelResource) =>
@@ -722,10 +803,10 @@ object DefinitionRelationship extends Relationships.Factory {
   type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node.GlobalElementDecl,
-    target: Node.GlobalElementDecl,
-    nonXLinkArcAttributes: Map[EName, String]): Option[DefinitionRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node.GlobalElementDecl,
+      target: Node.GlobalElementDecl,
+      nonXLinkArcAttributes: Map[EName, String]): Option[DefinitionRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
       case (ENames.LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/general-special") =>
@@ -737,8 +818,16 @@ object DefinitionRelationship extends Relationships.Factory {
       case (ENames.LinkDefinitionArcEName, "http://www.xbrl.org/2003/arcrole/requires-element") =>
         Some(RequiresElementRelationship(baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
       case (ENames.LinkDefinitionArcEName, _) =>
-        DimensionalRelationship.opt(baseSetKey, source, target, nonXLinkArcAttributes)
-          .orElse(Some(OtherDefinitionRelationship(baseSetKey.extLinkRole, baseSetKey.arcrole, source, target, nonXLinkArcAttributes)))
+        DimensionalRelationship
+          .opt(baseSetKey, source, target, nonXLinkArcAttributes)
+          .orElse(
+            Some(
+              OtherDefinitionRelationship(
+                baseSetKey.extLinkRole,
+                baseSetKey.arcrole,
+                source,
+                target,
+                nonXLinkArcAttributes)))
       case _ =>
         None
     }
@@ -752,16 +841,22 @@ object PresentationRelationship extends Relationships.Factory {
   type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node.GlobalElementDecl,
-    target: Node.GlobalElementDecl,
-    nonXLinkArcAttributes: Map[EName, String]): Option[PresentationRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node.GlobalElementDecl,
+      target: Node.GlobalElementDecl,
+      nonXLinkArcAttributes: Map[EName, String]): Option[PresentationRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
       case (ENames.LinkPresentationArcEName, "http://www.xbrl.org/2003/arcrole/parent-child") =>
         Some(ParentChildRelationship(baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
       case (ENames.LinkPresentationArcEName, _) =>
-        Some(OtherPresentationRelationship(baseSetKey.extLinkRole, baseSetKey.arcrole, source, target, nonXLinkArcAttributes))
+        Some(
+          OtherPresentationRelationship(
+            baseSetKey.extLinkRole,
+            baseSetKey.arcrole,
+            source,
+            target,
+            nonXLinkArcAttributes))
       case _ =>
         None
     }
@@ -775,16 +870,22 @@ object CalculationRelationship extends Relationships.Factory {
   type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node.GlobalElementDecl,
-    target: Node.GlobalElementDecl,
-    nonXLinkArcAttributes: Map[EName, String]): Option[CalculationRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node.GlobalElementDecl,
+      target: Node.GlobalElementDecl,
+      nonXLinkArcAttributes: Map[EName, String]): Option[CalculationRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
       case (ENames.LinkCalculationArcEName, "http://www.xbrl.org/2003/arcrole/summation-item") =>
         Some(SummationItemRelationship(baseSetKey.extLinkRole, source, target, nonXLinkArcAttributes))
       case (ENames.LinkCalculationArcEName, _) =>
-        Some(OtherCalculationRelationship(baseSetKey.extLinkRole, baseSetKey.arcrole, source, target, nonXLinkArcAttributes))
+        Some(
+          OtherCalculationRelationship(
+            baseSetKey.extLinkRole,
+            baseSetKey.arcrole,
+            source,
+            target,
+            nonXLinkArcAttributes))
       case _ =>
         None
     }
@@ -798,10 +899,10 @@ object DimensionalRelationship extends Relationships.Factory {
   type TargetNodeType = Node.GlobalElementDecl
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node.GlobalElementDecl,
-    target: Node.GlobalElementDecl,
-    nonXLinkArcAttributes: Map[EName, String]): Option[DimensionalRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node.GlobalElementDecl,
+      target: Node.GlobalElementDecl,
+      nonXLinkArcAttributes: Map[EName, String]): Option[DimensionalRelationship] = {
 
     (baseSetKey.arcEName, baseSetKey.arcrole) match {
       case (ENames.LinkDefinitionArcEName, "http://xbrl.org/int/dim/arcrole/hypercube-dimension") =>
@@ -829,19 +930,21 @@ object NonStandardRelationship extends Relationships.Factory {
   type TargetNodeType = Node
 
   def opt(
-    baseSetKey: BaseSetKey,
-    source: Node,
-    target: Node,
-    nonXLinkArcAttributes: Map[EName, String]): Option[NonStandardRelationship] = {
+      baseSetKey: BaseSetKey,
+      source: Node,
+      target: Node,
+      nonXLinkArcAttributes: Map[EName, String]): Option[NonStandardRelationship] = {
 
     if (baseSetKey.arcEName.namespaceUriOption.contains(Namespaces.LinkNamespace)) {
       None
     } else {
-      (baseSetKey.arcrole, target) match {
-        case ("http://xbrl.org/arcrole/2008/element-label", res: Node.ElementLabelResource) =>
+      (baseSetKey.arcrole, source, target) match {
+        case ("http://xbrl.org/arcrole/2008/element-label", _, res: Node.ElementLabelResource) =>
           Some(ElementLabelRelationship(baseSetKey.extLinkRole, source, res, nonXLinkArcAttributes))
-        case ("http://xbrl.org/arcrole/2008/element-reference", res: Node.ElementReferenceResource) =>
+        case ("http://xbrl.org/arcrole/2008/element-reference", _, res: Node.ElementReferenceResource) =>
           Some(ElementReferenceRelationship(baseSetKey.extLinkRole, source, res, nonXLinkArcAttributes))
+        case (_, source: Node.GlobalElementDecl, target: Node.GlobalElementDecl) =>
+          Some(NonStandardInterElementDeclarationRelationship(baseSetKey, source, target, nonXLinkArcAttributes))
         case _ =>
           Some(OtherNonStandardRelationship(baseSetKey, source, target, nonXLinkArcAttributes))
       }
