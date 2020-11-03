@@ -16,12 +16,12 @@
 
 package eu.cdevreeze.tqa.base.model
 
-import scala.collection.immutable
-
 import eu.cdevreeze.yaidom.core.EName
 
+import scala.collection.immutable
+
 /**
- * Standard inter-concept relationship path. Subsequent relationships in the path must be "consecutive". For non-dimensional
+ * Standard/generic inter-concept relationship path. Subsequent relationships in the path must be "consecutive". For non-dimensional
  * relationships that means that (of course) target concepts match the subsequent source concepts, and that the ELR
  * remain the same.
  *
@@ -29,34 +29,34 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final case class ConsecutiveRelationshipPath[A <: StandardInterConceptRelationship] private (
-  relationships: immutable.IndexedSeq[A]) {
+final case class ConsecutiveRelationshipPath[A <: InterElementDeclarationRelationship] private (
+    relationships: immutable.IndexedSeq[A]) {
 
-  require(relationships.size >= 1, s"A relationship path must have at least one relationship")
+  require(relationships.nonEmpty, s"A relationship path must have at least one relationship")
 
-  def sourceConcept: EName = firstRelationship.sourceConceptEName
+  def sourceConcept: EName = firstRelationship.sourceElementTargetEName
 
-  def targetConcept: EName = lastRelationship.targetConceptEName
+  def targetConcept: EName = lastRelationship.targetElementTargetEName
 
   def firstRelationship: A = relationships.head
 
   def lastRelationship: A = relationships.last
 
   def concepts: immutable.IndexedSeq[EName] = {
-    relationships.map(_.sourceConceptEName) :+ relationships.last.targetConceptEName
+    relationships.map(_.sourceElementTargetEName) :+ relationships.last.targetElementTargetEName
   }
 
   def relationshipTargetConcepts: immutable.IndexedSeq[EName] = {
-    relationships.map(_.targetConceptEName)
+    relationships.map(_.targetElementTargetEName)
   }
 
   def hasCycle: Boolean = {
-    val concepts = relationships.map(_.sourceConceptEName) :+ relationships.last.targetConceptEName
+    val concepts = relationships.map(_.sourceElementTargetEName) :+ relationships.last.targetElementTargetEName
     concepts.distinct.size < concepts.size
   }
 
   def isMinimalIfHavingCycle: Boolean = {
-    initOption.map(p => !p.hasCycle).getOrElse(true)
+    initOption.forall(p => !p.hasCycle)
   }
 
   def append(relationship: A): ConsecutiveRelationshipPath[A] = {
@@ -97,15 +97,16 @@ final case class ConsecutiveRelationshipPath[A <: StandardInterConceptRelationsh
 
 object ConsecutiveRelationshipPath {
 
-  def apply[A <: StandardInterConceptRelationship](relationship: A): ConsecutiveRelationshipPath[A] = {
+  def apply[A <: InterElementDeclarationRelationship](relationship: A): ConsecutiveRelationshipPath[A] = {
     new ConsecutiveRelationshipPath(immutable.IndexedSeq(relationship))
   }
 
-  def from[A <: StandardInterConceptRelationship](relationships: immutable.IndexedSeq[A]): ConsecutiveRelationshipPath[A] = {
+  def from[A <: InterElementDeclarationRelationship](
+      relationships: immutable.IndexedSeq[A]): ConsecutiveRelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => pair(0).isFollowedBy(pair(1))),
       s"All subsequent relationships in a path must be consecutive")
 
-    new ConsecutiveRelationshipPath(relationships.toIndexedSeq)
+    new ConsecutiveRelationshipPath(relationships)
   }
 }

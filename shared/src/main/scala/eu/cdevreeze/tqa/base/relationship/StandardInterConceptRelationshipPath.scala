@@ -31,8 +31,8 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final case class StandardInterConceptRelationshipPath[A <: StandardInterConceptRelationship] private(val relationships: immutable.IndexedSeq[A]) {
-  require(relationships.size >= 1, s"A relationship path must have at least one relationship")
+final case class StandardInterConceptRelationshipPath[A <: StandardInterConceptRelationship] private(relationships: immutable.IndexedSeq[A]) {
+  require(relationships.nonEmpty, s"A relationship path must have at least one relationship")
 
   def sourceConcept: EName = firstRelationship.sourceConceptEName
 
@@ -56,7 +56,7 @@ final case class StandardInterConceptRelationshipPath[A <: StandardInterConceptR
   }
 
   def isMinimalIfHavingCycle: Boolean = {
-    initOption.map(p => !p.hasCycle).getOrElse(true)
+    initOption.forall(p => !p.hasCycle)
   }
 
   def append(relationship: A): StandardInterConceptRelationshipPath[A] = {

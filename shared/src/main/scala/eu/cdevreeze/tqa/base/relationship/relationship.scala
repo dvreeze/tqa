@@ -205,6 +205,12 @@ sealed trait InterElementDeclarationRelationship extends Relationship {
   def targetGlobalElementDeclaration: GlobalElementDeclaration
 
   def targetElementTargetEName: EName
+
+  /**
+   * Returns true if the target of this relationship matches the source of the parameter relationship, and both relationships
+   * are in the same base set, with exceptions for dimensional relationships (where the targetRole attribute must be respected).
+   */
+  def isFollowedBy(rel: InterElementDeclarationRelationship): Boolean
 }
 
 /**
@@ -233,13 +239,20 @@ sealed abstract class StandardInterConceptRelationship(
    * For dimensional relationships, returns true if this and the parameter relationship form a pair of consecutive
    * relationships.
    *
+   * For non-standard inter-element-declaration relationships, false is returned.
+   *
    * This method does not check for the target relationship type, although for non-dimensional standard inter-concept relationships
    * the relationship type remains the same, and for dimensional relationships the target relationship type is as expected
    * for consecutive relationships.
    */
-  final def isFollowedBy(rel: StandardInterConceptRelationship): Boolean = {
-    (this.targetConceptEName == rel.sourceConceptEName) &&
-    (this.effectiveTargetBaseSetKey == rel.baseSetKey)
+  final def isFollowedBy(rel: InterElementDeclarationRelationship): Boolean = {
+    rel match {
+      case rel: StandardInterConceptRelationship =>
+        (this.targetConceptEName == rel.sourceConceptEName) &&
+          (this.effectiveTargetBaseSetKey == rel.baseSetKey)
+      case _ =>
+        false
+    }
   }
 
   /**
@@ -588,6 +601,22 @@ final class NonStandardInterElementDeclarationRelationship(
   def targetGlobalElementDeclaration: GlobalElementDeclaration = resolvedTo.resolvedElem
 
   def targetElementTargetEName: EName = targetGlobalElementDeclaration.targetEName
+
+  /**
+   * For non-standard inter-element-declaration relationships, returns true if the target element declaration of this relationship matches the source
+   * element declaration of the parameter relationship and both relationships are in the same base set. Otherwise false is returned.
+   *
+   * Note that for relationships with non-concepts as source or target, this method has no meaning,
+   */
+  def isFollowedBy(rel: InterElementDeclarationRelationship): Boolean = {
+    rel match {
+      case rel: NonStandardInterElementDeclarationRelationship =>
+        (this.targetElementTargetEName == rel.sourceElementTargetEName) &&
+          (this.baseSetKey == rel.baseSetKey)
+      case _ =>
+        false
+    }
+  }
 }
 
 /**

@@ -16,12 +16,11 @@
 
 package eu.cdevreeze.tqa.base.model.tree
 
-import scala.collection.immutable
-import scala.collection.compat._
-
 import eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
-import eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship
+import eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship
 import eu.cdevreeze.yaidom.core.EName
+
+import scala.collection.immutable
 
 /**
  * Tree of concepts connected by standard inter-concept relationships of some (inter-concept) relationship type.
@@ -30,10 +29,10 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * @author Chris de Vreeze
  */
-final class ConceptRelationshipTree[R <: StandardInterConceptRelationship] private (
-  val sourceConcept: EName,
-  val paths: immutable.IndexedSeq[ConsecutiveRelationshipPath[R]],
-  val pathsIndexedByConcept: Map[EName, immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]]) {
+final class ConceptRelationshipTree[R <: InterElementDeclarationRelationship] private (
+    val sourceConcept: EName,
+    val paths: immutable.IndexedSeq[ConsecutiveRelationshipPath[R]],
+    val pathsIndexedByConcept: Map[EName, immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]]) {
 
   assert(paths.forall(_.sourceConcept == sourceConcept))
 
@@ -41,13 +40,11 @@ final class ConceptRelationshipTree[R <: StandardInterConceptRelationship] priva
 
 object ConceptRelationshipTree {
 
-  def build[R <: StandardInterConceptRelationship](
-    sourceConcept: EName,
-    paths: immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]): ConceptRelationshipTree[R] = {
+  def build[R <: InterElementDeclarationRelationship](
+      sourceConcept: EName,
+      paths: immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]): ConceptRelationshipTree[R] = {
 
-    require(
-      paths.forall(_.sourceConcept == sourceConcept),
-      s"Not all paths start with the same concept $sourceConcept")
+    require(paths.forall(_.sourceConcept == sourceConcept), s"Not all paths start with the same concept $sourceConcept")
 
     val pathsIndexedByConcept: Map[EName, immutable.IndexedSeq[ConsecutiveRelationshipPath[R]]] =
       paths.flatMap(p => p.concepts.distinct.map(_ -> p)).groupBy(_._1).view.mapValues(_.map(_._2)).toMap
