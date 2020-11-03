@@ -21,6 +21,7 @@ import eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 import scala.collection.immutable
+import scala.collection.compat._
 
 /**
  * Tree of concepts connected by standard inter-concept relationships of some (inter-concept) relationship type.
