@@ -16,12 +16,12 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
+import eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
+import eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship
+import eu.cdevreeze.yaidom.core.EName
+
 import scala.collection.immutable
 import scala.reflect.ClassTag
-
-import eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship
-import eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
-import eu.cdevreeze.yaidom.core.EName
 
 /**
  * Purely abstract trait offering a standard inter-concept relationship query API.
@@ -39,39 +39,39 @@ trait StandardInterConceptRelationshipContainerApi {
   def findAllStandardInterConceptRelationships: immutable.IndexedSeq[StandardInterConceptRelationship]
 
   def filterStandardInterConceptRelationships(
-    p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
+      p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   def findAllStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   def filterStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Finds all standard inter-concept relationships that are outgoing from the given concept.
    */
   def findAllOutgoingStandardInterConceptRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[StandardInterConceptRelationship]
+      sourceConcept: EName): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Filters standard inter-concept relationships that are outgoing from the given concept.
    */
-  def filterOutgoingStandardInterConceptRelationships(
-    sourceConcept: EName)(p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
+  def filterOutgoingStandardInterConceptRelationships(sourceConcept: EName)(
+      p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Finds all standard inter-concept relationships of the given type that are outgoing from the given concept.
    */
   def findAllOutgoingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      sourceConcept: EName,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters standard inter-concept relationships of the given type that are outgoing from the given concept.
    */
   def filterOutgoingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+      sourceConcept: EName,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Finds all "consecutive" standard inter-concept relationships.
@@ -88,7 +88,8 @@ trait StandardInterConceptRelationshipContainerApi {
    * }
    * }}}
    */
-  def findAllConsecutiveStandardInterConceptRelationships(relationship: StandardInterConceptRelationship): immutable.IndexedSeq[StandardInterConceptRelationship]
+  def findAllConsecutiveStandardInterConceptRelationships(
+      relationship: StandardInterConceptRelationship): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Finds all "consecutive" standard inter-concept relationships of the given result type.
@@ -106,34 +107,34 @@ trait StandardInterConceptRelationshipContainerApi {
    * }}}
    */
   def findAllConsecutiveStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    relationship: StandardInterConceptRelationship,
-    resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationship: StandardInterConceptRelationship,
+      resultRelationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Finds all standard inter-concept relationships that are incoming to the given concept.
    */
   def findAllIncomingStandardInterConceptRelationships(
-    targetConcept: EName): immutable.IndexedSeq[StandardInterConceptRelationship]
+      targetConcept: EName): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Filters standard inter-concept relationships that are incoming to the given concept.
    */
-  def filterIncomingStandardInterConceptRelationships(
-    targetConcept: EName)(p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
+  def filterIncomingStandardInterConceptRelationships(targetConcept: EName)(
+      p: StandardInterConceptRelationship => Boolean): immutable.IndexedSeq[StandardInterConceptRelationship]
 
   /**
    * Finds all standard inter-concept relationships of the given type that are incoming to the given concept.
    */
   def findAllIncomingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      targetConcept: EName,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters standard inter-concept relationships of the given type that are incoming to the given concept.
    */
   def filterIncomingStandardInterConceptRelationshipsOfType[A <: StandardInterConceptRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+      targetConcept: EName,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Filters the consecutive relationship paths that are outgoing from the given concept and
@@ -142,8 +143,9 @@ trait StandardInterConceptRelationshipContainerApi {
    * but on encountering a cycle in a path it stops growing.
    */
   def filterOutgoingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
-    sourceConcept: EName,
-    relationshipType: ClassTag[A])(p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]]
+      sourceConcept: EName,
+      relationshipType: ClassTag[A])(
+      p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]]
 
   /**
    * Filters the consecutive relationship paths that are incoming to the given concept and
@@ -152,6 +154,7 @@ trait StandardInterConceptRelationshipContainerApi {
    * but on encountering a cycle in a path it stops growing.
    */
   def filterIncomingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
-    targetConcept: EName,
-    relationshipType: ClassTag[A])(p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]]
+      targetConcept: EName,
+      relationshipType: ClassTag[A])(
+      p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]]
 }

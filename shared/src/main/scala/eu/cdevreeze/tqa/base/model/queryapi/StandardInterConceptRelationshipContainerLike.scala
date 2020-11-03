@@ -97,6 +97,7 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
 
   final def findAllConsecutiveStandardInterConceptRelationships(
       relationship: StandardInterConceptRelationship): immutable.IndexedSeq[StandardInterConceptRelationship] = {
+
     filterOutgoingStandardInterConceptRelationships(relationship.targetConceptEName) { rel =>
       relationship.isFollowedBy(rel)
     }
@@ -136,6 +137,7 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
       relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag: ClassTag[A] = relationshipType
+
     standardInterConceptRelationshipsByTarget.getOrElse(targetConcept, Vector()).collect {
       case relationship: A if p(relationship) => relationship
     }

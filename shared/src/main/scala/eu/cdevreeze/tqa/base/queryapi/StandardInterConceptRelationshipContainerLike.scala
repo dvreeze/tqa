@@ -97,6 +97,7 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
 
   final def findAllConsecutiveStandardInterConceptRelationships(
       relationship: StandardInterConceptRelationship): immutable.IndexedSeq[StandardInterConceptRelationship] = {
+
     filterOutgoingStandardInterConceptRelationships(relationship.targetConceptEName) { rel =>
       relationship.isFollowedBy(rel)
     }
