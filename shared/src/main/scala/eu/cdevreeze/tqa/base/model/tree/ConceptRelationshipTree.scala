@@ -24,7 +24,7 @@ import scala.collection.immutable
 import scala.collection.compat._
 
 /**
- * Tree of concepts connected by standard inter-concept relationships of some (inter-concept) relationship type.
+ * Tree of concepts connected by standard/generic inter-concept relationships of some (inter-concept) relationship type.
  *
  * TODO Make more interesting.
  *

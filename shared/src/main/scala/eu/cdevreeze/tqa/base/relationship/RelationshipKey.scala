@@ -30,7 +30,7 @@ import eu.cdevreeze.tqa.base.common.BaseSetKey
  * @author Chris de Vreeze
  */
 final case class RelationshipKey(
-  val baseSetKey: BaseSetKey,
-  val sourceKey: XmlFragmentKey,
-  val targetKey: XmlFragmentKey,
-  val nonExemptAttributes: NonExemptAttributeMap)
+    baseSetKey: BaseSetKey,
+    sourceKey: XmlFragmentKey,
+    targetKey: XmlFragmentKey,
+    nonExemptAttributes: NonExemptAttributeMap)

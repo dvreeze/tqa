@@ -18,14 +18,14 @@ package eu.cdevreeze.tqa.base.relationship
 
 import java.net.URI
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.common.BaseSetKey
 import eu.cdevreeze.tqa.base.dom.ExtendedLink
 import eu.cdevreeze.tqa.base.dom.LabeledXLink
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XLinkArc
+
+import scala.collection.immutable
 
 /**
  * Extractor of relationships from a "taxonomy base".
@@ -43,24 +43,24 @@ trait RelationshipFactory {
    * Returns all relationships in the given `TaxonomyBase` passing the provided arc filter.
    */
   def extractRelationships(
-    taxonomyBase: TaxonomyBase,
-    arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
+      taxonomyBase: TaxonomyBase,
+      arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   /**
    * Returns all relationships in the given document in the given `TaxonomyBase` passing the provided arc filter.
    */
   def extractRelationshipsFromDocument(
-    docUri: URI,
-    taxonomyBase: TaxonomyBase,
-    arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
+      docUri: URI,
+      taxonomyBase: TaxonomyBase,
+      arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   /**
    * Returns all relationships in the given extended link in the given `TaxonomyBase` passing the provided arc filter.
    */
   def extractRelationshipsFromExtendedLink(
-    extendedLink: ExtendedLink,
-    taxonomyBase: TaxonomyBase,
-    arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
+      extendedLink: ExtendedLink,
+      taxonomyBase: TaxonomyBase,
+      arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship]
 
   /**
    * Returns all relationships (typically one) having the given underlying XLink arc in the given `TaxonomyBase`.
@@ -70,18 +70,18 @@ trait RelationshipFactory {
    * This method must respect the configuration of this RelationshipFactory.
    */
   def extractRelationshipsFromArc(
-    arc: XLinkArc,
-    labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
-    parentBaseUriOption: Option[URI],
-    taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship]
+      arc: XLinkArc,
+      labeledXlinkMap: Map[String, immutable.IndexedSeq[LabeledXLink]],
+      parentBaseUriOption: Option[URI],
+      taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship]
 
   /**
    * Returns the networks of relationships, computed from the given collection of relationships. The `TaxonomyBase`
    * is passed as second parameter.
    */
   def computeNetworks(
-    relationships: immutable.IndexedSeq[Relationship],
-    taxonomyBase: TaxonomyBase): Map[BaseSetKey, RelationshipFactory.NetworkComputationResult]
+      relationships: immutable.IndexedSeq[Relationship],
+      taxonomyBase: TaxonomyBase): Map[BaseSetKey, RelationshipFactory.NetworkComputationResult]
 
   /**
    * Gets the key of the relationship that is the same (only) for equivalent relationships.
@@ -94,17 +94,17 @@ object RelationshipFactory {
   /**
    * Arc filter that returns true for each arc.
    */
-  val AnyArc: XLinkArc => Boolean = (_ => true)
+  val AnyArc: XLinkArc => Boolean = _ => true
 
   /**
    * Arc filter that returns false if the XLink arcrole attribute is missing, and true otherwise.
    * Note that it is an error for an XLink arc (in XBRL) not to have an XLink arcrole attribute.
    */
-  val AnyArcHavingArcrole: XLinkArc => Boolean = (_.attributeOption(ENames.XLinkArcroleEName).nonEmpty)
+  val AnyArcHavingArcrole: XLinkArc => Boolean = _.attributeOption(ENames.XLinkArcroleEName).nonEmpty
 
   final case class NetworkComputationResult(
-    val retainedRelationships: immutable.IndexedSeq[Relationship],
-    val removedRelationships: immutable.IndexedSeq[Relationship])
+      retainedRelationships: immutable.IndexedSeq[Relationship],
+      removedRelationships: immutable.IndexedSeq[Relationship])
 
   /**
    * Configuration object used by a RelationshipFactory. It says to what extent the RelationshipFactory
@@ -119,9 +119,9 @@ object RelationshipFactory {
    * @param allowUnresolvedLocator if true, allows "dead" locator href URIs within the taxonomy
    */
   final case class Config(
-    val allowSyntaxError: Boolean,
-    val allowUnresolvedXLinkLabel: Boolean,
-    val allowUnresolvedLocator: Boolean) {
+      allowSyntaxError: Boolean,
+      allowUnresolvedXLinkLabel: Boolean,
+      allowUnresolvedLocator: Boolean) {
 
     /**
      * Returns true if XPointer syntax errors in any locator href URI fragment are allowed
@@ -140,18 +140,21 @@ object RelationshipFactory {
      * Accepts unresolved locators, XPointer syntax errors and broken XLink labels (in XLink arcs).
      * Such erroneous locators and arcs are silently skipped.
      */
-    val VeryLenient = Config(true, true, true)
+    val VeryLenient: Config =
+      Config(allowSyntaxError = true, allowUnresolvedXLinkLabel = true, allowUnresolvedLocator = true)
 
     /**
      * Accepts unresolved locators but does not accept any (found) XPointer syntax errors or broken XLink labels.
      * Such unresolved locators are silently skipped.
      */
-    val Lenient = Config(false, false, true)
+    val Lenient: Config =
+      Config(allowSyntaxError = false, allowUnresolvedXLinkLabel = false, allowUnresolvedLocator = true)
 
     /**
      * Does not accept any unresolved locators or syntax errors (in XPointer) or broken XLink labels.
      * Exceptions will be thrown instead.
      */
-    val Strict = Config(false, false, false)
+    val Strict: Config =
+      Config(allowSyntaxError = false, allowUnresolvedXLinkLabel = false, allowUnresolvedLocator = false)
   }
 }

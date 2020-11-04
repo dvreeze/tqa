@@ -18,8 +18,8 @@ package eu.cdevreeze.tqa.xpathaware.extension.table
 
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.common.BaseSetKey
-import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship
-import eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath
+import eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+import eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship
 import eu.cdevreeze.tqa.extension.table.common.ConceptRelationshipNodes
 import eu.cdevreeze.tqa.extension.table.dom.ConceptRelationshipNode
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
@@ -254,9 +254,9 @@ object ConceptRelationshipNodeData {
       taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val paths = taxo.underlyingTaxonomy
-      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(
+      .filterOutgoingConsecutiveInterConceptRelationshipPaths(
         sourceConcept,
-        classTag[StandardInterConceptRelationship]) { path =>
+        classTag[InterElementDeclarationRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
         effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
         hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
@@ -275,9 +275,9 @@ object ConceptRelationshipNodeData {
       taxo: BasicTableTaxonomy): immutable.IndexedSeq[ConceptRelationshipNodePath] = {
 
     val paths = taxo.underlyingTaxonomy
-      .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(
+      .filterOutgoingConsecutiveInterConceptRelationshipPaths(
         sourceConcept,
-        classTag[StandardInterConceptRelationship]) { path =>
+        classTag[InterElementDeclarationRelationship]) { path =>
         relationshipMatchesCriteria(path.firstRelationship, linkrole, arcrole, linknameOption, arcnameOption) &&
         effectiveGenerationsOption.forall(gen => path.relationships.size <= gen) &&
         hasMoreMatchingDescendantsIfEndingInAbstract(path, effectiveGenerationsOption, taxo)
@@ -400,19 +400,19 @@ object ConceptRelationshipNodeData {
 
     val relationships =
       taxo.underlyingTaxonomy
-        .filterStandardInterConceptRelationships { rel =>
+        .filterInterConceptRelationships { rel =>
           relationshipMatchesCriteria(rel, linkrole, arcrole, linknameOption, arcnameOption)
         }
 
-    val sources = relationships.map(_.sourceConceptEName).toSet
-    val targets = relationships.map(_.targetConceptEName).toSet
+    val sources = relationships.map(_.sourceElementTargetEName).toSet
+    val targets = relationships.map(_.targetElementTargetEName).toSet
     val rootConcepts = sources.diff(targets)
 
     sortConcepts(rootConcepts)
   }
 
   private def relationshipMatchesCriteria(
-      relationship: StandardInterConceptRelationship,
+      relationship: InterElementDeclarationRelationship,
       linkrole: String,
       arcrole: String,
       linknameOption: Option[EName],
@@ -433,19 +433,19 @@ object ConceptRelationshipNodeData {
       taxo: BasicTableTaxonomy): immutable.IndexedSeq[EName] = {
 
     val incomingRelationships =
-      taxo.underlyingTaxonomy.filterIncomingStandardInterConceptRelationships(concept) { rel =>
+      taxo.underlyingTaxonomy.filterIncomingInterConceptRelationships(concept) { rel =>
         relationshipMatchesCriteria(rel, linkrole, arcrole, linknameOption, arcnameOption)
       }
 
     val targetConcepts: immutable.IndexedSeq[EName] =
       incomingRelationships
         .flatMap { rel =>
-          taxo.underlyingTaxonomy.filterOutgoingStandardInterConceptRelationships(rel.sourceConceptEName) { r =>
+          taxo.underlyingTaxonomy.filterOutgoingInterConceptRelationships(rel.sourceElementTargetEName) { r =>
             relationshipMatchesCriteria(r, linkrole, arcrole, linknameOption, arcnameOption)
           }
         }
         .sortBy(_.order)
-        .map(_.targetConceptEName)
+        .map(_.targetElementTargetEName)
 
     targetConcepts
   }
@@ -468,23 +468,23 @@ object ConceptRelationshipNodeData {
   }
 
   private def hasMoreMatchingDescendantsIfEndingInAbstract(
-      path: StandardInterConceptRelationshipPath[StandardInterConceptRelationship],
+      path: InterConceptRelationshipPath[InterElementDeclarationRelationship],
       effectiveGenerationsOption: Option[Int],
       taxo: BasicTableTaxonomy): Boolean = {
 
     val endsInAbstract =
-      taxo.underlyingTaxonomy.findConceptDeclaration(path.targetConcept).filter(_.isAbstract).nonEmpty
+      taxo.underlyingTaxonomy.findConceptDeclaration(path.targetConcept).exists(_.isAbstract)
 
     if (endsInAbstract) {
       val followingPathsWithConcreteConcepts =
-        taxo.underlyingTaxonomy.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(
+        taxo.underlyingTaxonomy.filterOutgoingConsecutiveInterConceptRelationshipPaths(
           path.targetConcept,
-          classTag[StandardInterConceptRelationship]) { p =>
+          classTag[InterElementDeclarationRelationship]) { p =>
           path.lastRelationship.isFollowedBy(p.firstRelationship) &&
           effectiveGenerationsOption.forall(gen => path.relationships.size + p.relationships.size <= gen) &&
           p.relationships
-            .map(_.targetConceptEName)
-            .exists(c => taxo.underlyingTaxonomy.findConceptDeclaration(c).map(_.isConcrete).getOrElse(false))
+            .map(_.targetElementTargetEName)
+            .exists(c => taxo.underlyingTaxonomy.findConceptDeclaration(c).exists(_.isConcrete))
         }
 
       followingPathsWithConcreteConcepts.nonEmpty

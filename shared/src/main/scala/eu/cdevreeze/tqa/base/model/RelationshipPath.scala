@@ -30,7 +30,7 @@ import scala.collection.immutable
 final case class RelationshipPath[A <: Relationship] private (
   relationships: immutable.IndexedSeq[A]) {
 
-  require(relationships.size >= 1, s"A relationship path must have at least one relationship")
+  require(relationships.nonEmpty, s"A relationship path must have at least one relationship")
 
   def source: Node = firstRelationship.source
 
@@ -54,7 +54,7 @@ final case class RelationshipPath[A <: Relationship] private (
   }
 
   def isMinimalIfHavingCycle: Boolean = {
-    initOption.map(p => !p.hasCycle).getOrElse(true)
+    initOption.forall(p => !p.hasCycle)
   }
 
   def append(relationship: A): RelationshipPath[A] = {
@@ -111,7 +111,7 @@ object RelationshipPath {
       relationships.sliding(2).filter(_.size == 2).forall(pair => haveMatchingNodes(pair(0), pair(1))),
       s"All subsequent relationships in a path must have matching target/source nodes")
 
-    new RelationshipPath(relationships.toIndexedSeq)
+    new RelationshipPath(relationships)
   }
 
   private def haveMatchingNodes[A <: Relationship](relationship1: A, relationship2: A): Boolean = {
