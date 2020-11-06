@@ -29,6 +29,7 @@ import scala.collection.immutable
  */
 trait TaxonomyApi
     extends TaxonomySchemaApi
+    with RelationshipContainerApi
     with StandardRelationshipContainerApi
     with NonStandardRelationshipContainerApi
     with StandardInterConceptRelationshipContainerApi

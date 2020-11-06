@@ -120,6 +120,12 @@ final class BasicTaxonomy private (
     conceptDeclarationsByEName.get(ename)
   }
 
+  def findAllRelationshipsOfType[A <: Relationship](relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+    implicit val clsTag: ClassTag[A] = relationshipType
+
+    relationships.collect { case rel: A => rel }
+  }
+
   def findAllStandardRelationshipsOfType[A <: StandardRelationship](
       relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 

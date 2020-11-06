@@ -25,6 +25,7 @@ package eu.cdevreeze.tqa.base.model.queryapi
 trait TaxonomyLike
     extends TaxonomyApi
     with TaxonomySchemaLike
+    with RelationshipContainerLike
     with StandardRelationshipContainerLike
     with NonStandardRelationshipContainerLike
     with StandardInterConceptRelationshipContainerLike
