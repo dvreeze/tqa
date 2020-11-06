@@ -39,10 +39,4 @@ trait TaxonomyApi
     with ElementLabelRelationshipContainerApi
     with ElementReferenceRelationshipContainerApi
     with DimensionalRelationshipContainerApi
-    with InterConceptRelationshipContainerApi {
-
-  /**
-   * Returns all relationships in the taxonomy
-   */
-  def relationships: immutable.IndexedSeq[Relationship]
-}
+    with InterConceptRelationshipContainerApi
