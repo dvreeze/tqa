@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
+import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
 
@@ -55,4 +56,9 @@ trait TaxonomyApi
    * }}}
    */
   def rootElems: immutable.IndexedSeq[TaxonomyElem]
+
+  /**
+   * Returns the linkbase elements, which are typically top-level, but may be embedded in schemas.
+   */
+  def findAllLinkbases: immutable.IndexedSeq[Linkbase]
 }

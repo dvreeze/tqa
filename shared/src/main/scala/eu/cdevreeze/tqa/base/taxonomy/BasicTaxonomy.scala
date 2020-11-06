@@ -18,11 +18,13 @@ package eu.cdevreeze.tqa.base.taxonomy
 
 import java.net.URI
 
+import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.dom.ConceptDeclaration
 import eu.cdevreeze.tqa.base.dom.GlobalAttributeDeclaration
 import eu.cdevreeze.tqa.base.dom.GlobalElementDeclaration
+import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.NamedTypeDefinition
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
@@ -122,8 +124,14 @@ final class BasicTaxonomy private (
     rootElem
   }
 
+  def findAllLinkbases: immutable.IndexedSeq[Linkbase] = {
+    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[Linkbase])(_ => true))
+  }
+
   def findAllXsdSchemas: immutable.IndexedSeq[XsdSchema] = {
-    taxonomyBase.rootElems.flatMap(_.findTopmostElemsOrSelfOfType(classTag[XsdSchema])(_ => true))
+    taxonomyBase.rootElems
+      .filterNot(_.resolvedName == ENames.LinkLinkbaseEName)
+      .flatMap(_.findTopmostElemsOrSelfOfType(classTag[XsdSchema])(_ => true))
   }
 
   def findAllGlobalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration] = {
