@@ -3,13 +3,361 @@ CHANGELOG
 =========
 
 
-Version 0.9.0 should offer the following:
+Version 0.10.0 should offer the following:
 
 * Formula/table DOM/relationships that extend the "base" ones instead of wrapping them (for better usability)
 * Enhanced taxonomy API, with role type and arcrole type query support
 * Faster relationship creation and faster taxonomy creation in general
 * Better extensibility in creating TaxonomyApi implementations, with different performance characteristics
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
+
+
+0.9.0
+=====
+
+This release offers support for both standard inter-concept relationships and more general
+inter-concept relationships (that can be standard or generic). It has been heavily inspired
+by a pull request from Johan Walters. Support for standard/generic inter-concept relationships
+is needed, because (formula) concept relation filters and (table) concept relationship nodes
+may pertain to inter-concept relationships that are not standard relationships. Not supporting
+these potentially generic relationships between concepts was a bug in TQA, and it had to be
+solved.
+
+The most important changes compared to version 0.8.17 are:
+
+* Support for both standard inter-concept relationships and for "general" inter-concept relationships
+
+  * Inter-concept relationships have been renamed to "standard inter-concept relationships"
+  * The corresponding query API traits and methods have been renamed as well
+  * The original inter-concept relationships and query APIs now pertain to "general" inter-concept relationships
+  * More precisely, these relationships are in general "inter-global-element-declaration relationships"
+  * Concept relation filters (in XBRL formula) should now pertain to these more general inter-concept relationships
+  * The same is true for concept relationship nodes (in XBRL table)
+  * These changes have been applied both to the "base" and "base.model" sub-packages
+
+* Taxonomy element creation has become faster (issue tqa-0001)
+
+There are many breaking changes, but adapting client code and getting it to compile should
+not be too hard. Keep in mind that the query API calls for "inter-concept relationships"
+no longer pertain to standard inter-concept relationships, so their semantics have changed.
+That is something to keep in mind when migrating client code to the use of TQA 0.9.0!
+
+According to MiMa, the breaking changes compared to version 0.8.18 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* method this(eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState.this")
+* method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy's type is different in current version, where it is (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.relationship.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.findAllConsecutiveInterConceptRelationshipsOfType")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.ParentChildRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.ParentChildRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.ParentChildRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.ParentChildRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.NotAllRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.NotAllRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.NotAllRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.NotAllRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.GeneralSpecialRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.GeneralSpecialRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.GeneralSpecialRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.GeneralSpecialRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.AllRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.AllRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.AllRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.AllRelationship.isFollowedBy")
+* interface eu.cdevreeze.tqa.base.model.InterConceptRelationship does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.model.InterConceptRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.SimilarTuplesRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.SimilarTuplesRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.SimilarTuplesRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.SimilarTuplesRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.OtherCalculationRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.OtherCalculationRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.OtherCalculationRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.OtherCalculationRelationship.isFollowedBy")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.model.CalculationRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.CalculationRelationship")
+* static method apply(eu.cdevreeze.tqa.base.model.InterConceptRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in current version does not have a correspondent with same parameter signature among (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath, (scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.apply")
+* method firstRelationship()eu.cdevreeze.tqa.base.model.InterConceptRelationship in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath has a different result type in current version, where it is eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship rather than eu.cdevreeze.tqa.base.model.InterConceptRelationship
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.firstRelationship")
+* method lastRelationship()eu.cdevreeze.tqa.base.model.InterConceptRelationship in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath has a different result type in current version, where it is eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship rather than eu.cdevreeze.tqa.base.model.InterConceptRelationship
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.lastRelationship")
+* method append(eu.cdevreeze.tqa.base.model.InterConceptRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.append")
+* method prepend(eu.cdevreeze.tqa.base.model.InterConceptRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.prepend")
+* method canAppend(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.canAppend")
+* method canPrepend(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.canPrepend")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.HypercubeDimensionRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.HypercubeDimensionRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.HypercubeDimensionRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.HypercubeDimensionRelationship.isFollowedBy")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.model.DimensionalRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.DimensionalRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.DomainMemberRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.DomainMemberRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.DomainMemberRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.DomainMemberRelationship.isFollowedBy")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.model.DefinitionRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.DefinitionRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.SummationItemRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.SummationItemRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.SummationItemRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.SummationItemRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.DimensionDomainRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.DimensionDomainRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.DimensionDomainRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.DimensionDomainRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.RequiresElementRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.RequiresElementRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.RequiresElementRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.RequiresElementRelationship.isFollowedBy")
+* method apply(eu.cdevreeze.tqa.base.model.InterConceptRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in object eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in current version does not have a correspondent with same parameter signature among (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath, (scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.apply")
+* object eu.cdevreeze.tqa.base.model.InterConceptRelationship does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.model.InterConceptRelationship$")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.model.PresentationRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.PresentationRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.EssenceAliasRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.EssenceAliasRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.EssenceAliasRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.EssenceAliasRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.DimensionDefaultRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.DimensionDefaultRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.DimensionDefaultRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.DimensionDefaultRelationship.isFollowedBy")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.model.HasHypercubeRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.HasHypercubeRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.OtherPresentationRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.OtherPresentationRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.OtherPresentationRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.OtherPresentationRelationship.isFollowedBy")
+* the type hierarchy of class eu.cdevreeze.tqa.base.model.OtherDefinitionRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.OtherDefinitionRelationship")
+* method isFollowedBy(eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.model.OtherDefinitionRelationship's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.OtherDefinitionRelationship.isFollowedBy")
+* the type hierarchy of interface eu.cdevreeze.tqa.base.model.DomainAwareRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.model.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.model.DomainAwareRelationship")
+* method findAllConsecutiveInterConceptRelationships(eu.cdevreeze.tqa.base.model.InterConceptRelationship)scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.model.taxonomy.BasicTaxonomy's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.taxonomy.BasicTaxonomy.findAllConsecutiveInterConceptRelationships")
+* method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.model.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.model.taxonomy.BasicTaxonomy's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.taxonomy.BasicTaxonomy.findAllConsecutiveInterConceptRelationshipsOfType")
+* method this(eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.model.taxonomy.BasicTaxonomy does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.taxonomy.BasicTaxonomy.this")
+* abstract method findAllConsecutiveInterConceptRelationships(eu.cdevreeze.tqa.base.model.InterConceptRelationship)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi.findAllConsecutiveInterConceptRelationships")
+* abstract method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.model.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi.findAllConsecutiveInterConceptRelationshipsOfType")
+* abstract method findAllConsecutiveInterConceptRelationships(eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi.findAllConsecutiveInterConceptRelationships")
+* abstract method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerApi.findAllConsecutiveInterConceptRelationshipsOfType")
+* abstract method maxPathLengthBeyondCycle()Int in interface eu.cdevreeze.tqa.base.model.queryapi.PathLengthRestrictionApi is inherited by class NonStandardRelationshipContainerLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.NonStandardRelationshipContainerLike.maxPathLengthBeyondCycle")
+* abstract method filterRelationships(scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.RelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterRelationships")
+* abstract method findAllRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.RelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllRelationshipsOfType")
+* abstract method filterRelationshipsOfType(scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.RelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterRelationshipsOfType")
+* abstract method findAllStandardInterConceptRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllStandardInterConceptRelationships")
+* abstract method filterStandardInterConceptRelationships(scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterStandardInterConceptRelationships")
+* abstract method findAllStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllStandardInterConceptRelationshipsOfType")
+* abstract method filterStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterStandardInterConceptRelationshipsOfType")
+* abstract method findAllOutgoingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllOutgoingStandardInterConceptRelationships")
+* abstract method filterOutgoingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterOutgoingStandardInterConceptRelationships")
+* abstract method findAllOutgoingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllOutgoingStandardInterConceptRelationshipsOfType")
+* abstract method filterOutgoingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterOutgoingStandardInterConceptRelationshipsOfType")
+* abstract method findAllConsecutiveStandardInterConceptRelationships(eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllConsecutiveStandardInterConceptRelationships")
+* abstract method findAllConsecutiveStandardInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.model.StandardInterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllConsecutiveStandardInterConceptRelationshipsOfType")
+* abstract method findAllIncomingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllIncomingStandardInterConceptRelationships")
+* abstract method filterIncomingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterIncomingStandardInterConceptRelationships")
+* abstract method findAllIncomingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.findAllIncomingStandardInterConceptRelationshipsOfType")
+* abstract method filterIncomingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterIncomingStandardInterConceptRelationshipsOfType")
+* abstract method filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths")
+* abstract method filterIncomingConsecutiveStandardInterConceptRelationshipPaths(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyApi.filterIncomingConsecutiveStandardInterConceptRelationshipPaths")
+* method findAllConsecutiveInterConceptRelationships(eu.cdevreeze.tqa.base.model.InterConceptRelationship)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerLike's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerLike.findAllConsecutiveInterConceptRelationships")
+* method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.model.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerLike's type is different in current version, where it is (eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.model.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerLike.findAllConsecutiveInterConceptRelationshipsOfType")
+* abstract method interConceptRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerLike is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerLike.interConceptRelationships")
+* abstract method maxPathLengthBeyondCycle()Int in interface eu.cdevreeze.tqa.base.model.queryapi.PathLengthRestrictionApi is inherited by class InterConceptRelationshipContainerLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.InterConceptRelationshipContainerLike.maxPathLengthBeyondCycle")
+* abstract method findAllRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.RelationshipContainerApi is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.findAllRelationshipsOfType")
+* abstract method maxPathLengthBeyondCycle()Int in interface eu.cdevreeze.tqa.base.model.queryapi.PathLengthRestrictionApi is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.maxPathLengthBeyondCycle")
+* abstract method findAllStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.findAllStandardInterConceptRelationshipsOfType")
+* abstract method standardInterConceptRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.standardInterConceptRelationships")
+* abstract method standardInterConceptRelationshipsBySource()scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.standardInterConceptRelationshipsBySource")
+* abstract method standardInterConceptRelationshipsByTarget()scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.standardInterConceptRelationshipsByTarget")
+* abstract method findAllStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.findAllStandardInterConceptRelationshipsOfType")
+* abstract method findAllRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.model.queryapi.RelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike.findAllRelationshipsOfType")
+* abstract method findAllLinkbases()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.TaxonomyApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllLinkbases")
+* abstract method findAllStandardInterConceptRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllStandardInterConceptRelationships")
+* abstract method filterStandardInterConceptRelationships(scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterStandardInterConceptRelationships")
+* abstract method findAllStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllStandardInterConceptRelationshipsOfType")
+* abstract method filterStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterStandardInterConceptRelationshipsOfType")
+* abstract method findAllOutgoingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllOutgoingStandardInterConceptRelationships")
+* abstract method filterOutgoingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterOutgoingStandardInterConceptRelationships")
+* abstract method findAllOutgoingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllOutgoingStandardInterConceptRelationshipsOfType")
+* abstract method filterOutgoingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterOutgoingStandardInterConceptRelationshipsOfType")
+* abstract method findAllConsecutiveStandardInterConceptRelationships(eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllConsecutiveStandardInterConceptRelationships")
+* abstract method findAllConsecutiveStandardInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllConsecutiveStandardInterConceptRelationshipsOfType")
+* abstract method findAllIncomingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllIncomingStandardInterConceptRelationships")
+* abstract method filterIncomingStandardInterConceptRelationships(eu.cdevreeze.yaidom.core.EName,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterIncomingStandardInterConceptRelationships")
+* abstract method findAllIncomingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllIncomingStandardInterConceptRelationshipsOfType")
+* abstract method filterIncomingStandardInterConceptRelationshipsOfType(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterIncomingStandardInterConceptRelationshipsOfType")
+* abstract method filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths")
+* abstract method filterIncomingConsecutiveStandardInterConceptRelationshipPaths(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterIncomingConsecutiveStandardInterConceptRelationshipPaths")
+* abstract method filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths")
+* abstract method filterIncomingUnrestrictedStandardInterConceptRelationshipPaths(eu.cdevreeze.yaidom.core.EName,scala.reflect.ClassTag,scala.Function1)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyApi in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.filterIncomingUnrestrictedStandardInterConceptRelationshipPaths")
+* abstract method findAllStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerApi is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.findAllStandardInterConceptRelationshipsOfType")
+* abstract method maxPathLengthBeyondCycle()Int in interface eu.cdevreeze.tqa.base.queryapi.PathLengthRestrictionApi is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.maxPathLengthBeyondCycle")
+* abstract method standardInterConceptRelationships()scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.standardInterConceptRelationships")
+* abstract method standardInterConceptRelationshipsBySource()scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.standardInterConceptRelationshipsBySource")
+* abstract method standardInterConceptRelationshipsByTarget()scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.standardInterConceptRelationshipsByTarget")
+* abstract method findAllStandardInterConceptRelationshipsOfType(scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.StandardInterConceptRelationshipContainerLike is inherited by class TaxonomyLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyLike.findAllStandardInterConceptRelationshipsOfType")
+* method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerLike's type is different in current version, where it is (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.relationship.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerLike.findAllConsecutiveInterConceptRelationshipsOfType")
+* abstract method maxPathLengthBeyondCycle()Int in interface eu.cdevreeze.tqa.base.queryapi.PathLengthRestrictionApi is inherited by class InterConceptRelationshipContainerLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerLike.maxPathLengthBeyondCycle")
+* abstract method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerApi's type is different in current version, where it is (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq instead of (eu.cdevreeze.tqa.base.relationship.InterConceptRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerApi.findAllConsecutiveInterConceptRelationshipsOfType")
+* abstract method findAllConsecutiveInterConceptRelationships(eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerApi.findAllConsecutiveInterConceptRelationships")
+* abstract method findAllConsecutiveInterConceptRelationshipsOfType(eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship,scala.reflect.ClassTag)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerApi is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.InterConceptRelationshipContainerApi.findAllConsecutiveInterConceptRelationshipsOfType")
+* abstract method maxPathLengthBeyondCycle()Int in interface eu.cdevreeze.tqa.base.queryapi.PathLengthRestrictionApi is inherited by class NonStandardRelationshipContainerLike in current version.
+  filter with: ProblemFilters.exclude[InheritedNewAbstractMethodProblem]("eu.cdevreeze.tqa.base.queryapi.NonStandardRelationshipContainerLike.maxPathLengthBeyondCycle")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.AttributeDeclarationOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AttributeDeclarationOrReference.opt")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.ComplexTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ComplexTypeDefinition.opt")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInLabelNamespace in object eu.cdevreeze.tqa.base.dom.ElemInLabelNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInLabelNamespace.apply")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInLinkNamespace in object eu.cdevreeze.tqa.base.dom.ElemInLinkNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInLinkNamespace.apply")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInXsdNamespace in object eu.cdevreeze.tqa.base.dom.ElemInXsdNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInXsdNamespace.apply")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.ElemInReferenceNamespace in object eu.cdevreeze.tqa.base.dom.ElemInReferenceNamespace does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElemInReferenceNamespace.apply")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.ElementDeclarationOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ElementDeclarationOrReference.opt")
+* method apply(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.dom.TaxonomyElem in object eu.cdevreeze.tqa.base.dom.TaxonomyElem does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyElem.apply")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.ModelGroupDefinitionOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.ModelGroupDefinitionOrReference.opt")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.SimpleTypeDefinition does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.SimpleTypeDefinition.opt")
+* method opt(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)scala.Option in object eu.cdevreeze.tqa.base.dom.AttributeGroupDefinitionOrReference does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.AttributeGroupDefinitionOrReference.opt")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.EssenceAliasRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.EssenceAliasRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.RequiresElementRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.RequiresElementRelationship")
+* method apply(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in object eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in current version does not have a correspondent with same parameter signature among (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath, (scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.apply")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.DimensionDomainRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.DimensionDomainRelationship")
+* class eu.cdevreeze.tqa.base.relationship.InterConceptRelationship does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationship")
+* object eu.cdevreeze.tqa.base.relationship.InterConceptRelationship does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationship$")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.DomainAwareRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.ParentChildRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.ParentChildRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.NotAllRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.NotAllRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.SimilarTuplesRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.SimilarTuplesRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.DimensionalRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.DimensionalRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.GeneralSpecialRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.GeneralSpecialRelationship")
+* static method apply(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in current version does not have a correspondent with same parameter signature among (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath, (scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.apply")
+* method firstRelationship()eu.cdevreeze.tqa.base.relationship.InterConceptRelationship in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath has a different result type in current version, where it is eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship rather than eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.firstRelationship")
+* method lastRelationship()eu.cdevreeze.tqa.base.relationship.InterConceptRelationship in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath has a different result type in current version, where it is eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship rather than eu.cdevreeze.tqa.base.relationship.InterConceptRelationship
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.lastRelationship")
+* method append(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath instead of (eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.append")
+* method prepend(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath instead of (eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.prepend")
+* method canAppend(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.canAppend")
+* method canPrepend(eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)Boolean in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath's type is different in current version, where it is (eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship)Boolean instead of (eu.cdevreeze.tqa.base.relationship.InterConceptRelationship)Boolean
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.canPrepend")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.SummationItemRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.SummationItemRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.DefinitionRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.DefinitionRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.PresentationRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.PresentationRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.DimensionDefaultRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.DimensionDefaultRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.CalculationRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.CalculationRelationship")
+* the type hierarchy of class eu.cdevreeze.tqa.base.relationship.AllRelationship is different in current version. Missing types {eu.cdevreeze.tqa.base.relationship.InterConceptRelationship}
+  filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.relationship.AllRelationship")
 
 
 0.8.18

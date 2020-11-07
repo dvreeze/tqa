@@ -420,6 +420,8 @@ object BasicTaxonomy {
     }
   }
 
+  val defaultMaxPathLengthBeyondCycle = DerivedState.defaultMaxPathLengthBeyondCycle
+
   /**
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    * This method invokes the overloaded build method having as 4th parameter the arc filter that always returns true.

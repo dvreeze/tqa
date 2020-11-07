@@ -161,6 +161,8 @@ final class BasicTaxonomy private (
 
 object BasicTaxonomy {
 
+  val defaultMaxPathLengthBeyondCycle = 10
+
   /**
    * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
    */
@@ -168,8 +170,7 @@ object BasicTaxonomy {
       topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
       extraSubstitutionGroupMap: SubstitutionGroupMap,
       relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
-    val maxPathLengthBeyondCycle = 10
-    build(topmostSchemaContentElements, extraSubstitutionGroupMap, relationships, maxPathLengthBeyondCycle)
+    build(topmostSchemaContentElements, extraSubstitutionGroupMap, relationships, defaultMaxPathLengthBeyondCycle)
   }
 
   /**
