@@ -16,13 +16,13 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import scala.collection.immutable
-import scala.reflect.ClassTag
-
 import eu.cdevreeze.tqa.base.model.ParentChildRelationship
 import eu.cdevreeze.tqa.base.model.ParentChildRelationshipPath
 import eu.cdevreeze.tqa.base.model.PresentationRelationship
 import eu.cdevreeze.yaidom.core.EName
+
+import scala.collection.immutable
+import scala.reflect.ClassTag
 
 /**
  * Purely abstract trait offering a presentation relationship query API.
@@ -36,35 +36,35 @@ trait PresentationRelationshipContainerApi {
   // Finding and filtering relationships without looking at source or target concept
 
   def findAllPresentationRelationshipsOfType[A <: PresentationRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
-  def filterPresentationRelationshipsOfType[A <: PresentationRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+  def filterPresentationRelationshipsOfType[A <: PresentationRelationship](relationshipType: ClassTag[A])(
+      p: A => Boolean): immutable.IndexedSeq[A]
 
   def findAllParentChildRelationships: immutable.IndexedSeq[ParentChildRelationship]
 
   def filterParentChildRelationships(
-    p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship]
+      p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship]
 
   // Finding and filtering outgoing relationships
 
   /**
    * Finds all parent-child relationships that are outgoing from the given concept.
    */
-  def findAllOutgoingParentChildRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationship]
+  def findAllOutgoingParentChildRelationships(sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationship]
 
   /**
    * Filters parent-child relationships that are outgoing from the given concept.
    */
-  def filterOutgoingParentChildRelationships(
-    sourceConcept: EName)(p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship]
+  def filterOutgoingParentChildRelationships(sourceConcept: EName)(
+      p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship]
 
   /**
    * Filters parent-child relationships that are outgoing from the given concept on the given ELR.
    */
   def filterOutgoingParentChildRelationshipsOnElr(
-    sourceConcept: EName, elr: String): immutable.IndexedSeq[ParentChildRelationship]
+      sourceConcept: EName,
+      elr: String): immutable.IndexedSeq[ParentChildRelationship]
 
   /**
    * Finds all "following" ("consecutive") parent-child relationships.
@@ -77,21 +77,20 @@ trait PresentationRelationshipContainerApi {
    * }}}
    */
   def findAllConsecutiveParentChildRelationships(
-    relationship: ParentChildRelationship): immutable.IndexedSeq[ParentChildRelationship]
+      relationship: ParentChildRelationship): immutable.IndexedSeq[ParentChildRelationship]
 
   // Finding and filtering incoming relationships
 
   /**
    * Finds all parent-child relationships that are incoming to the given concept.
    */
-  def findAllIncomingParentChildRelationships(
-    targetConcept: EName): immutable.IndexedSeq[ParentChildRelationship]
+  def findAllIncomingParentChildRelationships(targetConcept: EName): immutable.IndexedSeq[ParentChildRelationship]
 
   /**
    * Filters parent-child relationships that are incoming to the given concept.
    */
-  def filterIncomingParentChildRelationships(
-    targetConcept: EName)(p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship]
+  def filterIncomingParentChildRelationships(targetConcept: EName)(
+      p: ParentChildRelationship => Boolean): immutable.IndexedSeq[ParentChildRelationship]
 
   // Filtering outgoing and incoming relationship paths
 
@@ -99,28 +98,27 @@ trait PresentationRelationshipContainerApi {
    * Returns `filterOutgoingConsecutiveParentChildRelationshipPaths(sourceConcept)(_ => true)`.
    */
   def findAllOutgoingConsecutiveParentChildRelationshipPaths(
-    sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
+      sourceConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
    * Filters the consecutive (!) parent-child relationship paths that are outgoing from the given concept.
    * Only relationship paths for which all (non-empty) "inits" pass the predicate are accepted by the filter!
-   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
-  def filterOutgoingConsecutiveParentChildRelationshipPaths(
-    sourceConcept: EName)(
+  def filterOutgoingConsecutiveParentChildRelationshipPaths(sourceConcept: EName)(
       p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
    * Returns `filterIncomingConsecutiveParentChildRelationshipPaths(targetConcept)(_ => true)`.
    */
   def findAllIncomingConsecutiveParentChildRelationshipPaths(
-    targetConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
+      targetConcept: EName): immutable.IndexedSeq[ParentChildRelationshipPath]
 
   /**
    * Filters the consecutive (!) parent-child relationship paths that are incoming to the given concept.
    * Only relationship paths for which all (non-empty) "tails" pass the predicate are accepted by the filter!
-   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
-  def filterIncomingConsecutiveParentChildRelationshipPaths(
-    targetConcept: EName)(p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath]
+  def filterIncomingConsecutiveParentChildRelationshipPaths(targetConcept: EName)(
+      p: ParentChildRelationshipPath => Boolean): immutable.IndexedSeq[ParentChildRelationshipPath]
 }

@@ -20,11 +20,6 @@ import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
 
-import scala.collection.immutable
-import scala.reflect.classTag
-
-import org.scalatest.funsuite.AnyFunSuite
-
 import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.dom.LocalElementDeclaration
 import eu.cdevreeze.tqa.base.dom.RoleRef
@@ -38,6 +33,10 @@ import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.docbuilder.saxon.SaxonDocumentBuilder
 import eu.cdevreeze.yaidom.core.EName
 import net.sf.saxon.s9api.Processor
+import org.scalatest.funsuite.AnyFunSuite
+
+import scala.collection.immutable
+import scala.reflect.classTag
 
 /**
  * Dimensional querying test case. It uses test data from the XBRL Dimensions conformance suite.
@@ -56,9 +55,8 @@ class DimensionalQueryTest extends AnyFunSuite {
       hypercube.targetEName
     }
     assertResult(true) {
-      hypercube.globalElementDeclaration.hasSubstitutionGroup(
-        ENames.XbrldtHypercubeItemEName,
-        taxo.substitutionGroupMap)
+      hypercube.globalElementDeclaration
+        .hasSubstitutionGroup(ENames.XbrldtHypercubeItemEName, taxo.substitutionGroupMap)
     }
 
     assertResult(true) {
@@ -79,9 +77,8 @@ class DimensionalQueryTest extends AnyFunSuite {
       hypercube.targetEName
     }
     assertResult(true) {
-      hypercube.globalElementDeclaration.hasSubstitutionGroup(
-        ENames.XbrldtHypercubeItemEName,
-        taxo.substitutionGroupMap)
+      hypercube.globalElementDeclaration
+        .hasSubstitutionGroup(ENames.XbrldtHypercubeItemEName, taxo.substitutionGroupMap)
     }
 
     assertResult(false) {
@@ -93,7 +90,8 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testNonAbstractHypercubeWithSGComplexities") {
-    val taxo = makeTestDts(Vector("100-xbrldte/101-HypercubeElementIsNotAbstractError/hypercubeNotAbstractWithSGComplexities.xsd"))
+    val taxo = makeTestDts(
+      Vector("100-xbrldte/101-HypercubeElementIsNotAbstractError/hypercubeNotAbstractWithSGComplexities.xsd"))
 
     val hypercubeName = EName("{http://www.xbrl.org/dim/conf/100/hypercubeNotAbstract}MyHypercube")
     val otherHypercubeName = EName("{http://www.xbrl.org/dim/conf/100/hypercubeNotAbstract}MyOtherHypercube")
@@ -111,14 +109,12 @@ class DimensionalQueryTest extends AnyFunSuite {
       otherHypercube.substitutionGroupOption
     }
     assertResult(true) {
-      hypercube.globalElementDeclaration.hasSubstitutionGroup(
-        ENames.XbrldtHypercubeItemEName,
-        taxo.substitutionGroupMap)
+      hypercube.globalElementDeclaration
+        .hasSubstitutionGroup(ENames.XbrldtHypercubeItemEName, taxo.substitutionGroupMap)
     }
     assertResult(true) {
-      otherHypercube.globalElementDeclaration.hasSubstitutionGroup(
-        ENames.XbrldtHypercubeItemEName,
-        taxo.substitutionGroupMap)
+      otherHypercube.globalElementDeclaration
+        .hasSubstitutionGroup(ENames.XbrldtHypercubeItemEName, taxo.substitutionGroupMap)
     }
 
     assertResult(true) {
@@ -136,9 +132,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testHasHypercubeNoContextElementInvalid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid.xsd",
-      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid.xsd",
+        "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid-definition.xml"
+      ))
 
     val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isAllRelationship)
 
@@ -151,9 +149,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testNotAllHasHypercubeNoContextElementInvalid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid.xsd",
-      "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/notAllHasHypercubeNoContextElementInvalid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/hasHypercubeNoContextElementInvalid.xsd",
+        "100-xbrldte/106-HasHypercubeMissingContextElementAttributeError/notAllHasHypercubeNoContextElementInvalid-definition.xml"
+      ))
 
     val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isNotAllRelationship)
 
@@ -166,9 +166,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testHypercubeDimensionTargetRoleValid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleValid.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleValid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleValid.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleValid-definition.xml"
+      ))
 
     val hypercube = EName("{http://www.xbrl.org/dim/conf}AllCube")
 
@@ -198,9 +200,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testHypercubeDimensionTargetRoleNotResolved") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleNotResolved.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleNotResolved-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleNotResolved.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/hypercubeDimensionTargetRoleNotResolved-definition.xml"
+      ))
 
     val hypercubeDimensions = taxo.findAllHypercubeDimensionRelationships
 
@@ -221,9 +225,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testHasHypercubeTargetRoleValid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleValid.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleValid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleValid.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleValid-definition.xml"
+      ))
 
     val hasHypercubes = taxo.findAllHasHypercubeRelationships
 
@@ -240,9 +246,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testHasHypercubeTargetRoleNotResolved") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleNotResolved.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleNotResolved-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleNotResolved.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/hasHypercubeTargetRoleNotResolved-definition.xml"
+      ))
 
     val hasHypercubes = taxo.findAllHasHypercubeRelationships
 
@@ -260,9 +268,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDomainTargetRoleValid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleValid.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleValid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleValid.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleValid-definition.xml"
+      ))
 
     val dimensionDomains = taxo.findAllDimensionDomainRelationships
 
@@ -279,9 +289,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDomainTargetRoleNotResolved") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleNotResolved.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleNotResolved-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleNotResolved.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/dimensionDomainTargetRoleNotResolved-definition.xml"
+      ))
 
     val dimensionDomains = taxo.findAllDimensionDomainRelationships
 
@@ -302,9 +314,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberTargetRoleValid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleValid.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleValid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleValid.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleValid-definition.xml"
+      ))
 
     val domainMembers = taxo.findAllDomainMemberRelationships
 
@@ -322,9 +336,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberTargetRoleNotResolved") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleNotResolved.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleNotResolved-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleNotResolved.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleNotResolved-definition.xml"
+      ))
 
     val domainMembers = taxo.findAllDomainMemberRelationships
 
@@ -346,9 +362,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testNotAllHasHypercubeTargetRoleValid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleValid.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleValid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleValid.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleValid-definition.xml"
+      ))
 
     val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isNotAllRelationship)
 
@@ -367,9 +385,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testNotAllHasHypercubeTargetRoleNotResolved") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleNotResolved.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleNotResolved-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleNotResolved.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/notAllHasHypercubeTargetRoleNotResolved-definition.xml"
+      ))
 
     val hasHypercubes = taxo.findAllHasHypercubeRelationships.filter(_.isNotAllRelationship)
 
@@ -390,10 +410,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberTargetRoleMissingRoleRef") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef-definition.xml",
-      "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef-definition2.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef-definition.xml",
+        "100-xbrldte/107-TargetRoleNotResolvedError/domainMemberTargetRoleMissingRoleRef-definition2.xml"
+      ))
 
     val domainMembers = taxo.findAllDomainMemberRelationships
 
@@ -419,9 +441,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testUnconnectedDRS") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/107-TargetRoleNotResolvedError/unconnectedDRS.xsd",
-      "100-xbrldte/107-TargetRoleNotResolvedError/unconnectedDRS-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/107-TargetRoleNotResolvedError/unconnectedDRS.xsd",
+        "100-xbrldte/107-TargetRoleNotResolvedError/unconnectedDRS-definition.xml"))
 
     val hypercube = EName("{http://www.xbrl.org/dim/conf}AllCube")
 
@@ -447,8 +470,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDeclarationValid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/108-DimensionElementIsNotAbstractError/dimensionValid.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/108-DimensionElementIsNotAbstractError/dimensionValid.xsd"))
 
     val dimension = EName("{http://www.xbrl.org/dim/conf/110/dimensionValid}MyDimension")
 
@@ -466,8 +488,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDeclarationNotAbstractInvalid") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/108-DimensionElementIsNotAbstractError/dimensionNotAbstract.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/108-DimensionElementIsNotAbstractError/dimensionNotAbstract.xsd"))
 
     val dimension = EName("{http://www.xbrl.org/dim/conf/110/dimensionNotAbstract}MyDimension")
 
@@ -485,8 +506,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainRefvalid-1") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/109-TypedDomainRefError/typedDomainRefvalid.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/109-TypedDomainRefError/typedDomainRefvalid.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -515,8 +535,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainRefvalid-2") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/109-TypedDomainRefError/typedDomainRefvalid2.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/109-TypedDomainRefError/typedDomainRefvalid2.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -549,8 +568,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainRefonNonItemDeclaration") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/109-TypedDomainRefError/typedDomainRefonNonItemDeclaration.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/109-TypedDomainRefError/typedDomainRefonNonItemDeclaration.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -571,8 +589,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTwotypedDomainRefattributesContainSameRef") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/109-TypedDomainRefError/TwotypedDomainRefattributesContainSameRef.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/109-TypedDomainRefError/TwotypedDomainRefattributesContainSameRef.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -592,8 +609,8 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTwotypedDomainRefattributesContainRefsLocatingSameElement") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/109-TypedDomainRefError/TwotypedDomainRefattributesContainRefsLocatingSameElement.xsd"))
+    val taxo = makeTestDts(
+      Vector("100-xbrldte/109-TypedDomainRefError/TwotypedDomainRefattributesContainRefsLocatingSameElement.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -613,8 +630,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainReflocatesDeclarationInSameFile") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInSameFile.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInSameFile.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -624,8 +640,7 @@ class DimensionalQueryTest extends AnyFunSuite {
       typedDimDecl.substitutionGroupOption
     }
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
-      taxo.getDimensionDeclaration(EName(tns, "headPhone")).
-        globalElementDeclaration.substitutionGroupOption
+      taxo.getDimensionDeclaration(EName(tns, "headPhone")).globalElementDeclaration.substitutionGroupOption
     }
 
     assertResult(true) {
@@ -634,8 +649,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainReftoAbstractItemDeclaration") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/110-TypedDimensionError/typedDomainReftoAbstractItemDeclaration.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/110-TypedDimensionError/typedDomainReftoAbstractItemDeclaration.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -651,8 +665,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainReflocatesTypeDeclaration") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesTypeDeclaration.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/110-TypedDimensionError/typedDomainReflocatesTypeDeclaration.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -662,8 +675,7 @@ class DimensionalQueryTest extends AnyFunSuite {
       typedDimDecl.substitutionGroupOption
     }
     assertResult(Some(ENames.XbrldtDimensionItemEName)) {
-      taxo.getDimensionDeclaration(EName(tns, "headPhone")).
-        globalElementDeclaration.substitutionGroupOption
+      taxo.getDimensionDeclaration(EName(tns, "headPhone")).globalElementDeclaration.substitutionGroupOption
     }
 
     assertResult(false) {
@@ -675,8 +687,8 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainRefLocatesNonGlobalElementDeclaration") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/110-TypedDimensionError/typedDomainRefLocatesNonGlobalElementDeclaration.xsd"))
+    val taxo =
+      makeTestDts(Vector("100-xbrldte/110-TypedDimensionError/typedDomainRefLocatesNonGlobalElementDeclaration.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -691,23 +703,25 @@ class DimensionalQueryTest extends AnyFunSuite {
     }
 
     val localElemDeclOption =
-      taxo.getRootElem(typedDimDecl.globalElementDeclaration).
-        findElemOfType(classTag[LocalElementDeclaration])(_.idOption == Some(typedDimDecl.typedDomainRef).map(_.getFragment))
+      taxo
+        .getRootElem(typedDimDecl.globalElementDeclaration)
+        .findElemOfType(classTag[LocalElementDeclaration])(
+          _.idOption == Some(typedDimDecl.typedDomainRef).map(_.getFragment))
 
     assertResult(true) {
       localElemDeclOption.nonEmpty
     }
     assertResult(EName(tns, "country")) {
-      EName(
-        localElemDeclOption.get.schemaTargetNamespaceOption,
-        localElemDeclOption.get.nameAttributeValue)
+      EName(localElemDeclOption.get.schemaTargetNamespaceOption, localElemDeclOption.get.nameAttributeValue)
     }
   }
 
   test("testTypedDomainReflocatesDeclarationInDifferentFileWithImport") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInDifferentFileWithImport.xsd",
-      "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInDifferentFile_File2.xsd"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInDifferentFileWithImport.xsd",
+        "100-xbrldte/110-TypedDimensionError/typedDomainReflocatesDeclarationInDifferentFile_File2.xsd"
+      ))
 
     val tns1 = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
     val tns2 = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid_File2"
@@ -718,7 +732,8 @@ class DimensionalQueryTest extends AnyFunSuite {
       typedDimDecl.substitutionGroupOption
     }
     assertResult(true) {
-      typedDimDecl.globalElementDeclaration.hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
+      typedDimDecl.globalElementDeclaration
+        .hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
     }
 
     val typedDomainDeclOption = taxo.findGlobalElementDeclarationByUri(typedDimDecl.typedDomainRef)
@@ -744,8 +759,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainRefHasNoFragment") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/111-TypedDimensionURIError/typedDomainRefHasNoFragment.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/111-TypedDimensionURIError/typedDomainRefHasNoFragment.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -755,7 +769,8 @@ class DimensionalQueryTest extends AnyFunSuite {
       typedDimDecl.substitutionGroupOption
     }
     assertResult(true) {
-      typedDimDecl.globalElementDeclaration.hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
+      typedDimDecl.globalElementDeclaration
+        .hasSubstitutionGroup(ENames.XbrldtDimensionItemEName, taxo.substitutionGroupMap)
     }
 
     assertResult(None) {
@@ -764,10 +779,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testPrimaryItemPolymorphismDirectError") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDirectError-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDirectError-definition.xml"
+      ))
 
     val primaryTns = "http://www.xbrl.org/dim/conf/primary"
     val tns = "http://www.conformance-dimensions.com/xbrl/"
@@ -779,13 +796,15 @@ class DimensionalQueryTest extends AnyFunSuite {
     val dimMembers = taxo.findAllDimensionMembers(hasHypercubes.head)
 
     // Sales is in a dimension domain
-    assertResult(Some(Set(
-      EName(primaryTns, "IncomeStatement"),
-      EName(primaryTns, "GrossProfit"),
-      EName(primaryTns, "GrossProfitPresentation"),
-      EName(primaryTns, "RevenueTotal"),
-      EName(primaryTns, "CostOfSales"),
-      EName(primaryTns, "Sales")))) {
+    assertResult(
+      Some(Set(
+        EName(primaryTns, "IncomeStatement"),
+        EName(primaryTns, "GrossProfit"),
+        EName(primaryTns, "GrossProfitPresentation"),
+        EName(primaryTns, "RevenueTotal"),
+        EName(primaryTns, "CostOfSales"),
+        EName(primaryTns, "Sales")
+      ))) {
 
       dimMembers.get(EName(tns, "BalanceDim"))
     }
@@ -799,16 +818,22 @@ class DimensionalQueryTest extends AnyFunSuite {
       taxo.filterOutgoingDomainMemberRelationshipsOnElr(primary, hasHypercubes.head.elr).map(_.member).toSet
     }
     assertResult(Set(EName(primaryTns, "Sales"))) {
-      taxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(_.firstRelationship.elr == hasHypercubes.head.elr).
-        flatMap(_.relationships).map(_.member).toSet
+      taxo
+        .filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(
+          _.firstRelationship.elr == hasHypercubes.head.elr)
+        .flatMap(_.relationships)
+        .map(_.member)
+        .toSet
     }
   }
 
   test("testPrimaryItemPolymorphismIndirectError") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismIndirectError-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismIndirectError-definition.xml"
+      ))
 
     val primaryTns = "http://www.xbrl.org/dim/conf/primary"
     val tns = "http://www.conformance-dimensions.com/xbrl/"
@@ -820,14 +845,16 @@ class DimensionalQueryTest extends AnyFunSuite {
     val dimMembers = taxo.findAllDimensionMembers(hasHypercubes.head)
 
     // Sales is in a dimension domain
-    assertResult(Some(Set(
-      EName(tns, "Domain"),
-      EName(primaryTns, "IncomeStatement"),
-      EName(primaryTns, "GrossProfit"),
-      EName(primaryTns, "GrossProfitPresentation"),
-      EName(primaryTns, "RevenueTotal"),
-      EName(primaryTns, "CostOfSales"),
-      EName(primaryTns, "Sales")))) {
+    assertResult(
+      Some(Set(
+        EName(tns, "Domain"),
+        EName(primaryTns, "IncomeStatement"),
+        EName(primaryTns, "GrossProfit"),
+        EName(primaryTns, "GrossProfitPresentation"),
+        EName(primaryTns, "RevenueTotal"),
+        EName(primaryTns, "CostOfSales"),
+        EName(primaryTns, "Sales")
+      ))) {
 
       dimMembers.get(EName(tns, "BalanceDim"))
     }
@@ -841,16 +868,22 @@ class DimensionalQueryTest extends AnyFunSuite {
       taxo.filterOutgoingDomainMemberRelationshipsOnElr(primary, hasHypercubes.head.elr).map(_.member).toSet
     }
     assertResult(Set(EName(primaryTns, "Sales"))) {
-      taxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(_.firstRelationship.elr == hasHypercubes.head.elr).
-        flatMap(_.relationships).map(_.member).toSet
+      taxo
+        .filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(
+          _.firstRelationship.elr == hasHypercubes.head.elr)
+        .flatMap(_.relationships)
+        .map(_.member)
+        .toSet
     }
   }
 
   test("testPrimaryItemPolymorphismDirectUsableFalse") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDirectUnusableError-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDirectUnusableError-definition.xml"
+      ))
 
     val primaryTns = "http://www.xbrl.org/dim/conf/primary"
     val tns = "http://www.conformance-dimensions.com/xbrl/"
@@ -862,8 +895,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     val dimMembers = taxo.findAllDimensionMembers(hasHypercubes.head)
 
     // Sales is in a dimension domain
-    assertResult(Some(Set(
-      EName(primaryTns, "Sales")))) {
+    assertResult(Some(Set(EName(primaryTns, "Sales")))) {
 
       dimMembers.get(EName(tns, "BalanceDim"))
     }
@@ -882,16 +914,22 @@ class DimensionalQueryTest extends AnyFunSuite {
       taxo.filterOutgoingDomainMemberRelationshipsOnElr(primary, hasHypercubes.head.elr).map(_.member).toSet
     }
     assertResult(Set(EName(primaryTns, "Sales"))) {
-      taxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(_.firstRelationship.elr == hasHypercubes.head.elr).
-        flatMap(_.relationships).map(_.member).toSet
+      taxo
+        .filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(
+          _.firstRelationship.elr == hasHypercubes.head.elr)
+        .flatMap(_.relationships)
+        .map(_.member)
+        .toSet
     }
   }
 
   test("testPrimaryItemPolymorphismIndirectUsableFalse") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismIndirectUnusableError-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismIndirectUnusableError-definition.xml"
+      ))
 
     val primaryTns = "http://www.xbrl.org/dim/conf/primary"
     val tns = "http://www.conformance-dimensions.com/xbrl/"
@@ -903,26 +941,30 @@ class DimensionalQueryTest extends AnyFunSuite {
     val dimMembers = taxo.findAllDimensionMembers(hasHypercubes.head)
 
     // Sales is in a dimension domain
-    assertResult(Some(Set(
-      EName(tns, "Domain"),
-      EName(primaryTns, "IncomeStatement"),
-      EName(primaryTns, "GrossProfit"),
-      EName(primaryTns, "GrossProfitPresentation"),
-      EName(primaryTns, "RevenueTotal"),
-      EName(primaryTns, "CostOfSales"),
-      EName(primaryTns, "Sales")))) {
+    assertResult(
+      Some(Set(
+        EName(tns, "Domain"),
+        EName(primaryTns, "IncomeStatement"),
+        EName(primaryTns, "GrossProfit"),
+        EName(primaryTns, "GrossProfitPresentation"),
+        EName(primaryTns, "RevenueTotal"),
+        EName(primaryTns, "CostOfSales"),
+        EName(primaryTns, "Sales")
+      ))) {
 
       dimMembers.get(EName(tns, "BalanceDim"))
     }
 
     // Sales is not usable, but that does not matter
-    assertResult(Some(Set(
-      EName(tns, "Domain"),
-      EName(primaryTns, "IncomeStatement"),
-      EName(primaryTns, "GrossProfit"),
-      EName(primaryTns, "GrossProfitPresentation"),
-      EName(primaryTns, "RevenueTotal"),
-      EName(primaryTns, "CostOfSales")))) {
+    assertResult(
+      Some(Set(
+        EName(tns, "Domain"),
+        EName(primaryTns, "IncomeStatement"),
+        EName(primaryTns, "GrossProfit"),
+        EName(primaryTns, "GrossProfitPresentation"),
+        EName(primaryTns, "RevenueTotal"),
+        EName(primaryTns, "CostOfSales")
+      ))) {
 
       taxo.findAllUsableDimensionMembers(hasHypercubes.head).get(EName(tns, "BalanceDim"))
     }
@@ -936,17 +978,23 @@ class DimensionalQueryTest extends AnyFunSuite {
       taxo.filterOutgoingDomainMemberRelationshipsOnElr(primary, hasHypercubes.head.elr).map(_.member).toSet
     }
     assertResult(Set(EName(primaryTns, "Sales"))) {
-      taxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(_.firstRelationship.elr == hasHypercubes.head.elr).
-        flatMap(_.relationships).map(_.member).toSet
+      taxo
+        .filterOutgoingConsecutiveDomainMemberRelationshipPaths(primary)(
+          _.firstRelationship.elr == hasHypercubes.head.elr)
+        .flatMap(_.relationships)
+        .map(_.member)
+        .toSet
     }
   }
 
   test("testPrimaryItemPolymorphismDifferentSubGraphs") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph-presentation.xml",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph-presentation.xml",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorDifferentSubgraph-definition.xml"
+      ))
 
     val tns = "http://www.test.com/t"
 
@@ -957,15 +1005,11 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(2) {
       hasHypercubes.size
     }
-    assertResult(List(
-      EName(tns, "MovementsAnalysisAbstract"),
-      EName(tns, "Assets"))) {
+    assertResult(List(EName(tns, "MovementsAnalysisAbstract"), EName(tns, "Assets"))) {
 
       hasHypercubes.map(_.primary)
     }
-    assertResult(List(
-      EName(tns, "ClassesHypercube"),
-      EName(tns, "ValuationHypercube"))) {
+    assertResult(List(EName(tns, "ClassesHypercube"), EName(tns, "ValuationHypercube"))) {
 
       hasHypercubes.map(_.hypercube)
     }
@@ -979,10 +1023,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     val classesHypercubeDimMembers = taxo.findAllDimensionMembers(classesHasHypercube)
 
     assertResult(Map(
-      EName(tns, "ClassesDimension") -> Set(
-        EName(tns, "Assets"),
-        EName(tns, "PPE"),
-        EName(tns, "BiologicalAssets")))) {
+      EName(tns, "ClassesDimension") -> Set(EName(tns, "Assets"), EName(tns, "PPE"), EName(tns, "BiologicalAssets")))) {
 
       classesHypercubeDimMembers
     }
@@ -995,7 +1036,13 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(false) {
       inheritingDomMemsForClassesHasHypercube.flatMap(_.concepts).contains(biologicalAssets)
     }
-    assertResult(Set(EName(tns, "MovementsAnalysisAbstract"), EName(tns, "NetValue"), EName(tns, "Changes"), EName(tns, "Increases"), EName(tns, "Decreases"))) {
+    assertResult(
+      Set(
+        EName(tns, "MovementsAnalysisAbstract"),
+        EName(tns, "NetValue"),
+        EName(tns, "Changes"),
+        EName(tns, "Increases"),
+        EName(tns, "Decreases"))) {
       inheritingDomMemsForClassesHasHypercube.flatMap(_.concepts).toSet
     }
 
@@ -1004,10 +1051,7 @@ class DimensionalQueryTest extends AnyFunSuite {
 
     val validationHypercubeDimMembers = taxo.findAllDimensionMembers(validationHasHypercube)
 
-    assertResult(Map(
-      EName(tns, "ValuationDimension") -> Set(
-        EName(tns, "AtCost"),
-        EName(tns, "FairValue")))) {
+    assertResult(Map(EName(tns, "ValuationDimension") -> Set(EName(tns, "AtCost"), EName(tns, "FairValue")))) {
 
       validationHypercubeDimMembers
     }
@@ -1020,12 +1064,14 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testPrimaryItemPolymorphismInherited") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorInherited.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorInherited-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorInherited.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismError.xsd",
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismErrorInherited-definition.xml"
+      ))
 
     val tns = "http://www.conformance-dimensions.com/xbrl/inherited"
 
@@ -1050,7 +1096,7 @@ class DimensionalQueryTest extends AnyFunSuite {
     // And the sales2 concept also inherits that has-hypercube
 
     assertResult(true) {
-      hasHypercubeInheritanceOrSelf exists {
+      hasHypercubeInheritanceOrSelf.exists {
         case (concept, hasHypercubeRels) =>
           concept == sales2 && hasHypercubeRels.contains(hasHypercubes.head)
       }
@@ -1058,10 +1104,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testPolymorphismDefaultTest1") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDefaultTest1.xsd",
-      "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDefaultTest1-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDefaultTest1.xsd",
+        "100-xbrldte/115-PrimaryItemPolymorphismError/polymorphismDefaultTest1-definition.xml"
+      ))
 
     val tns = "http://www.conformance-dimensions.com/xbrl/"
 
@@ -1081,10 +1129,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDefaultSameRoleValid") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleValid.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleValid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleValid.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleValid-definition.xml"
+      ))
 
     val tns = "http://www.example.com/new"
 
@@ -1114,10 +1164,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDefaultSameRoleInvalid") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleInvalid.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleInvalid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleInvalid.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultSameRoleInvalid-definition.xml"
+      ))
 
     val tns = "http://www.example.com/new"
 
@@ -1143,11 +1195,13 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDefaultDifferentRolesInvalid") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "lib/base/products.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentRolesInvalid.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentRolesInvalid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "lib/base/products.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentRolesInvalid.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentRolesInvalid-definition.xml"
+      ))
 
     val tns = "http://xbrl.org/dims/conformance"
     val prodTns = "http://www.xbrl.org/dim/conf/product"
@@ -1219,10 +1273,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDefaultOneArcWithTwoLocators") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultOneArcWithTwoLocators.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultOneArcWithTwoLocators-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultOneArcWithTwoLocators.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultOneArcWithTwoLocators-definition.xml"
+      ))
 
     val tns = "http://www.example.com/new"
 
@@ -1265,10 +1321,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testMultipleArcsResolveToSameDefault") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/multipleArcsResolveToSameDefault.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/multipleArcsResolveToSameDefault-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/multipleArcsResolveToSameDefault.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/multipleArcsResolveToSameDefault-definition.xml"
+      ))
 
     val tns = "http://www.example.com/new"
 
@@ -1293,10 +1351,12 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDefaultDifferentDomainsInvalid") {
-    val taxo = makeTestDts(Vector(
-      "lib/base/primary.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentDomainsInvalid.xsd",
-      "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentDomainsInvalid-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "lib/base/primary.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentDomainsInvalid.xsd",
+        "100-xbrldte/124-TooManyDefaultMembersError/dimensionDefaultDifferentDomainsInvalid-definition.xml"
+      ))
 
     val dimensionDefaults = taxo.findAllDimensionDefaultRelationships
 
@@ -1316,9 +1376,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testHypercubeDimensionUndirected") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
-      "100-xbrldte/125-DRSUndirectedCycleError/hypercubeDimensionUndirected-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
+        "100-xbrldte/125-DRSUndirectedCycleError/hypercubeDimensionUndirected-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1331,7 +1392,8 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
 
     val outgoingPaths =
-      taxo.filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(2)(outgoingPaths.size)
 
@@ -1346,7 +1408,8 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Not so if we follow consecutive relationships
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1360,9 +1423,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDimensionDomainUndirected") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
-      "100-xbrldte/125-DRSUndirectedCycleError/dimensionDomainUndirected-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
+        "100-xbrldte/125-DRSUndirectedCycleError/dimensionDomainUndirected-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1375,7 +1439,9 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Suppose the ELR and target role were insignificant, then there would be an undirected cycle
 
     val outgoingPaths =
-      taxo.filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingUnrestrictedStandardInterConceptRelationshipPaths(
+        hypercube,
+        classTag[DimensionalRelationship])(_ => true)
 
     assertResult(2)(outgoingPaths.size)
 
@@ -1390,7 +1456,8 @@ class DimensionalQueryTest extends AnyFunSuite {
     // Not so if we follow consecutive relationships
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(hypercube, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1404,9 +1471,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberUndirected") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
-      "100-xbrldte/125-DRSUndirectedCycleError/domainMemberUndirected-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/125-DRSUndirectedCycleError/schema.xsd",
+        "100-xbrldte/125-DRSUndirectedCycleError/domainMemberUndirected-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1417,7 +1485,8 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1431,9 +1500,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberDirected") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
-      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+        "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1446,7 +1516,8 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1460,9 +1531,11 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberDirected2") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
-      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected2-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+        "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected2-definition.xml"))
+      .withMaxLengthBeyondCycle(0)
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1475,10 +1548,13 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
-        // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
-        paths.forall(_.isMinimalIfHavingCycle)
-      }
+      taxo
+        .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ =>
+          true)
+        .ensuring { paths =>
+          // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
+          paths.forall(_.isMinimalIfHavingCycle)
+        }
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1498,9 +1574,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberDirectedWithoutHypercube") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
-      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirectedWithoutHypercube-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+        "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirectedWithoutHypercube-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1511,7 +1588,8 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
@@ -1525,9 +1603,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberParallel") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
-      "100-xbrldte/126-DRSDirectedCycleError/domainMemberParallel-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+        "100-xbrldte/126-DRSDirectedCycleError/domainMemberParallel-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1544,7 +1623,8 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(2)(outgoingDimPaths.size)
 
@@ -1552,18 +1632,20 @@ class DimensionalQueryTest extends AnyFunSuite {
 
     // A directed cycle
 
-    assertResult(Set(
-      List(primary, hypercube, dimension, domain, domainMember),
-      List(primary, hypercube, dimension, domainMember, domain))) {
+    assertResult(
+      Set(
+        List(primary, hypercube, dimension, domain, domainMember),
+        List(primary, hypercube, dimension, domainMember, domain))) {
 
       outgoingDimPaths.map(_.concepts).toSet
     }
   }
 
   test("testDomainMemberParallelWithoutHypercube") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
-      "100-xbrldte/126-DRSDirectedCycleError/domainMemberParallelWithoutHypercube-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+        "100-xbrldte/126-DRSDirectedCycleError/domainMemberParallelWithoutHypercube-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1580,13 +1662,17 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPathsFromPrimary =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(
+        _ => true)
 
     val outgoingDimPathsFromDomain =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(
+        _ => true)
 
     val outgoingDimPathsFromDomainMember =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domainMember, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(
+        domainMember,
+        classTag[DimensionalRelationship])(_ => true)
 
     assertResult(1) {
       outgoingDimPathsFromPrimary.size
@@ -1611,9 +1697,10 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testDomainMemberDirectedReverse") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
-      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirectedReverse-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+        "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirectedReverse-definition.xml"))
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1630,14 +1717,14 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPaths =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(_ => true)
+      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(primary, classTag[DimensionalRelationship])(
+        _ => true)
 
     assertResult(1)(outgoingDimPaths.size)
 
     assertResult(Set(4))(outgoingDimPaths.map(_.relationships.size).toSet)
 
-    assertResult(Set(
-      List(primary, hypercube, dimension, domain, domainMember))) {
+    assertResult(Set(List(primary, hypercube, dimension, domain, domainMember))) {
 
       outgoingDimPaths.map(_.concepts).toSet
     }
@@ -1645,15 +1732,19 @@ class DimensionalQueryTest extends AnyFunSuite {
     // The pseudo-cycle
 
     assertResult(Set(domainMember -> domain)) {
-      taxo.findAllOutgoingDomainMemberRelationships(domainMember).
-        map(rel => (rel.sourceConceptEName -> rel.targetConceptEName)).toSet
+      taxo
+        .findAllOutgoingDomainMemberRelationships(domainMember)
+        .map(rel => (rel.sourceConceptEName -> rel.targetConceptEName))
+        .toSet
     }
   }
 
   test("testDomainMemberDirected2WithoutHypercube") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
-      "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected2WithoutHypercube-definition.xml"))
+    val taxo = makeTestDts(
+      Vector(
+        "100-xbrldte/126-DRSDirectedCycleError/schema.xsd",
+        "100-xbrldte/126-DRSDirectedCycleError/domainMemberDirected2WithoutHypercube-definition.xml"))
+      .withMaxLengthBeyondCycle(0)
 
     val tns = "http://xbrl.org/dims/conformance"
 
@@ -1664,10 +1755,13 @@ class DimensionalQueryTest extends AnyFunSuite {
     assertResult(true)(taxo.findPrimaryItemDeclaration(domainMember).isDefined)
 
     val outgoingDimPathsFromDomain =
-      taxo.filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ => true) ensuring { paths =>
-        // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
-        paths.forall(_.isMinimalIfHavingCycle)
-      }
+      taxo
+        .filterOutgoingConsecutiveStandardInterConceptRelationshipPaths(domain, classTag[DimensionalRelationship])(_ =>
+          true)
+        .ensuring { paths =>
+          // The check isMinimalIfHavingCycle is essential as stopping condition. This stopping condition already holds for all returned paths.
+          paths.forall(_.isMinimalIfHavingCycle)
+        }
 
     assertResult(1)(outgoingDimPathsFromDomain.size)
 
@@ -1675,16 +1769,15 @@ class DimensionalQueryTest extends AnyFunSuite {
 
     // If there were a hypercube and dimension, we would have a directed cycle.
 
-    assertResult(Set(
-      List(domain, domainMember, domain))) {
+    assertResult(Set(List(domain, domainMember, domain))) {
 
       outgoingDimPathsFromDomain.map(_.concepts).toSet
     }
   }
 
   test("testTypedDomainRefdoesnotlocateDeclarationInDifferentFile") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/127-OutOfDTSSchemaError/typedDomainRefdoesnotlocateDeclarationInDifferentFile.xsd"))
+    val taxo = makeTestDts(
+      Vector("100-xbrldte/127-OutOfDTSSchemaError/typedDomainRefdoesnotlocateDeclarationInDifferentFile.xsd"))
 
     val tns = "http://www.xbrl.org/dim/conf/190/dimensionURIvalid"
 
@@ -1696,7 +1789,9 @@ class DimensionalQueryTest extends AnyFunSuite {
 
     val typedDomainRefUri = dimensionDecl.typedDomainRef
 
-    assertResult(dimensionDecl.globalElementDeclaration.baseUri.resolve("typedDomainReflocatesDeclarationInDifferentFile_File2.xsd#duriv_phone")) {
+    assertResult(
+      dimensionDecl.globalElementDeclaration.baseUri
+        .resolve("typedDomainReflocatesDeclarationInDifferentFile_File2.xsd#duriv_phone")) {
       typedDomainRefUri
     }
 
@@ -1715,8 +1810,8 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testTypedDomainReflocatesDeclarationInDifferentFile") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/127-OutOfDTSSchemaError/typedDomainReflocatesDeclarationInDifferentFile.xsd"))
+    val taxo =
+      makeTestDts(Vector("100-xbrldte/127-OutOfDTSSchemaError/typedDomainReflocatesDeclarationInDifferentFile.xsd"))
 
     // The file with the typed domain ref will be found during DTS discovery.
 
@@ -1730,7 +1825,9 @@ class DimensionalQueryTest extends AnyFunSuite {
 
     val typedDomainRefUri = dimensionDecl.typedDomainRef
 
-    assertResult(dimensionDecl.globalElementDeclaration.baseUri.resolve("typedDomainReflocatesDeclarationInDifferentFile_File2.xsd#duriv_phone")) {
+    assertResult(
+      dimensionDecl.globalElementDeclaration.baseUri
+        .resolve("typedDomainReflocatesDeclarationInDifferentFile_File2.xsd#duriv_phone")) {
       typedDomainRefUri
     }
 
@@ -1752,8 +1849,7 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   test("testCIQ-Integration-testcase-1") {
-    val taxo = makeTestDts(Vector(
-      "100-xbrldte/127-OutOfDTSSchemaError/XBRLTaxonomyA.xsd"))
+    val taxo = makeTestDts(Vector("100-xbrldte/127-OutOfDTSSchemaError/XBRLTaxonomyA.xsd"))
 
     val tns = "http://www.xbrl.org/test/typed/Oasis"
 
@@ -1781,10 +1877,10 @@ class DimensionalQueryTest extends AnyFunSuite {
     val relationshipFactory = DefaultRelationshipFactory.StrictInstance
 
     val taxoBuilder =
-      TaxonomyBuilder.
-        withDocumentBuilder(docBuilder).
-        withDocumentCollector(documentCollector).
-        withRelationshipFactory(relationshipFactory)
+      TaxonomyBuilder
+        .withDocumentBuilder(docBuilder)
+        .withDocumentCollector(documentCollector)
+        .withRelationshipFactory(relationshipFactory)
 
     val basicTaxo = taxoBuilder.build(entryPointUris)
     basicTaxo
@@ -1802,21 +1898,22 @@ class DimensionalQueryTest extends AnyFunSuite {
       SimpleCatalog(
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.xbrl.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.xbrl.org/"),
-          SimpleCatalog.UriRewrite(None, "http://www.w3.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.w3.org/")))
+          SimpleCatalog
+            .UriRewrite(None, "http://www.xbrl.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.xbrl.org/"),
+          SimpleCatalog
+            .UriRewrite(None, "http://www.w3.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.w3.org/")
+        )
+      )
 
     val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromCatalog(xbrlCatalog)
 
     val catalog =
-      SimpleCatalog(
-        None,
-        Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
+      SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
 
     val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(new ZipFile(zipFile), catalog)
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),
-      UriResolvers.fromPartialUriResolversWithFallback(
-        Vector(zipFilePartialResolver, xbrlAndW3UriPartialResolver)))
+      UriResolvers.fromPartialUriResolversWithFallback(Vector(zipFilePartialResolver, xbrlAndW3UriPartialResolver)))
   }
 }

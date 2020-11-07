@@ -16,10 +16,6 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import eu.cdevreeze.tqa.base.model.Relationship
-
-import scala.collection.immutable
-
 /**
  * Purely abstract trait offering a '''taxonomy query API'''. It combines several other purely abstract query
  * API traits. The query API concerns the taxonomy as taxonomy schema content, and as container of relationships,

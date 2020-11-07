@@ -70,7 +70,8 @@ final class BasicTaxonomy private (
     val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
     val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship],
     val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]],
-    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]])
+    val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]],
+    val maxPathLengthBeyondCycle: Int)
     extends TaxonomyLike {
 
   def substitutionGroupMap: SubstitutionGroupMap = netSubstitutionGroupMap
@@ -167,6 +168,18 @@ object BasicTaxonomy {
       topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
       extraSubstitutionGroupMap: SubstitutionGroupMap,
       relationships: immutable.IndexedSeq[Relationship]): BasicTaxonomy = {
+    val maxPathLengthBeyondCycle = 10
+    build(topmostSchemaContentElements, extraSubstitutionGroupMap, relationships, maxPathLengthBeyondCycle)
+  }
+
+  /**
+   * Expensive build method (but the private constructor is cheap, and so are the Scala getters of the maps).
+   */
+  def build(
+      topmostSchemaContentElements: immutable.IndexedSeq[SchemaContentElement],
+      extraSubstitutionGroupMap: SubstitutionGroupMap,
+      relationships: immutable.IndexedSeq[Relationship],
+      maxPathLengthBeyondCycle: Int): BasicTaxonomy = {
 
     val topmostSchemaContentElementsByENameAndId: Map[EName, Map[String, immutable.IndexedSeq[SchemaContentElement]]] =
       topmostSchemaContentElements
@@ -290,7 +303,8 @@ object BasicTaxonomy {
       standardInterConceptRelationshipsByTarget,
       interConceptRelationships,
       interConceptRelationshipsBySource,
-      interConceptRelationshipsByTarget
+      interConceptRelationshipsByTarget,
+      maxPathLengthBeyondCycle
     )
   }
 

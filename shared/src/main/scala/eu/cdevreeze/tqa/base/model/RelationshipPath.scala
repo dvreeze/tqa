@@ -27,9 +27,7 @@ import scala.collection.immutable
  *
  * @author Chris de Vreeze
  */
-final case class RelationshipPath[A <: Relationship] private (
-  relationships: immutable.IndexedSeq[A]) {
-
+final case class RelationshipPath[A <: Relationship] private (relationships: immutable.IndexedSeq[A]) {
   require(relationships.nonEmpty, s"A relationship path must have at least one relationship")
 
   def source: Node = firstRelationship.source
@@ -98,6 +96,14 @@ final case class RelationshipPath[A <: Relationship] private (
   def isSingleElrRelationshipPath: Boolean = {
     relationships.sliding(2).filter(_.size == 2).forall(pair => pair(0).elr == pair(1).elr)
   }
+
+  def drop(n: Int): RelationshipPath[A] = {
+    RelationshipPath(relationships.drop(n.min(relationships.size - 1)))
+  }
+
+  def dropRight(n: Int): RelationshipPath[A] = {
+    RelationshipPath(relationships.dropRight(n.min(relationships.size - 1)))
+  }
 }
 
 object RelationshipPath {
@@ -109,7 +115,8 @@ object RelationshipPath {
   def from[A <: Relationship](relationships: immutable.IndexedSeq[A]): RelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => haveMatchingNodes(pair(0), pair(1))),
-      s"All subsequent relationships in a path must have matching target/source nodes")
+      s"All subsequent relationships in a path must have matching target/source nodes"
+    )
 
     new RelationshipPath(relationships)
   }

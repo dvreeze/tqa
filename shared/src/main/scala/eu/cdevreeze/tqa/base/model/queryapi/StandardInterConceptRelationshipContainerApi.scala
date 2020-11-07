@@ -140,7 +140,7 @@ trait StandardInterConceptRelationshipContainerApi {
    * Filters the consecutive relationship paths that are outgoing from the given concept and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "inits"
    * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
-   * but on encountering a cycle in a path it stops growing.
+   * but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
   def filterOutgoingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
       sourceConcept: EName,
@@ -151,7 +151,7 @@ trait StandardInterConceptRelationshipContainerApi {
    * Filters the consecutive relationship paths that are incoming to the given concept and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "tails"
    * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
-   * but on encountering a cycle in a path it stops growing.
+   * but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
   def filterIncomingConsecutiveStandardInterConceptRelationshipPaths[A <: StandardInterConceptRelationship](
       targetConcept: EName,

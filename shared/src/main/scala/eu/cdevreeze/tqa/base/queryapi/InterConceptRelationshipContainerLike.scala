@@ -28,7 +28,7 @@ import scala.reflect.ClassTag
  *
  * @author Chris de Vreeze
  */
-trait InterConceptRelationshipContainerLike extends InterConceptRelationshipContainerApi {
+trait InterConceptRelationshipContainerLike extends InterConceptRelationshipContainerApi with PathLengthRestrictionApi {
 
   // Abstract methods
 
@@ -198,7 +198,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
 
     val nextRelationships =
       filterOutgoingInterConceptRelationshipsOfType(path.targetConcept, relationshipType)(relationship =>
-        !path.hasCycle && p(path.append(relationship)))
+        !path.dropRight(maxPathLengthBeyondCycle).hasCycle && p(path.append(relationship)))
 
     val nextPaths = nextRelationships.map(rel => path.append(rel))
 
@@ -219,7 +219,7 @@ trait InterConceptRelationshipContainerLike extends InterConceptRelationshipCont
 
     val prevRelationships =
       filterIncomingInterConceptRelationshipsOfType(path.sourceConcept, relationshipType)(relationship =>
-        !path.hasCycle && p(path.prepend(relationship)))
+        !path.drop(maxPathLengthBeyondCycle).hasCycle && p(path.prepend(relationship)))
 
     val prevPaths = prevRelationships.map(rel => path.prepend(rel))
 

@@ -35,7 +35,8 @@ import scala.collection.immutable
  *
  * @author Chris de Vreeze
  */
-final case class InterConceptRelationshipPath[A <: InterElementDeclarationRelationship] private(relationships: immutable.IndexedSeq[A]) {
+final case class InterConceptRelationshipPath[A <: InterElementDeclarationRelationship] private (
+    relationships: immutable.IndexedSeq[A]) {
   require(relationships.nonEmpty, s"A relationship path must have at least one relationship")
 
   def sourceConcept: EName = firstRelationship.sourceElementTargetEName
@@ -105,6 +106,14 @@ final case class InterConceptRelationshipPath[A <: InterElementDeclarationRelati
   def isConsecutiveRelationshipPath: Boolean = {
     relationships.sliding(2).filter(_.size == 2).forall(pair => pair(0).isFollowedBy(pair(1)))
   }
+
+  def drop(n: Int): InterConceptRelationshipPath[A] = {
+    InterConceptRelationshipPath(relationships.drop(n.min(relationships.size - 1)))
+  }
+
+  def dropRight(n: Int): InterConceptRelationshipPath[A] = {
+    InterConceptRelationshipPath(relationships.dropRight(n.min(relationships.size - 1)))
+  }
 }
 
 object InterConceptRelationshipPath {
@@ -113,15 +122,19 @@ object InterConceptRelationshipPath {
     new InterConceptRelationshipPath(Vector(relationship))
   }
 
-  def from[A <: InterElementDeclarationRelationship](relationships: immutable.IndexedSeq[A]): InterConceptRelationshipPath[A] = {
+  def from[A <: InterElementDeclarationRelationship](
+      relationships: immutable.IndexedSeq[A]): InterConceptRelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => haveMatchingConcepts(pair(0), pair(1))),
-      s"All subsequent relationships in a path must have matching target/source concepts")
+      s"All subsequent relationships in a path must have matching target/source concepts"
+    )
 
     new InterConceptRelationshipPath(relationships.toVector)
   }
 
-  private def haveMatchingConcepts[A <: InterElementDeclarationRelationship](relationship1: A, relationship2: A): Boolean = {
+  private def haveMatchingConcepts[A <: InterElementDeclarationRelationship](
+      relationship1: A,
+      relationship2: A): Boolean = {
     relationship1.targetElementTargetEName == relationship2.sourceElementTargetEName
   }
 }

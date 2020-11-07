@@ -16,20 +16,20 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import scala.collection.immutable
-import scala.reflect.ClassTag
-import scala.reflect.classTag
-
 import eu.cdevreeze.tqa.base.model.Node
 import eu.cdevreeze.tqa.base.model.NonStandardRelationship
 import eu.cdevreeze.tqa.base.model.RelationshipPath
+
+import scala.collection.immutable
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 /**
  * Partial implementation of `NonStandardRelationshipContainerApi`.
  *
  * @author Chris de Vreeze
  */
-trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContainerApi {
+trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContainerApi with PathLengthRestrictionApi {
 
   // Abstract methods
 
@@ -44,7 +44,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
   def nonStandardRelationshipsByTarget: Map[Node, immutable.IndexedSeq[NonStandardRelationship]]
 
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   // Concrete methods
 
@@ -53,101 +53,107 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
   }
 
   final def filterNonStandardRelationships(
-    p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
+      p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
 
     filterNonStandardRelationshipsOfType(classTag[NonStandardRelationship])(p)
   }
 
-  final def filterNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+  final def filterNonStandardRelationshipsOfType[A <: NonStandardRelationship](relationshipType: ClassTag[A])(
+      p: A => Boolean): immutable.IndexedSeq[A] = {
 
     findAllNonStandardRelationshipsOfType(relationshipType).filter(p)
   }
 
-  final def findAllOutgoingNonStandardRelationships(
-    source: Node): immutable.IndexedSeq[NonStandardRelationship] = {
+  final def findAllOutgoingNonStandardRelationships(source: Node): immutable.IndexedSeq[NonStandardRelationship] = {
 
     filterOutgoingNonStandardRelationships(source)(_ => true)
   }
 
-  final def filterOutgoingNonStandardRelationships(
-    source: Node)(p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
+  final def filterOutgoingNonStandardRelationships(source: Node)(
+      p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
 
     nonStandardRelationshipsBySource.getOrElse(source, Vector()).filter(p)
   }
 
   final def findAllOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    source: Node,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      source: Node,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterOutgoingNonStandardRelationshipsOfType(source, relationshipType)(_ => true)
   }
 
   final def filterOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    source: Node,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      source: Node,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType
-    nonStandardRelationshipsBySource.getOrElse(source, Vector()).collect { case relationship: A if p(relationship) => relationship }
+    nonStandardRelationshipsBySource.getOrElse(source, Vector()).collect {
+      case relationship: A if p(relationship) => relationship
+    }
   }
 
-  final def findAllIncomingNonStandardRelationships(
-    target: Node): immutable.IndexedSeq[NonStandardRelationship] = {
+  final def findAllIncomingNonStandardRelationships(target: Node): immutable.IndexedSeq[NonStandardRelationship] = {
 
     filterIncomingNonStandardRelationships(target)(_ => true)
   }
 
-  final def filterIncomingNonStandardRelationships(
-    target: Node)(p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
+  final def filterIncomingNonStandardRelationships(target: Node)(
+      p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship] = {
 
     nonStandardRelationshipsByTarget.getOrElse(target, Vector()).filter(p)
   }
 
   final def findAllIncomingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    target: Node,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
+      target: Node,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A] = {
 
     filterIncomingNonStandardRelationshipsOfType(target, relationshipType)(_ => true)
   }
 
   final def filterIncomingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    target: Node,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
+      target: Node,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A] = {
 
     implicit val relationshipClassTag = relationshipType
 
-    nonStandardRelationshipsByTarget.getOrElse(target, Vector()).collect { case relationship: A if p(relationship) => relationship }
+    nonStandardRelationshipsByTarget.getOrElse(target, Vector()).collect {
+      case relationship: A if p(relationship) => relationship
+    }
   }
 
   final def filterOutgoingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
-    source: Node,
-    relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
+      source: Node,
+      relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
 
-    val nextRelationships = filterOutgoingNonStandardRelationshipsOfType(source, relationshipType)(rel => p(RelationshipPath(rel)))
+    val nextRelationships =
+      filterOutgoingNonStandardRelationshipsOfType(source, relationshipType)(rel => p(RelationshipPath(rel)))
 
-    val paths = nextRelationships.flatMap(rel => filterOutgoingUnrestrictedNonStandardRelationshipPaths(RelationshipPath(rel), relationshipType)(p))
+    val paths = nextRelationships.flatMap(rel =>
+      filterOutgoingUnrestrictedNonStandardRelationshipPaths(RelationshipPath(rel), relationshipType)(p))
     paths
   }
 
   final def filterIncomingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
-    target: Node,
-    relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
+      target: Node,
+      relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
 
-    val prevRelationships = filterIncomingNonStandardRelationshipsOfType(target, relationshipType)(rel => p(RelationshipPath(rel)))
+    val prevRelationships =
+      filterIncomingNonStandardRelationshipsOfType(target, relationshipType)(rel => p(RelationshipPath(rel)))
 
-    val paths = prevRelationships.flatMap(rel => filterIncomingUnrestrictedNonStandardRelationshipPaths(RelationshipPath(rel), relationshipType)(p))
+    val paths = prevRelationships.flatMap(rel =>
+      filterIncomingUnrestrictedNonStandardRelationshipPaths(RelationshipPath(rel), relationshipType)(p))
     paths
   }
 
   // Private methods
 
   private def filterOutgoingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
-    path: RelationshipPath[A],
-    relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
+      path: RelationshipPath[A],
+      relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
 
     val nextRelationships =
-      filterOutgoingNonStandardRelationshipsOfType(
-        path.target, relationshipType)(relationship => !path.hasCycle && p(path.append(relationship)))
+      filterOutgoingNonStandardRelationshipsOfType(path.target, relationshipType)(relationship =>
+        !path.dropRight(maxPathLengthBeyondCycle).hasCycle && p(path.append(relationship)))
 
     val nextPaths = nextRelationships.map(rel => path.append(rel))
 
@@ -162,12 +168,12 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
   }
 
   private def filterIncomingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
-    path: RelationshipPath[A],
-    relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
+      path: RelationshipPath[A],
+      relationshipType: ClassTag[A])(p: RelationshipPath[A] => Boolean): immutable.IndexedSeq[RelationshipPath[A]] = {
 
     val prevRelationships =
-      filterIncomingNonStandardRelationshipsOfType(
-        path.source, relationshipType)(relationship => !path.hasCycle && p(path.prepend(relationship)))
+      filterIncomingNonStandardRelationshipsOfType(path.source, relationshipType)(relationship =>
+        !path.drop(maxPathLengthBeyondCycle).hasCycle && p(path.prepend(relationship)))
 
     val prevPaths = prevRelationships.map(rel => path.prepend(rel))
 

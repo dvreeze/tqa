@@ -16,9 +16,6 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
-import scala.collection.immutable
-import scala.reflect.ClassTag
-
 import eu.cdevreeze.tqa.base.relationship.DimensionDefaultRelationship
 import eu.cdevreeze.tqa.base.relationship.DimensionDomainRelationship
 import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
@@ -27,6 +24,9 @@ import eu.cdevreeze.tqa.base.relationship.DomainMemberRelationship
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.yaidom.core.EName
+
+import scala.collection.immutable
+import scala.reflect.ClassTag
 
 /**
  * Purely abstract trait offering a dimensional relationship query API.
@@ -42,76 +42,77 @@ trait DimensionalRelationshipContainerApi {
   def findAllDimensionalRelationships: immutable.IndexedSeq[DimensionalRelationship]
 
   def filterDimensionalRelationships(
-    p: DimensionalRelationship => Boolean): immutable.IndexedSeq[DimensionalRelationship]
+      p: DimensionalRelationship => Boolean): immutable.IndexedSeq[DimensionalRelationship]
 
   def findAllDimensionalRelationshipsOfType[A <: DimensionalRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
-  def filterDimensionalRelationshipsOfType[A <: DimensionalRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+  def filterDimensionalRelationshipsOfType[A <: DimensionalRelationship](relationshipType: ClassTag[A])(
+      p: A => Boolean): immutable.IndexedSeq[A]
 
   def findAllHasHypercubeRelationships: immutable.IndexedSeq[HasHypercubeRelationship]
 
   def filterHasHypercubeRelationships(
-    p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
+      p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
 
   def findAllHypercubeDimensionRelationships: immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   def filterHypercubeDimensionRelationships(
-    p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
+      p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   def findAllDimensionDomainRelationships: immutable.IndexedSeq[DimensionDomainRelationship]
 
   def filterDimensionDomainRelationships(
-    p: DimensionDomainRelationship => Boolean): immutable.IndexedSeq[DimensionDomainRelationship]
+      p: DimensionDomainRelationship => Boolean): immutable.IndexedSeq[DimensionDomainRelationship]
 
   def findAllDomainMemberRelationships: immutable.IndexedSeq[DomainMemberRelationship]
 
   def filterDomainMemberRelationships(
-    p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
+      p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
 
   def findAllDimensionDefaultRelationships: immutable.IndexedSeq[DimensionDefaultRelationship]
 
   def filterDimensionDefaultRelationships(
-    p: DimensionDefaultRelationship => Boolean): immutable.IndexedSeq[DimensionDefaultRelationship]
+      p: DimensionDefaultRelationship => Boolean): immutable.IndexedSeq[DimensionDefaultRelationship]
 
   // Finding and filtering outgoing relationships
 
   /**
    * Finds all has-hypercube relationships that are outgoing from the given concept.
    */
-  def findAllOutgoingHasHypercubeRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
+  def findAllOutgoingHasHypercubeRelationships(sourceConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
 
   /**
    * Filters has-hypercube relationships that are outgoing from the given concept.
    */
-  def filterOutgoingHasHypercubeRelationships(
-    sourceConcept: EName)(p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
+  def filterOutgoingHasHypercubeRelationships(sourceConcept: EName)(
+      p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
 
   /**
    * Filters has-hypercube relationships that are outgoing from the given concept on the given ELR.
    */
   def filterOutgoingHasHypercubeRelationshipsOnElr(
-    sourceConcept: EName, elr: String): immutable.IndexedSeq[HasHypercubeRelationship]
+      sourceConcept: EName,
+      elr: String): immutable.IndexedSeq[HasHypercubeRelationship]
 
   /**
    * Finds all hypercube-dimension relationships that are outgoing from the given concept.
    */
   def findAllOutgoingHypercubeDimensionRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship]
+      sourceConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
    * Filters hypercube-dimension relationships that are outgoing from the given concept.
    */
-  def filterOutgoingHypercubeDimensionRelationships(
-    sourceConcept: EName)(p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
+  def filterOutgoingHypercubeDimensionRelationships(sourceConcept: EName)(
+      p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
    * Filters hypercube-dimension relationships that are outgoing from the given concept on the given ELR.
    */
   def filterOutgoingHypercubeDimensionRelationshipsOnElr(
-    sourceConcept: EName, elr: String): immutable.IndexedSeq[HypercubeDimensionRelationship]
+      sourceConcept: EName,
+      elr: String): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
    * Finds all consecutive hypercube-dimension relationships.
@@ -124,25 +125,26 @@ trait DimensionalRelationshipContainerApi {
    * }}}
    */
   def findAllConsecutiveHypercubeDimensionRelationships(
-    relationship: HasHypercubeRelationship): immutable.IndexedSeq[HypercubeDimensionRelationship]
+      relationship: HasHypercubeRelationship): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
    * Finds all dimension-domain relationships that are outgoing from the given concept.
    */
   def findAllOutgoingDimensionDomainRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[DimensionDomainRelationship]
+      sourceConcept: EName): immutable.IndexedSeq[DimensionDomainRelationship]
 
   /**
    * Filters dimension-domain relationships that are outgoing from the given concept.
    */
-  def filterOutgoingDimensionDomainRelationships(
-    sourceConcept: EName)(p: DimensionDomainRelationship => Boolean): immutable.IndexedSeq[DimensionDomainRelationship]
+  def filterOutgoingDimensionDomainRelationships(sourceConcept: EName)(
+      p: DimensionDomainRelationship => Boolean): immutable.IndexedSeq[DimensionDomainRelationship]
 
   /**
    * Filters dimension-domain relationships that are outgoing from the given concept on the given ELR.
    */
   def filterOutgoingDimensionDomainRelationshipsOnElr(
-    sourceConcept: EName, elr: String): immutable.IndexedSeq[DimensionDomainRelationship]
+      sourceConcept: EName,
+      elr: String): immutable.IndexedSeq[DimensionDomainRelationship]
 
   /**
    * Finds all consecutive dimension-domain relationships.
@@ -155,25 +157,25 @@ trait DimensionalRelationshipContainerApi {
    * }}}
    */
   def findAllConsecutiveDimensionDomainRelationships(
-    relationship: HypercubeDimensionRelationship): immutable.IndexedSeq[DimensionDomainRelationship]
+      relationship: HypercubeDimensionRelationship): immutable.IndexedSeq[DimensionDomainRelationship]
 
   /**
    * Finds all domain-member relationships that are outgoing from the given concept.
    */
-  def findAllOutgoingDomainMemberRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationship]
+  def findAllOutgoingDomainMemberRelationships(sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
    * Filters domain-member relationships that are outgoing from the given concept.
    */
-  def filterOutgoingDomainMemberRelationships(
-    sourceConcept: EName)(p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
+  def filterOutgoingDomainMemberRelationships(sourceConcept: EName)(
+      p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
    * Filters domain-member relationships that are outgoing from the given concept on the given ELR.
    */
   def filterOutgoingDomainMemberRelationshipsOnElr(
-    sourceConcept: EName, elr: String): immutable.IndexedSeq[DomainMemberRelationship]
+      sourceConcept: EName,
+      elr: String): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
    * Finds all consecutive domain-member relationships.
@@ -186,75 +188,73 @@ trait DimensionalRelationshipContainerApi {
    * }}}
    */
   def findAllConsecutiveDomainMemberRelationships(
-    relationship: DomainAwareRelationship): immutable.IndexedSeq[DomainMemberRelationship]
+      relationship: DomainAwareRelationship): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
    * Finds all dimension-default relationships that are outgoing from the given concept.
    */
   def findAllOutgoingDimensionDefaultRelationships(
-    sourceConcept: EName): immutable.IndexedSeq[DimensionDefaultRelationship]
+      sourceConcept: EName): immutable.IndexedSeq[DimensionDefaultRelationship]
 
   /**
    * Filters dimension-default relationships that are outgoing from the given concept.
    */
-  def filterOutgoingDimensionDefaultRelationships(
-    sourceConcept: EName)(p: DimensionDefaultRelationship => Boolean): immutable.IndexedSeq[DimensionDefaultRelationship]
+  def filterOutgoingDimensionDefaultRelationships(sourceConcept: EName)(
+      p: DimensionDefaultRelationship => Boolean): immutable.IndexedSeq[DimensionDefaultRelationship]
 
   /**
    * Filters dimension-default relationships that are outgoing from the given concept on the given ELR.
    */
   def filterOutgoingDimensionDefaultRelationshipsOnElr(
-    sourceConcept: EName, elr: String): immutable.IndexedSeq[DimensionDefaultRelationship]
+      sourceConcept: EName,
+      elr: String): immutable.IndexedSeq[DimensionDefaultRelationship]
 
   // Finding and filtering incoming relationships
 
   /**
    * Finds all domain-member relationships that are incoming to the given concept.
    */
-  def findAllIncomingDomainMemberRelationships(
-    targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationship]
+  def findAllIncomingDomainMemberRelationships(targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
    * Filters domain-member relationships that are incoming to the given concept.
    */
-  def filterIncomingDomainMemberRelationships(
-    targetConcept: EName)(p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
+  def filterIncomingDomainMemberRelationships(targetConcept: EName)(
+      p: DomainMemberRelationship => Boolean): immutable.IndexedSeq[DomainMemberRelationship]
 
   /**
    * Finds all "domain-aware" relationships that are incoming to the given concept.
    */
-  def findAllIncomingDomainAwareRelationships(
-    targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationship]
+  def findAllIncomingDomainAwareRelationships(targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationship]
 
   /**
    * Filters "domain-aware" relationships that are incoming to the given concept.
    */
-  def filterIncomingDomainAwareRelationships(
-    targetConcept: EName)(p: DomainAwareRelationship => Boolean): immutable.IndexedSeq[DomainAwareRelationship]
+  def filterIncomingDomainAwareRelationships(targetConcept: EName)(
+      p: DomainAwareRelationship => Boolean): immutable.IndexedSeq[DomainAwareRelationship]
 
   /**
    * Finds all hypercube-dimension relationships that are incoming to the given (dimension) concept.
    */
   def findAllIncomingHypercubeDimensionRelationships(
-    targetConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship]
+      targetConcept: EName): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
    * Filters hypercube-dimension relationships that are incoming to the given (dimension) concept.
    */
-  def filterIncomingHypercubeDimensionRelationships(
-    targetConcept: EName)(p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
+  def filterIncomingHypercubeDimensionRelationships(targetConcept: EName)(
+      p: HypercubeDimensionRelationship => Boolean): immutable.IndexedSeq[HypercubeDimensionRelationship]
 
   /**
    * Finds all has-hypercube relationships that are incoming to the given (hypercube) concept.
    */
-  def findAllIncomingHasHypercubeRelationships(
-    targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
+  def findAllIncomingHasHypercubeRelationships(targetConcept: EName): immutable.IndexedSeq[HasHypercubeRelationship]
 
   /**
    * Filters has-hypercube relationships that are incoming to the given (hypercube) concept.
    */
-  def filterIncomingHasHypercubeRelationships(
-    targetConcept: EName)(p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
+  def filterIncomingHasHypercubeRelationships(targetConcept: EName)(
+      p: HasHypercubeRelationship => Boolean): immutable.IndexedSeq[HasHypercubeRelationship]
 
   // Filtering outgoing and incoming relationship paths
 
@@ -262,59 +262,57 @@ trait DimensionalRelationshipContainerApi {
    * Returns `filterOutgoingConsecutiveDomainAwareRelationshipPaths(sourceConcept)(_ => true)`.
    */
   def findAllOutgoingConsecutiveDomainAwareRelationshipPaths(
-    sourceConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
+      sourceConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
    * Filters the consecutive (!) dimension-domain-or-domain-member relationship paths that are outgoing from the given concept.
    * Only relationship paths for which all (non-empty) "inits" pass the predicate are accepted by the filter!
-   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
-  def filterOutgoingConsecutiveDomainAwareRelationshipPaths(
-    sourceConcept: EName)(
-    p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
+  def filterOutgoingConsecutiveDomainAwareRelationshipPaths(sourceConcept: EName)(
+      p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
    * Returns `filterOutgoingConsecutiveDomainMemberRelationshipPaths(sourceConcept)(_ => true)`.
    */
   def findAllOutgoingConsecutiveDomainMemberRelationshipPaths(
-    sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
+      sourceConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   /**
    * Filters the consecutive (!) domain-member relationship paths that are outgoing from the given concept.
    * Only relationship paths for which all (non-empty) "inits" pass the predicate are accepted by the filter!
-   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
-  def filterOutgoingConsecutiveDomainMemberRelationshipPaths(
-    sourceConcept: EName)(
-    p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
+  def filterOutgoingConsecutiveDomainMemberRelationshipPaths(sourceConcept: EName)(
+      p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   /**
    * Returns `filterIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept)(_ => true)`.
    */
   def findAllIncomingConsecutiveDomainAwareRelationshipPaths(
-    targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
+      targetConcept: EName): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
    * Filters the consecutive (!) dimension-domain-or-domain-member relationship paths that are incoming to the given concept.
    * Only relationship paths for which all (non-empty) "tails" pass the predicate are accepted by the filter!
-   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
-  def filterIncomingConsecutiveDomainAwareRelationshipPaths(
-    targetConcept: EName)(p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
+  def filterIncomingConsecutiveDomainAwareRelationshipPaths(targetConcept: EName)(
+      p: DomainAwareRelationshipPath => Boolean): immutable.IndexedSeq[DomainAwareRelationshipPath]
 
   /**
    * Returns `filterIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept)(_ => true)`.
    */
   def findAllIncomingConsecutiveDomainMemberRelationshipPaths(
-    targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
+      targetConcept: EName): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   /**
    * Filters the consecutive (!) domain-member relationship paths that are incoming to the given concept.
    * Only relationship paths for which all (non-empty) "tails" pass the predicate are accepted by the filter!
-   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing.
+   * The relationship paths are as long as possible, but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
-  def filterIncomingConsecutiveDomainMemberRelationshipPaths(
-    targetConcept: EName)(p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
+  def filterIncomingConsecutiveDomainMemberRelationshipPaths(targetConcept: EName)(
+      p: DomainMemberRelationshipPath => Boolean): immutable.IndexedSeq[DomainMemberRelationshipPath]
 
   // Other query methods
 
@@ -348,7 +346,7 @@ trait DimensionalRelationshipContainerApi {
    * should typically be called as few times as possible.
    */
   def computeFilteredHasHypercubeInheritanceOrSelf(
-    p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
+      p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
 
   /**
    * Finds all inherited has-hypercubes per concept that pass the predicate.
@@ -358,7 +356,7 @@ trait DimensionalRelationshipContainerApi {
    * should typically be called as few times as possible.
    */
   def computeFilteredHasHypercubeInheritance(
-    p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
+      p: HasHypercubeRelationship => Boolean): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
 
   /**
    * Finds all own or inherited has-hypercubes per concept. See section 2.6.1 of the XBRL Dimensions specification.
@@ -415,7 +413,8 @@ trait DimensionalRelationshipContainerApi {
    * computeFilteredHasHypercubeInheritanceOrSelf(_.elr == elr)
    * }}}
    */
-  def computeHasHypercubeInheritanceOrSelfForElr(elr: String): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
+  def computeHasHypercubeInheritanceOrSelfForElr(
+      elr: String): Map[EName, immutable.IndexedSeq[HasHypercubeRelationship]]
 
   /**
    * Finds all own or inherited has-hypercubes per concept, for the given ELR, returning Sets of all primaries that are source concepts

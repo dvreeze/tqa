@@ -16,9 +16,9 @@
 
 package eu.cdevreeze.tqa.base.relationship
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.XmlFragmentKey
+
+import scala.collection.immutable
 
 /**
  * Non-standard relationship path. Subsequent relationships in the path must match in target and
@@ -30,8 +30,9 @@ import eu.cdevreeze.tqa.XmlFragmentKey
  *
  * @author Chris de Vreeze
  */
-final case class NonStandardRelationshipPath[A <: NonStandardRelationship] private (val relationships: immutable.IndexedSeq[A]) {
-  require(relationships.size >= 1, s"A relationship path must have at least one relationship")
+final case class NonStandardRelationshipPath[A <: NonStandardRelationship] private (
+    relationships: immutable.IndexedSeq[A]) {
+  require(relationships.nonEmpty, s"A relationship path must have at least one relationship")
 
   def sourceKey: XmlFragmentKey = firstRelationship.sourceElem.key
 
@@ -55,7 +56,7 @@ final case class NonStandardRelationshipPath[A <: NonStandardRelationship] priva
   }
 
   def isMinimalIfHavingCycle: Boolean = {
-    initOption.map(p => !p.hasCycle).getOrElse(true)
+    initOption.forall(p => !p.hasCycle)
   }
 
   def append(relationship: A): NonStandardRelationshipPath[A] = {
@@ -99,6 +100,14 @@ final case class NonStandardRelationshipPath[A <: NonStandardRelationship] priva
   def isSingleElrRelationshipPath: Boolean = {
     relationships.sliding(2).filter(_.size == 2).forall(pair => pair(0).elr == pair(1).elr)
   }
+
+  def drop(n: Int): NonStandardRelationshipPath[A] = {
+    NonStandardRelationshipPath(relationships.drop(n.min(relationships.size - 1)))
+  }
+
+  def dropRight(n: Int): NonStandardRelationshipPath[A] = {
+    NonStandardRelationshipPath(relationships.dropRight(n.min(relationships.size - 1)))
+  }
 }
 
 object NonStandardRelationshipPath {
@@ -110,7 +119,8 @@ object NonStandardRelationshipPath {
   def from[A <: NonStandardRelationship](relationships: immutable.IndexedSeq[A]): NonStandardRelationshipPath[A] = {
     require(
       relationships.sliding(2).filter(_.size == 2).forall(pair => haveMatchingElementKeys(pair(0), pair(1))),
-      s"All subsequent relationships in a path must have matching target/source elements")
+      s"All subsequent relationships in a path must have matching target/source elements"
+    )
 
     new NonStandardRelationshipPath(relationships.toVector)
   }

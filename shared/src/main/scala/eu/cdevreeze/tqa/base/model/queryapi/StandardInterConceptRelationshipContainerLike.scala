@@ -28,7 +28,9 @@ import scala.reflect.ClassTag
  *
  * @author Chris de Vreeze
  */
-trait StandardInterConceptRelationshipContainerLike extends StandardInterConceptRelationshipContainerApi {
+trait StandardInterConceptRelationshipContainerLike
+    extends StandardInterConceptRelationshipContainerApi
+    with PathLengthRestrictionApi {
 
   // Abstract methods
 
@@ -183,8 +185,10 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
       p: ConsecutiveRelationshipPath[A] => Boolean): immutable.IndexedSeq[ConsecutiveRelationshipPath[A]] = {
 
     val nextRelationships =
-      filterOutgoingStandardInterConceptRelationshipsOfType(path.targetConcept, relationshipType)(relationship =>
-        !path.hasCycle && path.canAppend(relationship) && p(path.append(relationship)))
+      filterOutgoingStandardInterConceptRelationshipsOfType(path.targetConcept, relationshipType)(
+        relationship =>
+          !path.dropRight(maxPathLengthBeyondCycle).hasCycle && path.canAppend(relationship) && p(
+            path.append(relationship)))
 
     val nextPaths = nextRelationships.map(rel => path.append(rel))
 
@@ -205,7 +209,7 @@ trait StandardInterConceptRelationshipContainerLike extends StandardInterConcept
 
     val prevRelationships =
       filterIncomingStandardInterConceptRelationshipsOfType(path.sourceConcept, relationshipType)(relationship =>
-        !path.hasCycle && path.canPrepend(relationship) && p(path.prepend(relationship)))
+        !path.drop(maxPathLengthBeyondCycle).hasCycle && path.canPrepend(relationship) && p(path.prepend(relationship)))
 
     val prevPaths = prevRelationships.map(rel => path.prepend(rel))
 

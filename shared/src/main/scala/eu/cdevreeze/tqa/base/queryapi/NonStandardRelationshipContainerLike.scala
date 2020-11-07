@@ -16,19 +16,19 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
-import scala.collection.immutable
-import scala.reflect.ClassTag
-
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath
+
+import scala.collection.immutable
+import scala.reflect.ClassTag
 
 /**
  * Partial implementation of `NonStandardRelationshipContainerApi`.
  *
  * @author Chris de Vreeze
  */
-trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContainerApi {
+trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContainerApi with PathLengthRestrictionApi {
 
   // Abstract methods
 
@@ -158,7 +158,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
 
     val nextRelationships =
       filterOutgoingNonStandardRelationshipsOfType(path.targetKey, relationshipType)(relationship =>
-        !path.hasCycle && p(path.append(relationship)))
+        !path.dropRight(maxPathLengthBeyondCycle).hasCycle && p(path.append(relationship)))
 
     val nextPaths = nextRelationships.map(rel => path.append(rel))
 
@@ -179,7 +179,7 @@ trait NonStandardRelationshipContainerLike extends NonStandardRelationshipContai
 
     val prevRelationships =
       filterIncomingNonStandardRelationshipsOfType(path.sourceKey, relationshipType)(relationship =>
-        !path.hasCycle && p(path.prepend(relationship)))
+        !path.drop(maxPathLengthBeyondCycle).hasCycle && p(path.prepend(relationship)))
 
     val prevPaths = prevRelationships.map(rel => path.prepend(rel))
 

@@ -93,6 +93,14 @@ final case class ConsecutiveRelationshipPath[A <: InterElementDeclarationRelatio
       Some(new ConsecutiveRelationshipPath(relationships.init))
     }
   }
+
+  def drop(n: Int): ConsecutiveRelationshipPath[A] = {
+    ConsecutiveRelationshipPath(relationships.drop(n.min(relationships.size - 1)))
+  }
+
+  def dropRight(n: Int): ConsecutiveRelationshipPath[A] = {
+    ConsecutiveRelationshipPath(relationships.dropRight(n.min(relationships.size - 1)))
+  }
 }
 
 object ConsecutiveRelationshipPath {

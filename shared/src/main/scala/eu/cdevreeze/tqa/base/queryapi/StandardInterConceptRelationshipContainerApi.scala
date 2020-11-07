@@ -162,7 +162,7 @@ trait StandardInterConceptRelationshipContainerApi {
    * Filters the standard inter-concept relationship paths that are outgoing from the given concept and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "inits"
    * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
-   * but on encountering a cycle in a path it stops growing.
+   * but on encountering a cycle in a path it stops growing beyond a certain path length.
    *
    * This method can be useful for finding relationship paths that are not consecutive and therefore
    * not allowed, when we do not yet know that the taxonomy is XBRL-valid.
@@ -179,7 +179,7 @@ trait StandardInterConceptRelationshipContainerApi {
    * Filters the standard inter-concept relationship paths that are incoming to the given concept and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "tails"
    * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
-   * but on encountering a cycle in a path it stops growing.
+   * but on encountering a cycle in a path it stops growing beyond a certain path length.
    *
    * This method can be useful for finding relationship paths that are not consecutive and therefore
    * not allowed, when we do not yet know that the taxonomy is XBRL-valid.

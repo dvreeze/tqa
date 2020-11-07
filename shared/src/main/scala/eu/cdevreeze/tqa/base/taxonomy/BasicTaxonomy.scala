@@ -109,6 +109,8 @@ final class BasicTaxonomy private (
   def interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]] =
     derivedState.interConceptRelationshipsByTarget
 
+  def maxPathLengthBeyondCycle: Int = derivedState.maxPathLengthBeyondCycle
+
   // Other methods
 
   def taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument] = taxonomyBase.taxonomyDocs
@@ -261,6 +263,14 @@ final class BasicTaxonomy private (
     val outputTaxo = filteringRelationships(acceptRelationship)
     outputTaxo
   }
+
+  def withMaxLengthBeyondCycle(newMaxLengthBeyondCycle: Int): BasicTaxonomy = {
+    new BasicTaxonomy(
+      taxonomyBase,
+      extraSubstitutionGroupMap,
+      relationships,
+      derivedState.withMaxLengthBeyondCycle(newMaxLengthBeyondCycle))
+  }
 }
 
 object BasicTaxonomy {
@@ -279,14 +289,46 @@ object BasicTaxonomy {
       val standardInterConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[StandardInterConceptRelationship]],
       val interConceptRelationships: immutable.IndexedSeq[InterElementDeclarationRelationship],
       val interConceptRelationshipsBySource: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]],
-      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]])
+      val interConceptRelationshipsByTarget: Map[EName, immutable.IndexedSeq[InterElementDeclarationRelationship]],
+      val maxPathLengthBeyondCycle: Int) {
+
+    def withMaxLengthBeyondCycle(newMaxLengthBeyondCycle: Int): DerivedState = {
+      new DerivedState(
+        netSubstitutionGroupMap,
+        conceptDeclarations,
+        conceptDeclarationsByEName,
+        standardRelationships,
+        nonStandardRelationships,
+        standardInterConceptRelationships,
+        standardRelationshipsBySource,
+        nonStandardRelationshipsBySource,
+        nonStandardRelationshipsByTarget,
+        standardInterConceptRelationshipsBySource,
+        standardInterConceptRelationshipsByTarget,
+        interConceptRelationships,
+        interConceptRelationshipsBySource,
+        interConceptRelationshipsByTarget,
+        newMaxLengthBeyondCycle
+      )
+    }
+  }
 
   private[taxonomy] object DerivedState {
+
+    val defaultMaxPathLengthBeyondCycle = 10
 
     def build(
         taxonomyBase: TaxonomyBase,
         extraSubstitutionGroupMap: SubstitutionGroupMap,
         relationships: immutable.IndexedSeq[Relationship]): DerivedState = {
+      build(taxonomyBase, extraSubstitutionGroupMap, relationships, defaultMaxPathLengthBeyondCycle)
+    }
+
+    def build(
+        taxonomyBase: TaxonomyBase,
+        extraSubstitutionGroupMap: SubstitutionGroupMap,
+        relationships: immutable.IndexedSeq[Relationship],
+        maxPathLengthBeyondCycle: Int): DerivedState = {
 
       val netSubstitutionGroupMap = taxonomyBase.derivedSubstitutionGroupMap.append(extraSubstitutionGroupMap)
 
@@ -372,7 +414,8 @@ object BasicTaxonomy {
         standardInterConceptRelationshipsByTarget,
         interConceptRelationships,
         interConceptRelationshipsBySource,
-        interConceptRelationshipsByTarget
+        interConceptRelationshipsByTarget,
+        maxPathLengthBeyondCycle
       )
     }
   }

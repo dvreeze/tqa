@@ -16,12 +16,12 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
-import scala.collection.immutable
-import scala.reflect.ClassTag
-
 import eu.cdevreeze.tqa.XmlFragmentKey
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationship
 import eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath
+
+import scala.collection.immutable
+import scala.reflect.ClassTag
 
 /**
  * Purely abstract trait offering a non-standard relationship query API.
@@ -39,83 +39,83 @@ trait NonStandardRelationshipContainerApi {
   def findAllNonStandardRelationships: immutable.IndexedSeq[NonStandardRelationship]
 
   def filterNonStandardRelationships(
-    p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
+      p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
 
   def findAllNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
-  def filterNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+  def filterNonStandardRelationshipsOfType[A <: NonStandardRelationship](relationshipType: ClassTag[A])(
+      p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Finds all non-standard relationships that are outgoing from the given XML element.
    */
-  def findAllOutgoingNonStandardRelationships(
-    sourceKey: XmlFragmentKey): immutable.IndexedSeq[NonStandardRelationship]
+  def findAllOutgoingNonStandardRelationships(sourceKey: XmlFragmentKey): immutable.IndexedSeq[NonStandardRelationship]
 
   /**
    * Filters non-standard relationships that are outgoing from the given XML element.
    */
-  def filterOutgoingNonStandardRelationships(
-    sourceKey: XmlFragmentKey)(p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
+  def filterOutgoingNonStandardRelationships(sourceKey: XmlFragmentKey)(
+      p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
 
   /**
    * Finds all non-standard relationships of the given type that are outgoing from the given XML element.
    */
   def findAllOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey: XmlFragmentKey,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      sourceKey: XmlFragmentKey,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters non-standard relationships of the given type that are outgoing from the given XML element.
    */
   def filterOutgoingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    sourceKey: XmlFragmentKey,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+      sourceKey: XmlFragmentKey,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Finds all non-standard relationships that are incoming to the given XML element.
    */
-  def findAllIncomingNonStandardRelationships(
-    targetKey: XmlFragmentKey): immutable.IndexedSeq[NonStandardRelationship]
+  def findAllIncomingNonStandardRelationships(targetKey: XmlFragmentKey): immutable.IndexedSeq[NonStandardRelationship]
 
   /**
    * Filters non-standard relationships that are incoming to the given XML element.
    */
-  def filterIncomingNonStandardRelationships(
-    targetKey: XmlFragmentKey)(p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
+  def filterIncomingNonStandardRelationships(targetKey: XmlFragmentKey)(
+      p: NonStandardRelationship => Boolean): immutable.IndexedSeq[NonStandardRelationship]
 
   /**
    * Finds all non-standard relationships of the given type that are incoming to the given XML element.
    */
   def findAllIncomingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    targetKey: XmlFragmentKey,
-    relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
+      targetKey: XmlFragmentKey,
+      relationshipType: ClassTag[A]): immutable.IndexedSeq[A]
 
   /**
    * Filters non-standard relationships of the given type that are incoming to the given XML element.
    */
   def filterIncomingNonStandardRelationshipsOfType[A <: NonStandardRelationship](
-    targetKey: XmlFragmentKey,
-    relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
+      targetKey: XmlFragmentKey,
+      relationshipType: ClassTag[A])(p: A => Boolean): immutable.IndexedSeq[A]
 
   /**
    * Filters the non-standard relationship paths that are outgoing from the given XML element and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "inits"
    * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
-   * but on encountering a cycle in a path it stops growing.
+   * but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
   def filterOutgoingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
-    sourceKey: XmlFragmentKey,
-    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]]
+      sourceKey: XmlFragmentKey,
+      relationshipType: ClassTag[A])(
+      p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]]
 
   /**
    * Filters the non-standard relationship paths that are incoming to the given XML element and
    * whose relationships are of the given type. Only relationship paths for which all (non-empty) "tails"
    * pass the predicate are accepted by the filter! The relationship paths are as long as possible,
-   * but on encountering a cycle in a path it stops growing.
+   * but on encountering a cycle in a path it stops growing beyond a certain path length.
    */
   def filterIncomingUnrestrictedNonStandardRelationshipPaths[A <: NonStandardRelationship](
-    targetKey: XmlFragmentKey,
-    relationshipType: ClassTag[A])(p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]]
+      targetKey: XmlFragmentKey,
+      relationshipType: ClassTag[A])(
+      p: NonStandardRelationshipPath[A] => Boolean): immutable.IndexedSeq[NonStandardRelationshipPath[A]]
 }
