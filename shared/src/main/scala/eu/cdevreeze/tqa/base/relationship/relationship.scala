@@ -211,6 +211,11 @@ sealed trait InterElementDeclarationRelationship extends Relationship {
    * are in the same base set, with exceptions for dimensional relationships (where the targetRole attribute must be respected).
    */
   def isFollowedBy(rel: InterElementDeclarationRelationship): Boolean
+
+  /**
+   * Returns the optional gpl:preferredLabel attribute on the underlying arc.
+   */
+  def genericPreferredLabelOption: Option[String]
 }
 
 /**

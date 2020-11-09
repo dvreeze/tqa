@@ -109,7 +109,12 @@ sealed trait StandardRelationship extends Relationship {
 
 sealed trait NonStandardRelationship extends Relationship {
 
-  // TODO Preferred label
+  /**
+   * Returns the optional gpl:preferredLabel attribute on the underlying arc.
+   */
+  final def genericPreferredLabelOption: Option[String] = {
+    nonXLinkArcAttributes.get(ENames.GplPreferredLabelEName)
+  }
 }
 
 /**
@@ -135,6 +140,11 @@ sealed trait InterElementDeclarationRelationship extends Relationship {
    * are in the same base set, with exceptions for dimensional relationships (where the targetRole attribute must be respected).
    */
   def isFollowedBy(rel: InterElementDeclarationRelationship): Boolean
+
+  /**
+   * Returns the optional gpl:preferredLabel attribute on the underlying arc.
+   */
+  def genericPreferredLabelOption: Option[String]
 }
 
 sealed trait StandardInterConceptRelationship extends StandardRelationship with InterElementDeclarationRelationship {
