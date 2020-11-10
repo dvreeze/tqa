@@ -12,6 +12,22 @@ Version 0.10.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.9.1
+=====
+
+This release contains 2 bug fixes:
+
+* A bug fix that fixes ``TaxonomyPackagePartialUriResolvers``
+* Method ``genericPreferredLabelOption`` is now also promised by type ``InterElementDeclarationRelationship``
+
+There are almost no breaking changes, compared to version 0.9.0 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* abstract method genericPreferredLabelOption()scala.Option in interface eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship.genericPreferredLabelOption")
+* abstract method genericPreferredLabelOption()scala.Option in interface eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship is present only in current version
+  filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.InterElementDeclarationRelationship.genericPreferredLabelOption")
+
+
 0.9.0
 =====
 
