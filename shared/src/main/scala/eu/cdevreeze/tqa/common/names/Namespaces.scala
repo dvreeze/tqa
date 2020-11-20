@@ -33,6 +33,7 @@ object Namespaces {
   val LinkNamespace = "http://www.xbrl.org/2003/linkbase"
   val XbrliNamespace = "http://www.xbrl.org/2003/instance"
   val XbrldtNamespace = "http://xbrl.org/2005/xbrldt"
+  val Enum2Namespace = "http://xbrl.org/2020/extensible-enumerations-2.0"
   val GenNamespace = "http://xbrl.org/2008/generic"
   val LabelNamespace = "http://xbrl.org/2008/label"
   val ReferenceNamespace = "http://xbrl.org/2008/reference"

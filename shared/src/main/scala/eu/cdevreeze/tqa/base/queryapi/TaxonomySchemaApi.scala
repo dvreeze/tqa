@@ -16,8 +16,6 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
-import scala.collection.immutable
-
 import eu.cdevreeze.tqa.base.dom.ConceptDeclaration
 import eu.cdevreeze.tqa.base.dom.DimensionDeclaration
 import eu.cdevreeze.tqa.base.dom.ExplicitDimensionDeclaration
@@ -29,6 +27,8 @@ import eu.cdevreeze.tqa.base.dom.TupleDeclaration
 import eu.cdevreeze.tqa.base.dom.TypedDimensionDeclaration
 import eu.cdevreeze.yaidom.core.EName
 
+import scala.collection.immutable
+
 /**
  * Purely abstract trait offering a dimensionally-aware XBRL taxonomy schema API.
  *
@@ -36,6 +36,8 @@ import eu.cdevreeze.yaidom.core.EName
  *
  * Primary item declarations are concept declarations that are neither hypercubes nor dimensions,
  * regardless of whether they are used as primary items or domain members!
+ *
+ * This API is also aware of enumeration (2.0) concepts.
  *
  * @author Chris de Vreeze
  */
@@ -117,7 +119,8 @@ trait TaxonomySchemaApi extends SchemaApi {
 
   def findAllExplicitDimensionDeclarations: immutable.IndexedSeq[ExplicitDimensionDeclaration]
 
-  def filterExplicitDimensionDeclarations(p: ExplicitDimensionDeclaration => Boolean): immutable.IndexedSeq[ExplicitDimensionDeclaration]
+  def filterExplicitDimensionDeclarations(
+      p: ExplicitDimensionDeclaration => Boolean): immutable.IndexedSeq[ExplicitDimensionDeclaration]
 
   def findExplicitDimensionDeclaration(p: ExplicitDimensionDeclaration => Boolean): Option[ExplicitDimensionDeclaration]
 
@@ -129,7 +132,8 @@ trait TaxonomySchemaApi extends SchemaApi {
 
   def findAllTypedDimensionDeclarations: immutable.IndexedSeq[TypedDimensionDeclaration]
 
-  def filterTypedDimensionDeclarations(p: TypedDimensionDeclaration => Boolean): immutable.IndexedSeq[TypedDimensionDeclaration]
+  def filterTypedDimensionDeclarations(
+      p: TypedDimensionDeclaration => Boolean): immutable.IndexedSeq[TypedDimensionDeclaration]
 
   def findTypedDimensionDeclaration(p: TypedDimensionDeclaration => Boolean): Option[TypedDimensionDeclaration]
 
@@ -142,4 +146,24 @@ trait TaxonomySchemaApi extends SchemaApi {
   def findMemberDeclarationOfTypedDimension(typedDimension: EName): Option[GlobalElementDeclaration]
 
   def getMemberDeclarationOfTypedDimension(typedDimension: EName): GlobalElementDeclaration
+
+  // Enumeration (2.0) concept declarations, across documents
+
+  def isEnumerationConcept(ename: EName): Boolean
+
+  def isSingleValueEnumerationConcept(ename: EName): Boolean
+
+  def isSetValueEnumerationConcept(ename: EName): Boolean
+
+  def isEnumerationConcept(itemDecl: ItemDeclaration): Boolean
+
+  def isSingleValueEnumerationConcept(itemDecl: ItemDeclaration): Boolean
+
+  def isSetValueEnumerationConcept(itemDecl: ItemDeclaration): Boolean
+
+  def isEnumerationItemType(ename: EName): Boolean
+
+  def isSingleValueEnumerationItemType(ename: EName): Boolean
+
+  def isSetValueEnumerationItemType(ename: EName): Boolean
 }

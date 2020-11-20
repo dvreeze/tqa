@@ -88,6 +88,13 @@ object ENames {
   val XbrldtTypedDomainRefEName = EName(XbrldtNamespace, "typedDomainRef")
   val XbrldtContextElementEName = EName(XbrldtNamespace, "contextElement")
 
+  val Enum2EnumerationItemTypeEName = EName(Enum2Namespace, "enumerationItemType")
+  val Enum2EnumerationSetItemTypeEName = EName(Enum2Namespace, "enumerationSetItemType")
+
+  val Enum2DomainEName = EName(Enum2Namespace, "domain")
+  val Enum2LinkroleEName = EName(Enum2Namespace, "linkrole")
+  val Enum2HeadUsableEName = EName(Enum2Namespace, "headUsable")
+
   val XLinkTypeEName = EName(XLinkNamespace, "type")
   val XLinkHrefEName = EName(XLinkNamespace, "href")
   val XLinkLabelEName = EName(XLinkNamespace, "label")

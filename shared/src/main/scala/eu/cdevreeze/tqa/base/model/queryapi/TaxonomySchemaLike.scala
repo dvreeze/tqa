@@ -16,8 +16,7 @@
 
 package eu.cdevreeze.tqa.base.model.queryapi
 
-import scala.collection.immutable
-
+import eu.cdevreeze.tqa.ENames
 import eu.cdevreeze.tqa.base.model.ConceptDeclaration
 import eu.cdevreeze.tqa.base.model.DimensionDeclaration
 import eu.cdevreeze.tqa.base.model.ExplicitDimensionDeclaration
@@ -28,6 +27,8 @@ import eu.cdevreeze.tqa.base.model.PrimaryItemDeclaration
 import eu.cdevreeze.tqa.base.model.TupleDeclaration
 import eu.cdevreeze.tqa.base.model.TypedDimensionDeclaration
 import eu.cdevreeze.yaidom.core.EName
+
+import scala.collection.immutable
 
 /**
  * Partial implementation of trait `TaxonomySchemaApi`.
@@ -115,7 +116,8 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
     findAllConceptDeclarations.collect { case decl: PrimaryItemDeclaration => decl }
   }
 
-  final def filterPrimaryItemDeclarations(p: PrimaryItemDeclaration => Boolean): immutable.IndexedSeq[PrimaryItemDeclaration] = {
+  final def filterPrimaryItemDeclarations(
+      p: PrimaryItemDeclaration => Boolean): immutable.IndexedSeq[PrimaryItemDeclaration] = {
     findAllPrimaryItemDeclarations.filter(p)
   }
 
@@ -137,7 +139,8 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
     findAllConceptDeclarations.collect { case decl: HypercubeDeclaration => decl }
   }
 
-  final def filterHypercubeDeclarations(p: HypercubeDeclaration => Boolean): immutable.IndexedSeq[HypercubeDeclaration] = {
+  final def filterHypercubeDeclarations(
+      p: HypercubeDeclaration => Boolean): immutable.IndexedSeq[HypercubeDeclaration] = {
     findAllHypercubeDeclarations.filter(p)
   }
 
@@ -159,7 +162,8 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
     findAllConceptDeclarations.collect { case decl: DimensionDeclaration => decl }
   }
 
-  final def filterDimensionDeclarations(p: DimensionDeclaration => Boolean): immutable.IndexedSeq[DimensionDeclaration] = {
+  final def filterDimensionDeclarations(
+      p: DimensionDeclaration => Boolean): immutable.IndexedSeq[DimensionDeclaration] = {
     findAllDimensionDeclarations.filter(p)
   }
 
@@ -181,11 +185,13 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
     findAllConceptDeclarations.collect { case decl: ExplicitDimensionDeclaration => decl }
   }
 
-  final def filterExplicitDimensionDeclarations(p: ExplicitDimensionDeclaration => Boolean): immutable.IndexedSeq[ExplicitDimensionDeclaration] = {
+  final def filterExplicitDimensionDeclarations(
+      p: ExplicitDimensionDeclaration => Boolean): immutable.IndexedSeq[ExplicitDimensionDeclaration] = {
     findAllExplicitDimensionDeclarations.filter(p)
   }
 
-  final def findExplicitDimensionDeclaration(p: ExplicitDimensionDeclaration => Boolean): Option[ExplicitDimensionDeclaration] = {
+  final def findExplicitDimensionDeclaration(
+      p: ExplicitDimensionDeclaration => Boolean): Option[ExplicitDimensionDeclaration] = {
     findAllExplicitDimensionDeclarations.find(p)
   }
 
@@ -194,7 +200,8 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def getExplicitDimensionDeclaration(ename: EName): ExplicitDimensionDeclaration = {
-    findExplicitDimensionDeclaration(ename).getOrElse(sys.error(s"Missing explicit dimension declaration for expanded name $ename"))
+    findExplicitDimensionDeclaration(ename).getOrElse(
+      sys.error(s"Missing explicit dimension declaration for expanded name $ename"))
   }
 
   // Typed dimension declarations, across documents
@@ -203,11 +210,13 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
     findAllConceptDeclarations.collect { case decl: TypedDimensionDeclaration => decl }
   }
 
-  final def filterTypedDimensionDeclarations(p: TypedDimensionDeclaration => Boolean): immutable.IndexedSeq[TypedDimensionDeclaration] = {
+  final def filterTypedDimensionDeclarations(
+      p: TypedDimensionDeclaration => Boolean): immutable.IndexedSeq[TypedDimensionDeclaration] = {
     findAllTypedDimensionDeclarations.filter(p)
   }
 
-  final def findTypedDimensionDeclaration(p: TypedDimensionDeclaration => Boolean): Option[TypedDimensionDeclaration] = {
+  final def findTypedDimensionDeclaration(
+      p: TypedDimensionDeclaration => Boolean): Option[TypedDimensionDeclaration] = {
     findAllTypedDimensionDeclarations.find(p)
   }
 
@@ -216,7 +225,8 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
   }
 
   final def getTypedDimensionDeclaration(ename: EName): TypedDimensionDeclaration = {
-    findTypedDimensionDeclaration(ename).getOrElse(sys.error(s"Missing typed dimension declaration for expanded name $ename"))
+    findTypedDimensionDeclaration(ename).getOrElse(
+      sys.error(s"Missing typed dimension declaration for expanded name $ename"))
   }
 
   // Typed dimension member declarations
@@ -226,10 +236,51 @@ trait TaxonomySchemaLike extends TaxonomySchemaApi with SchemaLike {
 
     val typedDomainRefOption: Option[String] = typedDimensionDeclOption.map(e => e.typedDomainRef)
 
-    typedDomainRefOption.flatMap(findGlobalElementDeclarationById _)
+    typedDomainRefOption.flatMap(findGlobalElementDeclarationById)
   }
 
   final def getMemberDeclarationOfTypedDimension(typedDimension: EName): GlobalElementDeclaration = {
-    findMemberDeclarationOfTypedDimension(typedDimension).getOrElse(sys.error(s"Missing member declaration for typed dimension $typedDimension"))
+    findMemberDeclarationOfTypedDimension(typedDimension).getOrElse(
+      sys.error(s"Missing member declaration for typed dimension $typedDimension"))
+  }
+
+  // Enumeration (2.0) concept declarations, across documents
+
+  final def isEnumerationConcept(ename: EName): Boolean = {
+    findItemDeclaration(ename).exists(isEnumerationConcept)
+  }
+
+  final def isSingleValueEnumerationConcept(ename: EName): Boolean = {
+    findItemDeclaration(ename).exists(isSingleValueEnumerationConcept)
+  }
+
+  final def isSetValueEnumerationConcept(ename: EName): Boolean = {
+    findItemDeclaration(ename).exists(isSetValueEnumerationConcept)
+  }
+
+  final def isEnumerationConcept(itemDecl: ItemDeclaration): Boolean = {
+    findNamedTypeOfGlobalElementDeclaration(itemDecl.targetEName).exists(isEnumerationItemType)
+  }
+
+  final def isSingleValueEnumerationConcept(itemDecl: ItemDeclaration): Boolean = {
+    findNamedTypeOfGlobalElementDeclaration(itemDecl.targetEName).exists(isSingleValueEnumerationItemType)
+  }
+
+  final def isSetValueEnumerationConcept(itemDecl: ItemDeclaration): Boolean = {
+    findNamedTypeOfGlobalElementDeclaration(itemDecl.targetEName).exists(isSetValueEnumerationItemType)
+  }
+
+  final def isEnumerationItemType(ename: EName): Boolean = {
+    findBaseTypeOrSelfUntil(
+      ename,
+      tpe => tpe == ENames.Enum2EnumerationItemTypeEName || tpe == ENames.Enum2EnumerationSetItemTypeEName).nonEmpty
+  }
+
+  final def isSingleValueEnumerationItemType(ename: EName): Boolean = {
+    findBaseTypeOrSelfUntil(ename, _ == ENames.Enum2EnumerationItemTypeEName).nonEmpty
+  }
+
+  final def isSetValueEnumerationItemType(ename: EName): Boolean = {
+    findBaseTypeOrSelfUntil(ename, _ == ENames.Enum2EnumerationSetItemTypeEName).nonEmpty
   }
 }
