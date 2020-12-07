@@ -476,8 +476,9 @@ trait DimensionalRelationshipContainerApi {
    *
    * This method is equivalent to but more user-friendly than:
    * {{{
-   * findAllMembers(domain, dimensionDomainElr)
+   * findAllMembers(domain, targetElr)
    * }}}
+   * where targetElr is the target ELR of the dimension-domain relationship.
    */
   def findAllMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
 
@@ -487,9 +488,10 @@ trait DimensionalRelationshipContainerApi {
    *
    * This method is equivalent to but more user-friendly than:
    * {{{
-   * findAllUsableMembers(domain, dimensionDomainElr, headUsable)
+   * findAllUsableMembers(domain, targetElr, headUsable)
    * }}}
-   * where headUsable is taken from the xbrldt:usable attribute on the dimension-domain relationship.
+   * where headUsable is taken from the xbrldt:usable attribute on the dimension-domain relationship,
+   * and targetElr is the target ELR of the dimension-domain relationship.
    */
   def findAllUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
 
@@ -499,9 +501,10 @@ trait DimensionalRelationshipContainerApi {
    *
    * This method is equivalent to but more user-friendly than:
    * {{{
-   * findAllNonUsableMembers(domain, dimensionDomainElr, headUsable)
+   * findAllNonUsableMembers(domain, targetElr, headUsable)
    * }}}
-   * where headUsable is taken from the xbrldt:usable attribute on the dimension-domain relationship.
+   * where headUsable is taken from the xbrldt:usable attribute on the dimension-domain relationship,
+   * and targetElr is the target ELR of the dimension-domain relationship.
    */
   def findAllNonUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
 
