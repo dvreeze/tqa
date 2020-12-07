@@ -450,20 +450,58 @@ trait DimensionalRelationshipContainerApi {
   def computeHasHypercubeInheritanceForElrReturningPrimaries(elr: String): Map[EName, Set[EName]]
 
   /**
+   * Finds all members in the given domain, for the given ELR. This method is more general than the corresponding findAllMembers
+   * method that takes a dimension as first parameter. This method is also applicable to Extensible Enumerations 2.0, to
+   * find a domain of (allowed or disallowed) enumeration values.
+   */
+  def findAllMembers(domain: EName, elr: String): Set[EName]
+
+  /**
+   * Finds all usable members in the given domain, for the given ELR. This method is more general than the corresponding
+   * findAllUsableMembers method that takes a dimension as first parameter. This method is also applicable to Extensible Enumerations 2.0,
+   * to find a domain of allowed enumeration values.
+   */
+  def findAllUsableMembers(domain: EName, elr: String, headUsable: Boolean): Set[EName]
+
+  /**
+   * Finds all non-usable members in the given domain, for the given ELR. This method is more general than the corresponding
+   * findAllNonUsableMembers method that takes a dimension as first parameter. This method is also applicable to Extensible
+   * Enumerations 2.0, to find a domain of disallowed enumeration values.
+   */
+  def findAllNonUsableMembers(domain: EName, elr: String, headUsable: Boolean): Set[EName]
+
+  /**
    * Finds all members in the given dimension-domain. There should be at most one dimension-domain
    * relationship from the given dimension to the given domain, having the given ELR.
+   *
+   * This method is equivalent to but more user-friendly than:
+   * {{{
+   * findAllMembers(domain, dimensionDomainElr)
+   * }}}
    */
   def findAllMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
 
   /**
    * Finds all usable members in the given dimension-domain. There should be at most one dimension-domain
    * relationship from the given dimension to the given domain, having the given ELR.
+   *
+   * This method is equivalent to but more user-friendly than:
+   * {{{
+   * findAllUsableMembers(domain, dimensionDomainElr, headUsable)
+   * }}}
+   * where headUsable is taken from the xbrldt:usable attribute on the dimension-domain relationship.
    */
   def findAllUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
 
   /**
    * Finds all non-usable members in the given dimension-domain. There should be at most one dimension-domain
    * relationship from the given dimension to the given domain, having the given ELR.
+   *
+   * This method is equivalent to but more user-friendly than:
+   * {{{
+   * findAllNonUsableMembers(domain, dimensionDomainElr, headUsable)
+   * }}}
+   * where headUsable is taken from the xbrldt:usable attribute on the dimension-domain relationship.
    */
   def findAllNonUsableMembers(dimension: EName, domain: EName, dimensionDomainElr: String): Set[EName]
 
