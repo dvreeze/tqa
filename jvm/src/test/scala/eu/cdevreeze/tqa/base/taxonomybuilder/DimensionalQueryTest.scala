@@ -26,6 +26,7 @@ import eu.cdevreeze.tqa.base.dom.RoleRef
 import eu.cdevreeze.tqa.base.dom.RoleType
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.DimensionalRelationship
+import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.PartialUriResolvers
@@ -36,6 +37,7 @@ import net.sf.saxon.s9api.Processor
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.immutable
+import scala.collection.compat._
 import scala.reflect.classTag
 
 /**
@@ -809,6 +811,11 @@ class DimensionalQueryTest extends AnyFunSuite {
       dimMembers.get(EName(tns, "BalanceDim"))
     }
 
+    // 2 alternative ways of getting the same dimension members
+    assertResult(dimMembers) {
+      findAllDimensionMembers(hasHypercubes.head, taxo)
+    }
+
     // Sales also inherits the hypercube
     assertResult(hasHypercubes.toSet) {
       taxo.findAllInheritedHasHypercubes(EName(primaryTns, "Sales")).toSet
@@ -859,6 +866,11 @@ class DimensionalQueryTest extends AnyFunSuite {
       dimMembers.get(EName(tns, "BalanceDim"))
     }
 
+    // 2 alternative ways of getting the same dimension members
+    assertResult(dimMembers) {
+      findAllDimensionMembers(hasHypercubes.head, taxo)
+    }
+
     // Sales also inherits the hypercube
     assertResult(hasHypercubes.toSet) {
       taxo.findAllInheritedHasHypercubes(EName(primaryTns, "Sales")).toSet
@@ -894,15 +906,24 @@ class DimensionalQueryTest extends AnyFunSuite {
 
     val dimMembers = taxo.findAllDimensionMembers(hasHypercubes.head)
 
+    // 2 alternative ways of getting the same dimension members
+    assertResult(dimMembers) {
+      findAllDimensionMembers(hasHypercubes.head, taxo)
+    }
+
     // Sales is in a dimension domain
     assertResult(Some(Set(EName(primaryTns, "Sales")))) {
-
       dimMembers.get(EName(tns, "BalanceDim"))
     }
 
     // Sales is not usable, but that does not matter
     assertResult(Some(Set())) {
       taxo.findAllUsableDimensionMembers(hasHypercubes.head).get(EName(tns, "BalanceDim"))
+    }
+
+    // 2 alternative ways of getting the same dimension members
+    assertResult(taxo.findAllUsableDimensionMembers(hasHypercubes.head)) {
+      findAllUsableDimensionMembers(hasHypercubes.head, taxo)
     }
 
     // Sales also inherits the hypercube
@@ -955,6 +976,11 @@ class DimensionalQueryTest extends AnyFunSuite {
       dimMembers.get(EName(tns, "BalanceDim"))
     }
 
+    // 2 alternative ways of getting the same dimension members
+    assertResult(dimMembers) {
+      findAllDimensionMembers(hasHypercubes.head, taxo)
+    }
+
     // Sales is not usable, but that does not matter
     assertResult(
       Some(Set(
@@ -967,6 +993,11 @@ class DimensionalQueryTest extends AnyFunSuite {
       ))) {
 
       taxo.findAllUsableDimensionMembers(hasHypercubes.head).get(EName(tns, "BalanceDim"))
+    }
+
+    // 2 alternative ways of getting the same dimension members
+    assertResult(taxo.findAllUsableDimensionMembers(hasHypercubes.head)) {
+      findAllUsableDimensionMembers(hasHypercubes.head, taxo)
     }
 
     // Sales also inherits the hypercube
@@ -1028,6 +1059,11 @@ class DimensionalQueryTest extends AnyFunSuite {
       classesHypercubeDimMembers
     }
 
+    // 2 alternative ways of getting the same dimension members
+    assertResult(classesHypercubeDimMembers) {
+      findAllDimensionMembers(classesHasHypercube, taxo)
+    }
+
     val inheritingDomMemsForClassesHasHypercube =
       taxo.filterOutgoingConsecutiveDomainMemberRelationshipPaths(classesHasHypercube.primary) { path =>
         path.firstRelationship.elr == classesHasHypercube.elr
@@ -1052,8 +1088,12 @@ class DimensionalQueryTest extends AnyFunSuite {
     val validationHypercubeDimMembers = taxo.findAllDimensionMembers(validationHasHypercube)
 
     assertResult(Map(EName(tns, "ValuationDimension") -> Set(EName(tns, "AtCost"), EName(tns, "FairValue")))) {
-
       validationHypercubeDimMembers
+    }
+
+    // 2 alternative ways of getting the same dimension members
+    assertResult(validationHypercubeDimMembers) {
+      findAllDimensionMembers(validationHasHypercube, taxo)
     }
 
     val ownOrInheritedHasHypercubes = taxo.findAllOwnOrInheritedHasHypercubes(biologicalAssets)
@@ -1089,6 +1129,11 @@ class DimensionalQueryTest extends AnyFunSuite {
 
     assertResult(true) {
       taxo.findAllDimensionMembers(hasHypercubes.head).getOrElse(dimension, Set()).contains(sales2)
+    }
+
+    // 2 alternative ways of getting the same dimension members
+    assertResult(taxo.findAllDimensionMembers(hasHypercubes.head)) {
+      findAllDimensionMembers(hasHypercubes.head, taxo)
     }
 
     val hasHypercubeInheritanceOrSelf = taxo.computeHasHypercubeInheritanceOrSelf
@@ -1259,6 +1304,11 @@ class DimensionalQueryTest extends AnyFunSuite {
     }
     assertResult(someMembers) {
       dimMembers2.getOrElse(dimension.targetEName, Set()).filter(someMembers)
+    }
+
+    // 2 alternative ways of getting the same dimension members
+    assertResult(dimMembers1) {
+      findAllUsableDimensionMembers(hasHypercubes1.head, taxo)
     }
 
     val hasHypercubeInheritanceOrSelf = taxo.computeHasHypercubeInheritanceOrSelf
@@ -1867,6 +1917,102 @@ class DimensionalQueryTest extends AnyFunSuite {
   }
 
   // No test for V-04 (typed-dimension-schema-uses-redefine-3). We cannot handle xs:redefine.
+
+  // Alternative equivalent implementations of dimension member queries
+
+  private def findAllMembers(
+      dimension: EName,
+      domain: EName,
+      dimensionDomainElr: String,
+      taxo: BasicTaxonomy): Set[EName] = {
+    val ddRels = taxo.filterOutgoingDimensionDomainRelationships(dimension)(rel =>
+      rel.elr == dimensionDomainElr && rel.domain == domain)
+
+    // Calling the overloaded method findAllMembers that can also be used for enumeration 2.0 values
+    ddRels.flatMap(ddRel => taxo.findAllMembers(domain, ddRel.effectiveTargetRole)).toSet
+  }
+
+  private def findAllUsableMembers(
+      dimension: EName,
+      domain: EName,
+      dimensionDomainElr: String,
+      taxo: BasicTaxonomy): Set[EName] = {
+    val ddRels = taxo.filterOutgoingDimensionDomainRelationships(dimension)(rel =>
+      rel.elr == dimensionDomainElr && rel.domain == domain)
+    val headUsable = ddRels.forall(_.usable)
+
+    // Calling the overloaded method findAllUsableMembers that can also be used for enumeration 2.0 values
+    ddRels.flatMap(ddRel => taxo.findAllUsableMembers(domain, ddRel.effectiveTargetRole, headUsable)).toSet
+  }
+
+  private def findAllNonUsableMembers(
+      dimension: EName,
+      domain: EName,
+      dimensionDomainElr: String,
+      taxo: BasicTaxonomy): Set[EName] = {
+    val ddRels = taxo.filterOutgoingDimensionDomainRelationships(dimension)(rel =>
+      rel.elr == dimensionDomainElr && rel.domain == domain)
+    val headUsable = ddRels.forall(_.usable)
+
+    // Calling the overloaded method findAllNonUsableMembers that can also be used for enumeration 2.0 values
+    ddRels.flatMap(ddRel => taxo.findAllNonUsableMembers(domain, ddRel.effectiveTargetRole, headUsable)).toSet
+  }
+
+  private def findAllMembers(
+      dimension: EName,
+      domainElrPairs: Set[(EName, String)],
+      taxo: BasicTaxonomy): Set[EName] = {
+    domainElrPairs.toSeq.flatMap({ case (domain, elr) => findAllMembers(dimension, domain, elr, taxo) }).toSet
+  }
+
+  private def findAllUsableMembers(
+      dimension: EName,
+      domainElrPairs: Set[(EName, String)],
+      taxo: BasicTaxonomy): Set[EName] = {
+    val potentiallyUsableMembers =
+      domainElrPairs.toSeq.flatMap({ case (domain, elr) => findAllUsableMembers(dimension, domain, elr, taxo) }).toSet
+
+    val potentiallyNonUsableMembers =
+      domainElrPairs.toSeq
+        .flatMap({ case (domain, elr) => findAllNonUsableMembers(dimension, domain, elr, taxo) })
+        .toSet
+
+    potentiallyUsableMembers.diff(potentiallyNonUsableMembers)
+  }
+
+  private def findAllDimensionMembers(
+      hasHypercubeRelationship: HasHypercubeRelationship,
+      taxo: BasicTaxonomy): Map[EName, Set[EName]] = {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship, taxo).map {
+      case (dim, domainElrPairs) =>
+        dim -> findAllMembers(dim, domainElrPairs, taxo)
+    }
+  }
+
+  private def findAllUsableDimensionMembers(
+      hasHypercubeRelationship: HasHypercubeRelationship,
+      taxo: BasicTaxonomy): Map[EName, Set[EName]] = {
+    findAllDomainElrPairsPerDimension(hasHypercubeRelationship, taxo).map {
+      case (dim, domainElrPairs) =>
+        dim -> findAllUsableMembers(dim, domainElrPairs, taxo)
+    }
+  }
+
+  private def findAllDomainElrPairsPerDimension(
+      hasHypercubeRelationship: HasHypercubeRelationship,
+      taxo: BasicTaxonomy): Map[EName, Set[(EName, String)]] = {
+    val hypercubeDimensionRelationships =
+      taxo.findAllConsecutiveHypercubeDimensionRelationships(hasHypercubeRelationship)
+
+    val dimensionDomainRelationships =
+      hypercubeDimensionRelationships.flatMap(hd => taxo.findAllConsecutiveDimensionDomainRelationships(hd))
+
+    val dimensionDomainRelationshipsByDimension = dimensionDomainRelationships.groupBy(_.dimension)
+
+    dimensionDomainRelationshipsByDimension.view.mapValues(_.map(rel => rel.domain -> rel.elr).toSet).toMap
+  }
+
+  // Bootstrapping
 
   private def makeTestDts(relativeDocPaths: immutable.IndexedSeq[String]): BasicTaxonomy = {
     val entryPointUris =
