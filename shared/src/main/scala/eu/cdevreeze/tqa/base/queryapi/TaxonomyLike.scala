@@ -16,6 +16,11 @@
 
 package eu.cdevreeze.tqa.base.queryapi
 
+import eu.cdevreeze.tqa.ENames
+import eu.cdevreeze.tqa.XsdBooleans
+import eu.cdevreeze.tqa.base.dom.ItemDeclaration
+import eu.cdevreeze.yaidom.core.EName
+
 /**
  * Partial implementation of `TaxonomyApi`, formed by combining partial implementations of other
  * query API traits.
@@ -35,4 +40,29 @@ trait TaxonomyLike
     with ElementLabelRelationshipContainerLike
     with ElementReferenceRelationshipContainerLike
     with DimensionalRelationshipContainerLike
-    with InterConceptRelationshipContainerLike
+    with InterConceptRelationshipContainerLike {
+
+  // Enumeration 2.0
+
+  final def findAllEnumerationValues(enumerationConcept: EName): Set[EName] = {
+    val itemDecl: ItemDeclaration = getItemDeclaration(enumerationConcept)
+    val elemDecl = itemDecl.globalElementDeclaration
+
+    val domain: EName = elemDecl.attributeAsResolvedQName(ENames.Enum2DomainEName)
+    val elr: String = elemDecl.attribute(ENames.Enum2LinkroleEName)
+
+    findAllMembers(domain, elr)
+  }
+
+  final def findAllAllowedEnumerationValues(enumerationConcept: EName): Set[EName] = {
+    val itemDecl: ItemDeclaration = getItemDeclaration(enumerationConcept)
+    val elemDecl = itemDecl.globalElementDeclaration
+
+    val domain: EName = elemDecl.attributeAsResolvedQName(ENames.Enum2DomainEName)
+    val elr: String = elemDecl.attribute(ENames.Enum2LinkroleEName)
+    val headUsable: Boolean =
+      elemDecl.attributeOption(ENames.Enum2HeadUsableEName).exists(XsdBooleans.parseBoolean)
+
+    findAllUsableMembers(domain, elr, headUsable)
+  }
+}

@@ -19,6 +19,7 @@ package eu.cdevreeze.tqa.base.queryapi
 import eu.cdevreeze.tqa.base.dom.Linkbase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
 import eu.cdevreeze.tqa.base.dom.TaxonomyElem
+import eu.cdevreeze.yaidom.core.EName
 
 import scala.collection.immutable
 
@@ -61,4 +62,31 @@ trait TaxonomyApi
    * Returns the linkbase elements, which are typically top-level, but may be embedded in schemas.
    */
   def findAllLinkbases: immutable.IndexedSeq[Linkbase]
+
+  // Enumeration 2.0
+
+  /**
+   * Finds all enumeration values in the domain of the given enumeration concept.
+   * If attributes enum2:domain and/or enum2:linkrole are missing, an exception is thrown.
+   *
+   * This function invokes the following function call:
+   * {{{
+   * findAllMembers(domain, elr)
+   * }}}
+   * where domain and elr are taken from the above-mentioned attributes.
+   */
+  def findAllEnumerationValues(enumerationConcept: EName): Set[EName]
+
+  /**
+   * Finds all allowed enumeration values in the domain of the given enumeration concept.
+   * If attributes enum2:domain and/or enum2:linkrole are missing, an exception is thrown.
+   *
+   * This function invokes the following function call:
+   * {{{
+   * findAllUsableMembers(domain, elr, headUsable)
+   * }}}
+   * where domain and elr are taken from the above-mentioned attributes, as well as optional
+   * attribute enum2:headUsable (which defaults to false).
+   */
+  def findAllAllowedEnumerationValues(enumerationConcept: EName): Set[EName]
 }

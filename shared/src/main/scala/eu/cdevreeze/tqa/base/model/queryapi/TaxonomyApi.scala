@@ -35,4 +35,7 @@ trait TaxonomyApi
     with ElementLabelRelationshipContainerApi
     with ElementReferenceRelationshipContainerApi
     with DimensionalRelationshipContainerApi
-    with InterConceptRelationshipContainerApi
+    with InterConceptRelationshipContainerApi {
+
+  // TODO Enumeration 2.0 query methods findAllEnumerationValues and findAllAllowedEnumerationValues
+}

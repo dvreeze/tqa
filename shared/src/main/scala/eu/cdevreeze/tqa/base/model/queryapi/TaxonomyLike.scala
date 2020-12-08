@@ -35,4 +35,7 @@ trait TaxonomyLike
     with ElementLabelRelationshipContainerLike
     with ElementReferenceRelationshipContainerLike
     with DimensionalRelationshipContainerLike
-    with InterConceptRelationshipContainerLike
+    with InterConceptRelationshipContainerLike {
+
+  // TODO Enumeration 2.0 query methods findAllEnumerationValues and findAllAllowedEnumerationValues
+}
