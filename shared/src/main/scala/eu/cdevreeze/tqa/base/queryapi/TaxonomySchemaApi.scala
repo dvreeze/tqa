@@ -37,7 +37,8 @@ import scala.collection.immutable
  * Primary item declarations are concept declarations that are neither hypercubes nor dimensions,
  * regardless of whether they are used as primary items or domain members!
  *
- * This API is also aware of enumeration (2.0) concepts.
+ * This API is also aware of enumeration (2.0) concepts. Recognition of enumeration concepts may fail,
+ * however, if the item concept has an anonymous type nested in the global element declaration.
  *
  * @author Chris de Vreeze
  */
