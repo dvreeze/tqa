@@ -3,13 +3,76 @@ CHANGELOG
 =========
 
 
-Version 0.10.0 should offer the following:
+Version 0.11.0 should offer the following:
 
 * Formula/table DOM/relationships that extend the "base" ones instead of wrapping them (for better usability)
 * Enhanced taxonomy API, with role type and arcrole type query support
 * Faster relationship creation and faster taxonomy creation in general
 * Better extensibility in creating TaxonomyApi implementations, with different performance characteristics
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
+
+
+0.10.0
+======
+
+This release adds support for Extensible Enumerations 2.0 in taxonomies (not in instances).
+That is, enumeration concepts and domains of allowed enumeration values are modelled and can be
+queried. No validation of enumeration concepts is offered.
+
+According to MiMa, the breaking changes compared to version 0.9.1 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+ * abstract method isEnumerationConcept(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isEnumerationConcept")
+ * abstract method isSingleValueEnumerationConcept(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isSingleValueEnumerationConcept")
+ * abstract method isSetValueEnumerationConcept(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isSetValueEnumerationConcept")
+ * abstract method isEnumerationConcept(eu.cdevreeze.tqa.base.model.ItemDeclaration)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isEnumerationConcept")
+ * abstract method isSingleValueEnumerationConcept(eu.cdevreeze.tqa.base.model.ItemDeclaration)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isSingleValueEnumerationConcept")
+ * abstract method isSetValueEnumerationConcept(eu.cdevreeze.tqa.base.model.ItemDeclaration)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isSetValueEnumerationConcept")
+ * abstract method isEnumerationItemType(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isEnumerationItemType")
+ * abstract method isSingleValueEnumerationItemType(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isSingleValueEnumerationItemType")
+ * abstract method isSetValueEnumerationItemType(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isSetValueEnumerationItemType")
+ * abstract method findAllMembers(eu.cdevreeze.yaidom.core.EName,java.lang.String)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.model.queryapi.DimensionalRelationshipContainerApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.DimensionalRelationshipContainerApi.findAllMembers")
+ * abstract method findAllUsableMembers(eu.cdevreeze.yaidom.core.EName,java.lang.String,Boolean)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.model.queryapi.DimensionalRelationshipContainerApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.DimensionalRelationshipContainerApi.findAllUsableMembers")
+ * abstract method findAllNonUsableMembers(eu.cdevreeze.yaidom.core.EName,java.lang.String,Boolean)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.model.queryapi.DimensionalRelationshipContainerApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.DimensionalRelationshipContainerApi.findAllNonUsableMembers")
+ * abstract method findAllEnumerationValues(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.queryapi.TaxonomyApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllEnumerationValues")
+ * abstract method findAllAllowedEnumerationValues(eu.cdevreeze.yaidom.core.EName)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.queryapi.TaxonomyApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomyApi.findAllAllowedEnumerationValues")
+ * abstract method isEnumerationConcept(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isEnumerationConcept")
+ * abstract method isSingleValueEnumerationConcept(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isSingleValueEnumerationConcept")
+ * abstract method isSetValueEnumerationConcept(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isSetValueEnumerationConcept")
+ * abstract method isEnumerationConcept(eu.cdevreeze.tqa.base.dom.ItemDeclaration)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isEnumerationConcept")
+ * abstract method isSingleValueEnumerationConcept(eu.cdevreeze.tqa.base.dom.ItemDeclaration)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isSingleValueEnumerationConcept")
+ * abstract method isSetValueEnumerationConcept(eu.cdevreeze.tqa.base.dom.ItemDeclaration)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isSetValueEnumerationConcept")
+ * abstract method isEnumerationItemType(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isEnumerationItemType")
+ * abstract method isSingleValueEnumerationItemType(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isSingleValueEnumerationItemType")
+ * abstract method isSetValueEnumerationItemType(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.TaxonomySchemaApi.isSetValueEnumerationItemType")
+ * abstract method findAllMembers(eu.cdevreeze.yaidom.core.EName,java.lang.String)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.findAllMembers")
+ * abstract method findAllUsableMembers(eu.cdevreeze.yaidom.core.EName,java.lang.String,Boolean)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.findAllUsableMembers")
+ * abstract method findAllNonUsableMembers(eu.cdevreeze.yaidom.core.EName,java.lang.String,Boolean)scala.collection.immutable.Set in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
+   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.findAllNonUsableMembers")
 
 
 0.9.1
