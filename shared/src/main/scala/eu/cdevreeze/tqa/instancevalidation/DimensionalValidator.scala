@@ -17,7 +17,6 @@
 package eu.cdevreeze.tqa.instancevalidation
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.util.Success
 import scala.util.Try
 

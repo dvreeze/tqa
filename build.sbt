@@ -10,63 +10,47 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 // Note that 2.12.5 does not work for Scalatest in sbt (https://github.com/scalatest/scalatest/issues/1342).
 
-val scalaVer = "2.13.3"
+val scalaVer = "3.0.0"
+val crossScalaVer = Seq(scalaVer, "2.13.6")
 
-val crossScalaVer = Seq(scalaVer, "2.12.11")
+ThisBuild / description  := "Extensible XBRL taxonomy query API"
+ThisBuild / organization := "eu.cdevreeze.tqa"
+ThisBuild / version      := "0.11.0-SNAPSHOT"
 
-lazy val commonSettings = Seq(
-  name         := "tqa",
-  description  := "Extensible XBRL taxonomy query API",
-  organization := "eu.cdevreeze.tqa",
-  version      := "0.11.0-SNAPSHOT",
+ThisBuild / scalaVersion       := scalaVer
+ThisBuild / crossScalaVersions := crossScalaVer
 
-  scalaVersion       := scalaVer,
-  crossScalaVersions := crossScalaVer,
+ThisBuild / scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+  case (Some((3, _))) =>
+    Seq("-unchecked", "-source:3.0-migration")
+  case _ =>
+    Seq("-Wconf:cat=unused-imports:w,cat=unchecked:w,cat=deprecation:w,cat=feature:w,cat=lint:w", "-Ytasty-reader", "-Xsource:3")
+})
 
-  scalacOptions ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, n)) if n >= 13 =>
-        Seq("-Wconf:cat=unused-imports:w,cat=unchecked:w,cat=deprecation:w,cat=feature:w,cat=lint:w")
-      case _ =>
-        Seq("-unchecked", "-deprecation", "-feature", "-Xlint")
-    }
-  },
+ThisBuild / Test / publishArtifact := false
+ThisBuild / publishMavenStyle := true
 
-  Test / publishArtifact := false,
-  publishMavenStyle := true,
+ThisBuild / publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+  }
 
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-    },
+ThisBuild / pomExtra := pomData
+ThisBuild / pomIncludeRepository := { _ => false }
 
-  pomExtra := pomData,
-  pomIncludeRepository := { _ => false },
+ThisBuild / libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.12.0"
 
-  libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.11.0",
+ThisBuild / libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "2.0.0"
 
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "2.0.0-M1",
+ThisBuild / libraryDependencies += "org.scalactic" %%% "scalactic" % "3.2.9"
 
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6",
-
-  libraryDependencies ++= {
-    scalaBinaryVersion.value match {
-      case "2.13" => Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0")
-      case _      => Seq()
-    }
-  },
-
-  libraryDependencies += "org.scalactic" %%% "scalactic" % "3.1.1",
-
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.1" % "test"
-)
+ThisBuild / libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.9" % "test"
 
 lazy val root = project.in(file("."))
-  .aggregate(tqaJVM, tqaJS)
-  .settings(commonSettings: _*)
+  .aggregate(tqaJVM /*, tqaJS */)
   .settings(
     name                 := "tqa",
     // Thanks, scala-java-time, for showing us how to prevent any publishing of root level artifacts:
@@ -76,68 +60,42 @@ lazy val root = project.in(file("."))
     publishArtifact      := false,
     Keys.`package`       := file(""))
 
-lazy val tqa = crossProject(JSPlatform, JVMPlatform)
+lazy val tqa = crossProject(/* JSPlatform, */ JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("."))
-  .settings(commonSettings: _*)
   .jvmSettings(
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
-    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-7",
+    libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-8",
 
-    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.8.2",
+    libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.9.0",
 
-    libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2",
+    libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2", // Why needed?
 
-    libraryDependencies ++= {
-      scalaBinaryVersion.value match {
-        case "2.13" => Seq()
-        case _      => Seq("org.scalameta" %%% "scalameta" % "4.3.10" % "test")
-      }
-    },
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-parallel-collections" % "1.0.3",
 
-    Compile / unmanagedSourceDirectories += {
-      val sourceDir = (Compile / sourceDirectory).value
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
-        case _                       => sourceDir / "scala-2.13-"
-      }
-    },
-
-    Test / unmanagedSourceDirectories += {
-      val sourceDir = (Test / sourceDirectory).value
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
-        case _                       => sourceDir / "scala-2.13-"
-      }
-    },
-
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.9.1")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.10.0")
   )
+/*
   .jsSettings(    // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.0.0",
+    // Hopefully for3Use2_13 soon not needed anymore
+    libraryDependencies += ("org.scala-js" %%% "scalajs-dom" % "1.1.0").cross(CrossVersion.for3Use2_13),
 
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0",
+    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0",
 
-    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.9.1" % "optional",
-
-    Compile / unmanagedSourceDirectories += {
-      val sourceDir = (Compile / sourceDirectory).value
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
-        case _                       => sourceDir / "scala-2.13-"
-      }
-    },
+    // Hopefully for3Use2_13 soon not needed anymore
+    libraryDependencies += ("com.lihaoyi" %%% "scalatags" % "0.9.4" % Optional).cross(CrossVersion.for3Use2_13),
 
     Test / parallelExecution := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.9.1")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.10.0")
   )
+*/
 
 lazy val tqaJVM = tqa.jvm
-lazy val tqaJS = tqa.js
+// lazy val tqaJS = tqa.js
 
 lazy val pomData =
   <url>https://github.com/dvreeze/tqa</url>

@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.base.relationship
 import java.net.URI
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.reflect.classTag
 import scala.util.Failure
 import scala.util.Success

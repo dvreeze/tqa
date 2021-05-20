@@ -26,7 +26,6 @@ import eu.cdevreeze.tqa.base.relationship.HypercubeDimensionRelationship
 import eu.cdevreeze.yaidom.core.EName
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.reflect.ClassTag
 import scala.reflect.classTag
 

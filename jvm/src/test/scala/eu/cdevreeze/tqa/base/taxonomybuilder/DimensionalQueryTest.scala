@@ -37,7 +37,6 @@ import net.sf.saxon.s9api.Processor
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.reflect.classTag
 
 /**

@@ -44,7 +44,7 @@ object CachingThreadSafeDocumentBuilder {
   /**
    * Wrapper around a LoadingCache, to make sure that the cache uses a ThreadSafeDocumentBuilder.
    */
-  final case class LoadingCacheWrapper[D <: BackingDocumentApi] private (cache: LoadingCache[URI, D])
+  final case class LoadingCacheWrapper[D <: BackingDocumentApi] private[jvm] (cache: LoadingCache[URI, D])
 
   /**
    * Factory method to create a Caffeine BackingDoc cache, returned as LoadingCacheWrapper.

@@ -23,7 +23,6 @@ import java.time.ZonedDateTime
 import java.time.temporal.Temporal
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.reflect.classTag
 import scala.util.Try
 

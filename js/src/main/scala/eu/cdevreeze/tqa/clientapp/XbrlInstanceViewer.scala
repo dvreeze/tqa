@@ -137,7 +137,7 @@ object XbrlInstanceViewer {
         val contextOption = findContext(fact, xbrlInstance)
         val unitOption = findUnit(fact, xbrlInstance)
 
-        val onclickHandler = { ev: MouseEvent =>
+        val onclickHandler = { (ev: MouseEvent) =>
           val div = window.document.getElementById("myModal-body")
 
           val minimalInstance = createMinimalInstanceContainingFact(fact, xbrlInstance)
@@ -337,7 +337,7 @@ object XbrlInstanceViewer {
 
   private def createMinimalInstanceContainingFact(fact: Fact, xbrlInstance: XbrlInstance): XbrlInstance = {
     require(
-      xbrlInstance.backingElem.isInstanceOf[indexed.IndexedScopedNode.Elem[_]],
+      xbrlInstance.backingElem.isInstanceOf[indexed.Elem],
       s"Expected indexed.Elem as backing element")
 
     val topLevelFactPath = fact.path.ancestorOrSelfPaths.find(_.entries.size == 1).get

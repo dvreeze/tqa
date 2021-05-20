@@ -26,7 +26,6 @@ import eu.cdevreeze.tqa.extension.table.relationship.TableRelationship
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
 
 import scala.collection.immutable
-import scala.collection.compat._
 
 /**
  * Table-aware taxonomy parser and analyser, showing some statistics about the table-aware taxonomy.

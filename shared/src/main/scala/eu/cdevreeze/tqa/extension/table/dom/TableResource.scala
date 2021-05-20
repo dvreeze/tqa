@@ -19,7 +19,6 @@ package eu.cdevreeze.tqa.extension.table.dom
 import java.net.URI
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.reflect.ClassTag
 import scala.reflect.classTag
 

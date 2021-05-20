@@ -21,7 +21,6 @@ import java.net.URI
 import java.util.zip.ZipFile
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.reflect.classTag
 
 import org.scalatest.funsuite.AnyFunSuite

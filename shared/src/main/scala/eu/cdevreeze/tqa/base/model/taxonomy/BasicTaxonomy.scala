@@ -34,7 +34,6 @@ import eu.cdevreeze.tqa.base.model.queryapi.TaxonomyLike
 import eu.cdevreeze.yaidom.core.EName
 
 import scala.collection.immutable
-import scala.collection.compat._
 import scala.reflect.ClassTag
 
 /**

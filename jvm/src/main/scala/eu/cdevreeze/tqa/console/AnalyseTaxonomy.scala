@@ -25,7 +25,6 @@ import eu.cdevreeze.tqa.base.relationship.Relationship
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 
 import scala.collection.immutable
-import scala.collection.compat._
 
 /**
  * Taxonomy parser and analyser, showing some statistics about the taxonomy.

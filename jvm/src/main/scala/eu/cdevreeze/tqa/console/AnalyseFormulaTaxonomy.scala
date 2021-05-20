@@ -26,7 +26,6 @@ import eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
 
 import scala.collection.immutable
-import scala.collection.compat._
 
 /**
  * Formula-aware taxonomy parser and analyser, showing some statistics about the formula-aware taxonomy.
