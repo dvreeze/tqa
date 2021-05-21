@@ -3,13 +3,64 @@ CHANGELOG
 =========
 
 
-Version 0.11.0 should offer the following:
+Version 0.12.0 should offer the following:
 
 * Formula/table DOM/relationships that extend the "base" ones instead of wrapping them (for better usability)
 * Enhanced taxonomy API, with role type and arcrole type query support
 * Faster relationship creation and faster taxonomy creation in general
 * Better extensibility in creating TaxonomyApi implementations, with different performance characteristics
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
+
+
+0.11.0
+======
+
+This release supports Scala 3, and drops support for Scala 2.12.
+
+There are breaking changes, not caused by changing any code, but by targeting Scala 2.13.6 (with "-Xsource:3").
+These are XXXRelationshipPath.apply methods that should be private anyway, using corresponding factory method "from" instead.
+According to MiMa, the breaking changes compared to version 0.10.0 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* static method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.RelationshipPath in class eu.cdevreeze.tqa.base.model.RelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.RelationshipPath.apply")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.RelationshipPath in class eu.cdevreeze.tqa.base.model.RelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.RelationshipPath.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.model.RelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.RelationshipPath.copy$default$1")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.RelationshipPath in object eu.cdevreeze.tqa.base.model.RelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.RelationshipPath.apply")
+* static method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.apply")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.copy$default$1")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath in object eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.ConsecutiveRelationshipPath.apply")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath in object eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath does not have a correspondent in current versio
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath.apply")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath in object eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath.apply")
+* method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in object eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.apply")
+* static method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath in class eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath.apply")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath in class eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.NonStandardRelationshipPath.copy$default$1")
+* static method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.apply")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.InterConceptRelationshipPath.copy$default$1")
+* static method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath in class eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath.apply")
+* method copy(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath in class eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath.copy")
+* synthetic method copy$default$1()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.relationship.StandardInterConceptRelationshipPath.copy$default$1")
 
 
 0.10.0
