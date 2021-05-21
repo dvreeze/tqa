@@ -41,16 +41,15 @@ ThisBuild / publishTo := {
 ThisBuild / pomExtra := pomData
 ThisBuild / pomIncludeRepository := { _ => false }
 
-ThisBuild / libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.12.0"
+// Yaidom, scala-xml, scalactic and scalatest are common dependencies, but "%%%" does not seem to work well for JS now.
 
-ThisBuild / libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "2.0.0"
-
-ThisBuild / libraryDependencies += "org.scalactic" %%% "scalactic" % "3.2.9"
-
-ThisBuild / libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.9" % "test"
+// ThisBuild / libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.13.0"
+// ThisBuild / libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "2.0.0"
+// ThisBuild / libraryDependencies += "org.scalactic" %%% "scalactic" % "3.2.9"
+// ThisBuild / libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.9" % Test
 
 lazy val root = project.in(file("."))
-  .aggregate(tqaJVM /*, tqaJS */)
+  .aggregate(tqaJVM, tqaJS)
   .settings(
     name                 := "tqa",
     // Thanks, scala-java-time, for showing us how to prevent any publishing of root level artifacts:
@@ -60,10 +59,18 @@ lazy val root = project.in(file("."))
     publishArtifact      := false,
     Keys.`package`       := file(""))
 
-lazy val tqa = crossProject(/* JSPlatform, */ JVMPlatform)
+lazy val tqa = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("."))
   .jvmSettings(
+    libraryDependencies += "eu.cdevreeze.yaidom" %%% "yaidom" % "1.13.0",
+
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-xml" % "2.0.0",
+
+    libraryDependencies += "org.scalactic" %%% "scalactic" % "3.2.9",
+
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.9" % Test,
+
     // This is the HE release of Saxon. You may want to use the EE release instead.
 
     libraryDependencies += "net.sf.saxon" % "Saxon-HE" % "9.9.1-8",
@@ -76,26 +83,43 @@ lazy val tqa = crossProject(/* JSPlatform, */ JVMPlatform)
 
     mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.10.0")
   )
-/*
   .jsSettings(    // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
 
-    // Hopefully for3Use2_13 soon not needed anymore
-    libraryDependencies += ("org.scala-js" %%% "scalajs-dom" % "1.1.0").cross(CrossVersion.for3Use2_13),
+    libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+      case (Some((3, _))) =>
+        Seq(
+          "eu.cdevreeze.yaidom" % "yaidom_sjs1_3" % "1.13.0",
+          "org.scala-lang.modules" % "scala-xml_sjs1_3" % "2.0.0",
+          "org.scalactic" % "scalactic_sjs1_3" % "3.2.9",
+          "org.scalatest" % "scalatest_sjs1_3" % "3.2.9" % Test,
 
-    libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0",
+          "io.github.cquiroz" % "scala-java-time_sjs1_3" % "2.3.0",
+          // Hopefully for3Use2_13 soon not needed anymore
+          "org.scala-js" % "scalajs-dom_sjs1_2.13" % "1.1.0",
+          // Hopefully for3Use2_13 soon not needed anymore
+          "com.lihaoyi" % "scalatags_sjs1_2.13" % "0.9.4" % Optional
+        )
+      case _ =>
+        Seq(
+          "eu.cdevreeze.yaidom" % "yaidom_sjs1_2.13" % "1.13.0",
+          "org.scala-lang.modules" % "scala-xml_sjs1_2.13" % "2.0.0",
+          "org.scalactic" % "scalactic_sjs1_2.13" % "3.2.9",
+          "org.scalatest" % "scalatest_sjs1_2.13" % "3.2.9" % Test,
 
-    // Hopefully for3Use2_13 soon not needed anymore
-    libraryDependencies += ("com.lihaoyi" %%% "scalatags" % "0.9.4" % Optional).cross(CrossVersion.for3Use2_13),
+          "io.github.cquiroz" % "scala-java-time_sjs1_2.13" % "2.3.0",
+          "org.scala-js" % "scalajs-dom_sjs1_2.13" % "1.1.0",
+          "com.lihaoyi" % "scalatags_sjs1_2.13" % "0.9.4" % Optional
+        )
+    }),
 
     Test / parallelExecution := false,
 
     mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.10.0")
   )
-*/
 
 lazy val tqaJVM = tqa.jvm
-// lazy val tqaJS = tqa.js
+lazy val tqaJS = tqa.js
 
 lazy val pomData =
   <url>https://github.com/dvreeze/tqa</url>
