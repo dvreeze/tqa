@@ -79,24 +79,24 @@ final class TaxonomyBase private (
   def rootElems: immutable.IndexedSeq[TaxonomyElem] = taxonomyDocs.map(_.documentElement)
 
   @deprecated(
-    message = "Deprecated due to performance issues. Consider using 'taxonomyDocUriMap' or 'findRootElemByUri' instead",
+    message = "Deprecated due to performance issues. Consider using 'taxonomyDocUriMap' or 'findRootElemByDocUri' instead",
     since = "0.12.0")
   def rootElemUriMap: Map[URI, TaxonomyElem] = taxonomyDocUriMap.view.mapValues(_.documentElement).toMap
 
   /**
    * Returns the optional document element of the document with the given URI.
    */
-  def findRootElemByUri(docUri: URI): Option[TaxonomyElem] = {
+  def findRootElemByDocUri(docUri: URI): Option[TaxonomyElem] = {
     require(docUri.isAbsolute, s"URI '$docUri' is not absolute")
 
     taxonomyDocUriMap.get(docUri).map(_.documentElement)
   }
 
   /**
-   * Returns the equivalent of `findRootElemByUri(docUri).get`.
+   * Returns the equivalent of `findRootElemByDocUri(docUri).get`.
    */
-  def getRootElemByUri(docUri: URI): TaxonomyElem = {
-    findRootElemByUri(docUri).getOrElse(sys.error(s"Missing document (element) for document URI '$docUri'"))
+  def getRootElemByDocUri(docUri: URI): TaxonomyElem = {
+    findRootElemByDocUri(docUri).getOrElse(sys.error(s"Missing document (element) for document URI '$docUri'"))
   }
 
   /**

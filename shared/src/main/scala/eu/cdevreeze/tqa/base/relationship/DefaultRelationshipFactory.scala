@@ -83,7 +83,7 @@ final class DefaultRelationshipFactory(val config: RelationshipFactory.Config) e
       taxonomyBase: TaxonomyBase,
       arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
-    val taxoRootElemOption = taxonomyBase.findRootElemByUri(docUri)
+    val taxoRootElemOption = taxonomyBase.findRootElemByDocUri(docUri)
 
     if (taxoRootElemOption.isEmpty) {
       immutable.IndexedSeq()

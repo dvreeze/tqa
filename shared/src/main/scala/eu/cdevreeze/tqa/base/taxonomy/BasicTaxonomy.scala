@@ -120,7 +120,7 @@ final class BasicTaxonomy private (
 
   def getRootElem(elem: TaxonomyElem): TaxonomyElem = {
     val docUri = elem.docUri
-    val rootElem = taxonomyBase.getRootElemByUri(docUri)
+    val rootElem = taxonomyBase.getRootElemByDocUri(docUri)
     rootElem
   }
 
