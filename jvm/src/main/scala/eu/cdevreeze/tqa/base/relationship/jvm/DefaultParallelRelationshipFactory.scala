@@ -46,7 +46,7 @@ import scala.collection.parallel.CollectionConverters._
  */
 final class DefaultParallelRelationshipFactory(val config: RelationshipFactory.Config) extends RelationshipFactory {
 
-  private val defaultRepationshipFactory: DefaultRelationshipFactory = new DefaultRelationshipFactory(config)
+  private val defaultRelationshipFactory: DefaultRelationshipFactory = new DefaultRelationshipFactory(config)
 
   def extractRelationships(
       taxonomyBase: TaxonomyBase,
@@ -62,7 +62,7 @@ final class DefaultParallelRelationshipFactory(val config: RelationshipFactory.C
       taxonomyBase: TaxonomyBase,
       arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
-    defaultRepationshipFactory.extractRelationshipsFromDocument(docUri, taxonomyBase, arcFilter)
+    defaultRelationshipFactory.extractRelationshipsFromDocument(docUri, taxonomyBase, arcFilter)
   }
 
   def extractRelationshipsFromExtendedLink(
@@ -70,7 +70,7 @@ final class DefaultParallelRelationshipFactory(val config: RelationshipFactory.C
       taxonomyBase: TaxonomyBase,
       arcFilter: XLinkArc => Boolean): immutable.IndexedSeq[Relationship] = {
 
-    defaultRepationshipFactory.extractRelationshipsFromExtendedLink(extendedLink, taxonomyBase, arcFilter)
+    defaultRelationshipFactory.extractRelationshipsFromExtendedLink(extendedLink, taxonomyBase, arcFilter)
   }
 
   def extractRelationshipsFromArc(
@@ -79,18 +79,18 @@ final class DefaultParallelRelationshipFactory(val config: RelationshipFactory.C
       parentBaseUriOption: Option[URI],
       taxonomyBase: TaxonomyBase): immutable.IndexedSeq[Relationship] = {
 
-    defaultRepationshipFactory.extractRelationshipsFromArc(arc, labeledXlinkMap, parentBaseUriOption, taxonomyBase)
+    defaultRelationshipFactory.extractRelationshipsFromArc(arc, labeledXlinkMap, parentBaseUriOption, taxonomyBase)
   }
 
   def computeNetworks(
       relationships: immutable.IndexedSeq[Relationship],
       taxonomyBase: TaxonomyBase): Map[BaseSetKey, RelationshipFactory.NetworkComputationResult] = {
 
-    defaultRepationshipFactory.computeNetworks(relationships, taxonomyBase)
+    defaultRelationshipFactory.computeNetworks(relationships, taxonomyBase)
   }
 
   def getRelationshipKey(relationship: Relationship, taxonomyBase: TaxonomyBase): RelationshipKey = {
-    defaultRepationshipFactory.getRelationshipKey(relationship, taxonomyBase)
+    defaultRelationshipFactory.getRelationshipKey(relationship, taxonomyBase)
   }
 }
 
