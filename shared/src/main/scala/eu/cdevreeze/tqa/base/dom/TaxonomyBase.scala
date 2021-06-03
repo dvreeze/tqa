@@ -62,15 +62,15 @@ import eu.cdevreeze.yaidom.core.Scope
  * @author Chris de Vreeze
  */
 final class TaxonomyBase private (
-  val taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument],
-  val taxonomyDocUriMap: Map[URI, TaxonomyDocument],
-  val elemUriMap: Map[URI, TaxonomyElem],
-  val globalElementDeclarationsWithTargetENames: immutable.IndexedSeq[(GlobalElementDeclaration, EName)],
-  val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration],
-  val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration],
-  val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition],
-  val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration],
-  val derivedSubstitutionGroupMap: SubstitutionGroupMap) {
+    val taxonomyDocs: immutable.IndexedSeq[TaxonomyDocument],
+    val taxonomyDocUriMap: Map[URI, TaxonomyDocument],
+    val elemUriMap: Map[URI, TaxonomyElem],
+    val globalElementDeclarationsWithTargetENames: immutable.IndexedSeq[(GlobalElementDeclaration, EName)],
+    val globalElementDeclarations: immutable.IndexedSeq[GlobalElementDeclaration],
+    val globalElementDeclarationMap: Map[EName, GlobalElementDeclaration],
+    val namedTypeDefinitionMap: Map[EName, NamedTypeDefinition],
+    val globalAttributeDeclarationMap: Map[EName, GlobalAttributeDeclaration],
+    val derivedSubstitutionGroupMap: SubstitutionGroupMap) {
 
   require(
     taxonomyDocs.forall(_.uriOption.forall(_.getFragment == null)),
@@ -78,7 +78,26 @@ final class TaxonomyBase private (
 
   def rootElems: immutable.IndexedSeq[TaxonomyElem] = taxonomyDocs.map(_.documentElement)
 
+  @deprecated(
+    message = "Deprecated due to performance issues. Consider using 'taxonomyDocUriMap' or 'findRootElemByUri' instead",
+    since = "0.12.0")
   def rootElemUriMap: Map[URI, TaxonomyElem] = taxonomyDocUriMap.view.mapValues(_.documentElement).toMap
+
+  /**
+   * Returns the optional document element of the document with the given URI.
+   */
+  def findRootElemByUri(docUri: URI): Option[TaxonomyElem] = {
+    require(docUri.isAbsolute, s"URI '$docUri' is not absolute")
+
+    taxonomyDocUriMap.get(docUri).map(_.documentElement)
+  }
+
+  /**
+   * Returns the equivalent of `findRootElemByUri(docUri).get`.
+   */
+  def getRootElemByUri(docUri: URI): TaxonomyElem = {
+    findRootElemByUri(docUri).getOrElse(sys.error(s"Missing document (element) for document URI '$docUri'"))
+  }
 
   /**
    * Finds the (first) optional element with the given URI. The fragment, if any, must be an XPointer or sequence thereof.
@@ -215,7 +234,8 @@ final class TaxonomyBase private (
       filteredGlobalElementDeclarationMap,
       namedTypeDefinitionMap.filter(kv => namedTypeDefinitionENames.contains(kv._1)),
       globalAttributeDeclarationMap.filter(kv => globalAttributeDeclarationENames.contains(kv._1)),
-      filteredDerivedSubstitutionGroup)
+      filteredDerivedSubstitutionGroup
+    )
   }
 
   // Finding some "duplication errors".
@@ -273,9 +293,12 @@ final class TaxonomyBase private (
     }
   }
 
-  private def filterSubstitutionGroupMap(substitutionGroupMap: SubstitutionGroupMap, docUris: Set[URI]): SubstitutionGroupMap = {
-    val filteredMappings: Map[EName, EName] = substitutionGroupMap.mappings.filter { case (ename, _) =>
-      globalElementDeclarationMap.get(ename).exists(e => docUris.contains(e.docUri))
+  private def filterSubstitutionGroupMap(
+      substitutionGroupMap: SubstitutionGroupMap,
+      docUris: Set[URI]): SubstitutionGroupMap = {
+    val filteredMappings: Map[EName, EName] = substitutionGroupMap.mappings.filter {
+      case (ename, _) =>
+        globalElementDeclarationMap.get(ename).exists(e => docUris.contains(e.docUri))
     }
 
     SubstitutionGroupMap(filteredMappings)
@@ -343,16 +366,19 @@ object TaxonomyBase {
       globalElementDeclarationMap,
       namedTypeDefinitionMap,
       globalAttributeDeclarationMap,
-      derivedSubstitutionGroupMap)
+      derivedSubstitutionGroupMap
+    )
   }
 
-  def getGlobalElementDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalElementDeclaration] = {
+  def getGlobalElementDeclarationMap(rootElem: TaxonomyElem)(
+      implicit enameProvider: ENameProvider): Map[EName, GlobalElementDeclaration] = {
     val globalElemDeclsWithTargetENames = getGlobalElementDeclarationsWithTargetENames(rootElem)(enameProvider)
 
     globalElemDeclsWithTargetENames.groupBy(_._2).view.mapValues(_.head._1).toMap
   }
 
-  def getNamedTypeDefinitionMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, NamedTypeDefinition] = {
+  def getNamedTypeDefinitionMap(rootElem: TaxonomyElem)(
+      implicit enameProvider: ENameProvider): Map[EName, NamedTypeDefinition] = {
     val xsdSchemaOption: Option[XsdSchema] =
       if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
 
@@ -363,10 +389,15 @@ object TaxonomyBase {
     val namedTypeDefinitions =
       xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[NamedTypeDefinition])(_ => true))
 
-    namedTypeDefinitions.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
+    namedTypeDefinitions
+      .groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue))
+      .view
+      .mapValues(_.head)
+      .toMap
   }
 
-  def getGlobalAttributeDeclarationMap(rootElem: TaxonomyElem)(implicit enameProvider: ENameProvider): Map[EName, GlobalAttributeDeclaration] = {
+  def getGlobalAttributeDeclarationMap(rootElem: TaxonomyElem)(
+      implicit enameProvider: ENameProvider): Map[EName, GlobalAttributeDeclaration] = {
     val xsdSchemaOption: Option[XsdSchema] =
       if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
 
@@ -374,13 +405,18 @@ object TaxonomyBase {
     val tnsOption: Option[String] = xsdSchemaOption.flatMap(_.targetNamespaceOption)
 
     val globalAttributeDeclarations =
-      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(_ => true))
+      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalAttributeDeclaration])(_ =>
+        true))
 
-    globalAttributeDeclarations.groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue)).view.mapValues(_.head).toMap
+    globalAttributeDeclarations
+      .groupBy(e => enameProvider.getEName(tnsOption, e.nameAttributeValue))
+      .view
+      .mapValues(_.head)
+      .toMap
   }
 
   private def getGlobalElementDeclarationsWithTargetENames(rootElem: TaxonomyElem)(
-    implicit enameProvider: ENameProvider): immutable.IndexedSeq[(GlobalElementDeclaration, EName)] = {
+      implicit enameProvider: ENameProvider): immutable.IndexedSeq[(GlobalElementDeclaration, EName)] = {
 
     val xsdSchemaOption: Option[XsdSchema] =
       if (rootElem.isInstanceOf[Linkbase]) None else rootElem.findElemOrSelfOfType(classTag[XsdSchema])(_ => true)
@@ -390,7 +426,8 @@ object TaxonomyBase {
     val tnsOption: Option[String] = xsdSchemaOption.flatMap(_.targetNamespaceOption)
 
     val globalElementDeclarations =
-      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ => true))
+      xsdSchemaOption.toIndexedSeq.flatMap(_.findTopmostElemsOrSelfOfType(classTag[GlobalElementDeclaration])(_ =>
+        true))
 
     globalElementDeclarations.map(e => e -> enameProvider.getEName(tnsOption, e.nameAttributeValue))
   }
@@ -399,7 +436,8 @@ object TaxonomyBase {
    * Returns the SubstitutionGroupMap that can be derived from this taxonomy base alone.
    * This is an expensive operation that should be performed only once, if possible.
    */
-  private def computeDerivedSubstitutionGroupMap(globalElementDeclarationMap: Map[EName, GlobalElementDeclaration]): SubstitutionGroupMap = {
+  private def computeDerivedSubstitutionGroupMap(
+      globalElementDeclarationMap: Map[EName, GlobalElementDeclaration]): SubstitutionGroupMap = {
     val rawMappings: Map[EName, EName] =
       globalElementDeclarationMap.toSeq.flatMap {
         case (en, decl) => decl.substitutionGroupOption.map(sg => en -> sg)

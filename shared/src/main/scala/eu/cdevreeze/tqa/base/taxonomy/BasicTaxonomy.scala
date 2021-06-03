@@ -120,8 +120,7 @@ final class BasicTaxonomy private (
 
   def getRootElem(elem: TaxonomyElem): TaxonomyElem = {
     val docUri = elem.docUri
-    val rootElem =
-      taxonomyBase.rootElemUriMap.getOrElse(docUri, sys.error(s"Missing root elem for document URI $docUri"))
+    val rootElem = taxonomyBase.getRootElemByUri(docUri)
     rootElem
   }
 
