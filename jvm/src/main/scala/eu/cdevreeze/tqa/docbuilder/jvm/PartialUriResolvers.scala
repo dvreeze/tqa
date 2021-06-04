@@ -116,7 +116,9 @@ object PartialUriResolvers {
    * Creates a PartialUriResolver from the given UriResolver, returning None for all URIs for which the URI filter returns false.
    */
   def fromUriResolver(uriResolver: URI => InputSource, filterUri: URI => Boolean): PartialUriResolver = {
-    { (uri: URI) => if (filterUri(uri)) Some(uriResolver(uri)) else None }
+    { (uri: URI) =>
+      if (filterUri(uri)) Some(uriResolver(uri)) else None
+    }
   }
 
   /**
@@ -130,17 +132,28 @@ object PartialUriResolvers {
     fromPartialUriConverter(PartialUriConverters.identity)
   }
 
+  /**
+   * Turns the entries of the passed ZipFile into a Map from their relative URIs to the entries themselves.
+   */
   private def computeZipEntryMap(zipFile: ZipFile): Map[URI, ZipEntry] = {
     val zipEntries = zipFile.entries().asScala.toIndexedSeq
 
-    val zipFileParent = dummyDirectory
-
-    zipEntries.map(e => toRelativeUri(e, zipFileParent) -> e).toMap
+    zipEntries.map(e => toRelativeUri(e) -> e).toMap
   }
 
-  private def toRelativeUri(zipEntry: ZipEntry, zipFileParent: File): URI = {
-    val adaptedZipEntryUri = new File(zipFileParent, zipEntry.getName).toURI
-    val zipFileParentUri = URI.create(returnWithTrailingSlash(zipFileParent.toURI))
+  /**
+   * Using method "URI.relativize", turns the ZIP entry's location into a relative URI, relative to the
+   * "root" directory inside the ZIP file.
+   */
+  private def toRelativeUri(zipEntry: ZipEntry): URI = {
+    // Fake constant ZIP file parent URI.
+    val dummyZipFileParentDirectory = new File("/dummyRoot")
+
+    val adaptedZipEntryUri = new File(dummyZipFileParentDirectory, zipEntry.getName).toURI
+    val zipFileParentUri = URI.create(returnWithTrailingSlash(dummyZipFileParentDirectory.toURI))
+
+    // Having an adapted ZIP entry URI relative to the ZIP file parent URI, we can use the latter to
+    // "relativize" the former, getting a relative URI as result.
     val relativeZipEntryUri = zipFileParentUri.relativize(adaptedZipEntryUri)
     require(!relativeZipEntryUri.isAbsolute, s"Not a relative URI: $relativeZipEntryUri")
 
@@ -151,6 +164,4 @@ object PartialUriResolvers {
     val s = uri.toString
     if (s.endsWith("/")) s else s + "/"
   }
-
-  private val dummyDirectory = new File("/dummyRoot")
 }

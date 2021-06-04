@@ -51,21 +51,32 @@ object TaxonomyPackagePartialUriResolvers {
     val catalogEntry: ZipEntry = zipFile
       .entries()
       .asScala
-      .find(entry => toRelativeUri(entry, dummyDirectory).toString.endsWith("META-INF/catalog.xml"))
+      .find(entry => toRelativeUri(entry).toString.endsWith("META-INF/catalog.xml"))
       .getOrElse(sys.error(s"No META-INF/catalog.xml found in taxonomy package ZIP file ${zipFile.getName}"))
 
-    val catalogEntryRelativeUri: URI = toRelativeUri(catalogEntry, dummyDirectory).ensuring(!_.isAbsolute)
+    val catalogEntryRelativeUri: URI = toRelativeUri(catalogEntry).ensuring(!_.isAbsolute)
 
     val docParser = DocumentParserUsingStax.newInstance()
+    val docUri: URI = catalogEntryRelativeUri
     val catalogRootElem: indexed.Elem =
-      indexed.Elem(docParser.parse(zipFile.getInputStream(catalogEntry)).documentElement)
+      indexed.Elem(docUri, docParser.parse(zipFile.getInputStream(catalogEntry)).documentElement)
 
-    SimpleCatalog.fromElem(catalogRootElem).copy(xmlBaseAttributeOption = Some(catalogEntryRelativeUri))
+    SimpleCatalog.fromElem(catalogRootElem)
   }
 
-  private def toRelativeUri(zipEntry: ZipEntry, zipFileParent: File): URI = {
-    val adaptedZipEntryUri = new File(zipFileParent, zipEntry.getName).toURI
-    val zipFileParentUri = URI.create(returnWithTrailingSlash(zipFileParent.toURI))
+  /**
+   * Using method "URI.relativize", turns the ZIP entry's location into a relative URI, relative to the
+   * "root" directory inside the ZIP file.
+   */
+  private def toRelativeUri(zipEntry: ZipEntry): URI = {
+    // Fake constant ZIP file parent URI.
+    val dummyZipFileParentDirectory = new File("/dummyRoot")
+
+    val adaptedZipEntryUri = new File(dummyZipFileParentDirectory, zipEntry.getName).toURI
+    val zipFileParentUri = URI.create(returnWithTrailingSlash(dummyZipFileParentDirectory.toURI))
+
+    // Having an adapted ZIP entry URI relative to the ZIP file parent URI, we can use the latter to
+    // "relativize" the former, getting a relative URI as result.
     val relativeZipEntryUri = zipFileParentUri.relativize(adaptedZipEntryUri)
     require(!relativeZipEntryUri.isAbsolute, s"Not a relative URI: $relativeZipEntryUri")
 
@@ -76,6 +87,4 @@ object TaxonomyPackagePartialUriResolvers {
     val s = uri.toString
     if (s.endsWith("/")) s else s + "/"
   }
-
-  private val dummyDirectory = new File("/dummyRoot")
 }
