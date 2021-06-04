@@ -147,11 +147,6 @@ object UriResolvers {
     fromUriConverter(UriConverters.fromCatalogWithoutFallback(catalog))
   }
 
-  @deprecated(message = "Use 'fromLocalMirrorRootDirectoryWithoutScheme' instead", since = "0.8.17")
-  def fromLocalMirrorRootDirectory(rootDir: File): UriResolver = {
-    fromLocalMirrorRootDirectoryWithoutScheme(rootDir)
-  }
-
   /**
    * Returns an URI resolver that expects all files to be found in a local mirror, with the host name
    * of the URI mirrored under the given root directory. The protocol (HTTP or HTTPS) is not represented in
@@ -201,11 +196,6 @@ object UriResolvers {
     }
 
     fromUriConverter(convertUri)
-  }
-
-  @deprecated(message = "Use 'forZipFileContainingLocalMirrorWithoutScheme' instead", since = "0.8.17")
-  def forZipFileContainingLocalMirror(zipFile: ZipFile, parentPathOption: Option[URI]): UriResolver = {
-    forZipFileContainingLocalMirrorWithoutScheme(zipFile, parentPathOption)
   }
 
   /**
