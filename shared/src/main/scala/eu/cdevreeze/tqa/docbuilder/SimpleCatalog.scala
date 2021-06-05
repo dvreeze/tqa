@@ -155,7 +155,8 @@ object SimpleCatalog {
         rewriteElem.resolvedName == ErRewriteURIEName,
         s"Expected $ErRewriteURIEName but got ${rewriteElem.resolvedName}")
 
-      // If the rewriteElem has a document URI, it also has an absolute base URI (typically the same).
+      // If the rewriteElem has an absolute document URI, it also has an absolute base URI (typically the same).
+      // If the rewriteElem has a relative document URI, it either has a relative or absolute base URI, potentially from xml:base attributes.
       // If the rewriteElem has no document URI, it either has no base URI, or a relative or absolute one filled from xml:base attributes.
       val xmlBaseOption: Option[URI] = rewriteElem.baseUriOption
       val parentXmlBaseOption: Option[URI] = rewriteElem.parentBaseUriOption
@@ -181,12 +182,13 @@ object SimpleCatalog {
 
   /**
    * Creates a SimpleCatalog from the given element. The base URI, if any, of the element, becomes the filled
-   * xmlBaseAttributeOption of the SimpleCatalog.
+   * xmlBaseAttributeOption of the SimpleCatalog. This optional base URI may be a relative URI (typically within ZIP files).
    */
   def fromElem(catalogElem: BackingNodes.Elem): SimpleCatalog = {
     require(catalogElem.resolvedName == ErCatalogEName, s"Expected $ErCatalogEName but got ${catalogElem.resolvedName}")
 
-    // If the catalogElem has a document URI, it also has an absolute base URI (typically the same).
+    // If the catalogElem has an absolute document URI, it also has an absolute base URI (typically the same).
+    // If the catalogElem has a relative document URI, it either has a relative or absolute base URI, potentially from xml:base attributes.
     // If the catalogElem has no document URI, it either has no base URI, or a relative or absolute one filled from xml:base attributes.
     val xmlBaseOption: Option[URI] = catalogElem.baseUriOption
 

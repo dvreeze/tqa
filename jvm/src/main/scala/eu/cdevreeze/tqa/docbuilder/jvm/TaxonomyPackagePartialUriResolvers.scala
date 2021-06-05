@@ -57,7 +57,7 @@ object TaxonomyPackagePartialUriResolvers {
     val catalogEntryRelativeUri: URI = toRelativeUri(catalogEntry).ensuring(!_.isAbsolute)
 
     val docParser = DocumentParserUsingStax.newInstance()
-    val docUri: URI = catalogEntryRelativeUri
+    val docUri: URI = catalogEntryRelativeUri // A relative document URI, which is allowed for indexed/simple documents!
     val catalogRootElem: indexed.Elem =
       indexed.Elem(docUri, docParser.parse(zipFile.getInputStream(catalogEntry)).documentElement)
 
