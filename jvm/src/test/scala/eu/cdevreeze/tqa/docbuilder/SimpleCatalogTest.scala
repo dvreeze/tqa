@@ -203,7 +203,7 @@ class SimpleCatalogTest extends AnyFunSuite {
   }
 
   test("testUseRelativeUriCatalogWithoutTrailingSlash") {
-    // Removing the trailing spaces from the URI start strings does not affect the relative URI
+    // Removing the trailing slashes from the URI start strings does not affect the relative URI
     // resolution and therefore does not affect URI mapping.
 
     val docParser = DocumentParserUsingStax.newInstance()
@@ -323,6 +323,175 @@ class SimpleCatalogTest extends AnyFunSuite {
 
     assertResult(Some(URI.create("file:///home/user/part1/2015-01-01/"))) {
       catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(None) {
+      catalog.findMappedUri(URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt"))
+    }
+  }
+
+  test("testParseRelativeUriCatalogUsingRelativeDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("META-INF/catalog.xml") // Relative document URI!
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+
+    val expectedCatalog: SimpleCatalog =
+      SimpleCatalog(
+        Some(docUri),
+        Vector(
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part1/2015-01-01/",
+            "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part2/2015-01-01/",
+            "../part2/2015-01-01/")))
+
+    assertResult(expectedCatalog) {
+      catalog
+    }
+
+    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
+      resolved.Elem.from(expectedCatalog.copy(xmlBaseAttributeOption = None).toElem).removeAllInterElementWhitespace
+    }
+
+    assertResult(Map(
+      "http://www.example.com/part1/2015-01-01/" -> "part1/2015-01-01/",
+      "http://www.example.com/part2/2015-01-01/" -> "part2/2015-01-01/"
+    )) {
+      catalog.toMap
+    }
+
+    assertResult(expectedCatalog.toMap) {
+      SimpleCatalog.from(catalog.toMap).toMap
+    }
+
+    assertResult(catalog.toMap) {
+      catalog.reverse.reverse.toMap
+    }
+  }
+
+  test("testParseRelativeUriCatalogWithBaseUriUsingRelativeDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("META-INF/catalog.xml") // Relative document URI!
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+
+    val expectedCatalog: SimpleCatalog =
+      SimpleCatalog(
+        Some(URI.create("")),
+        Vector(
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part1/2015-01-01/",
+            "part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part2/2015-01-01/",
+            "part2/2015-01-01/")))
+
+    assertResult(expectedCatalog) {
+      catalog
+    }
+
+    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
+      resolved.Elem.from(expectedCatalog.copy(xmlBaseAttributeOption = Some(URI.create("../"))).toElem).removeAllInterElementWhitespace
+    }
+
+    val expectedNetCatalog: SimpleCatalog =
+      SimpleCatalog(
+        None,
+        Vector(
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part1/2015-01-01/",
+            "part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(
+            None,
+            "http://www.example.com/part2/2015-01-01/",
+            "part2/2015-01-01/")))
+
+    assertResult(expectedNetCatalog) {
+      catalog.netSimpleCatalog
+    }
+
+    assertResult(Map(
+      "http://www.example.com/part1/2015-01-01/" -> "part1/2015-01-01/",
+      "http://www.example.com/part2/2015-01-01/" -> "part2/2015-01-01/"
+    )) {
+      catalog.toMap
+    }
+
+    assertResult(expectedCatalog.toMap) {
+      SimpleCatalog.from(catalog.toMap).toMap
+    }
+
+    assertResult(catalog.toMap) {
+      catalog.reverse.reverse.toMap
+    }
+  }
+
+  test("testUseRelativeUriCatalogUsingRelativeDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("META-INF/catalog.xml") // Relative document URI!
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+
+    assertResult(Some(URI.create("part1/2015-01-01/a/b/c/"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/a/b/c/"))
+    }
+
+    assertResult(Some(URI.create("part1/2015-01-01/a/b/c/d.txt"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt"))
+    }
+
+    assertResult(Some(URI.create("part1/2015-01-01/"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(URI.create("part1/2015-01-01/")) {
+      catalog.getMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(None) {
+      catalog.findMappedUri(URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt"))
+    }
+  }
+
+  test("testUseRelativeUriCatalogWithBaseUriUsingRelativeDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("META-INF/catalog.xml") // Relative document URI!
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+
+    assertResult(Some(URI.create("part1/2015-01-01/a/b/c/"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/a/b/c/"))
+    }
+
+    assertResult(Some(URI.create("part1/2015-01-01/a/b/c/d.txt"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt"))
+    }
+
+    assertResult(Some(URI.create("part1/2015-01-01/"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(URI.create("part1/2015-01-01/")) {
+      catalog.getMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
     }
 
     assertResult(None) {
