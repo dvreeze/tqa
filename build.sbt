@@ -81,7 +81,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     libraryDependencies += "org.scala-lang.modules" %%% "scala-parallel-collections" % "1.0.3",
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.10.0")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.11.0")
   )
   .jsSettings(    // Do we need this jsEnv?
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
@@ -115,7 +115,7 @@ lazy val tqa = crossProject(JSPlatform, JVMPlatform)
 
     Test / parallelExecution := false,
 
-    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.10.0")
+    mimaPreviousArtifacts := Set("eu.cdevreeze.tqa" %%% "tqa" % "0.11.0")
   )
 
 lazy val tqaJVM = tqa.jvm

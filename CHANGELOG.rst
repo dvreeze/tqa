@@ -3,13 +3,41 @@ CHANGELOG
 =========
 
 
-Version 0.12.0 should offer the following:
+Version 1.0.0 should offer the following:
 
 * Formula/table DOM/relationships that extend the "base" ones instead of wrapping them (for better usability)
 * Enhanced taxonomy API, with role type and arcrole type query support
 * Faster relationship creation and faster taxonomy creation in general
 * Better extensibility in creating TaxonomyApi implementations, with different performance characteristics
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
+
+
+0.12.0
+======
+
+This release contains a few fixes, thus improving on the preceding release:
+
+* An important performance fix in relationship creation has been made. Thanks, Johan Walters, for reporting it!
+
+  * Method ``TaxonomyBase.rootElemUriMap`` (causing the performance issue) has been deprecated
+  * Faster methods ``findRootElemByDocUri`` and ``getRootElemByDocUri`` have been added
+
+* XML Base handling in class ``SimpleCatalog`` was broken, and has been fixed
+* A wrongly spelled private class member has been corrected
+* Previously deprecated methods have been removed
+
+According to MiMa, the breaking changes compared to version 0.11.0 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+
+* deprecated static method forZipFileContainingLocalMirror(java.util.zip.ZipFile,scala.Option)scala.Function1 in class eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers.forZipFileContainingLocalMirror")
+* deprecated static method fromLocalMirrorRootDirectory(java.io.File)scala.Function1 in class eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers.fromLocalMirrorRootDirectory")
+* deprecated method fromLocalMirrorRootDirectory(java.io.File)scala.Function1 in object eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers.fromLocalMirrorRootDirectory")
+* deprecated method forZipFileContainingLocalMirror(java.util.zip.ZipFile,scala.Option)scala.Function1 in object eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers.forZipFileContainingLocalMirror")
+
+In other words, putting the removed previously deprecated methods aside, there are no breaking changes.
 
 
 0.11.0
