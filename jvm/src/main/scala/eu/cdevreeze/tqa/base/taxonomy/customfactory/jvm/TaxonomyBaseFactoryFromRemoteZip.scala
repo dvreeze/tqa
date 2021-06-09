@@ -113,15 +113,12 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
         Iterator
           .continually(zis.getNextEntry())
           .takeWhile(_ != null)
-          .flatMap { zipEntry =>
-            if (zipEntry.isDirectory || zipEntry.getName().startsWith("META-INF/")) {
-              None
-            } else {
-              val originalUri: URI = reverseCatalog.getMappedUri(URI.create(zipEntry.getName)) // TODO ???
+          .filterNot(zipEntry => zipEntry.isDirectory || zipEntry.getName().startsWith("META-INF/"))
+          .map { zipEntry =>
+            val originalUri: URI = reverseCatalog.getMappedUri(URI.create(zipEntry.getName)) // TODO ???
 
-              // Only sequential processing?
-              Some(docBuilder.build(originalUri)).tap(_ => zis.closeEntry())
-            }
+            // Only sequential processing?
+            docBuilder.build(originalUri).tap(_ => zis.closeEntry())
           }
           .toIndexedSeq
       }

@@ -54,7 +54,7 @@ private[jvm] final class ZipDocumentBuilder(
   def build(uri: URI): SaxonDocument = {
     // Be careful not to close the ZipInputStream
     val filteredIs: InputStream = new FilterInputStream(zis) {
-      override def close() { zis.closeEntry() }
+      override def close(): Unit = { zis.closeEntry() }
     }
     val inputSource = new InputSource(filteredIs)
     inputSource.setSystemId(uri.toString)
