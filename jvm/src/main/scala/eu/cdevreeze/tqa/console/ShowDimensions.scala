@@ -17,16 +17,19 @@
 package eu.cdevreeze.tqa.console
 
 import java.io.File
+import java.io.FileInputStream
 import java.net.URI
 import java.util.logging.Logger
 import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
+
+import scala.collection.immutable
+import scala.util.chaining._
 
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.yaidom.core.EName
-
-import scala.collection.immutable
 
 /**
  * Program that shows dimensional data in a given taxonomy.
@@ -39,16 +42,27 @@ object ShowDimensions {
 
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: ShowDimensions <taxonomy package ZIP file> <entry point URI 1> ...")
-    val zipFile = new ZipFile(new File(args(0)).ensuring(_.isFile))
+    val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
+    val zipFile = new ZipFile(zipInputFile)
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
     val lenient = System.getProperty("lenient", "false").toBoolean
+    val useZipStreams = System.getProperty("useZipStreams", "false").toBoolean
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
-    val basicTaxo = taxoBuilder.build(entryPointUris)
+    val basicTaxo: BasicTaxonomy =
+      (if (useZipStreams) {
+         ConsoleUtil.createTaxonomyFromZipStreams(
+           entryPointUris,
+           () => new ZipInputStream(new FileInputStream(zipInputFile)),
+           lenient)
+       } else {
+         val taxoBuilder: TaxonomyBuilder =
+           ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
+         taxoBuilder.build(entryPointUris)
+       }).tap(_ => zipFile.close) // Not robust
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -71,8 +85,6 @@ object ShowDimensions {
     showHasHypercubeInheritance(hasHypercubes, basicTaxo)
 
     logger.info("Ready")
-
-    zipFile.close() // Not robust
   }
 
   private def showHasHypercubeTrees(

@@ -16,11 +16,17 @@
 
 package eu.cdevreeze.tqa.console
 
+import java.net.URI
 import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
+import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.jvm.DefaultParallelRelationshipFactory
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
+import eu.cdevreeze.tqa.base.taxonomy.customfactory.jvm.TaxonomyFactoryFromRemoteZip
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.base.taxonomybuilder.jvm.TaxonomyBuilderSupport
+import eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap
 import net.sf.saxon.s9api.Processor
 
 /**
@@ -47,5 +53,19 @@ private[console] object ConsoleUtil {
     } else {
       rawTaxonomyBuilder
     }
+  }
+
+  def createTaxonomyFromZipStreams(
+      entryPointUris: Set[URI],
+      getTaxonomyPackageStream: () => ZipInputStream,
+      lenient: Boolean): BasicTaxonomy = {
+    val relationshipFactory: RelationshipFactory =
+      if (lenient) DefaultParallelRelationshipFactory.LenientInstance
+      else DefaultParallelRelationshipFactory.StrictInstance
+
+    val taxoFactory: TaxonomyFactoryFromRemoteZip =
+      TaxonomyFactoryFromRemoteZip(getTaxonomyPackageStream, SubstitutionGroupMap.Empty, relationshipFactory, _ => true)
+
+    taxoFactory.build(entryPointUris)
   }
 }
