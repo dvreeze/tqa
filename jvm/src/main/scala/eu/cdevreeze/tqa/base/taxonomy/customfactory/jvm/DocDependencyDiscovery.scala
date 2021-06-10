@@ -29,8 +29,6 @@ import eu.cdevreeze.yaidom.queryapi.BackingNodes
  */
 private[jvm] object DocDependencyDiscovery {
 
-  // TODO Refine implementation to prevent too many base URI computations
-
   /**
    * Returns the DocDependencyList for the given document.
    *
@@ -40,22 +38,17 @@ private[jvm] object DocDependencyDiscovery {
     require(doc.uriOption.nonEmpty, s"Document without URI not allowed")
     val docUri: URI = doc.uriOption.get
 
-    val xlinkHrefElems: Seq[BackingNodes.Elem] = doc.documentElement.filterElems(isXlinkHrefElem)
+    val nonLocXlinkHrefElems: Seq[BackingNodes.Elem] = doc.documentElement.filterElems(isNonLocXlinkHrefElem)
 
-    val xlinkHrefs: Seq[URI] = xlinkHrefElems.flatMap { elem =>
+    val nonLocXlinkHrefs: Seq[URI] = nonLocXlinkHrefElems.flatMap { elem =>
       val rawHref: URI = URI.create(elem.attribute(ENames.XLinkHrefEName))
 
       if (rawHref == EmptyUri) None else Some(makeAbsoluteWithoutFragment(rawHref, elem.baseUri))
     }
 
-    val importOrIncludeElems: Seq[BackingNodes.Elem] = doc.documentElement.filterElems(isImportOrInclude)
+    val xlinkHrefs: Seq[URI] = nonLocXlinkHrefs.appendedAll(findAllLinkLocHrefs(doc))
 
-    val schemaLocations: Seq[URI] = importOrIncludeElems.flatMap { elem =>
-      val rawSchemaLocationOption: Option[URI] =
-        elem.attributeOption(ENames.SchemaLocationEName).map(URI.create)
-
-      rawSchemaLocationOption.map(u => makeAbsoluteWithoutFragment(u, elem.baseUri))
-    }
+    val schemaLocations: Seq[URI] = findAllSchemaLocations(doc)
 
     val dependencies: Seq[URI] = xlinkHrefs.appendedAll(schemaLocations)
 
@@ -63,9 +56,48 @@ private[jvm] object DocDependencyDiscovery {
     DocDependencyList.from(docUri, dependencies)
   }
 
-  private def isXlinkHrefElem(elem: BackingNodes.Elem): Boolean = {
+  private def findAllLinkLocHrefs(doc: BackingDocumentApi): Seq[URI] = {
+    val extendedLinks: Seq[BackingNodes.Elem] =
+      doc.documentElement.findTopmostElemsOrSelf(_.attributeOption(ENames.XLinkTypeEName).contains("extended"))
+
+    extendedLinks.flatMap { extLink =>
+      val parentBaseUri: URI = extLink.baseUri
+
+      extLink.filterChildElems(_.resolvedName == ENames.LinkLocEName).flatMap { linkLocElem =>
+        // Cheap base URI computation
+        val baseUri: URI =
+          linkLocElem.attributeOption(ENames.XmlBaseEName).map(u => parentBaseUri.resolve(u)).getOrElse(parentBaseUri)
+
+        val rawHref: URI = URI.create(linkLocElem.attribute(ENames.XLinkHrefEName))
+
+        if (rawHref == EmptyUri) None else Some(makeAbsoluteWithoutFragment(rawHref, baseUri))
+      }
+    }.distinct
+  }
+
+  private def findAllSchemaLocations(doc: BackingDocumentApi): Seq[URI] = {
+    val schemas: Seq[BackingNodes.Elem] =
+      doc.documentElement.findTopmostElemsOrSelf(_.resolvedName == ENames.XsSchemaEName)
+
+    schemas.flatMap { schemaElem =>
+      val parentBaseUri: URI = schemaElem.baseUri
+
+      schemaElem.filterChildElems(isImportOrInclude).flatMap { elem =>
+        // Cheap base URI computation
+        val baseUri: URI =
+          elem.attributeOption(ENames.XmlBaseEName).map(u => parentBaseUri.resolve(u)).getOrElse(parentBaseUri)
+
+        val rawSchemaLocationOption: Option[URI] =
+          elem.attributeOption(ENames.SchemaLocationEName).map(URI.create)
+
+        rawSchemaLocationOption.map(u => makeAbsoluteWithoutFragment(u, baseUri))
+      }
+    }
+  }
+
+  private def isNonLocXlinkHrefElem(elem: BackingNodes.Elem): Boolean = {
     elem.resolvedName match {
-      case ENames.LinkLocEName | ENames.LinkRoleRefEName | ENames.LinkArcroleRefEName | ENames.LinkLinkbaseRefEName =>
+      case ENames.LinkRoleRefEName | ENames.LinkArcroleRefEName | ENames.LinkLinkbaseRefEName =>
         true
       case _ => false
     }
