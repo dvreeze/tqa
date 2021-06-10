@@ -31,6 +31,9 @@ import eu.cdevreeze.yaidom.simple
  */
 final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedSeq[SimpleCatalog.UriRewrite]) {
 
+  @deprecated(message = "Use 'xmlBaseOption' instead", since = "0.13.0")
+  def xmlBaseAttributeOption: Option[URI] = xmlBaseOption
+
   /**
    * Applies the best matching rewrite rule to the given URI, if any, and returns the optional
    * resulting URI. Matching is done after normalizing the URI, as well as the URI start strings.
