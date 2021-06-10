@@ -56,8 +56,6 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
     val catalog: SimpleCatalog = parseCatalog()
     val docs: IndexedSeq[SaxonDocument] = loadAllDocuments(catalog).ensuring(_.forall(_.uriOption.nonEmpty))
 
-    // TODO Check roundtripping of document URIs.
-
     val dtsUris: Set[URI] = findDtsUris(entrypointUris, docs)
 
     val docsInDts: IndexedSeq[SaxonDocument] = docs.filter(d => dtsUris.contains(d.uriOption.get))
@@ -113,9 +111,16 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
         Iterator
           .continually(zis.getNextEntry())
           .takeWhile(_ != null)
-          .filterNot(zipEntry => zipEntry.isDirectory || zipEntry.getName().startsWith("META-INF/"))
+          .filterNot(zipEntry =>
+            zipEntry.isDirectory || zipEntry.getName().startsWith("META-INF/") || isNotTaxoXmlFile(zipEntry))
           .map { zipEntry =>
-            val originalUri: URI = reverseCatalog.getMappedUri(URI.create(zipEntry.getName)) // TODO ???
+            val localUri: URI = URI.create(zipEntry.getName) // TODO ???
+            val originalUri: URI = reverseCatalog.getMappedUri(localUri)
+
+            require(
+              catalog.getMappedUri(originalUri) == localUri,
+              s"URI roundtripping failed for (local) document URI '$localUri'"
+            )
 
             // Only sequential processing?
             docBuilder.build(originalUri).tap(_ => zis.closeEntry())
@@ -148,6 +153,14 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
     val buffer = Array.ofDim[Byte](bufferSize)
     Iterator.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(len => bos.write(buffer, 0, len))
     bos.toByteArray.to(ArraySeq)
+  }
+
+  private def isNotTaxoXmlFile(zipEntry: ZipEntry): Boolean = !isTaxoXmlFile(zipEntry)
+
+  private def isTaxoXmlFile(zipEntry: ZipEntry): Boolean = {
+    val name = zipEntry.getName()
+
+    name.endsWith(".xml") || name.endsWith(".xsd")
   }
 
   private val bufferSize = 4096
