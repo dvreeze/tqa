@@ -45,6 +45,15 @@ import org.xml.sax.InputSource
  * TaxonomyBase factory from a remote (or local) taxonomy package ZIP file. The ZIP does not have to be
  * a taxonomy package with META-INF/taxonomyPackage.xml file, but it does need to have a META-INF/catalog.xml
  * file. Moreover, this catalog.xml file must be invertible, so that there is only one original URI per mapped URI!
+ * Otherwise the DTS discovery step within method "loadDts" will probably fail!
+ *
+ * Another thing to keep in mind is that each XML file in the ZIP stream will be parsed, even if most of them
+ * are not part of the DTS. Indeed, DTS discovery is done once all XML documents have been loaded. This may be
+ * unrealistic if the ZIP stream contains far too many ZIP entries, for example for unused taxonomy versions or
+ * parts of the taxonomy that fall outside of the DTSes we are interested in!
+ *
+ * So if the catalog is not invertible or the ZIP contains far more documents than required, this TaxonomyBase
+ * factory is not usable.
  *
  * @author Chris de Vreeze
  */

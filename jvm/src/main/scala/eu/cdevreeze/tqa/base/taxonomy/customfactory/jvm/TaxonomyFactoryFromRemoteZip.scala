@@ -30,6 +30,9 @@ import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
  * a taxonomy package with META-INF/taxonomyPackage.xml file, but it does need to have a META-INF/catalog.xml
  * file.
  *
+ * This class uses type TaxonomyBaseFactoryFromRemoteZip. As a consequence, this class is not usable if the catalog
+ * is not invertible, or if the ZIP stream contains far more documents than required for the DTSes we are interested in!
+ *
  * @author Chris de Vreeze
  */
 final class TaxonomyFactoryFromRemoteZip(
