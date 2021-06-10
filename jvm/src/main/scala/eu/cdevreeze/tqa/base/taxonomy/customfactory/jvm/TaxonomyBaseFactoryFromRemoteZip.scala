@@ -24,16 +24,22 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.ListMap
+import scala.collection.parallel.CollectionConverters._
 import scala.util.Using
 import scala.util.chaining._
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
+import eu.cdevreeze.tqa.base.taxonomy.customfactory.jvm.TaxonomyBaseFactoryFromRemoteZip.MyUriResolver
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
+import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
+import eu.cdevreeze.tqa.docbuilder.saxon.ThreadSafeSaxonDocumentBuilder
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
 import eu.cdevreeze.yaidom.saxon.SaxonDocument
 import net.sf.saxon.s9api.Processor
+import org.xml.sax.InputSource
 
 /**
  * TaxonomyBase factory from a remote (or local) taxonomy package ZIP file. The ZIP does not have to be
@@ -47,15 +53,18 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
   private val catalogZipEntryName = "META-INF/catalog.xml"
 
   /**
-   * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs.
-   *
-   * Implementation note: this method first calls method parseCatalog, then method findDtsUris, and
-   * finally does the real work by calling method createTaxonomyBase.
+   * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs. This is the method that calls all the other
+   * methods of this class.
    */
   def loadDts(entrypointUris: Set[URI]): TaxonomyBase = {
-    val catalog: SimpleCatalog = parseCatalog()
-    val docs: IndexedSeq[SaxonDocument] = loadAllDocuments(catalog).ensuring(_.forall(_.uriOption.nonEmpty))
+    val xmlByteArrays: ListMap[String, ArraySeq[Byte]] = readAllXmlDocuments()
 
+    val catalog: SimpleCatalog = locateAndParseCatalog(xmlByteArrays)
+
+    val docs: IndexedSeq[SaxonDocument] =
+      parseAllTaxonomyDocuments(xmlByteArrays, catalog).ensuring(_.forall(_.uriOption.nonEmpty))
+
+    // If the catalog is not invertible, it is likely that DTS discovery will fail!
     val dtsUris: Set[URI] = findDtsUris(entrypointUris, docs)
 
     val docsInDts: IndexedSeq[SaxonDocument] = docs.filter(d => dtsUris.contains(d.uriOption.get))
@@ -64,79 +73,101 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
   }
 
   /**
-   * Parses the catalog, which is the first step in the workflow.
+   * Reads all XML documents in the ZIP stream into memory, not as parsed DOM trees, but as immutable byte arrays.
+   * More precisely, the result is a Map from ZIP entry names (following the ZipEntry.getName format) to immutable
+   * ArraySeq collections of bytes.
+   *
+   * After having this result, other code can safely turn this collection into a parallel collection of parsed XML documents,
+   * and it can also first grab the catalog.xml content and use it for computing the (original) URIs of the other documents.
+   *
+   * Admittedly, reading all XML files in the ZIP stream into memory may have quite a memory footprint, which some time
+   * later is GC'ed. On the other hand, code that exploits parallelism with the result of this function as input can be
+   * quite simple to reason about (note the immutable byte arrays), without introducing any Futures and later block on them.
+   * Moreover, if we cannot even temporarily fill all files into byte arrays, are we sure we have enough memory for whatever
+   * the program does with the loaded taxonomy or taxonomies?
    */
-  def parseCatalog(): SimpleCatalog = {
-    val catalogBytes: ArraySeq[Byte] =
-      Using
-        .resource(createZipInputStream()) { zis =>
-          Iterator
-            .continually(zis.getNextEntry())
-            .takeWhile(_ != null)
-            .map { zipEntry =>
-              if (zipEntry.getName == catalogZipEntryName) {
-                assert(!zipEntry.isDirectory)
-                Some(readZipEntry(zis))
-              } else {
-                None
-              }.tap(_ => zis.closeEntry())
-            }
-            .collectFirst { case Some(bytes) => bytes }
-            .getOrElse(sys.error(s"Missing ZIP entry '$catalogZipEntryName'"))
+  def readAllXmlDocuments(): ListMap[String, ArraySeq[Byte]] = {
+    Using.resource(createZipInputStream()) { zis =>
+      Iterator
+        .continually(zis.getNextEntry())
+        .takeWhile(_ != null)
+        .filterNot(zipEntry => zipEntry.isDirectory || isZipEntryNameOfNonXmlFile(zipEntry.getName))
+        .map { zipEntry =>
+          zipEntry.getName -> readZipEntry(zis).tap(_ => zis.closeEntry())
         }
+        .to(ListMap)
+    }
+  }
 
+  /**
+   * Finds the "META-INF/catalog.xml" file in the file data collection, throws an exception if not found, and parses
+   * the catalog data by calling method "parseCatalog".
+   */
+  def locateAndParseCatalog(fileDataCollection: ListMap[String, ArraySeq[Byte]]): SimpleCatalog = {
+    val fileData: ArraySeq[Byte] =
+      fileDataCollection.getOrElse(catalogZipEntryName, sys.error(s"Missing META-INF/catalog.xml file"))
+    parseCatalog(fileData)
+  }
+
+  /**
+   * Parses the catalog file data (as immutable byte array) into a SimpleCatalog. The returned catalog has baseUri
+   * the relative URI "META-INF/catalog.xml".
+   */
+  def parseCatalog(fileData: ArraySeq[Byte]): SimpleCatalog = {
     val docParser = DocumentParserUsingStax.newInstance()
     // A relative document URI, which is allowed for indexed/simple documents!
     val docUri: URI = URI.create(catalogZipEntryName)
     val catalogRootElem: indexed.Elem =
-      indexed.Elem(docUri, docParser.parse(new ByteArrayInputStream(catalogBytes.toArray)).documentElement)
+      indexed.Elem(docUri, docParser.parse(new ByteArrayInputStream(fileData.toArray)).documentElement)
 
     SimpleCatalog.fromElem(catalogRootElem)
   }
 
   /**
-   * Loads all (taxonomy) documents, without knowing the DTS yet. It is required that the passed XML catalog
-   * is invertible, or else this method does not work. This is step 2 in the workflow. After this step
-   * all documents there in order to compute the DTS and create the taxonomy (from a document subset).
+   * Parses all (taxonomy) documents, without knowing the DTS yet. It is required that the passed XML catalog
+   * is invertible, or else this method does not work. After calling this function all documents are there in order to compute
+   * the DTS and create the taxonomy (from a subset of those documents).
+   *
+   * Implementation note: this function parses many documents in parallel, for speed.
    */
-  def loadAllDocuments(catalog: SimpleCatalog): IndexedSeq[SaxonDocument] = {
+  def parseAllTaxonomyDocuments(
+      fileDataCollection: ListMap[String, ArraySeq[Byte]],
+      catalog: SimpleCatalog): IndexedSeq[SaxonDocument] = {
     val reverseCatalog: SimpleCatalog = catalog.reverse
 
     val processor: Processor = new Processor(false) // Always a new Processor needed?
 
-    val docs: IndexedSeq[SaxonDocument] =
-      Using.resource(createZipInputStream()) { zis =>
-        val docBuilder: ZipDocumentBuilder = new ZipDocumentBuilder(zis, processor, reverseCatalog)
+    val uriResolver: URI => InputSource = new MyUriResolver(fileDataCollection, catalog)
+    val docBuilder: ThreadSafeSaxonDocumentBuilder = ThreadSafeSaxonDocumentBuilder(processor, uriResolver)
 
-        Iterator
-          .continually(zis.getNextEntry())
-          .takeWhile(_ != null)
-          .filterNot(zipEntry =>
-            zipEntry.isDirectory || zipEntry.getName().startsWith("META-INF/") || isNotTaxoXmlFile(zipEntry))
-          .map { zipEntry =>
-            val localUri: URI = URI.create(zipEntry.getName) // TODO ???
-            val originalUri: URI = reverseCatalog.getMappedUri(localUri)
+    val taxoFileDataCollection: ListMap[String, ArraySeq[Byte]] =
+      fileDataCollection.filterNot(kv => isZipEntryNameInMetaInf(kv._1) || isZipEntryNameOfNonXmlFile(kv._1))
 
-            require(
-              catalog.getMappedUri(originalUri) == localUri,
-              s"URI roundtripping failed for (local) document URI '$localUri'"
-            )
+    // Parallel parsing
+    taxoFileDataCollection.toSeq.par
+      .map {
+        case (zipEntryName, fileData) =>
+          val localUri: URI = URI.create(zipEntryName) // TODO ???
+          val originalUri: URI = reverseCatalog.getMappedUri(localUri)
 
-            // Only sequential processing?
-            docBuilder.build(originalUri).tap(_ => zis.closeEntry())
-          }
-          .toIndexedSeq
+          require(
+            catalog.getMappedUri(originalUri) == localUri,
+            s"URI roundtripping failed for (local) document URI '$localUri'"
+          )
+
+          docBuilder.build(originalUri)
       }
-
-    docs
+      .seq
+      .toIndexedSeq
+      .sortBy(_.uriOption.map(_.toString).getOrElse(""))
   }
 
   /**
    * Finds all URIs in the DTS given the entrypoint URIs passed. A superset of the DTS as document collection
    * is passed as second parameter.
    */
-  def findDtsUris(entrypointUris: Set[URI], allDocs: Seq[SaxonDocument]): Set[URI] = {
-    val allDocDependencies: Seq[DocDependencyList] = allDocs.map { doc =>
+  def findDtsUris(entrypointUris: Set[URI], allTaxoDocs: Seq[SaxonDocument]): Set[URI] = {
+    val allDocDependencies: Seq[DocDependencyList] = allTaxoDocs.map { doc =>
       DocDependencyDiscovery.findDocDependencyList(doc)
     }
 
@@ -152,16 +183,16 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
     val bos = new ByteArrayOutputStream()
     val buffer = Array.ofDim[Byte](bufferSize)
     Iterator.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(len => bos.write(buffer, 0, len))
-    bos.toByteArray.to(ArraySeq)
+    ArraySeq.unsafeWrapArray(bos.toByteArray) // The original mutable array does not escape
   }
 
-  private def isNotTaxoXmlFile(zipEntry: ZipEntry): Boolean = !isTaxoXmlFile(zipEntry)
+  private def isZipEntryNameOfNonXmlFile(zipEntryName: String): Boolean = !isZipEntryNameOfXmlFile(zipEntryName)
 
-  private def isTaxoXmlFile(zipEntry: ZipEntry): Boolean = {
-    val name = zipEntry.getName()
-
-    name.endsWith(".xml") || name.endsWith(".xsd")
+  private def isZipEntryNameOfXmlFile(zipEntryName: String): Boolean = {
+    zipEntryName.endsWith(".xml") || zipEntryName.endsWith(".xsd")
   }
+
+  private def isZipEntryNameInMetaInf(zipEntryName: String): Boolean = zipEntryName.startsWith("META-INF/")
 
   private val bufferSize = 4096
 }
@@ -174,5 +205,21 @@ object TaxonomyBaseFactoryFromRemoteZip {
 
   def from(createInputStream: () => InputStream): TaxonomyBaseFactoryFromRemoteZip = {
     apply(() => new ZipInputStream(createInputStream()))
+  }
+
+  private class MyUriResolver(val fileDataCollection: ListMap[String, ArraySeq[Byte]], val catalog: SimpleCatalog)
+      extends (URI => InputSource) {
+
+    def apply(uri: URI): InputSource = {
+      val localUri: URI = catalog.getMappedUri(uri)
+      val zipEntryName: String = localUri.toString // TODO ???
+
+      val bytes: Array[Byte] = fileDataCollection
+        .getOrElse(zipEntryName, sys.error(s"Could not find byte array for URI '$uri' (local URI '$localUri')"))
+        .toArray
+      val bis: ByteArrayInputStream = new ByteArrayInputStream(bytes)
+
+      new InputSource(bis)
+    }
   }
 }
