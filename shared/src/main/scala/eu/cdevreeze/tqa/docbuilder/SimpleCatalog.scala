@@ -29,7 +29,7 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-final case class SimpleCatalog(xmlBaseAttributeOption: Option[URI], uriRewrites: IndexedSeq[SimpleCatalog.UriRewrite]) {
+final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedSeq[SimpleCatalog.UriRewrite]) {
 
   /**
    * Applies the best matching rewrite rule to the given URI, if any, and returns the optional
@@ -50,7 +50,7 @@ final case class SimpleCatalog(xmlBaseAttributeOption: Option[URI], uriRewrites:
         URI.create(rewrite.normalizedUriStartString).relativize(normalizedUri).ensuring(u => !u.isAbsolute)
 
       val effectiveRewritePrefix: URI =
-        xmlBaseAttributeOption
+        xmlBaseOption
           .map(_.resolve(rewrite.effectiveRewritePrefix))
           .getOrElse(URI.create(rewrite.effectiveRewritePrefix))
 
@@ -71,7 +71,7 @@ final case class SimpleCatalog(xmlBaseAttributeOption: Option[URI], uriRewrites:
   def netSimpleCatalog: SimpleCatalog = {
     val netUriRewrites: IndexedSeq[SimpleCatalog.UriRewrite] = uriRewrites.map { rewrite =>
       val effectiveRewritePrefix: URI =
-        xmlBaseAttributeOption
+        xmlBaseOption
           .map(_.resolve(rewrite.effectiveRewritePrefix))
           .getOrElse(URI.create(rewrite.effectiveRewritePrefix))
 
@@ -100,7 +100,7 @@ final case class SimpleCatalog(xmlBaseAttributeOption: Option[URI], uriRewrites:
   }
 
   def filter(p: SimpleCatalog.UriRewrite => Boolean): SimpleCatalog = {
-    SimpleCatalog(xmlBaseAttributeOption, uriRewrites.filter(p))
+    SimpleCatalog(xmlBaseOption, uriRewrites.filter(p))
   }
 
   def toElem: simple.Elem = {
@@ -111,7 +111,7 @@ final case class SimpleCatalog(xmlBaseAttributeOption: Option[URI], uriRewrites:
     val uriRewriteElems = uriRewrites.map(_.toElem)
 
     emptyElem(QName("catalog"), scope)
-      .plusAttributeOption(QName("xml:base"), xmlBaseAttributeOption.map(_.toString))
+      .plusAttributeOption(QName("xml:base"), xmlBaseOption.map(_.toString))
       .plusChildren(uriRewriteElems)
       .prettify(2)
   }
@@ -182,7 +182,7 @@ object SimpleCatalog {
 
   /**
    * Creates a SimpleCatalog from the given element. The base URI, if any, of the element, becomes the filled
-   * xmlBaseAttributeOption of the SimpleCatalog. This optional base URI may be a relative URI (typically within ZIP files).
+   * xmlBaseOption of the SimpleCatalog. This optional base URI may be a relative URI (typically within ZIP files).
    */
   def fromElem(catalogElem: BackingNodes.Elem): SimpleCatalog = {
     require(catalogElem.resolvedName == ErCatalogEName, s"Expected $ErCatalogEName but got ${catalogElem.resolvedName}")

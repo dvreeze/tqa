@@ -357,7 +357,7 @@ class SimpleCatalogTest extends AnyFunSuite {
     }
 
     assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
-      resolved.Elem.from(expectedCatalog.copy(xmlBaseAttributeOption = None).toElem).removeAllInterElementWhitespace
+      resolved.Elem.from(expectedCatalog.copy(xmlBaseOption = None).toElem).removeAllInterElementWhitespace
     }
 
     assertResult(Map(
@@ -403,7 +403,7 @@ class SimpleCatalogTest extends AnyFunSuite {
     }
 
     assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
-      resolved.Elem.from(expectedCatalog.copy(xmlBaseAttributeOption = Some(URI.create("../"))).toElem).removeAllInterElementWhitespace
+      resolved.Elem.from(expectedCatalog.copy(xmlBaseOption = Some(URI.create("../"))).toElem).removeAllInterElementWhitespace
     }
 
     val expectedNetCatalog: SimpleCatalog =
