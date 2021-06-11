@@ -40,6 +40,7 @@ import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
 import eu.cdevreeze.tqa.docbuilder.saxon.ThreadSafeSaxonDocumentBuilder
 import eu.cdevreeze.yaidom.indexed
 import eu.cdevreeze.yaidom.parse.DocumentParserUsingStax
+import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 import eu.cdevreeze.yaidom.saxon.SaxonDocument
 import net.sf.saxon.s9api.Processor
 import org.xml.sax.InputSource
@@ -60,9 +61,16 @@ import org.xml.sax.InputSource
  *
  * @author Chris de Vreeze
  */
-final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => ZipInputStream) {
+final class TaxonomyBaseFactoryFromRemoteZip(
+    val createZipInputStream: () => ZipInputStream,
+    val transformDocument: SaxonDocument => BackingDocumentApi) {
 
   private val catalogZipEntryName = "META-INF/catalog.xml" // Unix style, with forward slash
+
+  def withTransformDocuemnt(
+      newTransformDocument: SaxonDocument => BackingDocumentApi): TaxonomyBaseFactoryFromRemoteZip = {
+    new TaxonomyBaseFactoryFromRemoteZip(createZipInputStream, newTransformDocument)
+  }
 
   /**
    * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs. This method calls method readAllXmlDocuments,
@@ -117,7 +125,9 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
     // If the catalog is not invertible, it is likely that DTS discovery will fail!
     val dtsUris: Set[URI] = findDtsUris(entrypointUris, docs)
 
-    val docsInDts: IndexedSeq[SaxonDocument] = docs.filter(d => dtsUris.contains(d.uriOption.get))
+    val docsInDts: IndexedSeq[BackingDocumentApi] =
+      docs.filter(d => dtsUris.contains(d.uriOption.get)).map(transformDocument)
+
     val taxonomyBase: TaxonomyBase = docsInDts.map(TaxonomyDocument.build).pipe(TaxonomyBase.build)
     taxonomyBase
   }
@@ -227,7 +237,7 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
 object TaxonomyBaseFactoryFromRemoteZip {
 
   def apply(createZipInputStream: () => ZipInputStream): TaxonomyBaseFactoryFromRemoteZip = {
-    new TaxonomyBaseFactoryFromRemoteZip(createZipInputStream)
+    new TaxonomyBaseFactoryFromRemoteZip(createZipInputStream, identity)
   }
 
   def from(createInputStream: () => InputStream): TaxonomyBaseFactoryFromRemoteZip = {

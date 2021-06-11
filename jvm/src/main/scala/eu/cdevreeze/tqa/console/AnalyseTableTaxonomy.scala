@@ -19,13 +19,10 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
-import java.util.zip.ZipFile
 
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.extension.table.relationship.TableRelationship
 import eu.cdevreeze.tqa.extension.table.taxonomy.BasicTableTaxonomy
-
-import scala.collection.immutable
 
 /**
  * Table-aware taxonomy parser and analyser, showing some statistics about the table-aware taxonomy.
@@ -38,16 +35,17 @@ object AnalyseTableTaxonomy {
 
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: AnalyseTableTaxonomy <taxonomy package ZIP file> <entry point URI 1> ...")
-    val zipFile = new ZipFile(new File(args(0)).ensuring(_.isFile))
+    val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
     val lenient = System.getProperty("lenient", "false").toBoolean
+    val useZipStreams = System.getProperty("useZipStreams", "false").toBoolean
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
-    val basicTaxo = taxoBuilder.build(entryPointUris)
+    val basicTaxo: BasicTaxonomy = ConsoleUtil
+      .createTaxonomy(entryPointUris, zipInputFile, useZipStreams, useSaxon, lenient)
 
     logger.info(s"Starting building the table-aware taxonomy with entry point(s) ${entryPointUris.mkString(", ")}")
 
@@ -57,7 +55,7 @@ object AnalyseTableTaxonomy {
 
     logger.info(s"The taxonomy has ${tableRelationships.size} table relationships")
 
-    val tableRelationshipGroups: Map[String, immutable.IndexedSeq[TableRelationship]] =
+    val tableRelationshipGroups: Map[String, IndexedSeq[TableRelationship]] =
       tableRelationships.groupBy(_.getClass.getSimpleName)
 
     // scalastyle:off magic.number
@@ -68,7 +66,7 @@ object AnalyseTableTaxonomy {
 
     sortedTableRelationshipGroups.foreach {
       case (relationshipName, relationships) =>
-        val relationshipsByUri: Map[URI, immutable.IndexedSeq[TableRelationship]] = relationships.groupBy(_.docUri)
+        val relationshipsByUri: Map[URI, IndexedSeq[TableRelationship]] = relationships.groupBy(_.docUri)
 
         val uris = relationshipsByUri.keySet.toSeq.sortBy(_.toString)
 
@@ -81,7 +79,5 @@ object AnalyseTableTaxonomy {
             ", ")}. Arcroles: ${arcroles.mkString(", ")}.")
         }
     }
-
-    zipFile.close() // Not robust
   }
 }

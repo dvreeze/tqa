@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tqa.console
 
+import java.io.File
+import java.io.FileInputStream
 import java.net.URI
 import java.util.logging.Logger
 import java.util.zip.ZipFile
@@ -23,6 +25,9 @@ import java.util.zip.ZipInputStream
 
 import scala.collection.immutable.ArraySeq
 import scala.collection.immutable.ListMap
+import scala.io.Codec
+import scala.util.Using
+import scala.util.chaining._
 
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.jvm.DefaultParallelRelationshipFactory
@@ -31,6 +36,10 @@ import eu.cdevreeze.tqa.base.taxonomy.customfactory.jvm.TaxonomyFactoryFromRemot
 import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.tqa.base.taxonomybuilder.jvm.TaxonomyBuilderSupport
 import eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap
+import eu.cdevreeze.yaidom.indexed
+import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
+import eu.cdevreeze.yaidom.saxon.SaxonDocument
+import eu.cdevreeze.yaidom.simple
 import net.sf.saxon.s9api.Processor
 
 /**
@@ -61,21 +70,59 @@ private[console] object ConsoleUtil {
     }
   }
 
+  def createTaxonomyFromZipFile(
+      entryPointUris: Set[URI],
+      taxonomyPackage: ZipFile,
+      useSaxon: Boolean,
+      lenient: Boolean): BasicTaxonomy = {
+    val taxonomyBuilder: TaxonomyBuilder = createTaxonomyBuilder(taxonomyPackage, useSaxon, lenient)
+    taxonomyBuilder.build(entryPointUris)
+  }
+
   def createTaxonomyFromZipStreams(
       entryPointUris: Set[URI],
       getTaxonomyPackageStream: () => ZipInputStream,
+      useSaxon: Boolean,
       lenient: Boolean): BasicTaxonomy = {
     val relationshipFactory: RelationshipFactory =
       if (lenient) DefaultParallelRelationshipFactory.LenientInstance
       else DefaultParallelRelationshipFactory.StrictInstance
 
+    def transformDocument(doc: SaxonDocument): BackingDocumentApi = {
+      if (useSaxon) doc
+      else indexed.Document.from(simple.Document(doc.uriOption, simple.Elem.from(doc.documentElement)))
+    }
+
     val taxoFactory: TaxonomyFactoryFromRemoteZip =
-      TaxonomyFactoryFromRemoteZip(getTaxonomyPackageStream, SubstitutionGroupMap.Empty, relationshipFactory, _ => true)
+      TaxonomyFactoryFromRemoteZip(getTaxonomyPackageStream)
+        .withTransformDocument(transformDocument)
+        .withRelationshipFactory(relationshipFactory)
 
     val xmlByteArrays: ListMap[String, ArraySeq[Byte]] = taxoFactory.readAllXmlDocuments()
 
     logger.info(s"Number of (not yet parsed) documents in the ZIP (including those in META-INF): ${xmlByteArrays.size}")
 
     taxoFactory.build(entryPointUris, xmlByteArrays)
+  }
+
+  def createTaxonomy(
+      entryPointUris: Set[URI],
+      taxonomyPackageFile: File,
+      useZipStreams: Boolean,
+      useSaxon: Boolean,
+      lenient: Boolean): BasicTaxonomy = {
+
+    if (useZipStreams) {
+      // Assuming UTF-8 for ZIP entry names
+      def createStream(): ZipInputStream =
+        new ZipInputStream(new FileInputStream(taxonomyPackageFile), Codec.UTF8.charSet)
+
+      createTaxonomyFromZipStreams(entryPointUris, createStream, useSaxon, lenient)
+    } else {
+      // Assuming UTF-8 for ZIP entry names
+      Using.resource(new ZipFile(taxonomyPackageFile)) { zipFile =>
+        createTaxonomyFromZipFile(entryPointUris, zipFile, useSaxon, lenient)
+      }
+    }
   }
 }

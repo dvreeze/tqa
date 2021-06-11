@@ -26,7 +26,10 @@ import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
+import eu.cdevreeze.tqa.base.relationship.jvm.DefaultParallelRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
+import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
+import eu.cdevreeze.yaidom.saxon.SaxonDocument
 
 /**
  * BasicTaxonomy factory from a remote (or local) taxonomy package ZIP file. The ZIP does not have to be
@@ -40,13 +43,50 @@ import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
  */
 final class TaxonomyFactoryFromRemoteZip(
     val createZipInputStream: () => ZipInputStream,
+    val transformDocument: SaxonDocument => BackingDocumentApi,
     val extraSubstitutionGroupMap: SubstitutionGroupMap,
     val relationshipFactory: RelationshipFactory,
     val arcFilter: XLinkArc => Boolean) {
 
-  val taxonomyBaseFactory: TaxonomyBaseFactoryFromRemoteZip = TaxonomyBaseFactoryFromRemoteZip(createZipInputStream)
+  val taxonomyBaseFactory: TaxonomyBaseFactoryFromRemoteZip =
+    TaxonomyBaseFactoryFromRemoteZip(createZipInputStream).withTransformDocuemnt(transformDocument)
 
-  // TODO Functional copies (like builder pattern)
+  def withTransformDocument(newTransformDocument: SaxonDocument => BackingDocumentApi): TaxonomyFactoryFromRemoteZip = {
+    new TaxonomyFactoryFromRemoteZip(
+      createZipInputStream,
+      newTransformDocument,
+      extraSubstitutionGroupMap,
+      relationshipFactory,
+      arcFilter)
+  }
+
+  def withExtraSubstitutionGroupMap(
+      newExtraSubstitutionGroupMap: SubstitutionGroupMap): TaxonomyFactoryFromRemoteZip = {
+    new TaxonomyFactoryFromRemoteZip(
+      createZipInputStream,
+      transformDocument,
+      newExtraSubstitutionGroupMap,
+      relationshipFactory,
+      arcFilter)
+  }
+
+  def withRelationshipFactory(newRelationshipFactory: RelationshipFactory): TaxonomyFactoryFromRemoteZip = {
+    new TaxonomyFactoryFromRemoteZip(
+      createZipInputStream,
+      transformDocument,
+      extraSubstitutionGroupMap,
+      newRelationshipFactory,
+      arcFilter)
+  }
+
+  def withArcFilter(newArcFilter: XLinkArc => Boolean): TaxonomyFactoryFromRemoteZip = {
+    new TaxonomyFactoryFromRemoteZip(
+      createZipInputStream,
+      transformDocument,
+      extraSubstitutionGroupMap,
+      relationshipFactory,
+      newArcFilter)
+  }
 
   /**
    * Builds a `BasicTaxonomy` from the data available to this taxonomy factory, as well as the passed entrypoint URIs.
@@ -80,11 +120,26 @@ final class TaxonomyFactoryFromRemoteZip(
 
 object TaxonomyFactoryFromRemoteZip {
 
+  def apply(createZipInputStream: () => ZipInputStream): TaxonomyFactoryFromRemoteZip = {
+    apply(
+      createZipInputStream,
+      identity,
+      SubstitutionGroupMap.Empty,
+      DefaultParallelRelationshipFactory.StrictInstance,
+      _ => true)
+  }
+
   def apply(
       createZipInputStream: () => ZipInputStream,
+      transformDocument: SaxonDocument => BackingDocumentApi,
       extraSubstitutionGroupMap: SubstitutionGroupMap,
       relationshipFactory: RelationshipFactory,
       arcFilter: XLinkArc => Boolean): TaxonomyFactoryFromRemoteZip = {
-    new TaxonomyFactoryFromRemoteZip(createZipInputStream, extraSubstitutionGroupMap, relationshipFactory, arcFilter)
+    new TaxonomyFactoryFromRemoteZip(
+      createZipInputStream,
+      transformDocument,
+      extraSubstitutionGroupMap,
+      relationshipFactory,
+      arcFilter)
   }
 }

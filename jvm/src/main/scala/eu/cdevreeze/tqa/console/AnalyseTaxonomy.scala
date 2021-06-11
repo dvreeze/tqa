@@ -19,12 +19,9 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
-import java.util.zip.ZipFile
 
 import eu.cdevreeze.tqa.base.relationship.Relationship
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
-
-import scala.collection.immutable
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 
 /**
  * Taxonomy parser and analyser, showing some statistics about the taxonomy.
@@ -37,23 +34,24 @@ object AnalyseTaxonomy {
 
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: AnalyseTaxonomy <taxonomy package ZIP file> <entry point URI 1> ...")
-    val zipFile = new ZipFile(new File(args(0)).ensuring(_.isFile))
+    val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
     val lenient = System.getProperty("lenient", "false").toBoolean
+    val useZipStreams = System.getProperty("useZipStreams", "false").toBoolean
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
-    val basicTaxo = taxoBuilder.build(entryPointUris)
+    val basicTaxo: BasicTaxonomy = ConsoleUtil
+      .createTaxonomy(entryPointUris, zipInputFile, useZipStreams, useSaxon, lenient)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
     logger.info(s"The taxonomy has ${rootElems.size} taxonomy root elements")
     logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")
 
-    val relationshipGroups: Map[String, immutable.IndexedSeq[Relationship]] =
+    val relationshipGroups: Map[String, IndexedSeq[Relationship]] =
       basicTaxo.relationships.groupBy(_.getClass.getSimpleName)
 
     // scalastyle:off magic.number
@@ -64,7 +62,7 @@ object AnalyseTaxonomy {
 
     sortedRelationshipGroups.foreach {
       case (relationshipName, relationships) =>
-        val relationshipsByUri: Map[URI, immutable.IndexedSeq[Relationship]] = relationships.groupBy(_.docUri)
+        val relationshipsByUri: Map[URI, IndexedSeq[Relationship]] = relationships.groupBy(_.docUri)
 
         val uris = relationshipsByUri.keySet.toSeq.sortBy(_.toString)
 
@@ -77,7 +75,5 @@ object AnalyseTaxonomy {
             ", ")}. Arcroles: ${arcroles.mkString(", ")}.")
         }
     }
-
-    zipFile.close() // Not robust
   }
 }

@@ -19,13 +19,10 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
-import java.util.zip.ZipFile
 
 import eu.cdevreeze.tqa.base.relationship.ConceptLabelRelationship
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.yaidom.core.EName
-
-import scala.collection.immutable
 
 /**
  * Program that shows concept labels in a given taxonomy. One use case is finding translations for certain
@@ -39,16 +36,17 @@ object ShowLabels {
 
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: ShowLabels <taxonomy package ZIP file> <entry point URI 1> ...")
-    val zipFile = new ZipFile(new File(args(0)).ensuring(_.isFile))
+    val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
     val lenient = System.getProperty("lenient", "false").toBoolean
+    val useZipStreams = System.getProperty("useZipStreams", "false").toBoolean
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
-    val basicTaxo = taxoBuilder.build(entryPointUris)
+    val basicTaxo: BasicTaxonomy = ConsoleUtil
+      .createTaxonomy(entryPointUris, zipInputFile, useZipStreams, useSaxon, lenient)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -58,7 +56,7 @@ object ShowLabels {
     logger.info(s"The taxonomy has ${basicTaxo.relationships.size} relationships")
     logger.info(s"The taxonomy has ${conceptLabelRelationships.size} concept-label relationships")
 
-    val conceptLabelsByConcept: Map[EName, immutable.IndexedSeq[ConceptLabelRelationship]] =
+    val conceptLabelsByConcept: Map[EName, IndexedSeq[ConceptLabelRelationship]] =
       conceptLabelRelationships.groupBy(_.sourceConceptEName)
 
     val concepts = conceptLabelsByConcept.keySet.toIndexedSeq.sortBy(_.toString)
@@ -74,7 +72,5 @@ object ShowLabels {
     }
 
     logger.info("Ready")
-
-    zipFile.close() // Not robust
   }
 }

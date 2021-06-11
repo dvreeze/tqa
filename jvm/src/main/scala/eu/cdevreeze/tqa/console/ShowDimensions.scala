@@ -17,19 +17,11 @@
 package eu.cdevreeze.tqa.console
 
 import java.io.File
-import java.io.FileInputStream
 import java.net.URI
 import java.util.logging.Logger
-import java.util.zip.ZipFile
-import java.util.zip.ZipInputStream
-
-import scala.collection.immutable
-import scala.io.Codec
-import scala.util.chaining._
 
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
 import eu.cdevreeze.yaidom.core.EName
 
 /**
@@ -44,7 +36,6 @@ object ShowDimensions {
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: ShowDimensions <taxonomy package ZIP file> <entry point URI 1> ...")
     val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
-    val zipFile = new ZipFile(zipInputFile) // Uses UTF-8 for entry name decoding
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
@@ -53,17 +44,8 @@ object ShowDimensions {
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val basicTaxo: BasicTaxonomy =
-      (if (useZipStreams) {
-         ConsoleUtil.createTaxonomyFromZipStreams(
-           entryPointUris,
-           () => new ZipInputStream(new FileInputStream(zipInputFile), Codec.UTF8.charSet), // Assuming UTF-8
-           lenient)
-       } else {
-         val taxoBuilder: TaxonomyBuilder =
-           ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
-         taxoBuilder.build(entryPointUris)
-       }).tap(_ => zipFile.close) // Not robust
+    val basicTaxo: BasicTaxonomy = ConsoleUtil
+      .createTaxonomy(entryPointUris, zipInputFile, useZipStreams, useSaxon, lenient)
 
     val rootElems = basicTaxo.taxonomyBase.rootElems
 
@@ -89,7 +71,7 @@ object ShowDimensions {
   }
 
   private def showHasHypercubeTrees(
-      hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
+      hasHypercubes: IndexedSeq[HasHypercubeRelationship],
       basicTaxo: BasicTaxonomy): Unit = {
     hasHypercubes.foreach { hasHypercube =>
       println(s"Has-hypercube found for primary ${hasHypercube.primary} and ELR ${hasHypercube.elr}")
@@ -113,7 +95,7 @@ object ShowDimensions {
 
   // scalastyle:off method.length
   private def showHasHypercubeInheritance(
-      hasHypercubes: immutable.IndexedSeq[HasHypercubeRelationship],
+      hasHypercubes: IndexedSeq[HasHypercubeRelationship],
       basicTaxo: BasicTaxonomy): Unit = {
     val concretePrimaryItemDecls = basicTaxo.findAllPrimaryItemDeclarations.filter(_.isConcrete)
 

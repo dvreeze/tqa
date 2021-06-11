@@ -19,13 +19,10 @@ package eu.cdevreeze.tqa.console
 import java.io.File
 import java.net.URI
 import java.util.logging.Logger
-import java.util.zip.ZipFile
 
-import eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
 import eu.cdevreeze.tqa.extension.formula.relationship.FormulaRelationship
 import eu.cdevreeze.tqa.extension.formula.taxonomy.BasicFormulaTaxonomy
-
-import scala.collection.immutable
 
 /**
  * Formula-aware taxonomy parser and analyser, showing some statistics about the formula-aware taxonomy.
@@ -38,16 +35,17 @@ object AnalyseFormulaTaxonomy {
 
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: AnalyseFormulaTaxonomy <taxonomy package ZIP file> <entry point URI 1> ...")
-    val zipFile = new ZipFile(new File(args(0)).ensuring(_.isFile))
+    val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
     val lenient = System.getProperty("lenient", "false").toBoolean
+    val useZipStreams = System.getProperty("useZipStreams", "false").toBoolean
 
     logger.info(s"Starting building the DTS with entry point(s) ${entryPointUris.mkString(", ")}")
 
-    val taxoBuilder: TaxonomyBuilder = ConsoleUtil.createTaxonomyBuilder(zipFile, useSaxon, lenient)
-    val basicTaxo = taxoBuilder.build(entryPointUris)
+    val basicTaxo: BasicTaxonomy = ConsoleUtil
+      .createTaxonomy(entryPointUris, zipInputFile, useZipStreams, useSaxon, lenient)
 
     logger.info(s"Starting building the formula-aware taxonomy with entry point(s) ${entryPointUris.mkString(", ")}")
 
@@ -57,7 +55,7 @@ object AnalyseFormulaTaxonomy {
 
     logger.info(s"The taxonomy has ${formulaRelationships.size} formula relationships")
 
-    val formulaRelationshipGroups: Map[String, immutable.IndexedSeq[FormulaRelationship]] =
+    val formulaRelationshipGroups: Map[String, IndexedSeq[FormulaRelationship]] =
       formulaRelationships.groupBy(_.getClass.getSimpleName)
 
     // scalastyle:off magic.number
@@ -68,7 +66,7 @@ object AnalyseFormulaTaxonomy {
 
     sortedFormulaRelationshipGroups.foreach {
       case (relationshipName, relationships) =>
-        val relationshipsByUri: Map[URI, immutable.IndexedSeq[FormulaRelationship]] = relationships.groupBy(_.docUri)
+        val relationshipsByUri: Map[URI, IndexedSeq[FormulaRelationship]] = relationships.groupBy(_.docUri)
 
         val uris = relationshipsByUri.keySet.toSeq.sortBy(_.toString)
 
@@ -81,7 +79,5 @@ object AnalyseFormulaTaxonomy {
             ", ")}. Arcroles: ${arcroles.mkString(", ")}.")
         }
     }
-
-    zipFile.close() // Not robust
   }
 }
