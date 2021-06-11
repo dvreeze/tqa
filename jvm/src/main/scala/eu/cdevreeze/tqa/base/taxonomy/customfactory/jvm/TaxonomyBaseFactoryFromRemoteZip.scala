@@ -18,6 +18,7 @@ package eu.cdevreeze.tqa.base.taxonomy.customfactory.jvm
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.InputStream
 import java.net.URI
 import java.util.zip.ZipEntry
@@ -26,11 +27,13 @@ import java.util.zip.ZipInputStream
 import scala.collection.immutable.ArraySeq
 import scala.collection.immutable.ListMap
 import scala.collection.parallel.CollectionConverters._
+import scala.io.Codec
 import scala.util.Using
 import scala.util.chaining._
 
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.TaxonomyDocument
+import eu.cdevreeze.tqa.base.taxonomy.customfactory.jvm.TaxonomyBaseFactoryFromRemoteZip.convertZipEntryNameUsingForwardSlash
 import eu.cdevreeze.tqa.base.taxonomy.customfactory.jvm.TaxonomyBaseFactoryFromRemoteZip.MyUriResolver
 import eu.cdevreeze.tqa.docbuilder.SimpleCatalog
 import eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers
@@ -59,7 +62,7 @@ import org.xml.sax.InputSource
  */
 final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => ZipInputStream) {
 
-  private val catalogZipEntryName = "META-INF/catalog.xml"
+  private val catalogZipEntryName = "META-INF/catalog.xml" // Unix style, with forward slash
 
   /**
    * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs. This method calls method readAllXmlDocuments,
@@ -73,8 +76,8 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
 
   /**
    * Reads all XML documents in the ZIP stream into memory, not as parsed DOM trees, but as immutable byte arrays.
-   * More precisely, the result is a Map from ZIP entry names (following the ZipEntry.getName format) to immutable
-   * ArraySeq collections of bytes.
+   * More precisely, the result is a Map from ZIP entry names (following the ZipEntry.getName format on Unix) to immutable
+   * ArraySeq collections of bytes. Again, the ZIP entry names are assumed to use Unix-style (file component) separators.
    *
    * After having this result, other code can safely turn this collection into a parallel collection of parsed XML documents,
    * and it can also first grab the catalog.xml content and use it for computing the (original) URIs of the other documents.
@@ -92,7 +95,7 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
         .takeWhile(_ != null)
         .filterNot(zipEntry => zipEntry.isDirectory || isZipEntryNameOfNonXmlFile(zipEntry.getName))
         .map { zipEntry =>
-          zipEntry.getName -> readZipEntry(zis).tap(_ => zis.closeEntry())
+          zipEntry.getName.pipe(convertZipEntryNameUsingForwardSlash) -> readZipEntry(zis).tap(_ => zis.closeEntry())
         }
         .to(ListMap)
     }
@@ -101,6 +104,9 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
   /**
    * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs. This is the method that calls all the other
    * methods of this class, except for method readAllXmlDocuments (and of course the overloaded loadDts method).
+   *
+   * The 2nd parameter is the Map from ZIP entry names to immutable byte arrays.
+   * The ZIP entry names are assumed to use Unix-style (file component) separators.
    */
   def loadDts(entrypointUris: Set[URI], xmlByteArrays: ListMap[String, ArraySeq[Byte]]): TaxonomyBase = {
     val catalog: SimpleCatalog = locateAndParseCatalog(xmlByteArrays)
@@ -118,7 +124,8 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
 
   /**
    * Finds the "META-INF/catalog.xml" file in the file data collection, throws an exception if not found, and parses
-   * the catalog data by calling method "parseCatalog".
+   * the catalog data by calling method "parseCatalog". The file data collection uses as Map keys the ZIP entry
+   * names, using Unix-style (file component) separators.
    */
   def locateAndParseCatalog(fileDataCollection: ListMap[String, ArraySeq[Byte]]): SimpleCatalog = {
     val fileData: ArraySeq[Byte] =
@@ -145,6 +152,9 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
    * is invertible, or else this method does not work. After calling this function all documents are there in order to compute
    * the DTS and create the taxonomy (from a subset of those documents).
    *
+   * The 2nd parameter is the Map from ZIP entry names to immutable byte arrays.
+   * The ZIP entry names are assumed to use Unix-style (file component) separators.
+   *
    * Implementation note: this function parses many documents in parallel, for speed.
    */
   def parseAllTaxonomyDocuments(
@@ -164,7 +174,7 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
     taxoFileDataCollection.toSeq.par
       .map {
         case (zipEntryName, fileData) =>
-          val localUri: URI = URI.create(zipEntryName) // TODO ???
+          val localUri: URI = URI.create(zipEntryName.pipe(convertZipEntryNameUsingForwardSlash))
           val originalUri: URI = reverseCatalog.getMappedUri(localUri)
 
           require(
@@ -221,15 +231,19 @@ object TaxonomyBaseFactoryFromRemoteZip {
   }
 
   def from(createInputStream: () => InputStream): TaxonomyBaseFactoryFromRemoteZip = {
-    apply(() => new ZipInputStream(createInputStream()))
+    apply(() => new ZipInputStream(createInputStream(), Codec.UTF8.charSet)) // Assuming UTF-8
   }
 
+  /**
+   * URI resolver from a file data collection and a catalog. The file data collection is a Map from Unix-style
+   * ZIP entry names (using the forward slash as file component separator) to immutable byte arrays.
+   */
   private class MyUriResolver(val fileDataCollection: ListMap[String, ArraySeq[Byte]], val catalog: SimpleCatalog)
       extends (URI => InputSource) {
 
     def apply(uri: URI): InputSource = {
       val localUri: URI = catalog.getMappedUri(uri)
-      val zipEntryName: String = localUri.toString // TODO ???
+      val zipEntryName: String = localUri.toString // Uses forward slash as file component separator
 
       val bytes: Array[Byte] = fileDataCollection
         .getOrElse(zipEntryName, sys.error(s"Could not find byte array for URI '$uri' (local URI '$localUri')"))
@@ -238,5 +252,9 @@ object TaxonomyBaseFactoryFromRemoteZip {
 
       new InputSource(bis)
     }
+  }
+
+  private def convertZipEntryNameUsingForwardSlash(zipEntryName: String): String = {
+    zipEntryName.replace("\\", "/")
   }
 }

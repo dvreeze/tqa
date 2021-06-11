@@ -24,6 +24,7 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
 import scala.collection.immutable
+import scala.io.Codec
 import scala.util.chaining._
 
 import eu.cdevreeze.tqa.base.relationship.HasHypercubeRelationship
@@ -43,7 +44,7 @@ object ShowDimensions {
   def main(args: Array[String]): Unit = {
     require(args.size >= 2, s"Usage: ShowDimensions <taxonomy package ZIP file> <entry point URI 1> ...")
     val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
-    val zipFile = new ZipFile(zipInputFile)
+    val zipFile = new ZipFile(zipInputFile) // Uses UTF-8 for entry name decoding
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
     val useSaxon = System.getProperty("useSaxon", "false").toBoolean
@@ -56,7 +57,7 @@ object ShowDimensions {
       (if (useZipStreams) {
          ConsoleUtil.createTaxonomyFromZipStreams(
            entryPointUris,
-           () => new ZipInputStream(new FileInputStream(zipInputFile)),
+           () => new ZipInputStream(new FileInputStream(zipInputFile), Codec.UTF8.charSet), // Assuming UTF-8
            lenient)
        } else {
          val taxoBuilder: TaxonomyBuilder =

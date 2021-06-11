@@ -46,7 +46,7 @@ private[jvm] final class DtsDiscovery(val docDependencies: Map[URI, DocDependenc
       docUris
     } else {
       // One step, processing all URIs currently known, and not yet processed
-      val docUrisToProcessInThisStep: Set[URI] = docUris.diff(processedDocUris)
+      val docUrisToProcessInThisStep: Set[URI] = docUris.diff(processedDocUris).ensuring(_.nonEmpty)
 
       val docUrisFoundInThisStep: Set[URI] = docUrisToProcessInThisStep.toSeq.flatMap(u => findAllUsedDocUris(u)).toSet
 

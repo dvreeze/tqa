@@ -68,6 +68,8 @@ final class TaxonomyFactoryFromRemoteZip(
   /**
    * Builds a `BasicTaxonomy` from the data available to this taxonomy factory, as well as the passed entrypoint URIs.
    * This method no longer needs the ZIP input stream, and has all data (unparsed) in memory.
+   *
+   * The ZIP entry names are assumed to use Unix-style (file component) separators.
    */
   def build(entryPointUris: Set[URI], xmlByteArrays: ListMap[String, ArraySeq[Byte]]): BasicTaxonomy = {
     val taxonomyBase: TaxonomyBase = taxonomyBaseFactory.loadDts(entryPointUris, xmlByteArrays)
