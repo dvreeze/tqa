@@ -38,7 +38,7 @@ object AnalyseFormulaTaxonomy {
     val zipInputFile: File = new File(args(0)).ensuring(_.isFile)
 
     val entryPointUris = args.drop(1).map(u => URI.create(u)).toSet
-    val useSaxon = System.getProperty("useSaxon", "false").toBoolean
+    val useSaxon = System.getProperty("useSaxon", "true").toBoolean
     val lenient = System.getProperty("lenient", "false").toBoolean
     val useZipStreams = System.getProperty("useZipStreams", "false").toBoolean
 
