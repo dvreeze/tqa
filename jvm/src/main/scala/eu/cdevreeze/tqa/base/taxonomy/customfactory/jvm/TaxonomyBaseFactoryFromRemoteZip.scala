@@ -62,23 +62,13 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
   private val catalogZipEntryName = "META-INF/catalog.xml"
 
   /**
-   * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs. This is the method that calls all the other
-   * methods of this class.
+   * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs. This method calls method readAllXmlDocuments,
+   * and then calls the other overloaded loadDts method (which does not need the ZIP input stream anymore).
    */
   def loadDts(entrypointUris: Set[URI]): TaxonomyBase = {
     val xmlByteArrays: ListMap[String, ArraySeq[Byte]] = readAllXmlDocuments()
 
-    val catalog: SimpleCatalog = locateAndParseCatalog(xmlByteArrays)
-
-    val docs: IndexedSeq[SaxonDocument] =
-      parseAllTaxonomyDocuments(xmlByteArrays, catalog).ensuring(_.forall(_.uriOption.nonEmpty))
-
-    // If the catalog is not invertible, it is likely that DTS discovery will fail!
-    val dtsUris: Set[URI] = findDtsUris(entrypointUris, docs)
-
-    val docsInDts: IndexedSeq[SaxonDocument] = docs.filter(d => dtsUris.contains(d.uriOption.get))
-    val taxonomyBase: TaxonomyBase = docsInDts.map(TaxonomyDocument.build).pipe(TaxonomyBase.build)
-    taxonomyBase
+    loadDts(entrypointUris, xmlByteArrays)
   }
 
   /**
@@ -106,6 +96,24 @@ final class TaxonomyBaseFactoryFromRemoteZip(val createZipInputStream: () => Zip
         }
         .to(ListMap)
     }
+  }
+
+  /**
+   * Loads a taxonomy as TaxonomyBase, from the given entrypoint URIs. This is the method that calls all the other
+   * methods of this class, except for method readAllXmlDocuments (and of course the overloaded loadDts method).
+   */
+  def loadDts(entrypointUris: Set[URI], xmlByteArrays: ListMap[String, ArraySeq[Byte]]): TaxonomyBase = {
+    val catalog: SimpleCatalog = locateAndParseCatalog(xmlByteArrays)
+
+    val docs: IndexedSeq[SaxonDocument] =
+      parseAllTaxonomyDocuments(xmlByteArrays, catalog).ensuring(_.forall(_.uriOption.nonEmpty))
+
+    // If the catalog is not invertible, it is likely that DTS discovery will fail!
+    val dtsUris: Set[URI] = findDtsUris(entrypointUris, docs)
+
+    val docsInDts: IndexedSeq[SaxonDocument] = docs.filter(d => dtsUris.contains(d.uriOption.get))
+    val taxonomyBase: TaxonomyBase = docsInDts.map(TaxonomyDocument.build).pipe(TaxonomyBase.build)
+    taxonomyBase
   }
 
   /**

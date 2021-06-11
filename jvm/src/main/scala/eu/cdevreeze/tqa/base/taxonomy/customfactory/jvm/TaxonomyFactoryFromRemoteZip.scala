@@ -19,6 +19,9 @@ package eu.cdevreeze.tqa.base.taxonomy.customfactory.jvm
 import java.net.URI
 import java.util.zip.ZipInputStream
 
+import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.ListMap
+
 import eu.cdevreeze.tqa.SubstitutionGroupMap
 import eu.cdevreeze.tqa.base.dom.TaxonomyBase
 import eu.cdevreeze.tqa.base.dom.XLinkArc
@@ -47,9 +50,27 @@ final class TaxonomyFactoryFromRemoteZip(
 
   /**
    * Builds a `BasicTaxonomy` from the data available to this taxonomy factory, as well as the passed entrypoint URIs.
+   * It first calls method readAllXmlDocuments, and then the other overloaded method "build".
    */
   def build(entryPointUris: Set[URI]): BasicTaxonomy = {
-    val taxonomyBase: TaxonomyBase = taxonomyBaseFactory.loadDts(entryPointUris)
+    val xmlByteArrays: ListMap[String, ArraySeq[Byte]] = readAllXmlDocuments()
+
+    build(entryPointUris, xmlByteArrays)
+  }
+
+  /**
+   * Calls the method with the same name on taxonomyBaseFactory. After the call, we can log the number of documents.
+   */
+  def readAllXmlDocuments(): ListMap[String, ArraySeq[Byte]] = {
+    taxonomyBaseFactory.readAllXmlDocuments()
+  }
+
+  /**
+   * Builds a `BasicTaxonomy` from the data available to this taxonomy factory, as well as the passed entrypoint URIs.
+   * This method no longer needs the ZIP input stream, and has all data (unparsed) in memory.
+   */
+  def build(entryPointUris: Set[URI], xmlByteArrays: ListMap[String, ArraySeq[Byte]]): BasicTaxonomy = {
+    val taxonomyBase: TaxonomyBase = taxonomyBaseFactory.loadDts(entryPointUris, xmlByteArrays)
 
     BasicTaxonomy.build(taxonomyBase, extraSubstitutionGroupMap, relationshipFactory, arcFilter)
   }

@@ -17,8 +17,12 @@
 package eu.cdevreeze.tqa.console
 
 import java.net.URI
+import java.util.logging.Logger
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
+
+import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.ListMap
 
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.jvm.DefaultParallelRelationshipFactory
@@ -35,6 +39,8 @@ import net.sf.saxon.s9api.Processor
  * @author Chris de Vreeze
  */
 private[console] object ConsoleUtil {
+
+  private val logger = Logger.getGlobal
 
   def createTaxonomyBuilder(taxonomyPackage: ZipFile, useSaxon: Boolean, lenient: Boolean): TaxonomyBuilder = {
     // Exploiting parallelism, in DTS collection and relationship creation.
@@ -66,6 +72,10 @@ private[console] object ConsoleUtil {
     val taxoFactory: TaxonomyFactoryFromRemoteZip =
       TaxonomyFactoryFromRemoteZip(getTaxonomyPackageStream, SubstitutionGroupMap.Empty, relationshipFactory, _ => true)
 
-    taxoFactory.build(entryPointUris)
+    val xmlByteArrays: ListMap[String, ArraySeq[Byte]] = taxoFactory.readAllXmlDocuments()
+
+    logger.info(s"Number of (not yet parsed) documents in the ZIP (including those in META-INF): ${xmlByteArrays.size}")
+
+    taxoFactory.build(entryPointUris, xmlByteArrays)
   }
 }
