@@ -107,7 +107,11 @@ object CollectEntryPointUris {
 
     val taxonomyBase: TaxonomyBase = docsInDts.map(TaxonomyDocument.build).pipe(TaxonomyBase.build)
 
-    BasicTaxonomy.build(taxonomyBase, SubstitutionGroupMap.Empty, taxoFactory.relationshipFactory, _ => true)
+    BasicTaxonomy.build(
+      taxonomyBase,
+      taxoFactory.extraSubstitutionGroupMap,
+      taxoFactory.relationshipFactory,
+      taxoFactory.arcFilter)
   }
 
   def getTaxonomyFactory(
