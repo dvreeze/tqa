@@ -24,6 +24,7 @@ import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.relationship.DefaultRelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomyFactory
 import eu.cdevreeze.tqa.docbuilder.DocumentBuilder
 
 /**
@@ -37,7 +38,7 @@ final class TaxonomyBuilder(
     val documentCollector: DocumentCollector,
     val extraSubstitutionGroupMap: SubstitutionGroupMap,
     val relationshipFactory: RelationshipFactory,
-    val arcFilter: XLinkArc => Boolean) {
+    val arcFilter: XLinkArc => Boolean) extends BasicTaxonomyFactory {
 
   def withExtraSubstitutionGroupMap(newExtraSubstitutionGroupMap: SubstitutionGroupMap): TaxonomyBuilder = {
     new TaxonomyBuilder(

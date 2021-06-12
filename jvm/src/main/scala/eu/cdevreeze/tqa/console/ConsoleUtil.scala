@@ -79,6 +79,12 @@ private[console] object ConsoleUtil {
     taxonomyBuilder.build(entryPointUris)
   }
 
+  /**
+   * Creates a BasicTaxonomy from ZIP streams, using a TaxonomyFactoryFromRemoteZip instance.
+   * As a consequence, the ZIP stream must contain a "META-INF/catalog.xml" file, that catalog must be
+   * invertible, and the reverse catalog must be consistent with the URIs found during DTS discovery.
+   * Moreover, the ZIP stream should not be too large, in particular in relation to the DTS found.
+   */
   def createTaxonomyFromZipStreams(
       entryPointUris: Set[URI],
       getTaxonomyPackageStream: () => ZipInputStream,
@@ -105,6 +111,10 @@ private[console] object ConsoleUtil {
     taxoFactory.build(entryPointUris, xmlByteArrays)
   }
 
+  /**
+   * Creates a BasicTaxonomy. If parameter useZipStreams is true, see method createTaxonomyFromZipStreams for
+   * further requirements.
+   */
   def createTaxonomy(
       entryPointUris: Set[URI],
       taxonomyPackageFile: File,

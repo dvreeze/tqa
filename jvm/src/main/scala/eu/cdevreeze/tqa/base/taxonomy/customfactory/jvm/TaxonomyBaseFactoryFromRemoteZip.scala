@@ -49,7 +49,8 @@ import org.xml.sax.InputSource
  * TaxonomyBase factory from a remote (or local) taxonomy package ZIP file. The ZIP does not have to be
  * a taxonomy package with META-INF/taxonomyPackage.xml file, but it does need to have a META-INF/catalog.xml
  * file. Moreover, this catalog.xml file must be invertible, so that there is only one original URI per mapped URI!
- * Otherwise the DTS discovery step within method "loadDts" will probably fail!
+ * The catalog must also be consistent with the document URIs found during DTS discovery. Otherwise the loading
+ * of the documents whose URIs were found during DTS discovery will probably fail!
  *
  * Another thing to keep in mind is that each XML file in the ZIP stream will be parsed, even if most of them
  * are not part of the DTS. Indeed, DTS discovery is done once all XML documents have been loaded. This may be
@@ -123,6 +124,7 @@ final class TaxonomyBaseFactoryFromRemoteZip(
       parseAllTaxonomyDocuments(xmlByteArrays, catalog).ensuring(_.forall(_.uriOption.nonEmpty))
 
     // If the catalog is not invertible, it is likely that DTS discovery will fail!
+    // In any case, if DTS discovery below finds URIs that are not within the document collection, an exception is thrown!
     val dtsUris: Set[URI] = findDtsUris(entrypointUris, docs)
 
     val docsInDts: IndexedSeq[BackingDocumentApi] =
@@ -162,7 +164,7 @@ final class TaxonomyBaseFactoryFromRemoteZip(
    * is invertible, or else this method does not work. After calling this function all documents are there in order to compute
    * the DTS and create the taxonomy (from a subset of those documents).
    *
-   * The 2nd parameter is the Map from ZIP entry names to immutable byte arrays.
+   * The first parameter is the Map from ZIP entry names to immutable byte arrays.
    * The ZIP entry names are assumed to use Unix-style (file component) separators.
    *
    * Implementation note: this function parses many documents in parallel, for speed.
@@ -187,6 +189,9 @@ final class TaxonomyBaseFactoryFromRemoteZip(
           val localUri: URI = URI.create(zipEntryName.pipe(convertZipEntryNameUsingForwardSlash))
           val originalUri: URI = reverseCatalog.getMappedUri(localUri)
 
+          // Here we ensure that roundtripping from local URIs to original URIs and back to local URIs return
+          // the same local URIs. This ensures that the catalog and reverse catalog are the inverse catalogs of
+          // each other. This does not ensure that the original URIs match the ones found in the DTS.
           require(
             catalog.getMappedUri(originalUri) == localUri,
             s"URI roundtripping failed for (local) document URI '$localUri'"
@@ -201,7 +206,8 @@ final class TaxonomyBaseFactoryFromRemoteZip(
 
   /**
    * Finds all URIs in the DTS given the entrypoint URIs passed. A superset of the DTS as document collection
-   * is passed as second parameter.
+   * is passed as second parameter. If the result URI set is not a subset of the URIs of the passed document
+   * collection (as 2nd parameter), an exception is thrown.
    */
   def findDtsUris(entrypointUris: Set[URI], allTaxoDocs: Seq[SaxonDocument]): Set[URI] = {
     val allDocDependencies: Seq[DocDependencyList] = allTaxoDocs.map { doc =>

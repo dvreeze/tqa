@@ -28,6 +28,7 @@ import eu.cdevreeze.tqa.base.dom.XLinkArc
 import eu.cdevreeze.tqa.base.relationship.RelationshipFactory
 import eu.cdevreeze.tqa.base.relationship.jvm.DefaultParallelRelationshipFactory
 import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy
+import eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomyFactory
 import eu.cdevreeze.yaidom.queryapi.BackingDocumentApi
 import eu.cdevreeze.yaidom.saxon.SaxonDocument
 
@@ -38,6 +39,7 @@ import eu.cdevreeze.yaidom.saxon.SaxonDocument
  *
  * This class uses type TaxonomyBaseFactoryFromRemoteZip. As a consequence, this class is not usable if the catalog
  * is not invertible, or if the ZIP stream contains far more documents than required for the DTSes we are interested in!
+ * It is also not usable if the reverse catalog is inconsistent with the document URIs found during DTS discovery.
  *
  * @author Chris de Vreeze
  */
@@ -46,7 +48,8 @@ final class TaxonomyFactoryFromRemoteZip(
     val transformDocument: SaxonDocument => BackingDocumentApi,
     val extraSubstitutionGroupMap: SubstitutionGroupMap,
     val relationshipFactory: RelationshipFactory,
-    val arcFilter: XLinkArc => Boolean) {
+    val arcFilter: XLinkArc => Boolean)
+    extends BasicTaxonomyFactory {
 
   val taxonomyBaseFactory: TaxonomyBaseFactoryFromRemoteZip =
     TaxonomyBaseFactoryFromRemoteZip(createZipInputStream).withTransformDocuemnt(transformDocument)
@@ -99,7 +102,8 @@ final class TaxonomyFactoryFromRemoteZip(
   }
 
   /**
-   * Calls the method with the same name on taxonomyBaseFactory. After the call, we can log the number of documents.
+   * Calls the method with the same name on taxonomyBaseFactory. After the call, we can log the number of documents,
+   * if we would like to do so.
    */
   def readAllXmlDocuments(): ListMap[String, ArraySeq[Byte]] = {
     taxonomyBaseFactory.readAllXmlDocuments()
@@ -120,6 +124,10 @@ final class TaxonomyFactoryFromRemoteZip(
 
 object TaxonomyFactoryFromRemoteZip {
 
+  /**
+   * Creates a TaxonomyFactoryFromRemoteZip from the passed ZipInputStream creation function, using sensible
+   * defaults for the other primary constructor arguments. The relationship factory is strict, and uses parallellism.
+   */
   def apply(createZipInputStream: () => ZipInputStream): TaxonomyFactoryFromRemoteZip = {
     apply(
       createZipInputStream,
