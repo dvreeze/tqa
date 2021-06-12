@@ -213,7 +213,17 @@ final class TaxonomyBaseFactoryFromRemoteZip(
 
     val dtsDiscovery: DtsDiscovery = new DtsDiscovery(docDependenciesMap)
 
-    dtsDiscovery.findDts(entrypointUris)
+    // Finds the DTS, and checks if the DTS is indeed inside the document collection (which further validates the (reverse) catalog)
+    dtsDiscovery.findDts(entrypointUris).tap(uris => ensureWithinDocumentCollection(uris, allTaxoDocs))
+  }
+
+  private def ensureWithinDocumentCollection(docUris: Set[URI], allTaxoDocs: Seq[SaxonDocument]): Unit = {
+    val allDocUris: Set[URI] = allTaxoDocs.flatMap(_.uriOption).toSet
+
+    val outsideDocUris: Set[URI] = docUris.filterNot(allDocUris)
+    require(
+      outsideDocUris.isEmpty,
+      s"Not all URIs are inside the document set (at most 10 shown): ${outsideDocUris.take(10).mkString(", ")}")
   }
 
   private def readZipEntry(zis: ZipInputStream): ArraySeq[Byte] = {
