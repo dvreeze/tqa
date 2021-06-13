@@ -107,14 +107,24 @@ final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedS
   }
 
   def toElem: simple.Elem = {
+    toElem(None)
+  }
+
+  def toElem(docUriOption: Option[URI]): simple.Elem = {
     val scope = Scope.from("" -> SimpleCatalog.ErNamespace)
 
     import simple.Node._
 
     val uriRewriteElems = uriRewrites.map(_.toElem)
 
+    val targetXmlBaseOption: Option[URI] =
+      docUriOption
+        .map(u => xmlBaseOption.map(bu => u.relativize(bu)))
+        .getOrElse(xmlBaseOption)
+        .filterNot(_.toString.isEmpty)
+
     emptyElem(QName("catalog"), scope)
-      .plusAttributeOption(QName("xml:base"), xmlBaseOption.map(_.toString))
+      .plusAttributeOption(QName("xml:base"), targetXmlBaseOption.map(_.toString))
       .plusChildren(uriRewriteElems)
       .prettify(2)
   }

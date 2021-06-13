@@ -45,14 +45,10 @@ class SimpleCatalogTest extends AnyFunSuite {
       SimpleCatalog(
         None,
         Vector(
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part1/2015-01-01/",
-            "../part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part2/2015-01-01/",
-            "../part2/2015-01-01/")))
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
+        )
+      )
 
     assertResult(expectedCatalog) {
       catalog
@@ -66,10 +62,11 @@ class SimpleCatalogTest extends AnyFunSuite {
       catalog.netSimpleCatalog
     }
 
-    assertResult(Map(
-      "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
-      "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
-    )) {
+    assertResult(
+      Map(
+        "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
+        "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
+      )) {
       catalog.toMap
     }
 
@@ -94,14 +91,10 @@ class SimpleCatalogTest extends AnyFunSuite {
       SimpleCatalog(
         Some(URI.create("../")),
         Vector(
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part1/2015-01-01/",
-            "part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part2/2015-01-01/",
-            "part2/2015-01-01/")))
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
+        )
+      )
 
     assertResult(expectedCatalog) {
       catalog
@@ -115,23 +108,20 @@ class SimpleCatalogTest extends AnyFunSuite {
       SimpleCatalog(
         None,
         Vector(
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part1/2015-01-01/",
-            "../part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part2/2015-01-01/",
-            "../part2/2015-01-01/")))
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
+        )
+      )
 
     assertResult(expectedNetCatalog) {
       catalog.netSimpleCatalog
     }
 
-    assertResult(Map(
-      "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
-      "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
-    )) {
+    assertResult(
+      Map(
+        "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
+        "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
+      )) {
       catalog.toMap
     }
 
@@ -343,14 +333,10 @@ class SimpleCatalogTest extends AnyFunSuite {
       SimpleCatalog(
         Some(docUri),
         Vector(
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part1/2015-01-01/",
-            "../part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part2/2015-01-01/",
-            "../part2/2015-01-01/")))
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
+        )
+      )
 
     assertResult(expectedCatalog) {
       catalog
@@ -360,10 +346,11 @@ class SimpleCatalogTest extends AnyFunSuite {
       resolved.Elem.from(expectedCatalog.copy(xmlBaseOption = None).toElem).removeAllInterElementWhitespace
     }
 
-    assertResult(Map(
-      "http://www.example.com/part1/2015-01-01/" -> "part1/2015-01-01/",
-      "http://www.example.com/part2/2015-01-01/" -> "part2/2015-01-01/"
-    )) {
+    assertResult(
+      Map(
+        "http://www.example.com/part1/2015-01-01/" -> "part1/2015-01-01/",
+        "http://www.example.com/part2/2015-01-01/" -> "part2/2015-01-01/"
+      )) {
       catalog.toMap
     }
 
@@ -389,44 +376,39 @@ class SimpleCatalogTest extends AnyFunSuite {
       SimpleCatalog(
         Some(URI.create("")),
         Vector(
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part1/2015-01-01/",
-            "part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part2/2015-01-01/",
-            "part2/2015-01-01/")))
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
+        )
+      )
 
     assertResult(expectedCatalog) {
       catalog
     }
 
     assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
-      resolved.Elem.from(expectedCatalog.copy(xmlBaseOption = Some(URI.create("../"))).toElem).removeAllInterElementWhitespace
+      resolved.Elem
+        .from(expectedCatalog.copy(xmlBaseOption = Some(URI.create("../"))).toElem)
+        .removeAllInterElementWhitespace
     }
 
     val expectedNetCatalog: SimpleCatalog =
       SimpleCatalog(
         None,
         Vector(
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part1/2015-01-01/",
-            "part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(
-            None,
-            "http://www.example.com/part2/2015-01-01/",
-            "part2/2015-01-01/")))
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
+        )
+      )
 
     assertResult(expectedNetCatalog) {
       catalog.netSimpleCatalog
     }
 
-    assertResult(Map(
-      "http://www.example.com/part1/2015-01-01/" -> "part1/2015-01-01/",
-      "http://www.example.com/part2/2015-01-01/" -> "part2/2015-01-01/"
-    )) {
+    assertResult(
+      Map(
+        "http://www.example.com/part1/2015-01-01/" -> "part1/2015-01-01/",
+        "http://www.example.com/part2/2015-01-01/" -> "part2/2015-01-01/"
+      )) {
       catalog.toMap
     }
 
