@@ -44,6 +44,7 @@ class SimpleCatalogTest extends AnyFunSuite {
     val expectedCatalog: SimpleCatalog =
       SimpleCatalog(
         None,
+        None,
         Vector(
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
@@ -54,7 +55,7 @@ class SimpleCatalogTest extends AnyFunSuite {
       catalog
     }
 
-    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
+    assertResult(resolved.Elem.from(catalogElem).removeAllInterElementWhitespace) {
       resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
     }
 
@@ -89,6 +90,7 @@ class SimpleCatalogTest extends AnyFunSuite {
 
     val expectedCatalog: SimpleCatalog =
       SimpleCatalog(
+        None,
         Some(URI.create("../")),
         Vector(
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
@@ -100,12 +102,13 @@ class SimpleCatalogTest extends AnyFunSuite {
       catalog
     }
 
-    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
+    assertResult(resolved.Elem.from(catalogElem).removeAllInterElementWhitespace) {
       resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
     }
 
     val expectedNetCatalog: SimpleCatalog =
       SimpleCatalog(
+        None,
         None,
         Vector(
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
@@ -320,6 +323,52 @@ class SimpleCatalogTest extends AnyFunSuite {
     }
   }
 
+  test("testEquivalenceWithNetCatalog") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val catalogElem =
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+    val netCatalog = catalog.netSimpleCatalog
+
+    assertResult(true) {
+      netCatalog != catalog && netCatalog.xmlBaseAttributeOption != catalog.xmlBaseAttributeOption
+    }
+
+    val netCatalogElem =
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
+
+    assertResult(netCatalog) {
+      SimpleCatalog.fromElem(netCatalogElem)
+    }
+
+    val u1 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/")
+    assertResult(catalog.findMappedUri(u1)) {
+      netCatalog.findMappedUri(u1)
+    }
+
+    val u2 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u2)) {
+      netCatalog.findMappedUri(u2)
+    }
+
+    val u3 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u3)) {
+      netCatalog.findMappedUri(u3)
+    }
+
+    val u4 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u4)) {
+      netCatalog.findMappedUri(u4)
+    }
+
+    val u5 = URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u5)) {
+      netCatalog.findMappedUri(u5)
+    }
+  }
+
   test("testParseRelativeUriCatalogUsingRelativeDocUri") {
     val docParser = DocumentParserUsingStax.newInstance()
 
@@ -332,6 +381,7 @@ class SimpleCatalogTest extends AnyFunSuite {
     val expectedCatalog: SimpleCatalog =
       SimpleCatalog(
         Some(docUri),
+        None,
         Vector(
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
@@ -342,8 +392,16 @@ class SimpleCatalogTest extends AnyFunSuite {
       catalog
     }
 
-    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
-      resolved.Elem.from(expectedCatalog.copy(xmlBaseOption = None).toElem).removeAllInterElementWhitespace
+    assertResult(resolved.Elem.from(catalogElem).removeAllInterElementWhitespace) {
+      resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
+    }
+
+    assertResult(
+      Map(
+        "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
+        "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
+      )) {
+      catalog.toMapIgnoringDocUri
     }
 
     assertResult(
@@ -374,7 +432,8 @@ class SimpleCatalogTest extends AnyFunSuite {
 
     val expectedCatalog: SimpleCatalog =
       SimpleCatalog(
-        Some(URI.create("")),
+        Some(docUri),
+        Some(URI.create("../")),
         Vector(
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
           SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
@@ -385,23 +444,30 @@ class SimpleCatalogTest extends AnyFunSuite {
       catalog
     }
 
-    assertResult(resolved.Elem.from(catalogElem.underlyingElem).removeAllInterElementWhitespace) {
-      resolved.Elem
-        .from(expectedCatalog.copy(xmlBaseOption = Some(URI.create("../"))).toElem)
-        .removeAllInterElementWhitespace
+    assertResult(resolved.Elem.from(catalogElem).removeAllInterElementWhitespace) {
+      resolved.Elem.from(expectedCatalog.toElem).removeAllInterElementWhitespace
     }
 
     val expectedNetCatalog: SimpleCatalog =
       SimpleCatalog(
+        Some(docUri),
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
         )
       )
 
     assertResult(expectedNetCatalog) {
       catalog.netSimpleCatalog
+    }
+
+    assertResult(
+      Map(
+        "http://www.example.com/part1/2015-01-01/" -> "../part1/2015-01-01/",
+        "http://www.example.com/part2/2015-01-01/" -> "../part2/2015-01-01/"
+      )) {
+      catalog.toMapIgnoringDocUri
     }
 
     assertResult(
@@ -478,6 +544,53 @@ class SimpleCatalogTest extends AnyFunSuite {
 
     assertResult(None) {
       catalog.findMappedUri(URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt"))
+    }
+  }
+
+  test("testEquivalenceWithNetCatalogUsingRelativeDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("META-INF/catalog.xml") // Relative document URI!
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+    val netCatalog = catalog.netSimpleCatalog
+
+    assertResult(true) {
+      netCatalog != catalog && netCatalog.xmlBaseAttributeOption != catalog.xmlBaseAttributeOption
+    }
+
+    val netCatalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
+
+    assertResult(netCatalog) {
+      SimpleCatalog.fromElem(netCatalogElem)
+    }
+
+    val u1 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/")
+    assertResult(catalog.findMappedUri(u1)) {
+      netCatalog.findMappedUri(u1)
+    }
+
+    val u2 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u2)) {
+      netCatalog.findMappedUri(u2)
+    }
+
+    val u3 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u3)) {
+      netCatalog.findMappedUri(u3)
+    }
+
+    val u4 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u4)) {
+      netCatalog.findMappedUri(u4)
+    }
+
+    val u5 = URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u5)) {
+      netCatalog.findMappedUri(u5)
     }
   }
 

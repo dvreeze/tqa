@@ -18,10 +18,12 @@ package eu.cdevreeze.tqa.docbuilder
 
 import java.net.URI
 
+import eu.cdevreeze.tqa.common.names.ENames
 import eu.cdevreeze.yaidom.core.EName
 import eu.cdevreeze.yaidom.core.QName
 import eu.cdevreeze.yaidom.core.Scope
 import eu.cdevreeze.yaidom.queryapi.BackingNodes
+import eu.cdevreeze.yaidom.queryapi.ScopedNodes
 import eu.cdevreeze.yaidom.simple
 
 /**
@@ -29,10 +31,20 @@ import eu.cdevreeze.yaidom.simple
  *
  * @author Chris de Vreeze
  */
-final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedSeq[SimpleCatalog.UriRewrite]) {
+final case class SimpleCatalog(
+    docUriOption: Option[URI],
+    xmlBaseAttributeOption: Option[URI],
+    uriRewrites: IndexedSeq[SimpleCatalog.UriRewrite]) {
 
-  @deprecated(message = "Use 'xmlBaseOption' instead", since = "0.13.0")
-  def xmlBaseAttributeOption: Option[URI] = xmlBaseOption
+  // The implementation uses the assumption that URI.resolve is a transitive operation!
+
+  def withDocUriOption(newDocUriOption: Option[URI]): SimpleCatalog = {
+    copy(docUriOption = newDocUriOption)
+  }
+
+  def xmlBaseOption: Option[URI] = {
+    docUriOption.map(u => xmlBaseAttributeOption.map(b => u.resolve(b)).getOrElse(u)).orElse(xmlBaseAttributeOption)
+  }
 
   /**
    * Applies the best matching rewrite rule to the given URI, if any, and returns the optional
@@ -52,12 +64,9 @@ final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedS
       val relativeUri: URI =
         URI.create(rewrite.normalizedUriStartString).relativize(normalizedUri).ensuring(u => !u.isAbsolute)
 
-      val effectiveRewritePrefix: URI =
-        xmlBaseOption
-          .map(_.resolve(rewrite.effectiveRewritePrefix))
-          .getOrElse(URI.create(rewrite.effectiveRewritePrefix))
+      val effRewritePrefix: URI = URI.create(rewrite.effectiveRewritePrefix(xmlBaseOption))
 
-      effectiveRewritePrefix.resolve(relativeUri)
+      effRewritePrefix.resolve(relativeUri)
     }
   }
 
@@ -69,32 +78,44 @@ final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedS
   }
 
   /**
-   * Returns the same simple catalog, but first resolving XML base attributes. Therefore the result has no XML base attributes anywhere.
+   * Returns the same simple catalog, but first resolving XML base attributes (without taking the optional
+   * document URI into account). Therefore the result has no XML base attributes anywhere. The optional
+   * document URI is the same in the result as in this catalog.
    */
   def netSimpleCatalog: SimpleCatalog = {
     val netUriRewrites: IndexedSeq[SimpleCatalog.UriRewrite] = uriRewrites.map { rewrite =>
-      val effectiveRewritePrefix: URI =
-        xmlBaseOption
-          .map(_.resolve(rewrite.effectiveRewritePrefix))
-          .getOrElse(URI.create(rewrite.effectiveRewritePrefix))
+      // Ignoring the optional document URI, but using the optional XML Base attribute of this catalog
+      val effRewritePrefix: URI = URI.create(rewrite.effectiveRewritePrefix(xmlBaseAttributeOption))
 
-      SimpleCatalog.UriRewrite(None, rewrite.uriStartString, effectiveRewritePrefix.toString)
+      SimpleCatalog.UriRewrite(None, rewrite.uriStartString, effRewritePrefix.toString)
     }
 
-    SimpleCatalog(None, netUriRewrites)
+    SimpleCatalog(docUriOption, None, netUriRewrites)
   }
 
   /**
-   * Returns this simple catalog as the mapping of the net simple catalog.
+   * Returns this simple catalog as the mapping of the net simple catalog, but also taking XML Base resolution including
+   * the optional document URI into account.
    */
   def toMap: Map[String, String] = {
+    val catalogXmlBaseOption: Option[URI] = xmlBaseOption
+
+    uriRewrites.map { rewrite =>
+      rewrite.uriStartString -> rewrite.effectiveRewritePrefix(catalogXmlBaseOption)
+    }.toMap
+  }
+
+  /**
+   * Returns this simple catalog as the mapping of the net simple catalog, ignoring the optional document URI.
+   */
+  def toMapIgnoringDocUri: Map[String, String] = {
     netSimpleCatalog.uriRewrites.map { rewrite =>
       rewrite.uriStartString -> rewrite.rewritePrefix
     }.toMap
   }
 
   /**
-   * Tries to reverse this simple catalog (after converting it to the net simple catalog), but if this simple catalog
+   * Tries to reverse this simple catalog (after XML Base resolution including the optional document URI), but if this simple catalog
    * is not invertible, the result is incorrect.
    */
   def reverse: SimpleCatalog = {
@@ -103,28 +124,21 @@ final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedS
   }
 
   def filter(p: SimpleCatalog.UriRewrite => Boolean): SimpleCatalog = {
-    SimpleCatalog(xmlBaseOption, uriRewrites.filter(p))
+    SimpleCatalog(docUriOption, xmlBaseAttributeOption, uriRewrites.filter(p))
   }
 
+  /**
+   * Converts this catalog to a yaidom simple element. The optional document URI is ignored.
+   */
   def toElem: simple.Elem = {
-    toElem(None)
-  }
-
-  def toElem(docUriOption: Option[URI]): simple.Elem = {
     val scope = Scope.from("" -> SimpleCatalog.ErNamespace)
 
     import simple.Node._
 
     val uriRewriteElems = uriRewrites.map(_.toElem)
 
-    val targetXmlBaseOption: Option[URI] =
-      docUriOption
-        .map(u => xmlBaseOption.map(bu => u.relativize(bu)))
-        .getOrElse(xmlBaseOption)
-        .filterNot(_.toString.isEmpty)
-
     emptyElem(QName("catalog"), scope)
-      .plusAttributeOption(QName("xml:base"), targetXmlBaseOption.map(_.toString))
+      .plusAttributeOption(QName("xml:base"), xmlBaseAttributeOption.map(_.toString))
       .plusChildren(uriRewriteElems)
       .prettify(2)
   }
@@ -133,6 +147,12 @@ final case class SimpleCatalog(xmlBaseOption: Option[URI], uriRewrites: IndexedS
 object SimpleCatalog {
 
   final case class UriRewrite(xmlBaseAttributeOption: Option[URI], uriStartString: String, rewritePrefix: String) {
+
+    def xmlBaseOption(parentBaseUriOption: Option[URI]): Option[URI] = {
+      parentBaseUriOption
+        .map(u => xmlBaseAttributeOption.map(b => u.resolve(b)).getOrElse(u))
+        .orElse(xmlBaseAttributeOption)
+    }
 
     /**
      * Returns the normalized URI start string, which is used for matching against normalized URIs.
@@ -149,6 +169,13 @@ object SimpleCatalog {
       xmlBaseAttributeOption.map(_.resolve(rewritePrefix).toString).getOrElse(rewritePrefix)
     }
 
+    /**
+     * Returns the rewrite prefix, after XML Base resolution, given the passed optional parent base URI.
+     */
+    def effectiveRewritePrefix(parentBaseUriOption: Option[URI]): String = {
+      xmlBaseOption(parentBaseUriOption).map(_.resolve(rewritePrefix).toString).getOrElse(rewritePrefix)
+    }
+
     def toElem: simple.Elem = {
       val scope = Scope.from("" -> SimpleCatalog.ErNamespace)
 
@@ -163,23 +190,16 @@ object SimpleCatalog {
 
   object UriRewrite {
 
-    def fromElem(rewriteElem: BackingNodes.Elem): UriRewrite = {
+    def apply(uriStartString: String, rewritePrefix: String): UriRewrite = {
+      UriRewrite(None, uriStartString, rewritePrefix)
+    }
+
+    def fromElem(rewriteElem: ScopedNodes.Elem): UriRewrite = {
       require(
         rewriteElem.resolvedName == ErRewriteURIEName,
         s"Expected $ErRewriteURIEName but got ${rewriteElem.resolvedName}")
 
-      // If the rewriteElem has an absolute document URI, it also has an absolute base URI (typically the same).
-      // If the rewriteElem has a relative document URI, it either has a relative or absolute base URI, potentially from xml:base attributes.
-      // If the rewriteElem has no document URI, it either has no base URI, or a relative or absolute one filled from xml:base attributes.
-      val xmlBaseOption: Option[URI] = rewriteElem.baseUriOption
-      val parentXmlBaseOption: Option[URI] = rewriteElem.parentBaseUriOption
-
-      val xmlBaseAttrOption: Option[URI] =
-        parentXmlBaseOption
-          .flatMap(pb => xmlBaseOption.map(b => pb.relativize(b)))
-          .orElse(xmlBaseOption)
-          .filter(_.toString.nonEmpty)
-
+      val xmlBaseAttrOption: Option[URI] = rewriteElem.attributeOption(ENames.XmlBaseEName).map(URI.create)
       val uriStartString = rewriteElem.attribute(UriStartStringEName)
       val rewritePrefix = rewriteElem.attribute(RewritePrefixEName)
 
@@ -187,27 +207,29 @@ object SimpleCatalog {
     }
   }
 
+  def apply(docUriOption: Option[URI], uriRewrites: IndexedSeq[SimpleCatalog.UriRewrite]): SimpleCatalog = {
+    SimpleCatalog(docUriOption, None, uriRewrites)
+  }
+
   def from(uriRewrites: Map[String, String]): SimpleCatalog = {
-    SimpleCatalog(None, uriRewrites.toIndexedSeq.map {
+    SimpleCatalog(None, None, uriRewrites.toIndexedSeq.map {
       case (startString, rewritePrefix) => UriRewrite(None, startString, rewritePrefix)
     })
   }
 
   /**
-   * Creates a SimpleCatalog from the given element. The base URI, if any, of the element, becomes the filled
-   * xmlBaseOption of the SimpleCatalog. This optional base URI may be a relative URI (typically within ZIP files).
+   * Creates a SimpleCatalog from the given element. This optional document URI may be a relative URI (typically
+   * within ZIP files).
    */
   def fromElem(catalogElem: BackingNodes.Elem): SimpleCatalog = {
     require(catalogElem.resolvedName == ErCatalogEName, s"Expected $ErCatalogEName but got ${catalogElem.resolvedName}")
 
-    // If the catalogElem has an absolute document URI, it also has an absolute base URI (typically the same).
-    // If the catalogElem has a relative document URI, it either has a relative or absolute base URI, potentially from xml:base attributes.
-    // If the catalogElem has no document URI, it either has no base URI, or a relative or absolute one filled from xml:base attributes.
-    val xmlBaseOption: Option[URI] = catalogElem.baseUriOption
+    val docUriOption: Option[URI] = catalogElem.docUriOption
+    val xmlBaseAttrOption: Option[URI] = catalogElem.attributeOption(ENames.XmlBaseEName).map(URI.create)
 
     val uriRewrites = catalogElem.filterChildElems(_.resolvedName == ErRewriteURIEName).map(e => UriRewrite.fromElem(e))
 
-    SimpleCatalog(xmlBaseOption, uriRewrites)
+    SimpleCatalog(docUriOption, xmlBaseAttrOption, uriRewrites)
   }
 
   val ErNamespace = "urn:oasis:names:tc:entity:xmlns:xml:catalog"
