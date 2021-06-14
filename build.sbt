@@ -15,7 +15,7 @@ val crossScalaVer = Seq(scalaVer, "2.13.6")
 
 ThisBuild / description  := "Extensible XBRL taxonomy query API"
 ThisBuild / organization := "eu.cdevreeze.tqa"
-ThisBuild / version      := "0.13.0-SNAPSHOT"
+ThisBuild / version      := "0.13.0"
 
 ThisBuild / scalaVersion       := scalaVer
 ThisBuild / crossScalaVersions := crossScalaVer
