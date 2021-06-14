@@ -12,6 +12,45 @@ Version 1.0.0 should offer the following:
 * Improved experimental "model" APIs that mimic the base DOM/relationship/querying APIs
 
 
+0.13.0
+======
+
+This release contains the following changes:
+
+* Refactored type ``SimpleCatalog``
+
+  * The changes are breaking!
+  * Class SimpleCatalog has now a clearer API, distinguishing between (optional) document URI and (optional) XML Base attributes
+  * The (optional) document URI and XML Base attributes (of catalog and URI rewrites) suffice for XML Base computation
+  * At the same time they clearly mirror the XML (yaidom "backing" element) from which they can be loaded
+
+* Added taxonomy bootstrapping from a ZIP stream, not having to go through a file
+
+  * Added classes ``TaxonomyFactoryFromRemoteZip`` and ``TaxonomyBaseFactoryFromRemoteZip``
+  * The former now implements new type ``BasicTaxonomyFactory``, and so does ``TaxonomyBuilder``
+  * The ``BasicTaxonomyFactory`` abstraction is a more generally useful taxonomy/DTS creation API than ``TaxonomyBuilder``
+  * Console programs have been adapted to choose taxonomy bootstrapping between "file" and "streaming" variants
+  * The new "streaming" taxonomy bootstrapping does come with limitations/requirements; see the documentation
+
+* Added console programs ``ShowLoadedDocUris`` and ``CollectEntryPointUris``
+
+  * Given one of more entry point URI regular expressions, the latter program returns space-separated entrypoint URIs
+  * That output can be fed to the former program, which outputs all document URIs in the "combined DTS"
+  * This can be used to create "minimal" (taxonomy package) ZIP files
+  * That is especially needed for "streaming" bootstrapping, because the entire ZIP content is parsed
+
+According to MiMa, the breaking changes compared to version 0.12.0 are as follows (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
+
+* method fromElem(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem)eu.cdevreeze.tqa.docbuilder.SimpleCatalog#UriRewrite in object eu.cdevreeze.tqa.docbuilder.SimpleCatalog#UriRewrite's type is different in current version, where it is (eu.cdevreeze.yaidom.queryapi.ScopedNodes#Elem)eu.cdevreeze.tqa.docbuilder.SimpleCatalog#UriRewrite instead of (eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem)eu.cdevreeze.tqa.docbuilder.SimpleCatalog#UriRewrite
+  filter with: ProblemFilters.exclude[IncompatibleMethTypeProblem]("eu.cdevreeze.tqa.docbuilder.SimpleCatalog#UriRewrite.fromElem")
+* method copy(scala.Option,scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.docbuilder.SimpleCatalog in class eu.cdevreeze.tqa.docbuilder.SimpleCatalog does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.SimpleCatalog.copy")
+* synthetic method copy$default$2()scala.collection.immutable.IndexedSeq in class eu.cdevreeze.tqa.docbuilder.SimpleCatalog has a different result type in current version, where it is scala.Option rather than scala.collection.immutable.IndexedSeq
+  filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.docbuilder.SimpleCatalog.copy$default$2")
+* method this(scala.Option,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.docbuilder.SimpleCatalog does not have a correspondent in current version
+  filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.SimpleCatalog.this")
+
+
 0.12.0
 ======
 
@@ -26,7 +65,7 @@ This release contains a few fixes, thus improving on the preceding release:
 * A wrongly spelled private class member has been corrected
 * Previously deprecated methods have been removed
 
-According to MiMa, the breaking changes compared to version 0.11.0 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+According to MiMa, the breaking changes compared to version 0.11.0 are as follows (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * deprecated static method forZipFileContainingLocalMirror(java.util.zip.ZipFile,scala.Option)scala.Function1 in class eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.docbuilder.jvm.UriResolvers.forZipFileContainingLocalMirror")
@@ -47,7 +86,7 @@ This release supports Scala 3, and drops support for Scala 2.12.
 
 There are breaking changes, not caused by changing any code, but by targeting Scala 2.13.6 (with "-Xsource:3").
 These are XXXRelationshipPath.apply methods that should be private anyway, using corresponding factory method "from" instead.
-According to MiMa, the breaking changes compared to version 0.10.0 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+According to MiMa, the breaking changes compared to version 0.10.0 are as follows (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * static method apply(scala.collection.immutable.IndexedSeq)eu.cdevreeze.tqa.base.model.RelationshipPath in class eu.cdevreeze.tqa.base.model.RelationshipPath does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.model.RelationshipPath.apply")
@@ -98,7 +137,7 @@ This release adds support for Extensible Enumerations 2.0 in taxonomies (not in 
 That is, enumeration concepts and domains of allowed enumeration values are modelled and can be
 queried. No validation of enumeration concepts is offered.
 
-According to MiMa, the breaking changes compared to version 0.9.1 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+According to MiMa, the breaking changes compared to version 0.9.1 are as follows (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * abstract method isEnumerationConcept(eu.cdevreeze.yaidom.core.EName)Boolean in interface eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi is present only in current version
   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.queryapi.TaxonomySchemaApi.isEnumerationConcept")
@@ -162,7 +201,7 @@ This release contains 2 bug fixes:
 * A bug fix that fixes ``TaxonomyPackagePartialUriResolvers``
 * Method ``genericPreferredLabelOption`` is now also promised by type ``InterElementDeclarationRelationship``
 
-There are almost no breaking changes, compared to version 0.9.0 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+There are almost no breaking changes, compared to version 0.9.0 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * abstract method genericPreferredLabelOption()scala.Option in interface eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship is present only in current version
   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.model.InterElementDeclarationRelationship.genericPreferredLabelOption")
@@ -200,7 +239,7 @@ not be too hard. Keep in mind that the query API calls for "inter-concept relati
 no longer pertain to standard inter-concept relationships, so their semantics have changed.
 That is something to keep in mind when migrating client code to the use of TQA 0.9.0!
 
-According to MiMa, the breaking changes compared to version 0.8.18 are as follows (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+According to MiMa, the breaking changes compared to version 0.8.18 are as follows (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method this(eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState.this")
@@ -530,7 +569,7 @@ The most important changes compared to version 0.8.17 are:
 * Parallel and therefore typically faster RelationshipFactory that can be wired into a TaxonomyBuilder
 * New ``TaxonomyBuilderSupport`` object, making TaxonomyBuilder creation easy in some common cases
 
-According to MiMa, there are no significant breaking changes compared to version 0.8.17 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+According to MiMa, there are no significant breaking changes compared to version 0.8.17 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * static method createTaxonomyBuilder(java.util.zip.ZipFile,Boolean)eu.cdevreeze.tqa.base.taxonomybuilder.TaxonomyBuilder in class eu.cdevreeze.tqa.console.ConsoleUtil does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.console.ConsoleUtil.createTaxonomyBuilder")
@@ -557,7 +596,7 @@ The most important changes compared to version 0.8.16 are:
 * Enhanced and improved LoadDts script
 * Many small improvements in naming, idiomatic use of Scala, comments, syntax styling (collection HOFs as "methods" rather than "infix operators")
 
-According to MiMa, there are no breaking changes compared to version 0.8.16 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues).
+According to MiMa, there are no breaking changes compared to version 0.8.16 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues).
 
 
 0.8.16
@@ -565,7 +604,7 @@ According to MiMa, there are no breaking changes compared to version 0.8.16 (in 
 
 This release uses yaidom 1.11.0, targets ScalaJS 1.0 instead of 0.6, and cross-compiles against Scala 2.13.2 and 2.12.11.
 
-According to MiMa, there are no breaking changes compared to version 0.8.15 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues).
+According to MiMa, there are no breaking changes compared to version 0.8.15 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues).
 
 
 0.8.15
@@ -575,7 +614,7 @@ This release fixed failed release 0.8.14, restoring concept declaration retrieva
 
 This release 0.8.15 requires yaidom 1.10.2 or 1.10.3 (or later)! It does not work with yaidom 1.10.1 or 1.10.0!
 
-There are some (reasonably low impact) breaking changes compared to version 0.8.13 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+There are some (reasonably low impact) breaking changes compared to version 0.8.13 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method this(eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.Map,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState.this")
@@ -597,7 +636,7 @@ had failed tests, and did not make it to Maven Central.
 
 This release 0.8.14 requires yaidom 1.10.2 or 1.10.3 (or later)! It does not work with yaidom 1.10.1 or 1.10.0!
 
-There are some (reasonably low impact) breaking changes compared to version 0.8.13 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+There are some (reasonably low impact) breaking changes compared to version 0.8.13 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method this(eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.Map,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy#DerivedState.this")
@@ -623,7 +662,7 @@ The most important changes compared to version 0.8.12 are:
 * Class ``BasicTaxonomy`` now caches more data (subsets of relationships), leading to searches in smaller collections, thus improving performance
 * Added query API trait ``RelationshipContainerApi``
 
-There are some (reasonably low impact) breaking changes compared to version 0.8.12 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+There are some (reasonably low impact) breaking changes compared to version 0.8.12 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method this(eu.cdevreeze.tqa.base.dom.TaxonomyBase,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,eu.cdevreeze.tqa.common.schema.SubstitutionGroupMap,scala.collection.immutable.IndexedSeq,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map,scala.collection.immutable.Map)Unit in class eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.taxonomy.BasicTaxonomy.this")
@@ -659,7 +698,7 @@ The most important changes compared to version 0.8.11 are:
 * URI resolution is now more composable for the same URIs (it was already composable across URIs)
 * Upgraded dependencies
 
-There are no breaking changes compared to version 0.8.11 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues).
+There are no breaking changes compared to version 0.8.11 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues).
 
 
 0.8.11
@@ -692,7 +731,7 @@ by storing the Path with each taxonomy element. This speedup is needed to speed 
 DO NOT USE THIS RELEASE, AND USE THE PRECEDING RELEASE INSTEAD OF THIS ONE! Overall version 0.8.10 has worse
 performance than version 0.8.9.
 
-Breaking changes compared to version 0.8.9 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.9 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method this(eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem,scala.collection.immutable.IndexedSeq)Unit in class eu.cdevreeze.tqa.base.dom.Appinfo does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.Appinfo.this")
@@ -868,7 +907,7 @@ This release mainly adds an experimental "model" that shares pretty much the sam
 * Created experimental model for core/dimensional taxonomy content, offering pretty much the same taxonomy query API
 * Added experimental (far from complete) taxonomy editing support, using the model mentioned above
 
-Breaking changes compared to version 0.8.8 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.8 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * object eu.cdevreeze.tqa.base.dom.IdPointer does not have a correspondent in current version
   filter with: ProblemFilters.exclude[MissingClassProblem]("eu.cdevreeze.tqa.base.dom.IdPointer$")
@@ -942,7 +981,7 @@ This release is about small performance improvements and minor cleanups, such as
 * Renamed some type-safe DOM classes for clarity, but retained the old names through aliases
 * Added type-safe DOM classes for non-standard labels and references (in the corresponding namespaces)
 
-Breaking changes compared to version 0.8.7 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.7 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * the type hierarchy of class eu.cdevreeze.tqa.base.dom.Appinfo is different in current version. Missing types {eu.cdevreeze.tqa.base.dom.XsdElem}
   filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.base.dom.Appinfo")
@@ -1124,7 +1163,7 @@ This release is about trying to make creation of taxonomies and especially "sub-
 * Attempted to optimize methods ``BasicTaxonomy.filteringDocumentUris`` and ``BasicTaxonomy.filteringRelationships``
 * Indirectly method ``BasicTaxonomy.filteringDocumentUris`` should benefit from the optimizations in method ``TaxonomyBase.filteringDocumentUris``
 
-Breaking changes compared to version 0.8.6 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.6 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method computeDerivedSubstitutionGroupMap()eu.cdevreeze.tqa.SubstitutionGroupMap in class eu.cdevreeze.tqa.base.dom.TaxonomyBase does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.base.dom.TaxonomyBase.computeDerivedSubstitutionGroupMap")
@@ -1146,7 +1185,7 @@ One of the things that this release tries to accomplish is that very large insta
 must be feasible too. Yaidom 1.9.0 improved the Saxon "backing elements", and creation of XbrlInstance objects
 is now relatively fast regardless of whether these Saxon backing elements are used or not.
 
-Breaking changes compared to version 0.8.5 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.5 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method cache()com.google.common.cache.LoadingCache in class eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder has a different result type in current version, where it is com.github.benmanes.caffeine.cache.LoadingCache rather than com.google.common.cache.LoadingCache
   filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.docbuilder.jvm.CachingDocumentBuilder.cache")
@@ -1309,7 +1348,7 @@ Compared with release 0.8.3, the main changes in this version are:
 * The ("XML-free") models for formulas and tables now hold the optional IDs for "resources"
 * Added class ``Relationship.UniqueKey``
 
-Breaking changes compared to version 0.8.3 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.3 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * the type hierarchy of object eu.cdevreeze.tqa.extension.formula.model.SegmentFilter is different in current version. Missing types {scala.runtime.AbstractFunction1}
   filter with: ProblemFilters.exclude[MissingTypesProblem]("eu.cdevreeze.tqa.extension.formula.model.SegmentFilter$")
@@ -2054,7 +2093,7 @@ Compared with release 0.8.2, the main changes in this version are:
 * The taxonomy package and layout model "yaidom dialects" now also contain non-element nodes, to make (direct) conversion to resolved elements work
 * Periods in XBRL instances can now have timezones (for datetime period data)
 
-Breaking changes compared to version 0.8.2 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.2 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method parseStartDate(java.lang.String)java.time.LocalDateTime in object eu.cdevreeze.tqa.instance.Period has a different result type in current version, where it is java.time.temporal.Temporal rather than java.time.LocalDateTime
   filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.instance.Period.parseStartDate")
@@ -2084,7 +2123,7 @@ Compared with release 0.8.1, the main changes in this version are:
 * "Hardened" the lenient creation APIs for the different yaidom dialects (for taxonomies, instances, taxonomy packages and layout models)
 * These yaidom dialects now also support nesting the expected root elements in other elements
 
-Breaking changes compared to version 0.8.1 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.1 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * abstract method wellKnownAspects()scala.collection.immutable.Set in interface eu.cdevreeze.tqa.aspect.AspectModel does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.aspect.AspectModel.wellKnownAspects")
@@ -2136,7 +2175,7 @@ Compared with release 0.8.0, the main changes in this version are:
 There are many breaking changes (only) in the "xpathaware" namespace, but this part of TQA has rarely been used so far. The most important change
 in this respect is that XPath evaluation no longer needs an implicit Scope.
 
-Breaking changes compared to version 0.8.0 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.8.0 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method evaluate(eu.cdevreeze.tqa.StringValueOrExpr,eu.cdevreeze.yaidom.xpath.XPathEvaluator,eu.cdevreeze.yaidom.core.Scope)java.lang.String in object eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator does not have a correspondent in current version
   filter with: ProblemFilters.exclude[DirectMissingMethodProblem]("eu.cdevreeze.tqa.xpathaware.StringValueOrExprEvaluator.evaluate")
@@ -2221,7 +2260,7 @@ Compared with release 0.7.1, the main changes in this version are:
 * More taxonomy query API methods and traits, like added support for element-label relationship querying
 * Some refactoring, like moving document builders (for Saxon and native yaidom indexed documents) to another package
 
-Breaking changes compared to version 0.7.1 (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes compared to version 0.7.1 (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method backingElem()eu.cdevreeze.yaidom.queryapi.BackingElemApi in class eu.cdevreeze.tqa.XmlFragmentKey#XmlFragmentKeyAware has a different result type in current version, where it is eu.cdevreeze.yaidom.queryapi.BackingNodes#Elem rather than eu.cdevreeze.yaidom.queryapi.BackingElemApi
   filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.XmlFragmentKey#XmlFragmentKeyAware.backingElem")
@@ -3003,7 +3042,7 @@ This version added the following to the previous version:
 * More query methods for querying dimensional tree inheritance, filtering on has-hypercube relationships
 * Constants for standard label and reference roles
 
-Breaking changes (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * abstract method computeFilteredHasHypercubeInheritanceOrSelf(scala.Function1)scala.collection.immutable.Map in interface eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi is present only in current version
   filter with: ProblemFilters.exclude[ReversedMissingMethodProblem]("eu.cdevreeze.tqa.base.queryapi.DimensionalRelationshipContainerApi.computeFilteredHasHypercubeInheritanceOrSelf")
@@ -3035,7 +3074,7 @@ The major changes are:
 * Added ``XbrlInstanceDocument``
 * Renamed XbrlInstance ``apply`` method to ``build``
 
-Breaking changes (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
 * method build(java.net.URI)eu.cdevreeze.yaidom.queryapi.BackingElemApi in interface eu.cdevreeze.tqa.docbuilder.DocumentBuilder has a different result type in current version, where it is eu.cdevreeze.yaidom.queryapi.BackingDocumentApi rather than eu.cdevreeze.yaidom.queryapi.BackingElemApi
   filter with: ProblemFilters.exclude[IncompatibleResultTypeProblem]("eu.cdevreeze.tqa.docbuilder.DocumentBuilder.build")
@@ -3101,7 +3140,7 @@ The major changes are:
   * This makes taxonomy builders re-usable across entry points
   * Taxonomy package XML files can now be parsed, and provide entry point URIs via an entry point name, for example
 
-Breaking changes (in SBT, run: tqaJVM/*:mimaReportBinaryIssues):
+Breaking changes (in SBT, run: tqaJVM/*/mimaReportBinaryIssues):
 
   * method uriToLocalUri(java.net.URI,java.io.File)java.net.URI in object eu.cdevreeze.tqa.docbuilder.jvm.UriConverters does not have a correspondent in current version
   * abstract method collectTaxonomyRootElems(eu.cdevreeze.tqa.docbuilder.DocumentBuilder)scala.collection.immutable.IndexedSeq in interface eu.cdevreeze.tqa.base.taxonomybuilder.DocumentCollector does not have a correspondent in current version
