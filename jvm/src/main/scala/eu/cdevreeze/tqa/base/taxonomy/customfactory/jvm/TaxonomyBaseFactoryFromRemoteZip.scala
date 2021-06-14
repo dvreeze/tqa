@@ -146,17 +146,17 @@ final class TaxonomyBaseFactoryFromRemoteZip(
   }
 
   /**
-   * Parses the catalog file data (as immutable byte array) into a SimpleCatalog. The returned catalog has baseUri
+   * Parses the catalog file data (as immutable byte array) into a SimpleCatalog. The returned catalog has as document URI
    * the relative URI "META-INF/catalog.xml".
    */
   def parseCatalog(fileData: ArraySeq[Byte]): SimpleCatalog = {
     val docParser = DocumentParserUsingStax.newInstance()
     // A relative document URI, which is allowed for indexed/simple documents!
-    val docUri: URI = URI.create(catalogZipEntryName)
+    val docUri: URI = URI.create(catalogZipEntryName).ensuring(!_.isAbsolute)
     val catalogRootElem: indexed.Elem =
       indexed.Elem(docUri, docParser.parse(new ByteArrayInputStream(fileData.toArray)).documentElement)
 
-    SimpleCatalog.fromElem(catalogRootElem)
+    SimpleCatalog.fromElem(catalogRootElem).ensuring(_.docUriOption.contains(docUri))
   }
 
   /**

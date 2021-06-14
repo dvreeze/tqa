@@ -61,7 +61,7 @@ object TaxonomyPackagePartialUriResolvers {
     val catalogRootElem: indexed.Elem =
       indexed.Elem(docUri, docParser.parse(zipFile.getInputStream(catalogEntry)).documentElement)
 
-    SimpleCatalog.fromElem(catalogRootElem)
+    SimpleCatalog.fromElem(catalogRootElem).ensuring(_.docUriOption.contains(docUri))
   }
 
   /**

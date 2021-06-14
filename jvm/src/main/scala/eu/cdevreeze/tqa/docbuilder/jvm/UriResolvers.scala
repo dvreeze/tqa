@@ -161,10 +161,10 @@ object UriResolvers {
       require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
 
       val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-      val rewritePrefix = returnWithTrailingSlash(new File(rootDir, uri.getHost).toURI)
+      val rewritePrefix = returnWithTrailingSlash(new File(rootDir, uri.getHost).toURI).ensuring(_.isAbsolute)
 
-      val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+      // No document URI needed, since the rewrite prefixes are absolute URIs
+      val catalog = SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -187,9 +187,10 @@ object UriResolvers {
 
       val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
       val rewritePrefix = returnWithTrailingSlash(rootDir.toPath.resolve(uri.getScheme).resolve(uri.getHost).toUri)
+        .ensuring(_.isAbsolute)
 
-      val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+      // No document URI needed, since the rewrite prefixes are absolute URIs
+      val catalog = SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -218,11 +219,12 @@ object UriResolvers {
         parentPathOption
           .map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(hostAsRelativeUri))
           .getOrElse(hostAsRelativeUri)
+          .ensuring(!_.isAbsolute)
           .toString
           .ensuring(_.endsWith("/"))
 
-      val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+      // No (relative) document URI needed, since the rewrite prefixes take the relative path (from the root) into account
+      val catalog = SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -250,11 +252,12 @@ object UriResolvers {
         parentPathOption
           .map(pp => URI.create(returnWithTrailingSlash(pp)).resolve(schemePlusHostAsRelativeUri))
           .getOrElse(schemePlusHostAsRelativeUri)
+          .ensuring(!_.isAbsolute)
           .toString
           .ensuring(_.endsWith("/"))
 
-      val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
+      // No (relative) document URI needed, since the rewrite prefixes take the relative path (from the root) into account
+      val catalog = SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
