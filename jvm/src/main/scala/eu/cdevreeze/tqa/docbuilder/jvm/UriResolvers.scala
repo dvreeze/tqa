@@ -26,6 +26,7 @@ import org.xml.sax.InputSource
 
 import scala.collection.immutable
 import scala.util.Try
+import scala.util.chaining._
 
 /**
  * URI resolvers, converting an URI to a SAX InputSource.
@@ -161,7 +162,8 @@ object UriResolvers {
       require(uri.getScheme == "http" || uri.getScheme == "https", s"Not an HTTP(S) URI: '$uri'")
 
       val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
-      val rewritePrefix = returnWithTrailingSlash(new File(rootDir, uri.getHost).toURI).ensuring(_.isAbsolute)
+      val rewritePrefix =
+        returnWithTrailingSlash(new File(rootDir, uri.getHost).toURI).ensuring(_.pipe(URI.create).isAbsolute)
 
       // No document URI needed, since the rewrite prefixes are absolute URIs
       val catalog = SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
@@ -187,7 +189,7 @@ object UriResolvers {
 
       val uriStart = returnWithTrailingSlash(new URI(uri.getScheme, uri.getHost, null, null))
       val rewritePrefix = returnWithTrailingSlash(rootDir.toPath.resolve(uri.getScheme).resolve(uri.getHost).toUri)
-        .ensuring(_.isAbsolute)
+        .ensuring(_.pipe(URI.create).isAbsolute)
 
       // No document URI needed, since the rewrite prefixes are absolute URIs
       val catalog = SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
