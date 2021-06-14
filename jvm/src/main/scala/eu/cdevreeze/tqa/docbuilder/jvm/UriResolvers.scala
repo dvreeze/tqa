@@ -164,7 +164,7 @@ object UriResolvers {
       val rewritePrefix = returnWithTrailingSlash(new File(rootDir, uri.getHost).toURI)
 
       val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -189,7 +189,7 @@ object UriResolvers {
       val rewritePrefix = returnWithTrailingSlash(rootDir.toPath.resolve(uri.getScheme).resolve(uri.getHost).toUri)
 
       val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -222,7 +222,7 @@ object UriResolvers {
           .ensuring(_.endsWith("/"))
 
       val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri
@@ -254,7 +254,7 @@ object UriResolvers {
           .ensuring(_.endsWith("/"))
 
       val catalog =
-        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(None, uriStart, rewritePrefix)))
+        SimpleCatalog(None, Vector(SimpleCatalog.UriRewrite(uriStart, rewritePrefix)))
 
       val mappedUri = catalog.findMappedUri(uri).getOrElse(sys.error(s"No mapping found for URI '$uri'"))
       mappedUri

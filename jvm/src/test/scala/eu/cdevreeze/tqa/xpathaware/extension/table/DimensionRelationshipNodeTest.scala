@@ -1006,15 +1006,15 @@ class DimensionRelationshipNodeTest extends AnyFunSuite {
       SimpleCatalog(
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.xbrl.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.xbrl.org/"),
-          SimpleCatalog.UriRewrite(None, "http://www.w3.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.w3.org/")))
+          SimpleCatalog.UriRewrite("http://www.xbrl.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.xbrl.org/"),
+          SimpleCatalog.UriRewrite("http://www.w3.org/", otherRootDir.toURI.toString.stripSuffix("/") + "/www.w3.org/")))
 
     val xbrlAndW3UriPartialResolver = PartialUriResolvers.fromCatalog(xbrlCatalog)
 
     val catalog =
       SimpleCatalog(
         None,
-        Vector(SimpleCatalog.UriRewrite(None, dummyUriPrefix.toString, "")))
+        Vector(SimpleCatalog.UriRewrite(dummyUriPrefix.toString, "")))
 
     val zipFilePartialResolver = PartialUriResolvers.forZipFileUsingCatalog(new ZipFile(zipFile), catalog)
 

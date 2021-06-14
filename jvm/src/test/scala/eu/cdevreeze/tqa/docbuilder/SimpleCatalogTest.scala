@@ -46,8 +46,8 @@ class SimpleCatalogTest extends AnyFunSuite {
         None,
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
+          SimpleCatalog.UriRewrite("http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite("http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
         )
       )
 
@@ -93,8 +93,8 @@ class SimpleCatalogTest extends AnyFunSuite {
         None,
         Some(URI.create("../")),
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
+          SimpleCatalog.UriRewrite("http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite("http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
         )
       )
 
@@ -111,8 +111,8 @@ class SimpleCatalogTest extends AnyFunSuite {
         None,
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
+          SimpleCatalog.UriRewrite("http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite("http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
         )
       )
 
@@ -422,8 +422,8 @@ class SimpleCatalogTest extends AnyFunSuite {
         Some(docUri),
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
+          SimpleCatalog.UriRewrite("http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite("http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
         )
       )
 
@@ -474,8 +474,8 @@ class SimpleCatalogTest extends AnyFunSuite {
         Some(docUri),
         Some(URI.create("../")),
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
+          SimpleCatalog.UriRewrite("http://www.example.com/part1/2015-01-01/", "part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite("http://www.example.com/part2/2015-01-01/", "part2/2015-01-01/")
         )
       )
 
@@ -492,8 +492,8 @@ class SimpleCatalogTest extends AnyFunSuite {
         Some(docUri),
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
-          SimpleCatalog.UriRewrite(None, "http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
+          SimpleCatalog.UriRewrite("http://www.example.com/part1/2015-01-01/", "../part1/2015-01-01/"),
+          SimpleCatalog.UriRewrite("http://www.example.com/part2/2015-01-01/", "../part2/2015-01-01/")
         )
       )
 

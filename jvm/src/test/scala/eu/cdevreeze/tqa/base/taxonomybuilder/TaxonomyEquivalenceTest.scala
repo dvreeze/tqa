@@ -110,9 +110,9 @@ class TaxonomyEquivalenceTest extends AnyFunSuite {
       SimpleCatalog(
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.nltaxonomie.nl/", "taxonomie/www.nltaxonomie.nl/"),
-          SimpleCatalog.UriRewrite(None, "http://www.xbrl.org/", "taxonomie/www.xbrl.org/"),
-          SimpleCatalog.UriRewrite(None, "http://www.w3.org/", "taxonomie/www.w3.org/")))
+          SimpleCatalog.UriRewrite("http://www.nltaxonomie.nl/", "taxonomie/www.nltaxonomie.nl/"),
+          SimpleCatalog.UriRewrite("http://www.xbrl.org/", "taxonomie/www.xbrl.org/"),
+          SimpleCatalog.UriRewrite("http://www.w3.org/", "taxonomie/www.w3.org/")))
 
     SaxonDocumentBuilder(
       processor.newDocumentBuilder(),

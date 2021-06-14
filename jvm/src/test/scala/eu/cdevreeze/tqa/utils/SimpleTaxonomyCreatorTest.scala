@@ -205,9 +205,9 @@ class SimpleTaxonomyCreatorTest extends AnyFunSuite {
       SimpleCatalog(
         None,
         Vector(
-          SimpleCatalog.UriRewrite(None, "http://www.test.com/test/", utilsDirUri.toString),
-          SimpleCatalog.UriRewrite(None, "http://www.xbrl.org/", xbrlDirUri.resolve("www.xbrl.org/").toString),
-          SimpleCatalog.UriRewrite(None, "http://www.w3.org/", xbrlDirUri.resolve("www.w3.org/").toString)))
+          SimpleCatalog.UriRewrite("http://www.test.com/test/", utilsDirUri.toString),
+          SimpleCatalog.UriRewrite("http://www.xbrl.org/", xbrlDirUri.resolve("www.xbrl.org/").toString),
+          SimpleCatalog.UriRewrite("http://www.w3.org/", xbrlDirUri.resolve("www.w3.org/").toString)))
 
     val uriResolver = UriResolvers.fromCatalogWithoutFallback(catalog)
 
