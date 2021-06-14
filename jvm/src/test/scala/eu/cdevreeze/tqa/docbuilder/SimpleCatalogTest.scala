@@ -369,6 +369,45 @@ class SimpleCatalogTest extends AnyFunSuite {
     }
   }
 
+  test("testEquivalenceWithCatalogFromMap") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val catalogElem =
+      Elem(docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+    val equivCatalog = SimpleCatalog.from(catalog.toMap)
+
+    assertResult(true) {
+      equivCatalog != catalog
+    }
+
+    val u1 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/")
+    assertResult(catalog.findMappedUri(u1)) {
+      equivCatalog.findMappedUri(u1)
+    }
+
+    val u2 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u2)) {
+      equivCatalog.findMappedUri(u2)
+    }
+
+    val u3 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u3)) {
+      equivCatalog.findMappedUri(u3)
+    }
+
+    val u4 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u4)) {
+      equivCatalog.findMappedUri(u4)
+    }
+
+    val u5 = URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u5)) {
+      equivCatalog.findMappedUri(u5)
+    }
+  }
+
   test("testParseRelativeUriCatalogUsingRelativeDocUri") {
     val docParser = DocumentParserUsingStax.newInstance()
 
@@ -547,6 +586,36 @@ class SimpleCatalogTest extends AnyFunSuite {
     }
   }
 
+  test("testUseRelativeUriCatalogWithBaseUriUsingAbsoluteDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("file:/home/user/catalogs/catalog.xml") // Absolute document URI
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+
+    assertResult(Some(URI.create("file:/home/user/part1/2015-01-01/a/b/c/"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/a/b/c/"))
+    }
+
+    assertResult(Some(URI.create("file:/home/user/part1/2015-01-01/a/b/c/d.txt"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt"))
+    }
+
+    assertResult(Some(URI.create("file:/home/user/part1/2015-01-01/"))) {
+      catalog.findMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(URI.create("file:/home/user/part1/2015-01-01/")) {
+      catalog.getMappedUri(URI.create("http://www.example.com/part1/2015-01-01/"))
+    }
+
+    assertResult(None) {
+      catalog.findMappedUri(URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt"))
+    }
+  }
+
   test("testEquivalenceWithNetCatalogUsingRelativeDocUri") {
     val docParser = DocumentParserUsingStax.newInstance()
 
@@ -591,6 +660,133 @@ class SimpleCatalogTest extends AnyFunSuite {
     val u5 = URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt")
     assertResult(catalog.findMappedUri(u5)) {
       netCatalog.findMappedUri(u5)
+    }
+  }
+
+  test("testEquivalenceWithCatalogFromMapUsingRelativeDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("META-INF/catalog.xml") // Relative document URI!
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+    val equivCatalog = SimpleCatalog.from(catalog.toMap)
+
+    assertResult(true) {
+      equivCatalog != catalog
+    }
+
+    val u1 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/")
+    assertResult(catalog.findMappedUri(u1)) {
+      equivCatalog.findMappedUri(u1)
+    }
+
+    val u2 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u2)) {
+      equivCatalog.findMappedUri(u2)
+    }
+
+    val u3 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u3)) {
+      equivCatalog.findMappedUri(u3)
+    }
+
+    val u4 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u4)) {
+      equivCatalog.findMappedUri(u4)
+    }
+
+    val u5 = URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u5)) {
+      equivCatalog.findMappedUri(u5)
+    }
+  }
+
+  test("testEquivalenceWithNetCatalogUsingAbsoluteDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("file:/home/user/catalogs/catalog.xml") // Absolute document URI
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+    val netCatalog = catalog.netSimpleCatalog
+
+    assertResult(true) {
+      netCatalog != catalog && netCatalog.xmlBaseAttributeOption != catalog.xmlBaseAttributeOption
+    }
+
+    val netCatalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml1))).documentElement)
+
+    assertResult(netCatalog) {
+      SimpleCatalog.fromElem(netCatalogElem)
+    }
+
+    val u1 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/")
+    assertResult(catalog.findMappedUri(u1)) {
+      netCatalog.findMappedUri(u1)
+    }
+
+    val u2 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u2)) {
+      netCatalog.findMappedUri(u2)
+    }
+
+    val u3 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u3)) {
+      netCatalog.findMappedUri(u3)
+    }
+
+    val u4 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u4)) {
+      netCatalog.findMappedUri(u4)
+    }
+
+    val u5 = URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u5)) {
+      netCatalog.findMappedUri(u5)
+    }
+  }
+
+  test("testEquivalenceWithCatalogFromMapUsingAbsoluteDocUri") {
+    val docParser = DocumentParserUsingStax.newInstance()
+
+    val docUri = URI.create("file:/home/user/catalogs/catalog.xml") // Absolute document URI
+    val catalogElem =
+      Elem(Some(docUri), docParser.parse(new InputSource(new StringReader(catalogXml2))).documentElement)
+
+    val catalog = SimpleCatalog.fromElem(catalogElem)
+    val equivCatalog = SimpleCatalog.from(catalog.toMap)
+
+    assertResult(true) {
+      equivCatalog != catalog
+    }
+
+    val u1 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/")
+    assertResult(catalog.findMappedUri(u1)) {
+      equivCatalog.findMappedUri(u1)
+    }
+
+    val u2 = URI.create("http://www.example.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u2)) {
+      equivCatalog.findMappedUri(u2)
+    }
+
+    val u3 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u3)) {
+      equivCatalog.findMappedUri(u3)
+    }
+
+    val u4 = URI.create("http://www.example.com/part1/2015-01-01/")
+    assertResult(catalog.findMappedUri(u4)) {
+      equivCatalog.findMappedUri(u4)
+    }
+
+    val u5 = URI.create("http://www.otherExample.com/part1/2015-01-01/a/b/c/d.txt")
+    assertResult(catalog.findMappedUri(u5)) {
+      equivCatalog.findMappedUri(u5)
     }
   }
 
