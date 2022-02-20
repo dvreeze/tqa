@@ -37,3 +37,6 @@ addSbtPlugin("io.github.cquiroz" % "sbt-tzdb" % "1.0.1")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
+// See https://scalacenter.github.io/scalafix/docs/users/installation.html
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.34")
+
