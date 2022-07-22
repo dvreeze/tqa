@@ -51,7 +51,7 @@ object TaxonomyPackagePartialUriResolvers {
     val catalogEntry: ZipEntry = zipFile
       .entries()
       .asScala
-      .find(entry => toRelativeUri(entry).toString.endsWith("META-INF/catalog.xml"))
+      .find(entry => entry.getName.endsWith("catalog.xml"))
       .getOrElse(sys.error(s"No META-INF/catalog.xml found in taxonomy package ZIP file ${zipFile.getName}"))
 
     val catalogEntryRelativeUri: URI = toRelativeUri(catalogEntry).ensuring(!_.isAbsolute)
