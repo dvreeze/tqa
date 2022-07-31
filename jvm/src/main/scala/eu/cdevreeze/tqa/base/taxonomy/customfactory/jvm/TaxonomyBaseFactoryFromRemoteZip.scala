@@ -140,19 +140,22 @@ final class TaxonomyBaseFactoryFromRemoteZip(
    * names, using Unix-style (file component) separators.
    */
   def locateAndParseCatalog(fileDataCollection: ListMap[String, ArraySeq[Byte]]): SimpleCatalog = {
-    val fileData: ArraySeq[Byte] =
-      fileDataCollection.getOrElse(catalogZipEntryName, sys.error(s"Missing META-INF/catalog.xml file"))
-    parseCatalog(fileData)
+    val (catalogLocation, fileData) = {
+      fileDataCollection
+        .find { case (path, bytes) => path.endsWith(catalogZipEntryName) }
+        .getOrElse(catalogZipEntryName, sys.error(s"Missing META-INF/catalog.xml file"))
+    }
+    parseCatalog(catalogLocation, fileData)
   }
 
   /**
    * Parses the catalog file data (as immutable byte array) into a SimpleCatalog. The returned catalog has as document URI
    * the relative URI "META-INF/catalog.xml".
    */
-  def parseCatalog(fileData: ArraySeq[Byte]): SimpleCatalog = {
+  def parseCatalog(location: String, fileData: ArraySeq[Byte]): SimpleCatalog = {
     val docParser = DocumentParserUsingStax.newInstance()
     // A relative document URI, which is allowed for indexed/simple documents!
-    val docUri: URI = URI.create(catalogZipEntryName).ensuring(!_.isAbsolute)
+    val docUri: URI = URI.create(location).ensuring(!_.isAbsolute)
     val catalogRootElem: indexed.Elem =
       indexed.Elem(docUri, docParser.parse(new ByteArrayInputStream(fileData.toArray)).documentElement)
 
